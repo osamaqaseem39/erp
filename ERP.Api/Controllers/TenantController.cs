@@ -1,0 +1,77 @@
+using Microsoft.AspNetCore.Mvc;
+using ERP.Api.Abstractions;
+using ERP.Api.Services;
+using ERP.Api.Validators;
+using ERP.Shared.DTOs.Core;
+using FluentValidation;
+
+namespace ERP.Api.Controllers;
+
+[ApiController]
+[Route("api/tenants")]
+public class TenantController : ERP.Api.Abstractions.ControllerBase
+{
+    private readonly ITenantApiService _tenantService;
+    private readonly CreateTenantValidator _createValidator;
+    private readonly UpdateTenantValidator _updateValidator;
+
+    public TenantController(
+        ITenantApiService tenantService,
+        CreateTenantValidator createValidator,
+        UpdateTenantValidator updateValidator,
+        ILogger<TenantController> logger) : base(logger)
+    {
+        _tenantService = tenantService;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        return await HandleAsync(() => _tenantService.GetByIdAsync(id));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        return await HandleAsync(() => _tenantService.GetAllAsync());
+    }
+
+    [HttpGet("domain/{domain}")]
+    public async Task<IActionResult> GetByDomain(string domain)
+    {
+        return await HandleAsync(() => _tenantService.GetByDomainAsync(domain));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateTenantDto dto)
+    {
+        var validationResult = await _createValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+        }
+
+        return await HandleAsync(() => _tenantService.CreateAsync(dto));
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTenantDto dto)
+    {
+        dto.Id = id; // Ensure ID consistency
+        var validationResult = await _updateValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+        }
+
+        return await HandleAsync(() => _tenantService.UpdateAsync(dto));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        return await HandleAsync(() => _tenantService.DeleteAsync(id));
+    }
+}

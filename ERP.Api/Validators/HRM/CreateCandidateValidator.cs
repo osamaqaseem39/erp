@@ -1,0 +1,52 @@
+using ERP.Shared.DTOs.HRM;
+using FluentValidation;
+
+namespace ERP.Api.Validators.HRM;
+
+public class CreateCandidateValidator : BaseValidator<CreateCandidateDto>
+{
+    public CreateCandidateValidator()
+    {
+        RuleFor(x => x.FirstName)
+            .NotEmpty().WithMessage("First name is required")
+            .MaximumLength(100).WithMessage("First name cannot exceed 100 characters");
+
+        RuleFor(x => x.LastName)
+            .NotEmpty().WithMessage("Last name is required")
+            .MaximumLength(100).WithMessage("Last name cannot exceed 100 characters");
+
+        RuleFor(x => x.Email)
+            .NotEmpty().WithMessage("Email is required")
+            .EmailAddress().WithMessage("Invalid email format")
+            .MaximumLength(100).WithMessage("Email cannot exceed 100 characters");
+
+        RuleFor(x => x.Phone)
+            .NotEmpty().WithMessage("Phone is required")
+            .MaximumLength(20).WithMessage("Phone number cannot exceed 20 characters");
+
+        RuleFor(x => x.DateOfBirth)
+            .LessThan(DateTime.Today.AddYears(-16)).WithMessage("Candidate must be at least 16 years old")
+            .When(x => x.DateOfBirth.HasValue);
+
+        RuleFor(x => x.Experience)
+            .MaximumLength(500).WithMessage("Experience cannot exceed 500 characters")
+            .When(x => !string.IsNullOrEmpty(x.Experience));
+
+        RuleFor(x => x.Education)
+            .MaximumLength(200).WithMessage("Education cannot exceed 200 characters")
+            .When(x => !string.IsNullOrEmpty(x.Education));
+
+        RuleFor(x => x.Skills)
+            .MaximumLength(1000).WithMessage("Skills cannot exceed 1000 characters")
+            .When(x => !string.IsNullOrEmpty(x.Skills));
+
+
+        RuleFor(x => x.ExpectedSalary)
+            .GreaterThanOrEqualTo(0).WithMessage("Expected salary must be greater than or equal to 0")
+            .When(x => x.ExpectedSalary.HasValue);
+
+        RuleFor(x => x.Status)
+            .NotEmpty().WithMessage("Status is required")
+            .MaximumLength(50).WithMessage("Status cannot exceed 50 characters");
+    }
+}

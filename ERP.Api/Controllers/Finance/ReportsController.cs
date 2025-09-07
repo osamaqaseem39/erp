@@ -1,0 +1,159 @@
+using Microsoft.AspNetCore.Mvc;
+using ERP.Api.Abstractions;
+using ERP.Application.Interfaces.Finance;
+using ERP.Application.Interfaces.Reports;
+using ERP.Shared.DTOs.Finance;
+using Microsoft.AspNetCore.Authorization;
+
+namespace ERP.Api.Controllers.Finance;
+
+[ApiController]
+[Route("api/finance/reports")]
+[Authorize]
+public class ReportsController : ERP.Api.Abstractions.ControllerBase
+{
+    private readonly IReportService _reportsService;
+    private readonly ILogger<ReportsController> _logger;
+
+    public ReportsController(IReportService reportsService, ILogger<ReportsController> logger) : base(logger)
+    {
+        _reportsService = reportsService;
+        _logger = logger;
+    }
+
+    [HttpGet("trial-balance")]
+    public async Task<IActionResult> GetTrialBalance([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] string? currencyCode = null)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetTrialBalanceAsync(tenantId, fromDate, toDate, currencyCode);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting trial balance report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpGet("profit-loss")]
+    public async Task<IActionResult> GetProfitAndLoss([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] string? currencyCode = null)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetProfitAndLossAsync(tenantId, fromDate, toDate, currencyCode);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting profit and loss report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpGet("balance-sheet")]
+    public async Task<IActionResult> GetBalanceSheet([FromQuery] DateTime asOfDate, [FromQuery] string? currencyCode = null)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetBalanceSheetAsync(tenantId, asOfDate, currencyCode);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting balance sheet report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpGet("cash-flow")]
+    public async Task<IActionResult> GetCashFlow([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] string? currencyCode = null)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetCashFlowAsync(tenantId, fromDate, toDate, currencyCode);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting cash flow report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpGet("aged-receivables")]
+    public async Task<IActionResult> GetAgedReceivables([FromQuery] DateTime asOfDate, [FromQuery] int[]? agingBuckets = null)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetAgedReceivablesAsync(tenantId, asOfDate, agingBuckets);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting aged receivables report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpGet("aged-payables")]
+    public async Task<IActionResult> GetAgedPayables([FromQuery] DateTime asOfDate, [FromQuery] int[]? agingBuckets = null)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetAgedPayablesAsync(tenantId, asOfDate, agingBuckets);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting aged payables report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpGet("general-ledger")]
+    public async Task<IActionResult> GetGeneralLedger([FromQuery] Guid accountId, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetGeneralLedgerAsync(accountId, tenantId, fromDate, toDate);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting general ledger report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpGet("budget-vs-actual")]
+    public async Task<IActionResult> GetBudgetVsActual([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] Guid? budgetId = null)
+    {
+        try
+        {
+            var tenantId = GetTenantId();
+            var report = await _reportsService.GetBudgetVsActualAsync(tenantId, fromDate, toDate, budgetId);
+            return Ok(report);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting budget vs actual report");
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    private Guid GetTenantId()
+    {
+        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
+        if (Guid.TryParse(tenantIdClaim, out var tenantId))
+            return tenantId;
+        throw new UnauthorizedAccessException("Tenant ID not found in token");
+    }
+}

@@ -1,0 +1,51 @@
+namespace ERP.Shared.Exceptions;
+
+public class ERPException : Exception
+{
+    public string ErrorCode { get; }
+    public int StatusCode { get; }
+
+    public ERPException(string message, string errorCode = "GENERAL_ERROR", int statusCode = 500) 
+        : base(message)
+    {
+        ErrorCode = errorCode;
+        StatusCode = statusCode;
+    }
+
+    public ERPException(string message, Exception innerException, string errorCode = "GENERAL_ERROR", int statusCode = 500) 
+        : base(message, innerException)
+    {
+        ErrorCode = errorCode;
+        StatusCode = statusCode;
+    }
+}
+
+public class ValidationException : ERPException
+{
+    public List<string> Errors { get; }
+
+    public ValidationException(string message) : base(message, "VALIDATION_ERROR", 400) 
+    {
+        Errors = new List<string> { message };
+    }
+
+    public ValidationException(string message, List<string> errors) : base(message, "VALIDATION_ERROR", 400)
+    {
+        Errors = errors;
+    }
+}
+
+public class NotFoundException : ERPException
+{
+    public NotFoundException(string message) : base(message, "NOT_FOUND", 404) { }
+}
+
+public class UnauthorizedException : ERPException
+{
+    public UnauthorizedException(string message) : base(message, "UNAUTHORIZED", 401) { }
+}
+
+public class ForbiddenException : ERPException
+{
+    public ForbiddenException(string message) : base(message, "FORBIDDEN", 403) { }
+}
