@@ -79,6 +79,22 @@ public class CustomerRepository : CrmRepositoryBase, ICustomerRepository
         return await CustomersQuery().Where(c => c.Industry == industry).ToListAsync();
     }
 
+    public async Task<IReadOnlyDictionary<string, int>> GetDependentCountsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        // Counted separately (not via the Includes on the detail query) so nothing is loaded into the change tracker.
+        var counts = new Dictionary<string, int>
+        {
+            ["contacts"] = await ApplyTenant(Context.Contacts).CountAsync(x => x.CustomerId == id, cancellationToken),
+            ["opportunities"] = await ApplyTenant(Context.Opportunities).CountAsync(x => x.CustomerId == id, cancellationToken),
+            ["quotes"] = await ApplyTenant(Context.Quotes).CountAsync(x => x.CustomerId == id, cancellationToken),
+            ["sales orders"] = await ApplyTenant(Context.SalesOrders).CountAsync(x => x.CustomerId == id, cancellationToken),
+            ["activities"] = await ApplyTenant(Context.Activities).CountAsync(x => x.CustomerId == id, cancellationToken),
+            ["return orders"] = await ApplyTenant(Context.ReturnOrders).CountAsync(x => x.CustomerId == id, cancellationToken),
+            ["projects"] = await ApplyTenant(Context.Projects).CountAsync(x => x.ClientId == id, cancellationToken),
+        };
+        return counts.Where(kv => kv.Value > 0).ToDictionary(kv => kv.Key, kv => kv.Value);
+    }
+
     public async Task<Customer?> GetByCodeAsync(string customerCode)
     {
         return await CustomersQuery().FirstOrDefaultAsync(c => c.CustomerCode == customerCode);
@@ -104,7 +120,9 @@ public class CustomerRepository : CrmRepositoryBase, ICustomerRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var customer = await GetByIdAsync(id);
+        // Load without navigation collections: with them tracked, EF would null out CustomerId on the
+        // customer's opportunities/quotes/orders (ClientSetNull) instead of letting the delete be refused.
+        var customer = await ApplyTenant(Context.Customers).FirstOrDefaultAsync(c => c.Id == id);
         if (customer == null) return false;
 
         Context.Customers.Remove(customer);

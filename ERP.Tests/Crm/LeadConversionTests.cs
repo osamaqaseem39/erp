@@ -100,6 +100,8 @@ public class LeadConversionTests
         public Task<IEnumerable<Customer>> GetAllAsync() => Task.FromResult(Enumerable.Empty<Customer>());
         public Task<ERP.Shared.DTOs.PagedResult<Customer>> GetPagedAsync(ERP.Shared.DTOs.CRM.CustomerPagedQuery query, CancellationToken cancellationToken = default)
             => Task.FromResult(new ERP.Shared.DTOs.PagedResult<Customer>());
+        public Task<IReadOnlyDictionary<string, int>> GetDependentCountsAsync(Guid id, CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyDictionary<string, int>>(new Dictionary<string, int>());
         public Task<IEnumerable<Customer>> GetByStatusAsync(string status) => Task.FromResult(Enumerable.Empty<Customer>());
         public Task<IEnumerable<Customer>> GetByIndustryAsync(string industry) => Task.FromResult(Enumerable.Empty<Customer>());
         public Task<Customer?> GetByCodeAsync(string customerCode) => Task.FromResult<Customer?>(null);

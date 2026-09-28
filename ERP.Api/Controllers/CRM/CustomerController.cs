@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
+using ERP.Shared.DTOs;
 using ERP.Shared.DTOs.CRM;
 using ERP.Api.Validators.CRM;
 using FluentValidation;
@@ -29,10 +30,11 @@ public class CustomerController : ERP.Api.Abstractions.ControllerBase
         _updateValidator = updateValidator;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        return await HandleAsync(() => _service.GetByIdAsync(id));
+        var customer = await _service.GetByIdAsync(id);
+        return customer is null ? NotFound(NotFoundError(id)) : Ok(customer);
     }
 
     [HttpGet]
@@ -75,10 +77,12 @@ public class CustomerController : ERP.Api.Abstractions.ControllerBase
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
-        return await HandleAsync(() => _service.CreateAsync(dto));
+        // HandleAsync cannot return a Guid body (its T is class-constrained), so respond explicitly.
+        var id = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCustomerDto dto)
     {
         dto.Id = id;
@@ -88,12 +92,20 @@ public class CustomerController : ERP.Api.Abstractions.ControllerBase
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
-        return await HandleAsync(() => _service.UpdateAsync(dto));
+        return await _service.UpdateAsync(dto) ? NoContent() : NotFound(NotFoundError(id));
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        return await HandleAsync(() => _service.DeleteAsync(id));
+        return await _service.DeleteAsync(id) ? NoContent() : NotFound(NotFoundError(id));
     }
+
+    private ApiError NotFoundError(Guid id) => new()
+    {
+        Status = 404,
+        ErrorCode = ApiErrorCodes.NotFound,
+        Message = "This customer could not be found. It may have been deleted.",
+        TraceId = HttpContext.TraceIdentifier,
+    };
 }

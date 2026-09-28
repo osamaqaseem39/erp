@@ -1,3 +1,4 @@
+using ERP.Shared.Exceptions;
 using ERP.Shared.DTOs;
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
@@ -50,8 +51,21 @@ public class CustomerService : ICustomerService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
+        var dependents = await _repository.GetDependentCountsAsync(id);
+        if (dependents.Count > 0)
+        {
+            var summary = string.Join(", ", dependents.Select(d => $"{d.Value} {(d.Value == 1 ? Singular(d.Key) : d.Key)}"));
+            throw new ConflictException($"It has {summary}. Mark it inactive instead to keep that history.");
+        }
         return await _repository.DeleteAsync(id);
     }
+
+    private static string Singular(string plural) => plural switch
+    {
+        "opportunities" => "opportunity",
+        "activities" => "activity",
+        _ => plural.TrimEnd('s'),
+    };
 
     public async Task<IEnumerable<CustomerDto>> SearchAsync(string searchTerm)
     {

@@ -15,4 +15,6 @@ public interface ICustomerRepository
     Task<Guid> CreateAsync(Customer customer);
     Task<bool> UpdateAsync(Customer customer);
     Task<bool> DeleteAsync(Guid id);
+    /// <summary>Records that reference the customer, by kind (only kinds with at least one record).</summary>
+    Task<IReadOnlyDictionary<string, int>> GetDependentCountsAsync(Guid id, CancellationToken cancellationToken = default);
 }
