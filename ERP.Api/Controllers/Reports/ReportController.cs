@@ -23,135 +23,71 @@ public class ReportController : ERP.Api.Abstractions.ControllerBase
     [HttpGet("available")]
     public async Task<IActionResult> GetAvailableReports()
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var reports = await _reportService.GetAvailableReportsAsync(tenantId);
-            return Ok(reports);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting available reports");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var reports = await _reportService.GetAvailableReportsAsync(tenantId);
+        return Ok(reports);
     }
 
     [HttpPost("generate")]
     public async Task<IActionResult> GenerateReport([FromBody] GenerateReportDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _reportService.GenerateReportAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error generating report");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _reportService.GenerateReportAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpGet("scheduled")]
     public async Task<IActionResult> GetScheduledReports()
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var reports = await _reportService.GetScheduledReportsAsync(tenantId);
-            return Ok(reports);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting scheduled reports");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var reports = await _reportService.GetScheduledReportsAsync(tenantId);
+        return Ok(reports);
     }
 
     [HttpPost("schedule")]
     public async Task<IActionResult> ScheduleReport([FromBody] ScheduleReportDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _reportService.ScheduleReportAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetScheduledReport), new { id = result.Id }, result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error scheduling report");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _reportService.ScheduleReportAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetScheduledReport), new { id = result.Id }, result);
     }
 
     [HttpGet("schedule/{id}")]
     public async Task<IActionResult> GetScheduledReport(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var report = await _reportService.GetScheduledReportByIdAsync(id, tenantId);
-            if (report == null)
-                return NotFound();
-            return Ok(report);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting scheduled report {ScheduleId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var report = await _reportService.GetScheduledReportByIdAsync(id, tenantId);
+        if (report == null)
+            return NotFound();
+        return Ok(report);
     }
 
     [HttpDelete("schedule/{id}")]
     public async Task<IActionResult> CancelScheduledReport(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _reportService.CancelScheduledReportAsync(id, tenantId);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error canceling scheduled report {ScheduleId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _reportService.CancelScheduledReportAsync(id, tenantId);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     [HttpGet("history")]
     public async Task<IActionResult> GetReportHistory([FromQuery] string? reportType = null, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var history = await _reportService.GetReportHistoryAsync(tenantId, reportType, fromDate, toDate);
-            return Ok(history);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting report history");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var history = await _reportService.GetReportHistoryAsync(tenantId, reportType, fromDate, toDate);
+        return Ok(history);
     }
 
     [HttpGet("export/{reportId}")]
     public async Task<IActionResult> ExportReport(Guid reportId, [FromQuery] string format = "pdf")
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _reportService.ExportReportAsync(reportId, tenantId, format);
-            return File(result.Content, result.ContentType, result.FileName);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error exporting report {ReportId}", reportId);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _reportService.ExportReportAsync(reportId, tenantId, format);
+        return File(result.Content, result.ContentType, result.FileName);
     }
 
     private Guid GetTenantId()

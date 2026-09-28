@@ -48,7 +48,29 @@ JwtHelper.Configure(jwtSettings);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 builder.Services.AddSingleton(jwtSettings);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Model-binding failures (malformed JSON, wrong types) use the same body as every other error.
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(entry => entry.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    entry => ERP.Api.Errors.ApiErrorMapper.ToCamelCasePath(entry.Key.TrimStart('$', '.')),
+                    entry => entry.Value!.Errors
+                        .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? "The value is not valid." : e.ErrorMessage)
+                        .ToArray());
+            return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new ERP.Shared.DTOs.ApiError
+            {
+                Status = 400,
+                ErrorCode = ERP.Shared.DTOs.ApiErrorCodes.ValidationError,
+                Message = "The request is not valid.",
+                Errors = errors,
+                TraceId = context.HttpContext.TraceIdentifier,
+            });
+        };
+    });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 

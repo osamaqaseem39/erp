@@ -23,140 +23,76 @@ public class JournalsController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] JournalCreateDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _accountingService.AddJournalAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result }, new { JournalId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating journal");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _accountingService.AddJournalAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result }, new { JournalId = result });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var journal = await _accountingService.GetJournalByIdAsync(id, tenantId);
-            if (journal == null)
-                return NotFound();
-            return Ok(journal);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting journal {JournalId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var journal = await _accountingService.GetJournalByIdAsync(id, tenantId);
+        if (journal == null)
+            return NotFound();
+        return Ok(journal);
     }
 
     [HttpGet]
     public async Task<IActionResult> Search([FromQuery] JournalQuery query)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            query.TenantId = tenantId;
-            var result = await _accountingService.SearchJournalsAsync(query);
-            return Ok(new { Journals = result.Journals, TotalCount = result.TotalCount });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching journals");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        query.TenantId = tenantId;
+        var result = await _accountingService.SearchJournalsAsync(query);
+        return Ok(new { Journals = result.Journals, TotalCount = result.TotalCount });
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] JournalUpdateDto dto)
     {
-        try
-        {
-            dto.JournalId = id;
+        dto.JournalId = id;
 
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _accountingService.UpdateJournalAsync(dto, tenantId, userId);
-            return Ok(new { JournalId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating journal {JournalId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _accountingService.UpdateJournalAsync(dto, tenantId, userId);
+        return Ok(new { JournalId = result });
     }
 
     [HttpPost("{id}/post")]
     public async Task<IActionResult> Post(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _accountingService.PostJournalAsync(id, tenantId, userId);
-            return Ok(new { JournalId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error posting journal {JournalId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _accountingService.PostJournalAsync(id, tenantId, userId);
+        return Ok(new { JournalId = result });
     }
 
     [HttpPost("{id}/reverse")]
     public async Task<IActionResult> Reverse(Guid id, [FromBody] ReverseJournalDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var reason = dto.ReversalReason ?? dto.Reason;
-            var result = await _accountingService.ReverseJournalAsync(id, tenantId, userId, reason);
-            return Ok(new { JournalId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error reversing journal {JournalId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var reason = dto.ReversalReason ?? dto.Reason;
+        var result = await _accountingService.ReverseJournalAsync(id, tenantId, userId, reason);
+        return Ok(new { JournalId = result });
     }
 
     [HttpGet("{id}/entries")]
     public async Task<IActionResult> GetEntries(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var entries = await _accountingService.GetJournalEntriesByJournalIdAsync(id, tenantId);
-            return Ok(entries);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting journal entries for {JournalId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var entries = await _accountingService.GetJournalEntriesByJournalIdAsync(id, tenantId);
+        return Ok(entries);
     }
 
     [HttpPost("{id}/entries")]
     public async Task<IActionResult> AddEntry(Guid id, [FromBody] CreateJournalEntryDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _accountingService.AddJournalEntryAsync(dto, id, tenantId, userId);
-            return CreatedAtAction(nameof(GetEntries), new { id }, new { EntryId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding journal entry to {JournalId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _accountingService.AddJournalEntryAsync(dto, id, tenantId, userId);
+        return CreatedAtAction(nameof(GetEntries), new { id }, new { EntryId = result });
     }
 
     private Guid GetTenantId()

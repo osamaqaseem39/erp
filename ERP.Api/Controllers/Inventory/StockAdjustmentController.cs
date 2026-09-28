@@ -23,113 +23,57 @@ public class StockAdjustmentController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateStockAdjustmentDto dto)
     {
-        try
-        {
-            var result = await _adjustmentService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result }, new { AdjustmentId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating stock adjustment");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _adjustmentService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = result }, new { AdjustmentId = result });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var adjustment = await _adjustmentService.GetByIdAsync(id);
-            if (adjustment == null)
-                return NotFound();
-            return Ok(adjustment);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting stock adjustment {AdjustmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var adjustment = await _adjustmentService.GetByIdAsync(id);
+        if (adjustment == null)
+            return NotFound();
+        return Ok(adjustment);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? warehouseId = null, [FromQuery] string? reason = null, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        try
-        {
-            var adjustments = await _adjustmentService.GetAllAsync();
-            return Ok(adjustments);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all stock adjustments");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var adjustments = await _adjustmentService.GetAllAsync();
+        return Ok(adjustments);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStockAdjustmentDto dto)
     {
-        try
-        {
-            if (id != dto.Id)
-                return BadRequest("ID mismatch");
+        if (id != dto.Id)
+            return BadRequest("ID mismatch");
 
-            var result = await _adjustmentService.UpdateAsync(dto);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating stock adjustment {AdjustmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _adjustmentService.UpdateAsync(dto);
+        return Ok(result);
     }
 
     [HttpPost("{id}/approve")]
     public async Task<IActionResult> Approve(Guid id)
     {
-        try
-        {
-            // Note: ApproveAsync not available in current interface
-            return BadRequest(new { Error = "Approve functionality not yet implemented" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error approving stock adjustment {AdjustmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        // Note: ApproveAsync not available in current interface
+        return BadRequest(new { Error = "Approve functionality not yet implemented" });
     }
 
     [HttpPost("{id}/reject")]
     public async Task<IActionResult> Reject(Guid id, [FromBody] RejectAdjustmentDto dto)
     {
-        try
-        {
-            // Note: RejectAsync not available in current interface
-            return BadRequest(new { Error = "Reject functionality not yet implemented" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error rejecting stock adjustment {AdjustmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        // Note: RejectAsync not available in current interface
+        return BadRequest(new { Error = "Reject functionality not yet implemented" });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var result = await _adjustmentService.DeleteAsync(id);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting stock adjustment {AdjustmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _adjustmentService.DeleteAsync(id);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()

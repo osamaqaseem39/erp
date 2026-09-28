@@ -23,106 +23,58 @@ public class ItemCategoryController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateItemCategoryDto dto)
     {
-        try
-        {
-            var result = await _categoryService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result }, new { CategoryId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating item category");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _categoryService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = result }, new { CategoryId = result });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var category = await _categoryService.GetByIdAsync(id);
-            if (category == null)
-                return NotFound();
-            return Ok(category);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting item category {CategoryId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var category = await _categoryService.GetByIdAsync(id);
+        if (category == null)
+            return NotFound();
+        return Ok(category);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? parentId = null, [FromQuery] bool? isActive = null)
     {
-        try
-        {
-            IEnumerable<ItemCategoryDto> categories;
+        IEnumerable<ItemCategoryDto> categories;
+        
+        if (parentId.HasValue)
+            categories = await _categoryService.GetByParentAsync(parentId.Value);
+        else if (isActive.HasValue && isActive.Value)
+            categories = await _categoryService.GetActiveAsync();
+        else
+            categories = await _categoryService.GetAllAsync();
             
-            if (parentId.HasValue)
-                categories = await _categoryService.GetByParentAsync(parentId.Value);
-            else if (isActive.HasValue && isActive.Value)
-                categories = await _categoryService.GetActiveAsync();
-            else
-                categories = await _categoryService.GetAllAsync();
-                
-            return Ok(categories);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all item categories");
-            return BadRequest(new { Error = ex.Message });
-        }
+        return Ok(categories);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateItemCategoryDto dto)
     {
-        try
-        {
-            dto.Id = id;
-            var result = await _categoryService.UpdateAsync(dto);
-            return Ok(new { Success = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating item category {CategoryId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        dto.Id = id;
+        var result = await _categoryService.UpdateAsync(dto);
+        return Ok(new { Success = result });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var result = await _categoryService.DeleteAsync(id);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting item category {CategoryId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _categoryService.DeleteAsync(id);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     [HttpGet("tree")]
     public async Task<IActionResult> GetCategoryTree()
     {
-        try
-        {
-            // Note: IItemCategoryService doesn't have GetCategoryTreeAsync method
-            // This would need to be implemented or use a different approach
-            var allCategories = await _categoryService.GetAllAsync();
-            return Ok(allCategories);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting category tree");
-            return BadRequest(new { Error = ex.Message });
-        }
+        // Note: IItemCategoryService doesn't have GetCategoryTreeAsync method
+        // This would need to be implemented or use a different approach
+        var allCategories = await _categoryService.GetAllAsync();
+        return Ok(allCategories);
     }
 
     private Guid GetTenantId()

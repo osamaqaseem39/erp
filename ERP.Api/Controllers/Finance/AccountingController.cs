@@ -31,277 +31,158 @@ public class AccountingController : ERP.Api.Abstractions.ControllerBase
     [HttpGet("chart-of-accounts")]
     public async Task<IActionResult> GetAllChartOfAccounts([FromQuery] string? accountType = null, [FromQuery] bool? isActive = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetAllChartOfAccountsAsync(tenantId, accountType, isActive);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetAllChartOfAccountsAsync(tenantId, accountType, isActive);
+        return Ok(result);
     }
 
     [HttpGet("chart-of-accounts/{id}")]
     public async Task<IActionResult> GetChartOfAccountById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetChartOfAccountByIdAsync(id, tenantId);
-            return result != null ? Ok(result) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetChartOfAccountByIdAsync(id, tenantId);
+        return result != null ? Ok(result) : NotFound();
     }
 
     [HttpPost("chart-of-accounts")]
     public async Task<IActionResult> CreateChartOfAccount([FromBody] CreateChartOfAccountDto dto)
     {
-        try
-        {
-            var validationResult = await _createChartValidator.ValidateAsync(dto);
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
+        var validationResult = await _createChartValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
 
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var id = await _service.AddChartOfAccountAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetChartOfAccountById), new { id }, new { id });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var id = await _service.AddChartOfAccountAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetChartOfAccountById), new { id }, new { id });
     }
 
     [HttpPut("chart-of-accounts/{id}")]
     public async Task<IActionResult> UpdateChartOfAccount(Guid id, [FromBody] UpdateChartOfAccountDto dto)
     {
-        try
-        {
-            dto.AccountId = id;
-            var validationResult = await _updateChartValidator.ValidateAsync(dto);
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
+        dto.AccountId = id;
+        var validationResult = await _updateChartValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
 
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _service.UpdateChartOfAccountAsync(dto, tenantId, userId);
-            return result != Guid.Empty ? Ok(new { id = result }) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _service.UpdateChartOfAccountAsync(dto, tenantId, userId);
+        return result != Guid.Empty ? Ok(new { id = result }) : NotFound();
     }
 
     [HttpDelete("chart-of-accounts/{id}")]
     public async Task<IActionResult> DeleteChartOfAccount(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.DeleteChartOfAccountAsync(id, tenantId);
-            return result ? NoContent() : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.DeleteChartOfAccountAsync(id, tenantId);
+        return result ? NoContent() : NotFound();
     }
 
     // Journal endpoints
     [HttpGet("journals")]
     public async Task<IActionResult> SearchJournals([FromQuery] JournalQuery query)
     {
-        try
-        {
-            var result = await _service.SearchJournalsAsync(query);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.SearchJournalsAsync(query);
+        return Ok(result);
     }
 
     [HttpGet("journals/{id}")]
     public async Task<IActionResult> GetJournalById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetJournalByIdAsync(id, tenantId);
-            return result != null ? Ok(result) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetJournalByIdAsync(id, tenantId);
+        return result != null ? Ok(result) : NotFound();
     }
 
     [HttpPost("journals")]
     public async Task<IActionResult> CreateJournal([FromBody] JournalCreateDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var id = await _service.AddJournalAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetJournalById), new { id }, new { id });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var id = await _service.AddJournalAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetJournalById), new { id }, new { id });
     }
 
     [HttpPut("journals/{id}")]
     public async Task<IActionResult> UpdateJournal(Guid id, [FromBody] JournalUpdateDto dto)
     {
-        try
-        {
-            dto.JournalId = id;
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _service.UpdateJournalAsync(dto, tenantId, userId);
-            return result != Guid.Empty ? Ok(new { id = result }) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        dto.JournalId = id;
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _service.UpdateJournalAsync(dto, tenantId, userId);
+        return result != Guid.Empty ? Ok(new { id = result }) : NotFound();
     }
 
     [HttpPost("journals/{id}/post")]
     public async Task<IActionResult> PostJournal(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var postedBy = GetUserId();
-            var result = await _service.PostJournalAsync(id, tenantId, postedBy);
-            return result != Guid.Empty ? Ok(new { id = result }) : BadRequest();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var postedBy = GetUserId();
+        var result = await _service.PostJournalAsync(id, tenantId, postedBy);
+        return result != Guid.Empty ? Ok(new { id = result }) : BadRequest();
     }
 
     [HttpPost("journals/{id}/reverse")]
     public async Task<IActionResult> ReverseJournal(Guid id, [FromBody] ReverseJournalDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var reversedBy = GetUserId();
-            var result = await _service.ReverseJournalAsync(id, tenantId, reversedBy, dto.ReversalReason);
-            return result != Guid.Empty ? Ok(new { id = result }) : BadRequest();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var reversedBy = GetUserId();
+        var result = await _service.ReverseJournalAsync(id, tenantId, reversedBy, dto.ReversalReason);
+        return result != Guid.Empty ? Ok(new { id = result }) : BadRequest();
     }
 
     // Journal Entries endpoints
     [HttpGet("journals/{journalId}/entries")]
     public async Task<IActionResult> GetJournalEntries(Guid journalId)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetJournalEntriesByJournalIdAsync(journalId, tenantId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetJournalEntriesByJournalIdAsync(journalId, tenantId);
+        return Ok(result);
     }
 
     [HttpPost("journals/{journalId}/entries")]
     public async Task<IActionResult> CreateJournalEntry(Guid journalId, [FromBody] CreateJournalEntryDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var id = await _service.AddJournalEntryAsync(dto, journalId, tenantId, userId);
-            return CreatedAtAction(nameof(GetJournalEntries), new { journalId }, new { id });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var id = await _service.AddJournalEntryAsync(dto, journalId, tenantId, userId);
+        return CreatedAtAction(nameof(GetJournalEntries), new { journalId }, new { id });
     }
 
     [HttpPut("journal-entries/{id}")]
     public async Task<IActionResult> UpdateJournalEntry(Guid id, [FromBody] UpdateJournalEntryDto dto)
     {
-        try
-        {
-            dto.EntryId = id;
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _service.UpdateJournalEntryAsync(dto, tenantId, userId);
-            return result != Guid.Empty ? Ok(new { id = result }) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        dto.EntryId = id;
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _service.UpdateJournalEntryAsync(dto, tenantId, userId);
+        return result != Guid.Empty ? Ok(new { id = result }) : NotFound();
     }
 
     [HttpDelete("journal-entries/{id}")]
     public async Task<IActionResult> DeleteJournalEntry(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.DeleteJournalEntryAsync(id, tenantId);
-            return result ? NoContent() : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.DeleteJournalEntryAsync(id, tenantId);
+        return result ? NoContent() : NotFound();
     }
 
     // Financial Reports endpoints
     [HttpGet("reports/trial-balance")]
     public async Task<IActionResult> GetTrialBalance([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] string? currencyCode = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetTrialBalanceAsync(tenantId, fromDate, toDate, currencyCode);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetTrialBalanceAsync(tenantId, fromDate, toDate, currencyCode);
+        return Ok(result);
     }
 
     [HttpGet("reports/general-ledger/{accountId}")]
     public async Task<IActionResult> GetGeneralLedgerBalance(Guid accountId, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetGeneralLedgerBalanceAsync(accountId, tenantId, fromDate, toDate);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetGeneralLedgerBalanceAsync(accountId, tenantId, fromDate, toDate);
+        return Ok(result);
     }
 
     private Guid GetTenantId()

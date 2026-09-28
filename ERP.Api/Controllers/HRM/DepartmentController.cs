@@ -23,90 +23,50 @@ public class DepartmentController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateDepartmentDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _departmentService.CreateAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating department");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _departmentService.CreateAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var department = await _departmentService.GetByIdAsync(id, tenantId);
-            if (department == null)
-                return NotFound();
-            return Ok(department);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting department {DepartmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var department = await _departmentService.GetByIdAsync(id, tenantId);
+        if (department == null)
+            return NotFound();
+        return Ok(department);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? companyId = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var departments = await _departmentService.GetAllAsync(tenantId, companyId);
-            return Ok(departments);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all departments");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var departments = await _departmentService.GetAllAsync(tenantId, companyId);
+        return Ok(departments);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDepartmentDto dto)
     {
-        try
-        {
-            if (id != dto.Id)
-                return BadRequest("ID mismatch");
+        if (id != dto.Id)
+            return BadRequest("ID mismatch");
 
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _departmentService.UpdateAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating department {DepartmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _departmentService.UpdateAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _departmentService.DeleteAsync(id, tenantId);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting department {DepartmentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _departmentService.DeleteAsync(id, tenantId);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()

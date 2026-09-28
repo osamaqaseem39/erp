@@ -1,3 +1,4 @@
+using ERP.Api.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
@@ -58,7 +59,7 @@ public class TaxController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _createValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _service.CreateAsync(dto));
@@ -71,7 +72,7 @@ public class TaxController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _updateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _service.UpdateAsync(dto));

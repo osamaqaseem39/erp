@@ -1,3 +1,4 @@
+using ERP.Api.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -36,7 +37,7 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _loginValidator.ValidateAsync(loginDto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _authService.LoginAsync(loginDto));
@@ -49,7 +50,7 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _refreshTokenValidator.ValidateAsync(refreshTokenDto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _authService.RefreshTokenAsync(refreshTokenDto));
@@ -62,7 +63,7 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _refreshTokenValidator.ValidateAsync(refreshTokenDto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _authService.LogoutAsync(refreshTokenDto.RefreshToken));

@@ -1,3 +1,4 @@
+using ERP.Api.Errors;
 using ERP.Api.Abstractions;
 using ERP.Application.CRM;
 using ERP.Api.Validators.CRM;
@@ -35,7 +36,7 @@ public class CustomerGroupController : ERP.Api.Abstractions.ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateCustomerGroupDto dto)
     {
         var validation = await _createValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.CreateAsync(dto));
     }
 
@@ -44,7 +45,7 @@ public class CustomerGroupController : ERP.Api.Abstractions.ControllerBase
     {
         dto.Id = id;
         var validation = await _updateValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.UpdateAsync(dto));
     }
 
@@ -78,7 +79,7 @@ public class PriceListController : ERP.Api.Abstractions.ControllerBase
     public async Task<IActionResult> Create([FromBody] CreatePriceListDto dto)
     {
         var validation = await _createValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.CreateAsync(dto));
     }
 
@@ -87,7 +88,7 @@ public class PriceListController : ERP.Api.Abstractions.ControllerBase
     {
         dto.Id = id;
         var validation = await _updateValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.UpdateAsync(dto));
     }
 
@@ -121,7 +122,7 @@ public class SalesTerritoryController : ERP.Api.Abstractions.ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateSalesTerritoryDto dto)
     {
         var validation = await _createValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.CreateAsync(dto));
     }
 
@@ -130,7 +131,7 @@ public class SalesTerritoryController : ERP.Api.Abstractions.ControllerBase
     {
         dto.Id = id;
         var validation = await _updateValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.UpdateAsync(dto));
     }
 
@@ -164,7 +165,7 @@ public class ReturnOrderController : ERP.Api.Abstractions.ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateReturnOrderDto dto)
     {
         var validation = await _createValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.CreateAsync(dto));
     }
 
@@ -173,7 +174,7 @@ public class ReturnOrderController : ERP.Api.Abstractions.ControllerBase
     {
         dto.Id = id;
         var validation = await _updateValidator.ValidateAsync(dto);
-        if (!validation.IsValid) return BadRequest(new { message = "Validation failed", errors = validation.Errors });
+        if (!validation.IsValid) return BadRequest(ApiErrorMapper.ValidationError(validation.Errors));
         return await HandleAsync(() => _service.UpdateAsync(dto));
     }
 

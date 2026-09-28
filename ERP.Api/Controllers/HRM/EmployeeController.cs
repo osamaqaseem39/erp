@@ -21,98 +21,49 @@ public class EmployeeController : ERP.Api.Abstractions.ControllerBase
     [HttpPost("addEmployee")]
     public async Task<IActionResult> AddEmployee([FromBody] CreateEmployeeDto dto)
     {
-        try
-        {
-            var result = await _employeeService.AddEmployeeAsync(dto);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _employeeService.AddEmployeeAsync(dto);
+        return Ok(result);
     }
 
     [HttpPut("updateEmployee")]
     public async Task<IActionResult> UpdateEmployee([FromBody] UpdateEmployeeDto dto)
     {
-        try
-        {
-            var result = await _employeeService.UpdateEmployeeAsync(dto);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _employeeService.UpdateEmployeeAsync(dto);
+        return Ok(result);
     }
 
     [HttpDelete("deleteEmployee")]
     public async Task<IActionResult> DeleteEmployee([FromQuery] Guid employeeId)
     {
-        try
-        {
-            await _employeeService.DeleteEmployeeAsync(employeeId);
-            return Ok(new { message = "Employee deleted successfully" });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        await _employeeService.DeleteEmployeeAsync(employeeId);
+        return Ok(new { message = "Employee deleted successfully" });
     }
 
     [HttpGet("getEmployeeById")]
     public async Task<IActionResult> GetEmployeeById([FromQuery] Guid employeeId)
     {
-        try
-        {
-            var result = await _employeeService.GetEmployeeByIdAsync(employeeId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _employeeService.GetEmployeeByIdAsync(employeeId);
+        return Ok(result);
     }
 
     [HttpGet("getAllEmployees")]
     public async Task<IActionResult> GetAllEmployees([FromQuery] EmployeeQuery filter)
     {
-        try
-        {
-            var result = await _employeeService.GetEmployeesAsync(filter);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _employeeService.GetEmployeesAsync(filter);
+        return Ok(result);
     }
 
     [HttpGet("getEmployeeByCode")]
     public async Task<IActionResult> GetEmployeeByCode([FromQuery] string employeeCode)
     {
-        try
-        {
-            var result = await _employeeService.GetEmployeeByCodeAsync(employeeCode);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _employeeService.GetEmployeeByCodeAsync(employeeCode);
+        return Ok(result);
     }
 
     [HttpGet("isEmployeeCodeUnique")]
     public async Task<IActionResult> IsEmployeeCodeUnique([FromQuery] string employeeCode, [FromQuery] Guid? excludeEmployeeId = null)
     {
-        try
-        {
-            var result = await _employeeService.IsEmployeeCodeUniqueAsync(employeeCode, excludeEmployeeId);
-            return Ok(new { isUnique = result });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var result = await _employeeService.IsEmployeeCodeUniqueAsync(employeeCode, excludeEmployeeId);
+        return Ok(new { isUnique = result });
     }
 }

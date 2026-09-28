@@ -23,141 +23,77 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateProductionOrderDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _productionOrderService.CreateAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating production order");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _productionOrderService.CreateAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var order = await _productionOrderService.GetByIdAsync(id, tenantId);
-            if (order == null)
-                return NotFound();
-            return Ok(order);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting production order {ProductionOrderId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var order = await _productionOrderService.GetByIdAsync(id, tenantId);
+        if (order == null)
+            return NotFound();
+        return Ok(order);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] string? status = null, [FromQuery] Guid? workCenterId = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var orders = await _productionOrderService.GetAllAsync(tenantId, status, workCenterId);
-            return Ok(orders);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all production orders");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var orders = await _productionOrderService.GetAllAsync(tenantId, status, workCenterId);
+        return Ok(orders);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductionOrderDto dto)
     {
-        try
-        {
-            if (id != dto.Id)
-                return BadRequest("ID mismatch");
+        if (id != dto.Id)
+            return BadRequest("ID mismatch");
 
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _productionOrderService.UpdateAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating production order {ProductionOrderId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _productionOrderService.UpdateAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/start")]
     public async Task<IActionResult> Start(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _productionOrderService.StartAsync(id, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error starting production order {ProductionOrderId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _productionOrderService.StartAsync(id, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/complete")]
     public async Task<IActionResult> Complete(Guid id, [FromBody] CompleteProductionOrderDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _productionOrderService.CompleteAsync(id, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error completing production order {ProductionOrderId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _productionOrderService.CompleteAsync(id, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> Cancel(Guid id, [FromBody] CancelProductionOrderDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _productionOrderService.CancelAsync(id, dto.Reason, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error canceling production order {ProductionOrderId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _productionOrderService.CancelAsync(id, dto.Reason, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _productionOrderService.DeleteAsync(id, tenantId);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting production order {ProductionOrderId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _productionOrderService.DeleteAsync(id, tenantId);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()

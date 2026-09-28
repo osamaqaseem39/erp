@@ -23,122 +23,74 @@ public class POSSessionController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePOSSessionDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantIdFromContext();
-            var userId = GetUserIdFromContext();
-            var result = await _service.CreateAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result }, new { SessionId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating POS session");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantIdFromContext();
+        var userId = GetUserIdFromContext();
+        var result = await _service.CreateAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result }, new { SessionId = result });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantIdFromContext();
-            var session = await _service.GetByIdAsync(id, tenantId);
-            if (session == null)
-                return NotFound();
-            return Ok(session);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting POS session {SessionId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantIdFromContext();
+        var session = await _service.GetByIdAsync(id, tenantId);
+        if (session == null)
+            return NotFound();
+        return Ok(session);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? cashierId = null, [FromQuery] string? status = null)
     {
-        try
-        {
-            var tenantId = GetTenantIdFromContext();
-            IEnumerable<POSSessionDto> sessions;
+        var tenantId = GetTenantIdFromContext();
+        IEnumerable<POSSessionDto> sessions;
 
-            if (cashierId.HasValue)
-                sessions = await _service.GetByCashierAsync(cashierId.Value, tenantId);
-            else if (!string.IsNullOrEmpty(status))
-                sessions = await _service.GetByStatusAsync(status, tenantId);
-            else
-                sessions = await _service.GetAllAsync(tenantId);
+        if (cashierId.HasValue)
+            sessions = await _service.GetByCashierAsync(cashierId.Value, tenantId);
+        else if (!string.IsNullOrEmpty(status))
+            sessions = await _service.GetByStatusAsync(status, tenantId);
+        else
+            sessions = await _service.GetAllAsync(tenantId);
 
-            return Ok(sessions);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting POS sessions");
-            return BadRequest(new { Error = ex.Message });
-        }
+        return Ok(sessions);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePOSSessionDto dto)
     {
-        try
-        {
-            if (id != dto.Id)
-                return BadRequest(new { Error = "ID mismatch" });
+        if (id != dto.Id)
+            return BadRequest(new { Error = "ID mismatch" });
 
-            var tenantId = GetTenantIdFromContext();
-            var userId = GetUserIdFromContext();
-            var result = await _service.UpdateAsync(dto, tenantId, userId);
-            if (!result)
-                return NotFound();
-            return Ok(new { Message = "POS session updated successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating POS session {SessionId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantIdFromContext();
+        var userId = GetUserIdFromContext();
+        var result = await _service.UpdateAsync(dto, tenantId, userId);
+        if (!result)
+            return NotFound();
+        return Ok(new { Message = "POS session updated successfully" });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantIdFromContext();
-            var result = await _service.DeleteAsync(id, tenantId);
-            if (!result)
-                return NotFound();
-            return Ok(new { Message = "POS session deleted successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting POS session {SessionId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantIdFromContext();
+        var result = await _service.DeleteAsync(id, tenantId);
+        if (!result)
+            return NotFound();
+        return Ok(new { Message = "POS session deleted successfully" });
     }
 
     [HttpPost("{id}/close")]
     public async Task<IActionResult> CloseSession(Guid id, [FromBody] ClosePOSSessionDto dto)
     {
-        try
-        {
-            if (id != dto.SessionId)
-                return BadRequest(new { Error = "ID mismatch" });
+        if (id != dto.SessionId)
+            return BadRequest(new { Error = "ID mismatch" });
 
-            var tenantId = GetTenantIdFromContext();
-            var userId = GetUserIdFromContext();
-            var result = await _service.CloseSessionAsync(dto, tenantId, userId);
-            if (!result)
-                return NotFound();
-            return Ok(new { Message = "POS session closed successfully" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error closing POS session {SessionId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantIdFromContext();
+        var userId = GetUserIdFromContext();
+        var result = await _service.CloseSessionAsync(dto, tenantId, userId);
+        if (!result)
+            return NotFound();
+        return Ok(new { Message = "POS session closed successfully" });
     }
 
     private Guid GetTenantIdFromContext()

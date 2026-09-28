@@ -1,3 +1,4 @@
+using ERP.Api.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
@@ -68,7 +69,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _createJobOpeningValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _service.CreateJobOpeningAsync(dto));
@@ -81,7 +82,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _updateJobOpeningValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         var tenantId = GetTenantId();
@@ -123,7 +124,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _createJobApplicationValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _service.CreateJobApplicationAsync(dto));
@@ -136,7 +137,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _updateJobApplicationValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         var tenantId = GetTenantId();
@@ -171,7 +172,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _createCandidateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _service.CreateCandidateAsync(dto));
@@ -184,7 +185,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _updateCandidateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         var tenantId = GetTenantId();
@@ -226,7 +227,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _createInterviewValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _service.CreateInterviewAsync(dto));
@@ -239,7 +240,7 @@ public class RecruitmentController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _updateInterviewValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         var tenantId = GetTenantId();

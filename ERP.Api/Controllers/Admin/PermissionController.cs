@@ -21,32 +21,18 @@ public class PermissionController : ERP.Api.Abstractions.ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] bool activeOnly = true)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var permissions = await _permissionService.GetAllAsync(tenantId, activeOnly);
-            return Ok(permissions);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var permissions = await _permissionService.GetAllAsync(tenantId, activeOnly);
+        return Ok(permissions);
     }
 
     [HttpPost("seed")]
     public async Task<IActionResult> SeedDefaults()
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var permissions = await _permissionService.SeedDefaultPermissionsAsync(tenantId, userId.ToString());
-            return Ok(permissions);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var permissions = await _permissionService.SeedDefaultPermissionsAsync(tenantId, userId.ToString());
+        return Ok(permissions);
     }
 
     private Guid GetTenantId()

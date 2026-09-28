@@ -1,8 +1,6 @@
+using ERP.Api.Errors;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using ERP.Shared.Exceptions;
-using System.Net;
-using FluentValidation;
-using ValidationException = ERP.Shared.Exceptions.ValidationException;
 
 namespace ERP.Api.Abstractions;
 
@@ -15,73 +13,28 @@ public abstract class ControllerBase : Microsoft.AspNetCore.Mvc.ControllerBase, 
         _logger = logger;
     }
 
+    // Exceptions are not caught here: ExceptionMiddleware maps every one of them through ApiErrorMapper,
+    // so all endpoints share the same status codes and error body.
     [NonAction]
     public async Task<IActionResult> HandleAsync<T>(Func<Task<T>> operation) where T : class?
     {
-        try
-        {
-            var result = await operation();
-            return Ok(result);
-        }
-        catch (ValidationException ex)
-        {
-            _logger.LogWarning(ex, "Validation error occurred");
-            return BadRequest(new { message = ex.Message, errors = ex.Errors });
-        }
-        catch (NotFoundException ex)
-        {
-            _logger.LogWarning(ex, "Resource not found");
-            return NotFound(new { message = ex.Message });
-        }
-        catch (UnauthorizedException ex)
-        {
-            _logger.LogWarning(ex, "Unauthorized access");
-            return Unauthorized(new { message = ex.Message });
-        }
-        catch (ForbiddenException ex)
-        {
-            _logger.LogWarning(ex, "Forbidden access");
-            return StatusCode((int)HttpStatusCode.Forbidden, new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An unexpected error occurred");
-            return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An unexpected error occurred" });
-        }
+        var result = await operation();
+        return Ok(result);
     }
 
     [NonAction]
     public async Task<IActionResult> HandleAsync(Func<Task> operation)
     {
-        try
-        {
-            await operation();
-            return Ok();
-        }
-        catch (ValidationException ex)
-        {
-            _logger.LogWarning(ex, "Validation error occurred");
-            return BadRequest(new { message = ex.Message, errors = ex.Errors });
-        }
-        catch (NotFoundException ex)
-        {
-            _logger.LogWarning(ex, "Resource not found");
-            return NotFound(new { message = ex.Message });
-        }
-        catch (UnauthorizedException ex)
-        {
-            _logger.LogWarning(ex, "Unauthorized access");
-            return Unauthorized(new { message = ex.Message });
-        }
-        catch (ForbiddenException ex)
-        {
-            _logger.LogWarning(ex, "Forbidden access");
-            return StatusCode((int)HttpStatusCode.Forbidden, new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An unexpected error occurred");
-            return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "An unexpected error occurred" });
-        }
+        await operation();
+        return Ok();
+    }
+
+    /// <summary>400 with field-level errors from a FluentValidation result.</summary>
+    [NonAction]
+    public IActionResult ValidationFailed(ValidationResult result)
+    {
+        var error = ApiErrorMapper.ValidationError(result.Errors);
+        error.TraceId = HttpContext?.TraceIdentifier;
+        return BadRequest(error);
     }
 }

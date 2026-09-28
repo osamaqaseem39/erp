@@ -23,124 +23,68 @@ public class BenefitsController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateBenefitDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _benefitsService.CreateAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating benefit");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _benefitsService.CreateAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var benefit = await _benefitsService.GetByIdAsync(id, tenantId);
-            if (benefit == null)
-                return NotFound();
-            return Ok(benefit);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting benefit {BenefitId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var benefit = await _benefitsService.GetByIdAsync(id, tenantId);
+        if (benefit == null)
+            return NotFound();
+        return Ok(benefit);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] string? category = null, [FromQuery] bool? isActive = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var benefits = await _benefitsService.GetAllAsync(tenantId, category, isActive);
-            return Ok(benefits);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all benefits");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var benefits = await _benefitsService.GetAllAsync(tenantId, category, isActive);
+        return Ok(benefits);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] BenefitDto dto)
     {
-        try
-        {
         if (id != dto.Id)
-            return BadRequest("ID mismatch");
+        return BadRequest("ID mismatch");
 
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _benefitsService.UpdateAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating benefit {BenefitId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _benefitsService.UpdateAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/enroll")]
     public async Task<IActionResult> EnrollEmployee(Guid id, [FromBody] EnrollEmployeeDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _benefitsService.EnrollEmployeeAsync(id, dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error enrolling employee in benefit {BenefitId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _benefitsService.EnrollEmployeeAsync(id, dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/unenroll")]
     public async Task<IActionResult> UnenrollEmployee(Guid id, [FromBody] UnenrollEmployeeDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _benefitsService.UnenrollEmployeeAsync(id, dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error unenrolling employee from benefit {BenefitId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _benefitsService.UnenrollEmployeeAsync(id, dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _benefitsService.DeleteAsync(id, tenantId);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting benefit {BenefitId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _benefitsService.DeleteAsync(id, tenantId);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()

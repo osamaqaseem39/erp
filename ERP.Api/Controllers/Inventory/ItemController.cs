@@ -54,36 +54,22 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<ActionResult<ItemDto>> Create([FromBody] CreateItemDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var createdBy = GetCurrentUser();
-            var item = await _itemService.CreateAsync(dto, tenantId, createdBy);
-            return CreatedAtAction(nameof(GetById), new { id = item.Id }, item);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var tenantId = GetTenantId();
+        var createdBy = GetCurrentUser();
+        var item = await _itemService.CreateAsync(dto, tenantId, createdBy);
+        return CreatedAtAction(nameof(GetById), new { id = item.Id }, item);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult<ItemDto>> Update(Guid id, [FromBody] UpdateItemDto dto)
     {
-        try
-        {
-            if (id != dto.Id)
-                return BadRequest("ID mismatch");
+        if (id != dto.Id)
+            return BadRequest("ID mismatch");
 
-            var tenantId = GetTenantId();
-            var updatedBy = GetCurrentUser();
-            var item = await _itemService.UpdateAsync(dto, tenantId, updatedBy);
-            return Ok(item);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var tenantId = GetTenantId();
+        var updatedBy = GetCurrentUser();
+        var item = await _itemService.UpdateAsync(dto, tenantId, updatedBy);
+        return Ok(item);
     }
 
     [HttpDelete("{id}")]

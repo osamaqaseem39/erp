@@ -23,126 +23,70 @@ public class VendorController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateVendorDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _vendorService.AddVendorAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result }, new { VendorId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating vendor");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _vendorService.AddVendorAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result }, new { VendorId = result });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var vendor = await _vendorService.GetVendorByIdAsync(id, tenantId);
-            if (vendor == null)
-                return NotFound();
-            return Ok(vendor);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting vendor {VendorId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var vendor = await _vendorService.GetVendorByIdAsync(id, tenantId);
+        if (vendor == null)
+            return NotFound();
+        return Ok(vendor);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] string? searchTerm = null, [FromQuery] string? category = null, [FromQuery] bool? isActive = null)
     {
-        try
+        var tenantId = GetTenantId();
+        var query = new VendorQuery
         {
-            var tenantId = GetTenantId();
-            var query = new VendorQuery
-            {
-                TenantId = tenantId,
-                SearchTerm = searchTerm,
-                IsActive = isActive
-            };
-            var (vendors, totalCount) = await _vendorService.SearchVendorsAsync(query);
-            return Ok(new { Vendors = vendors, TotalCount = totalCount });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all vendors");
-            return BadRequest(new { Error = ex.Message });
-        }
+            TenantId = tenantId,
+            SearchTerm = searchTerm,
+            IsActive = isActive
+        };
+        var (vendors, totalCount) = await _vendorService.SearchVendorsAsync(query);
+        return Ok(new { Vendors = vendors, TotalCount = totalCount });
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateVendorDto dto)
     {
-        try
-        {
-            dto.VendorId = id;
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _vendorService.UpdateVendorAsync(dto, tenantId, userId);
-            return Ok(new { Success = result != Guid.Empty });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating vendor {VendorId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        dto.VendorId = id;
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _vendorService.UpdateVendorAsync(dto, tenantId, userId);
+        return Ok(new { Success = result != Guid.Empty });
     }
 
     [HttpPost("{id}/approve")]
     public async Task<IActionResult> Approve(Guid id)
     {
-        try
-        {
-            // Note: IVendorService doesn't have ApproveAsync method
-            // This would need to be implemented or use a different approach
-            return BadRequest(new { Error = "Approve functionality not yet implemented" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error approving vendor {VendorId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        // Note: IVendorService doesn't have ApproveAsync method
+        // This would need to be implemented or use a different approach
+        return BadRequest(new { Error = "Approve functionality not yet implemented" });
     }
 
     [HttpPost("{id}/suspend")]
     public async Task<IActionResult> Suspend(Guid id, [FromBody] SuspendVendorDto dto)
     {
-        try
-        {
-            // Note: IVendorService doesn't have SuspendAsync method
-            // This would need to be implemented or use a different approach
-            return BadRequest(new { Error = "Suspend functionality not yet implemented" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error suspending vendor {VendorId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        // Note: IVendorService doesn't have SuspendAsync method
+        // This would need to be implemented or use a different approach
+        return BadRequest(new { Error = "Suspend functionality not yet implemented" });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _vendorService.DeleteVendorAsync(id, tenantId);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting vendor {VendorId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _vendorService.DeleteVendorAsync(id, tenantId);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()

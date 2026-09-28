@@ -21,125 +21,69 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetByIdAsync(id, tenantId);
-            return result != null ? Ok(result) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetByIdAsync(id, tenantId);
+        return result != null ? Ok(result) : NotFound();
     }
 
     [HttpGet("key/{key}")]
     public async Task<IActionResult> GetByKey(string key)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetByKeyAsync(key, tenantId);
-            return result != null ? Ok(result) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetByKeyAsync(key, tenantId);
+        return result != null ? Ok(result) : NotFound();
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] string? category = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetAllAsync(tenantId, category);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetAllAsync(tenantId, category);
+        return Ok(result);
     }
 
     [HttpGet("category/{category}")]
     public async Task<IActionResult> GetByCategory(string category)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.GetByCategoryAsync(category, tenantId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.GetByCategoryAsync(category, tenantId);
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateSystemSettingDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _service.CreateAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _service.CreateAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSystemSettingDto dto)
     {
-        try
-        {
-            dto.Id = id;
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _service.UpdateAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        dto.Id = id;
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _service.UpdateAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _service.DeleteAsync(id, tenantId);
-            return result ? NoContent() : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _service.DeleteAsync(id, tenantId);
+        return result ? NoContent() : NotFound();
     }
 
     [HttpPost("upsert")]
     public async Task<IActionResult> Upsert([FromBody] UpsertSystemSettingDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _service.UpsertAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _service.UpsertAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     private Guid GetTenantId()

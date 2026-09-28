@@ -23,90 +23,50 @@ public class AttendanceController : ERP.Api.Abstractions.ControllerBase
     [HttpPost("check-in")]
     public async Task<IActionResult> CheckIn([FromBody] CheckInDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _attendanceService.CheckInAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking in employee");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _attendanceService.CheckInAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("check-out")]
     public async Task<IActionResult> CheckOut([FromBody] CheckOutDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _attendanceService.CheckOutAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking out employee");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _attendanceService.CheckOutAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpGet("employee/{employeeId}")]
     public async Task<IActionResult> GetEmployeeAttendance(Guid employeeId, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var from = fromDate ?? DateTime.Today.AddDays(-30);
-            var to = toDate ?? DateTime.Today;
-            
-            var attendance = await _attendanceService.GetEmployeeAttendanceAsync(employeeId, tenantId, from, to);
-            return Ok(attendance);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting employee attendance for {EmployeeId}", employeeId);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var from = fromDate ?? DateTime.Today.AddDays(-30);
+        var to = toDate ?? DateTime.Today;
+        
+        var attendance = await _attendanceService.GetEmployeeAttendanceAsync(employeeId, tenantId, from, to);
+        return Ok(attendance);
     }
 
     [HttpGet("summary/{employeeId}")]
     public async Task<IActionResult> GetAttendanceSummary(Guid employeeId, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var from = fromDate ?? DateTime.Today.AddDays(-30);
-            var to = toDate ?? DateTime.Today;
-            
-            var summary = await _attendanceService.GetAttendanceSummaryAsync(employeeId, tenantId, from, to);
-            return Ok(summary);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting attendance summary for {EmployeeId}", employeeId);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var from = fromDate ?? DateTime.Today.AddDays(-30);
+        var to = toDate ?? DateTime.Today;
+        
+        var summary = await _attendanceService.GetAttendanceSummaryAsync(employeeId, tenantId, from, to);
+        return Ok(summary);
     }
 
     [HttpPut("adjust")]
     public async Task<IActionResult> AdjustAttendance([FromBody] AttendanceAdjustmentDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _attendanceService.AdjustAttendanceAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adjusting attendance");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _attendanceService.AdjustAttendanceAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     private Guid GetTenantId()

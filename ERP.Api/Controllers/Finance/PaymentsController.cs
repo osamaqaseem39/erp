@@ -23,121 +23,65 @@ public class PaymentsController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePaymentDto dto)
     {
-        try
-        {
-            var result = await _paymentService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result }, new { PaymentId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating payment");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _paymentService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = result }, new { PaymentId = result });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var payment = await _paymentService.GetByIdAsync(id);
-            if (payment == null)
-                return NotFound();
-            return Ok(payment);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting payment {PaymentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var payment = await _paymentService.GetByIdAsync(id);
+        if (payment == null)
+            return NotFound();
+        return Ok(payment);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? customerId = null, [FromQuery] Guid? invoiceId = null, [FromQuery] string? paymentMethod = null, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        try
-        {
-            IEnumerable<PaymentDto> payments;
+        IEnumerable<PaymentDto> payments;
+        
+        if (invoiceId.HasValue)
+            payments = await _paymentService.GetByInvoiceAsync(invoiceId.Value);
+        else if (fromDate.HasValue && toDate.HasValue)
+            payments = await _paymentService.GetByDateRangeAsync(fromDate.Value, toDate.Value);
+        else
+            payments = await _paymentService.GetAllAsync();
             
-            if (invoiceId.HasValue)
-                payments = await _paymentService.GetByInvoiceAsync(invoiceId.Value);
-            else if (fromDate.HasValue && toDate.HasValue)
-                payments = await _paymentService.GetByDateRangeAsync(fromDate.Value, toDate.Value);
-            else
-                payments = await _paymentService.GetAllAsync();
-                
-            return Ok(payments);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all payments");
-            return BadRequest(new { Error = ex.Message });
-        }
+        return Ok(payments);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePaymentDto dto)
     {
-        try
-        {
-            dto.PaymentId = id;
-            var result = await _paymentService.UpdateAsync(dto);
-            return Ok(new { Success = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating payment {PaymentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        dto.PaymentId = id;
+        var result = await _paymentService.UpdateAsync(dto);
+        return Ok(new { Success = result });
     }
 
     [HttpPost("{id}/refund")]
     public async Task<IActionResult> Refund(Guid id, [FromBody] RefundDto dto)
     {
-        try
-        {
-            // Note: IPaymentService doesn't have RefundAsync method
-            // This would need to be implemented or use a different approach
-            return BadRequest(new { Error = "Refund functionality not yet implemented" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error refunding payment {PaymentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        // Note: IPaymentService doesn't have RefundAsync method
+        // This would need to be implemented or use a different approach
+        return BadRequest(new { Error = "Refund functionality not yet implemented" });
     }
 
     [HttpPost("{id}/void")]
     public async Task<IActionResult> Void(Guid id, [FromBody] VoidPaymentDto dto)
     {
-        try
-        {
-            // Note: IPaymentService doesn't have VoidAsync method
-            // This would need to be implemented or use a different approach
-            return BadRequest(new { Error = "Void functionality not yet implemented" });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error voiding payment {PaymentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        // Note: IPaymentService doesn't have VoidAsync method
+        // This would need to be implemented or use a different approach
+        return BadRequest(new { Error = "Void functionality not yet implemented" });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var result = await _paymentService.DeleteAsync(id);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting payment {PaymentId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _paymentService.DeleteAsync(id);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()

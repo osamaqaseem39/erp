@@ -21,119 +21,63 @@ public class AuditLogController : ERP.Api.Abstractions.ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var result = await _service.GetByIdAsync(id);
-            return result != null ? Ok(result) : NotFound();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.GetByIdAsync(id);
+        return result != null ? Ok(result) : NotFound();
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        try
-        {
-            var result = await _service.GetAllAsync();
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.GetAllAsync();
+        return Ok(result);
     }
 
     [HttpGet("entity/{entityName}/{entityId}")]
     public async Task<IActionResult> GetByEntity(string entityName, string entityId)
     {
-        try
-        {
-            var result = await _service.GetByEntityAsync(entityName, entityId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.GetByEntityAsync(entityName, entityId);
+        return Ok(result);
     }
 
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUser(Guid userId)
     {
-        try
-        {
-            var result = await _service.GetByUserAsync(userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.GetByUserAsync(userId);
+        return Ok(result);
     }
 
     [HttpGet("action/{action}")]
     public async Task<IActionResult> GetByAction(string action)
     {
-        try
-        {
-            var result = await _service.GetByActionAsync(action);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.GetByActionAsync(action);
+        return Ok(result);
     }
 
     [HttpGet("date-range")]
     public async Task<IActionResult> GetByDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
-        try
-        {
-            var result = await _service.GetByDateRangeAsync(startDate, endDate);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.GetByDateRangeAsync(startDate, endDate);
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateAuditLogDto dto)
     {
-        try
-        {
-            var id = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id }, new { id });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var id = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
     [HttpPost("log-action")]
     public async Task<IActionResult> LogAction([FromBody] LogActionDto dto)
     {
-        try
-        {
-            var result = await _service.LogActionAsync(
-                dto.EntityName, 
-                dto.EntityId, 
-                dto.Action, 
-                dto.OldValues, 
-                dto.NewValues, 
-                dto.UserId);
-            return result ? Ok() : BadRequest();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _service.LogActionAsync(
+            dto.EntityName, 
+            dto.EntityId, 
+            dto.Action, 
+            dto.OldValues, 
+            dto.NewValues, 
+            dto.UserId);
+        return result ? Ok() : BadRequest();
     }
 }
 

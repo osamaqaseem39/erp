@@ -23,120 +23,64 @@ public class LeaveRequestController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateLeaveRequestDto dto)
     {
-        try
-        {
-            var result = await _leaveRequestService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result }, new { LeaveRequestId = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating leave request");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _leaveRequestService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = result }, new { LeaveRequestId = result });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var leaveRequest = await _leaveRequestService.GetByIdAsync(id);
-            if (leaveRequest == null)
-                return NotFound();
-            return Ok(leaveRequest);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting leave request {LeaveRequestId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var leaveRequest = await _leaveRequestService.GetByIdAsync(id);
+        if (leaveRequest == null)
+            return NotFound();
+        return Ok(leaveRequest);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? employeeId = null, [FromQuery] string? status = null, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        try
-        {
-            IEnumerable<LeaveRequestDto> leaveRequests;
+        IEnumerable<LeaveRequestDto> leaveRequests;
+        
+        if (employeeId.HasValue)
+            leaveRequests = await _leaveRequestService.GetByEmployeeAsync(employeeId.Value);
+        else if (!string.IsNullOrEmpty(status))
+            leaveRequests = await _leaveRequestService.GetByStatusAsync(status);
+        else
+            leaveRequests = await _leaveRequestService.GetAllAsync();
             
-            if (employeeId.HasValue)
-                leaveRequests = await _leaveRequestService.GetByEmployeeAsync(employeeId.Value);
-            else if (!string.IsNullOrEmpty(status))
-                leaveRequests = await _leaveRequestService.GetByStatusAsync(status);
-            else
-                leaveRequests = await _leaveRequestService.GetAllAsync();
-                
-            return Ok(leaveRequests);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all leave requests");
-            return BadRequest(new { Error = ex.Message });
-        }
+        return Ok(leaveRequests);
     }
 
     [HttpPut("{id}/approve")]
     public async Task<IActionResult> Approve(Guid id, [FromBody] LeaveApprovalDto dto)
     {
-        try
-        {
-            var result = await _leaveRequestService.ApproveAsync(id);
-            return Ok(new { Success = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error approving leave request {LeaveRequestId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _leaveRequestService.ApproveAsync(id);
+        return Ok(new { Success = result });
     }
 
     [HttpPut("{id}/reject")]
     public async Task<IActionResult> Reject(Guid id, [FromBody] LeaveRejectionDto dto)
     {
-        try
-        {
-            var result = await _leaveRequestService.RejectAsync(id);
-            return Ok(new { Success = result });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error rejecting leave request {LeaveRequestId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _leaveRequestService.RejectAsync(id);
+        return Ok(new { Success = result });
     }
 
     [HttpPut("{id}/cancel")]
     public async Task<IActionResult> Cancel(Guid id, [FromBody] LeaveCancellationDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _leaveRequestService.CancelAsync(id, dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error cancelling leave request {LeaveRequestId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _leaveRequestService.CancelAsync(id, dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var result = await _leaveRequestService.DeleteAsync(id);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting leave request {LeaveRequestId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var result = await _leaveRequestService.DeleteAsync(id);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()

@@ -1,3 +1,4 @@
+using ERP.Api.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
@@ -71,7 +72,7 @@ public class StockController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _adjustmentValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         return await HandleAsync(() => _service.AdjustStockAsync(dto));
@@ -83,7 +84,7 @@ public class StockController : ERP.Api.Abstractions.ControllerBase
         var validationResult = await _transferValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new { message = "Validation failed", errors = validationResult.Errors });
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
         // Note: TransferStockAsync not available in current interface

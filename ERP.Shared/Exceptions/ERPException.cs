@@ -49,3 +49,9 @@ public class ForbiddenException : ERPException
 {
     public ForbiddenException(string message) : base(message, "FORBIDDEN", 403) { }
 }
+
+/// <summary>The request conflicts with current state, e.g. a record still referenced by others.</summary>
+public class ConflictException : ERPException
+{
+    public ConflictException(string message) : base(message, "CONFLICT", 409) { }
+}

@@ -23,141 +23,77 @@ public class BillsController : ERP.Api.Abstractions.ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateBillDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _billService.CreateAsync(dto, tenantId, userId);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating bill");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _billService.CreateAsync(dto, tenantId, userId);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var bill = await _billService.GetByIdAsync(id, tenantId);
-            if (bill == null)
-                return NotFound();
-            return Ok(bill);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting bill {BillId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var bill = await _billService.GetByIdAsync(id, tenantId);
+        if (bill == null)
+            return NotFound();
+        return Ok(bill);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? vendorId = null, [FromQuery] string? status = null, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var bills = await _billService.GetAllAsync(tenantId, vendorId, status, fromDate, toDate);
-            return Ok(bills);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting all bills");
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var bills = await _billService.GetAllAsync(tenantId, vendorId, status, fromDate, toDate);
+        return Ok(bills);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBillDto dto)
     {
-        try
-        {
-            if (id != dto.BillId)
-                return BadRequest("ID mismatch");
+        if (id != dto.BillId)
+            return BadRequest("ID mismatch");
 
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _billService.UpdateAsync(dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating bill {BillId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _billService.UpdateAsync(dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/approve")]
     public async Task<IActionResult> Approve(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _billService.ApproveAsync(id, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error approving bill {BillId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _billService.ApproveAsync(id, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/mark-paid")]
     public async Task<IActionResult> MarkAsPaid(Guid id, [FromBody] PaymentDto paymentDto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _billService.MarkAsPaidAsync(id, paymentDto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error marking bill as paid {BillId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _billService.MarkAsPaidAsync(id, paymentDto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpPost("{id}/void")]
     public async Task<IActionResult> VoidBill(Guid id, [FromBody] VoidBillDto dto)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var userId = GetUserId();
-            var result = await _billService.VoidBillAsync(id, dto, tenantId, userId);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error voiding bill {BillId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var userId = GetUserId();
+        var result = await _billService.VoidBillAsync(id, dto, tenantId, userId);
+        return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        try
-        {
-            var tenantId = GetTenantId();
-            var result = await _billService.DeleteAsync(id, tenantId);
-            if (!result)
-                return NotFound();
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting bill {BillId}", id);
-            return BadRequest(new { Error = ex.Message });
-        }
+        var tenantId = GetTenantId();
+        var result = await _billService.DeleteAsync(id, tenantId);
+        if (!result)
+            return NotFound();
+        return NoContent();
     }
 
     private Guid GetTenantId()
