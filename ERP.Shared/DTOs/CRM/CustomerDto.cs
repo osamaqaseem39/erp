@@ -79,3 +79,9 @@ public class UpdateCustomerDto : UpdateDto
     public string? Notes { get; set; }
     public string CurrencyCode { get; set; } = "USD";
 }
+public class CustomerPagedQuery : PagedRequest
+{
+    public string? Status { get; set; }
+    public string? Industry { get; set; }
+    public string? CustomerType { get; set; }
+}

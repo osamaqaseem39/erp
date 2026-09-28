@@ -1,3 +1,4 @@
+using ERP.Shared.DTOs;
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
@@ -24,6 +25,12 @@ public class CustomerService : ICustomerService
     {
         var entities = await _repository.GetAllAsync();
         return entities.Select(MapToDto);
+    }
+
+    public async Task<PagedResult<CustomerDto>> GetPagedAsync(CustomerPagedQuery query, CancellationToken cancellationToken = default)
+    {
+        var page = await _repository.GetPagedAsync(query, cancellationToken);
+        return page.Map(MapToDto);
     }
 
     public async Task<Guid> CreateAsync(CreateCustomerDto dto)

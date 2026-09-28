@@ -41,6 +41,13 @@ public class CustomerController : ERP.Api.Abstractions.ControllerBase
         return await HandleAsync(() => _service.GetAllAsync());
     }
 
+    /// <summary>Server-side paged, filtered and sorted customer list.</summary>
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPaged([FromQuery] CustomerPagedQuery query, CancellationToken cancellationToken)
+    {
+        return await HandleAsync(() => _service.GetPagedAsync(query, cancellationToken));
+    }
+
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string searchTerm)
     {
