@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 
 import config from "../../config";
 
@@ -46,8 +46,8 @@ axios.interceptors.response.use(
         // window.location.href = '/not-found';
         message = "Sorry! the data you are looking for could not be found";
       } else if (status === 403) {
-        window.location.href = "/access-denied";
-        message = "Access Forbidden";
+        // Rendered in place by the page (PermissionDenied); a 403 must not take the whole app away.
+        message = "You don't have permission to do this.";
       } else if (status === 401) {
         if (!isAuthEndpoint(requestUrl) && !isOnLoginPage()) {
           handleUnauthenticatedSession("unauthorized");
@@ -152,16 +152,16 @@ class APICore {
   /**
    * Fetches data from given url
    */
-  get = (url: string, params: any) => {
+  get = (url: string, params: any, config?: AxiosRequestConfig) => {
     if (params && typeof params === 'object') {
       // Build query string from params object
       const queryString = Object.keys(params)
         .filter(key => params[key] !== null && params[key] !== undefined)
         .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
         .join("&");
-      return axios.get(queryString ? `${url}?${queryString}` : url);
+      return axios.get(queryString ? `${url}?${queryString}` : url, config);
     }
-    return axios.get(url);
+    return axios.get(url, config);
   };
 
   getFile = (url: string, params: any) => {

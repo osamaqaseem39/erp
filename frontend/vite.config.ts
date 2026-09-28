@@ -7,8 +7,9 @@ export default defineConfig({
   plugins: [react()],
   define: { 'process.env': {} },
   test: {
-    environment: 'node',
-    include: ['src/**/*.test.ts'],
+    environment: 'jsdom',
+    include: ['src/**/*.test.{ts,tsx}'],
+    restoreMocks: true,
   },
   resolve: {
     alias: {
