@@ -1,6 +1,6 @@
 # Checkpoint 0 — Baseline and Foundation: Plan (Gate A)
 
-> Status: **awaiting approval**. No code has been changed yet.
+> Status: **approved 2026-09-28 (recommended decisions D1–D6) and implemented**. See [CP0_FOUNDATION_STATUS.md](CP0_FOUNDATION_STATUS.md).
 > Parent plan: [../erp-ui-program/PLAN.md](../erp-ui-program/PLAN.md) · Rules: [../erp-ui-program/MASTER_PROMPT.md](../erp-ui-program/MASTER_PROMPT.md)
 > Written: 2026-09-28
 

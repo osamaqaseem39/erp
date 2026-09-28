@@ -3,7 +3,7 @@
 **Goal:** every ERP module gets a real dashboard, server-paged lists, sectioned forms, detail pages, safe delete/archive, workflows, RBAC and audit, all on one shared design system. The work runs on the existing React SPA and .NET API.
 
 **Prompts:** [MASTER_PROMPT.md](MASTER_PROMPT.md) (standing context) and [MODULE_PROMPT.md](MODULE_PROMPT.md) (one per checkpoint).
-**Last updated:** 2026-09-28
+**Last updated:** 2026-09-29
 
 ---
 
@@ -181,7 +181,7 @@ Exit criteria
 
 | # | Checkpoint | Gate A (plan) | Gate B (done) | Status doc | Notes |
 |---|------------|---------------|---------------|------------|-------|
-| 0 | Baseline & foundation | ☐ | ☐ | — | |
+| 0 | Baseline & foundation | ✅ 2026-09-28 | ⏳ code complete; your walk-through pending | [CP0 status](../modules/CP0_FOUNDATION_STATUS.md) | |
 | 1 | Core / Settings | ☐ | ☐ | ☐ | |
 | 2 | Admin + RBAC | ☐ | ☐ | ☐ | security milestone |
 | 3 | CRM (pilot) | ☐ | ☐ | ☐ | design-system freeze review |

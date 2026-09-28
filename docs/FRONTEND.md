@@ -22,7 +22,14 @@ Scripts: `npm run dev` (`vite --host`), `build` (`tsc && vite build`), `lint`, `
 
 ## Routing
 
-Defined in `frontend/src/routes/index.tsx`, rendered by `Routes.tsx` with `PrivateRoute` for authenticated areas. Setup flow: `SetupGuard` / setup pages; root redirect via `RootRedirect`.
+`createBrowserRouter` in `frontend/src/routes/router.tsx`. `App` is the root route (setup and session guards around an `<Outlet/>`). Route definitions live in one file per module under `frontend/src/routes/modules/*.routes.tsx` and are assembled in `routes/index.tsx`. Authenticated pages go through `ProtectedRoute`, which handles the sign-in redirect with a safe `?next=`, layout choice, and an optional `permission` per route. Template demo pages only load with `VITE_SHOW_TEMPLATE_PAGES=true`. `routes/routes.test.tsx` checks that every URL from the pre-split table still resolves.
+
+## ERP UI kit
+
+- `frontend/src/components/erp/`: the shared components every module uses (PageHeader, DataTable and toolbar, Pagination, FilterPanel, StatusBadge, Empty/Error states, Confirm/Delete dialogs, KpiCard, ChartCard, WidgetBoundary, form fields, EntitySelect, LineItemsTable, detail-page pieces). See every component in every state at `/dev/components` (dev server only).
+- `frontend/src/lib/erp/`: logic without UI (`parseApiError`, `useResource`/`usePagedQuery`/`useMutation`, paging and URL sync, status registry, formatters, permissions, line totals, unsaved-changes guard).
+- Reference implementation: `modules/crm/entities/customer` (list, form, detail).
+- `components/entity/*` and `modules/crm/components/*` are deprecated legacy layouts.
 
 ### Module route groups (ERP)
 
