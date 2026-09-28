@@ -10,6 +10,7 @@ import { procurementRoutes } from "./modules/procurement.routes";
 import { manufacturingRoutes } from "./modules/manufacturing.routes";
 import { projectsRoutes } from "./modules/projects.routes";
 import { authRoutes, otherPublicRoutes } from "./modules/public.routes";
+import { devRoutes } from "./modules/dev.routes";
 import {
   calendarAppRoutes,
   chartRoutes,
@@ -64,7 +65,8 @@ export function getAuthProtectedRoutes(includeTemplatePages = SHOW_TEMPLATE_PAGE
 }
 
 export const authProtectedRoutes = getAuthProtectedRoutes();
-export const publicRoutes: RoutesProps[] = [...authRoutes, ...otherPublicRoutes];
+// The gallery needs no API, so it is public; import.meta.env.DEV removes it from production builds.
+export const publicRoutes: RoutesProps[] = [...authRoutes, ...(import.meta.env.DEV ? devRoutes : []), ...otherPublicRoutes];
 
 export const authProtectedFlattenRoutes = flattenRoutes(authProtectedRoutes);
 export const publicProtectedFlattenRoutes = flattenRoutes(publicRoutes);

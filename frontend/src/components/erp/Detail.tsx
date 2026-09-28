@@ -78,7 +78,7 @@ export function DetailTabs({ tabs }: { tabs: DetailTab[] }) {
         setParams(next, { replace: true });
       }}
     >
-      <TabList className="flex gap-1 overflow-x-auto border-b border-slate-200 dark:border-slate-700">
+      <TabList className="flex gap-1 overflow-x-auto overflow-y-hidden border-b border-slate-200 dark:border-slate-700">
         {tabs.map((tab) => (
           <Tab
             key={tab.key}

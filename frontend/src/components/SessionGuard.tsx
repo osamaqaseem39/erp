@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { APICore, forceLogout } from "../helpers/api/apiCore";
 
-const PUBLIC_PREFIXES = ["/auth/", "/setup", "/maintenance", "/coming-soon", "/error-", "/access-denied"];
+const PUBLIC_PREFIXES = ["/auth/", "/setup", "/maintenance", "/coming-soon", "/error-", "/access-denied", "/dev/"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));

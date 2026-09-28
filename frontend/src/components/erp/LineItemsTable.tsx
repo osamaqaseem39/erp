@@ -55,7 +55,7 @@ export function LineItemsTable({ name, currency, newRow, showDiscount = true, sh
         <table className="min-w-full text-sm">
           <caption className="sr-only">Line items</caption>
           <thead className="bg-slate-50 dark:bg-slate-800">
-            <tr className="text-slate-600 dark:text-slate-300">
+            <tr className="text-slate-600 dark:text-slate-300 [&>th]:normal-case [&>th]:tracking-normal [&>th]:font-semibold">
               <th scope="col" className="w-8 px-2 py-2 text-left">#</th>
               <th scope="col" className="min-w-56 px-2 py-2 text-left">Description</th>
               <th scope="col" className="w-24 px-2 py-2 text-right">Qty</th>

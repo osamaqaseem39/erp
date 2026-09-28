@@ -4,7 +4,7 @@ import SetupLoadingScreen from "../modules/core/components/SetupLoadingScreen";
 import { useSetup } from "../modules/core/context/SetupContext";
 
 const SETUP_PATH = "/setup";
-const EXEMPT_PREFIXES = ["/maintenance", "/coming-soon", "/error-", "/access-denied"];
+const EXEMPT_PREFIXES = ["/maintenance", "/coming-soon", "/error-", "/access-denied", "/dev/"];
 
 function isExemptPath(pathname: string): boolean {
   if (pathname === SETUP_PATH) return true;

@@ -150,7 +150,7 @@ export function DataTable<T>({
                     key={column.key}
                     scope="col"
                     aria-sort={column.sortable ? ariaSort ?? "none" : undefined}
-                    className={`whitespace-nowrap px-3 py-2.5 font-semibold text-slate-600 dark:text-slate-300 ${alignClass[column.align ?? "left"]} ${column.className ?? ""}`}
+                    className={`whitespace-nowrap px-3 py-2.5 normal-case tracking-normal font-semibold text-slate-600 dark:text-slate-300 ${alignClass[column.align ?? "left"]} ${column.className ?? ""}`}
                   >
                     {column.sortable && onSortChange ? (
                       <button
