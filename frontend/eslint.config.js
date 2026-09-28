@@ -7,7 +7,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 // Code written under the ERP UI program is linted at error level.
 // Everything else is legacy: same rules, downgraded to warnings until its module is migrated
 // (see docs/modules/CP0_FOUNDATION_PLAN.md, decision D5).
-const STRICT_FILES = ["src/components/erp/**/*.{ts,tsx}", "src/lib/erp/**/*.{ts,tsx}"]; // src/routes joins in WP4
+const STRICT_FILES = ["src/components/erp/**/*.{ts,tsx}", "src/lib/erp/**/*.{ts,tsx}", "src/routes/**/*.{ts,tsx}"];
 
 const tsRecommended = tsPlugin.configs["flat/recommended"];
 

@@ -1,4 +1,4 @@
-import AllRoutes from "./routes/Routes";
+import { Outlet } from "react-router-dom";
 import SessionGuard from "./components/SessionGuard";
 import { SetupProvider } from "./modules/core/context/SetupContext";
 import SetupGuard from "./routes/SetupGuard";
@@ -16,13 +16,14 @@ import "./assets/scss/icons.scss";
 // Apollo Client is initialized in lib/apolloClient.ts and used directly in services
 // No need for ApolloProvider wrapper when using client.query() and client.mutate()
 
+/** Root route element: setup and session checks wrap every page. */
 const App = () => {
 
   return (
     <SetupProvider>
       <SetupGuard>
         <SessionGuard>
-          <AllRoutes />
+          <Outlet />
         </SessionGuard>
       </SetupGuard>
     </SetupProvider>

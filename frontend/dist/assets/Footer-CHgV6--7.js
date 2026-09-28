@@ -1,1 +1,0 @@
-import{j as e,n as t}from"./index-DuN-0V71.js";const r=()=>e.jsx("footer",{className:"footer h-16 flex items-center px-6 bg-white shadow dark:bg-gray-800",children:e.jsx("div",{className:"flex md:justify-between justify-center w-full gap-4",children:e.jsxs("div",{children:[new Date().getFullYear()," © ",t.APP_NAME]})})});export{r as default};

@@ -1,3 +1,4 @@
+import { safeRedirectPath } from "../../lib/erp/safeRedirect";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, Link, useLocation, useSearchParams } from "react-router-dom";
 
@@ -143,7 +144,7 @@ const Login = () => {
   };
 
   const location = useLocation();
-  const redirectUrl = location?.search?.slice(6) || "/modules";
+  const redirectUrl = safeRedirectPath(location?.search ?? "");
 
   return (
     <>

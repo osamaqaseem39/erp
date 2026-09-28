@@ -1,1 +1,0 @@
-import{H as u,j as e,I as a,N as t,B as i}from"./index-DuN-0V71.js";const p=()=>{const{isSetupComplete:r,isLoading:s}=u(),o=new i;return s||r===null?e.jsx(a,{}):r?o.isUserAuthenticated()?e.jsx(t,{to:"/modules",replace:!0}):e.jsx(t,{to:"/auth/login",replace:!0}):e.jsx(t,{to:"/setup",replace:!0})};export{p as default};

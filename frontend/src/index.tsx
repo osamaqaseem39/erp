@@ -1,27 +1,19 @@
-import React from 'react'
-import { BrowserRouter } from "react-router-dom";
+import React from "react";
+import { RouterProvider } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
-import App from './App.js'
+import { router } from "./routes/router";
 import { store } from "./redux/store.js";
 
-const container = document.getElementById('konrix');
+const container = document.getElementById("konrix");
 if (container) {
   const root = createRoot(container);
   root.render(
     <Provider store={store}>
       <React.Fragment>
-        <BrowserRouter 
-          basename={process.env.PUBLIC_URL}
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <App />
-        </BrowserRouter>
+        <RouterProvider router={router} future={{ v7_startTransition: true }} />
       </React.Fragment>
     </Provider>
-  )
+  );
 }
