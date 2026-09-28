@@ -11,6 +11,7 @@ interface CrmFormFooterProps {
   updateLabel?: string;
 }
 
+/** @deprecated Legacy layout kept until its module is migrated. Use FormFooter from components/erp. */
 const cmdBtnSecondary =
   "inline-flex items-center justify-center px-4 py-1.5 text-sm font-medium text-[#323130] bg-white border border-[#8A8886] hover:bg-[#F3F2F1] rounded-sm transition-colors disabled:opacity-50";
 

@@ -23,6 +23,7 @@ function parseEntityFromTitles(breadcrumbTitle: string, title: string): { entity
   return { entityName: entityName || "Record", isEdit };
 }
 
+/** @deprecated Legacy layout kept until its module is migrated. Use PageHeader + FormSection + FormFooter from components/erp. */
 const CrmFormLayout: React.FC<CrmFormLayoutProps> = ({
   breadcrumbTitle,
   title,

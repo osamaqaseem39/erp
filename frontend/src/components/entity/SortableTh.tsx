@@ -13,6 +13,7 @@ export interface SortableThProps {
   variant?: "default" | "crm";
 }
 
+/** @deprecated Legacy layout kept until its module is migrated. Use DataTable (server-side sort) from components/erp. */
 const crmThClass =
   "text-left text-[11px] font-semibold text-[#605E5C] uppercase tracking-wide px-3 py-2 bg-[#FAF9F8] border-b border-[#EDEBE9] whitespace-nowrap";
 

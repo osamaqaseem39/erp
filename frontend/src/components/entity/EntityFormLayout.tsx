@@ -16,6 +16,7 @@ interface EntityFormLayoutProps {
   showBreadcrumb?: boolean;
 }
 
+/** @deprecated Legacy layout kept until its module is migrated. Use PageHeader + FormSection + FormFooter from components/erp. */
 const EntityFormLayout: React.FC<EntityFormLayoutProps> = ({
   moduleName,
   entityName,

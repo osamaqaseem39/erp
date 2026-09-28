@@ -11,6 +11,7 @@ interface EntityFormFooterProps {
   updateLabel?: string;
 }
 
+/** @deprecated Legacy layout kept until its module is migrated. Use FormFooter from components/erp. */
 const EntityFormFooter: React.FC<EntityFormFooterProps> = ({
   cancelUrl,
   loading,

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { sortTableData, type SortDirection } from "./sortTableData";
 
+/** @deprecated Legacy layout kept until its module is migrated. Use DataTable with usePagedQuery (server-side sort). */
 export function useTableSort(defaultKey: string, defaultDir: SortDirection = "asc") {
   const [sortKey, setSortKey] = useState<string>(defaultKey);
   const [sortDir, setSortDir] = useState<SortDirection>(defaultDir);

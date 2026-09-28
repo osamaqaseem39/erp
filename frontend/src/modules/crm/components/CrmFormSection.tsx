@@ -7,6 +7,7 @@ export interface CrmFormSectionProps {
   columns?: 1 | 2;
 }
 
+/** @deprecated Legacy layout kept until its module is migrated. Use FormSection from components/erp. */
 const CrmFormSection: React.FC<CrmFormSectionProps> = ({
   title,
   description,

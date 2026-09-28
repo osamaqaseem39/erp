@@ -14,6 +14,7 @@ interface EntityListLayoutProps {
   showBreadcrumb?: boolean;
 }
 
+/** @deprecated Legacy layout kept until its module is migrated. Use PageHeader + DataTableToolbar + DataTable + Pagination from components/erp. */
 const EntityListLayout: React.FC<EntityListLayoutProps> = ({
   title,
   moduleName,
