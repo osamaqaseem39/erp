@@ -4,9 +4,11 @@ namespace ERP.Infrastructure.Interfaces.CRM;
 
 public interface IContactRepository
 {
-    Task<Contact?> GetByIdAsync(int id);
+    Task<Contact?> GetByIdAsync(Guid id);
     Task<IEnumerable<Contact>> GetAllAsync();
-    Task<Contact> AddAsync(Contact entity);
-    Task UpdateAsync(Contact entity);
-    Task DeleteAsync(int id);
+    Task<IEnumerable<Contact>> GetByCustomerAsync(Guid customerId);
+    Task<IEnumerable<Contact>> SearchAsync(string searchTerm);
+    Task<Guid> CreateAsync(Contact contact);
+    Task<bool> UpdateAsync(Contact contact);
+    Task<bool> DeleteAsync(Guid id);
 }

@@ -485,3 +485,8 @@ docker-compose*.yml
 # Application specific
 appsettings.Production.json
 appsettings.Staging.json
+# Local build/scratch outputs
+build-out*/
+build-crm-check/
+temp_batch_*.sql
+.kilo/worktrees/

@@ -1,3 +1,4 @@
+using ERP.Application.Interfaces.Core;
 using ERP.Domain.Core;
 using ERP.Infrastructure.Repositories.Core;
 using ERP.Shared.DTOs;
@@ -26,16 +27,27 @@ public class TenantService : ITenantService
         return tenants.Select(MapToDto);
     }
 
-    public async Task<PagedResult<TenantDto>> GetPagedAsync(int pageNumber, int pageSize)
+    public async Task<IEnumerable<TenantDto>> GetActiveAsync()
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("GetPagedAsync method needs to be implemented in the repository");
+        var tenants = await _repository.GetActiveAsync();
+        return tenants.Select(MapToDto);
     }
 
-    public async Task<TenantDto?> GetBySubdomainAsync(string subdomain)
+    public async Task<IEnumerable<LoginTenantOptionDto>> GetLoginOptionsAsync()
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("GetBySubdomainAsync method needs to be implemented in the repository");
+        var tenants = await _repository.GetActiveAsync();
+        return tenants.Select(t => new LoginTenantOptionDto
+        {
+            Id = t.Id,
+            Name = t.TenantName,
+            Domain = t.Domain
+        });
+    }
+
+    public async Task<TenantDto?> GetByDomainAsync(string domain)
+    {
+        var tenant = await _repository.GetByDomainAsync(domain);
+        return tenant != null ? MapToDto(tenant) : null;
     }
 
     public async Task<Guid> CreateAsync(CreateTenantDto dto)
@@ -79,10 +91,26 @@ public class TenantService : ITenantService
         return await _repository.DeleteAsync(id);
     }
 
-    public async Task<bool> ExistsAsync(Guid id)
+    public async Task<bool> SuspendAsync(Guid id)
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("ExistsAsync method needs to be implemented in the repository");
+        var tenant = await _repository.GetByIdAsync(id);
+        if (tenant == null) return false;
+
+        tenant.IsActive = false;
+        tenant.Status = "Suspended";
+        tenant.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(tenant);
+    }
+
+    public async Task<bool> ActivateAsync(Guid id)
+    {
+        var tenant = await _repository.GetByIdAsync(id);
+        if (tenant == null) return false;
+
+        tenant.IsActive = true;
+        tenant.Status = "Active";
+        tenant.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(tenant);
     }
 
     private static TenantDto MapToDto(Tenant tenant)
@@ -96,7 +124,8 @@ public class TenantService : ITenantService
             Country = tenant.Country,
             Status = tenant.Status,
             DatabaseName = tenant.DatabaseName,
-            ConnectionString = tenant.ConnectionString,
+            // Never expose connection strings on public/API DTOs
+            ConnectionString = string.Empty,
             IsActive = tenant.IsActive,
             CreatedAt = tenant.CreatedAt,
             UpdatedAt = tenant.UpdatedAt,

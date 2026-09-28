@@ -1,5 +1,6 @@
 using HotChocolate;
 using ERP.Application.Core;
+using ERP.Application.Interfaces.Core;
 using ERP.Shared.DTOs.Core;
 
 namespace ERP.Api.GraphQL;

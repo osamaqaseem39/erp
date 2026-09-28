@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Finance;
 using ERP.Api.Validators.Finance;
@@ -9,6 +10,7 @@ namespace ERP.Api.Controllers.Finance;
 
 [ApiController]
 [Route("api/finance/taxes")]
+[Authorize]
 public class TaxController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ITaxService _service;

@@ -1,86 +1,73 @@
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Database;
+using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Repositories.CRM;
 
-public class CustomerRepository : ICustomerRepository
+public class CustomerRepository : CrmRepositoryBase, ICustomerRepository
 {
-    private readonly ERPDbContext _context;
-
-    public CustomerRepository(ERPDbContext context)
+    public CustomerRepository(ERPDbContext context, ITenantProvider tenantProvider)
+        : base(context, tenantProvider)
     {
-        _context = context;
     }
+
+    private IQueryable<Customer> CustomersQuery() =>
+        ApplyTenant(Context.Customers
+            .Include(c => c.Opportunities)
+            .Include(c => c.Quotes)
+            .Include(c => c.SalesOrders));
 
     public async Task<Customer?> GetByIdAsync(Guid id)
     {
-        return await _context.Customers
-            .Include(c => c.Opportunities)
-            .Include(c => c.Quotes)
-            .Include(c => c.SalesOrders)
-            .FirstOrDefaultAsync(c => c.Id == id);
+        return await CustomersQuery().FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task<IEnumerable<Customer>> GetAllAsync()
     {
-        return await _context.Customers
-            .Include(c => c.Opportunities)
-            .Include(c => c.Quotes)
-            .Include(c => c.SalesOrders)
-            .ToListAsync();
+        return await CustomersQuery().ToListAsync();
     }
 
     public async Task<IEnumerable<Customer>> GetByStatusAsync(string status)
     {
-        return await _context.Customers
-            .Include(c => c.Opportunities)
-            .Include(c => c.Quotes)
-            .Include(c => c.SalesOrders)
-            .Where(c => c.Status == status)
-            .ToListAsync();
+        return await CustomersQuery().Where(c => c.Status == status).ToListAsync();
     }
 
     public async Task<IEnumerable<Customer>> GetByIndustryAsync(string industry)
     {
-        return await _context.Customers
-            .Include(c => c.Opportunities)
-            .Include(c => c.Quotes)
-            .Include(c => c.SalesOrders)
-            .Where(c => c.Industry == industry)
-            .ToListAsync();
+        return await CustomersQuery().Where(c => c.Industry == industry).ToListAsync();
     }
 
     public async Task<Customer?> GetByCodeAsync(string customerCode)
     {
-        return await _context.Customers
-            .Include(c => c.Opportunities)
-            .Include(c => c.Quotes)
-            .Include(c => c.SalesOrders)
-            .FirstOrDefaultAsync(c => c.CustomerCode == customerCode);
+        return await CustomersQuery().FirstOrDefaultAsync(c => c.CustomerCode == customerCode);
     }
 
     public async Task<Guid> CreateAsync(Customer customer)
     {
-        _context.Customers.Add(customer);
-        await _context.SaveChangesAsync();
+        if (TenantId.HasValue && TenantId != Guid.Empty)
+            customer.TenantId = TenantId.Value;
+
+        Context.Customers.Add(customer);
+        await Context.SaveChangesAsync();
         return customer.Id;
     }
 
     public async Task<bool> UpdateAsync(Customer customer)
     {
-        _context.Customers.Update(customer);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        if (!MatchesTenant(customer)) return false;
+
+        Context.Customers.Update(customer);
+        return await Context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var customer = await _context.Customers.FindAsync(id);
+        var customer = await GetByIdAsync(id);
         if (customer == null) return false;
 
-        _context.Customers.Remove(customer);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        Context.Customers.Remove(customer);
+        return await Context.SaveChangesAsync() > 0;
     }
 }

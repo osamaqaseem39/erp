@@ -11,7 +11,8 @@ public interface ILeadService
     Task<bool> DeleteAsync(Guid id);
     Task<IEnumerable<LeadDto>> GetByStatusAsync(string status);
     Task<IEnumerable<LeadDto>> GetBySourceAsync(string source);
+    Task<IEnumerable<LeadDto>> GetByAssignedToAsync(Guid assignedTo);
     Task<IEnumerable<LeadDto>> SearchAsync(string searchTerm);
-    Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid opportunityId);
+    Task<Guid> ConvertToOpportunityAsync(Guid leadId);
     Task<Guid> ConvertToCustomerAsync(Guid leadId);
 }

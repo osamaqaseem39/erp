@@ -9,10 +9,12 @@ namespace ERP.Application.CRM;
 public class OpportunityService : IOpportunityService
 {
     private readonly IOpportunityRepository _repository;
+    private readonly IQuoteRepository _quoteRepository;
 
-    public OpportunityService(IOpportunityRepository repository)
+    public OpportunityService(IOpportunityRepository repository, IQuoteRepository quoteRepository)
     {
         _repository = repository;
+        _quoteRepository = quoteRepository;
     }
 
     public async Task<OpportunityDto?> GetByIdAsync(Guid id)
@@ -71,14 +73,38 @@ public class OpportunityService : IOpportunityService
         return entities.Select(MapToDto);
     }
 
-    public async Task<bool> ConvertToQuoteAsync(Guid opportunityId)
+    public async Task<Guid> ConvertToQuoteAsync(Guid opportunityId)
     {
         var entity = await _repository.GetByIdAsync(opportunityId);
-        if (entity == null) return false;
+        if (entity == null) return Guid.Empty;
+
+        var quote = new Quote
+        {
+            TenantId = entity.TenantId,
+            CompanyId = entity.Customer?.CompanyId ?? Guid.Empty,
+            QuoteNumber = CrmLineCalculator.GenerateNumber("QT"),
+            CustomerId = entity.CustomerId,
+            OpportunityId = entity.Id,
+            QuoteDate = DateTime.UtcNow,
+            ValidUntil = DateTime.UtcNow.AddDays(30),
+            ExpiryDate = DateTime.UtcNow.AddDays(30),
+            Status = "Draft",
+            SubTotal = entity.Amount,
+            TaxAmount = 0,
+            TotalAmount = entity.Amount,
+            Currency = entity.Currency,
+            Notes = entity.Notes,
+            AssignedToUserId = entity.AssignedToUserId ?? entity.AssignedTo,
+            CreatedBy = entity.CreatedBy
+        };
+
+        var quoteId = await _quoteRepository.CreateAsync(quote);
 
         entity.Status = "Converted";
         entity.ConvertedDate = DateTime.UtcNow;
-        return await _repository.UpdateAsync(entity);
+        await _repository.UpdateAsync(entity);
+
+        return quoteId;
     }
 
     private static OpportunityDto MapToDto(Opportunity entity)

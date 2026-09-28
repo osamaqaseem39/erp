@@ -1,16 +1,26 @@
+using System.Reflection;
+using System.Threading.RateLimiting;
+using ERP.Api.Extensions;
 using ERP.Api.GraphQL;
+using ERP.Api.GraphQL.Admin;
+using ERP.Api.GraphQL.CRM;
+using ERP.Api.GraphQL.HRM;
+using ERP.Api.GraphQL.Inventory;
+using ERP.Api.GraphQL.Manufacturing;
+using ERP.Api.GraphQL.Projects;
+using ERP.Api.GraphQL.Reports;
+using ERP.Api.GraphQL.Sales;
 using ERP.Api.Middlewares;
-using ERP.Api.Services;
-using ERP.Api.Mappers;
 using ERP.Api.Validators;
-using ERP.Application.Core;
 using ERP.Infrastructure.Database;
-using ERP.Infrastructure.Interfaces;
-using ERP.Infrastructure.Repositories.Core;
 using ERP.Infrastructure.Services;
-using ERP.Shared.Constants;
+using ERP.Shared.Configuration;
+using ERP.Shared.Helpers;
 using FluentValidation;
+using HotChocolate.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -19,7 +29,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -29,50 +38,50 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Add services to the container
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required.");
+
+var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+    ?? throw new InvalidOperationException("Jwt configuration section is required.");
+JwtHelper.Configure(jwtSettings);
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.AddSingleton(jwtSettings);
+
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
 
-// Add Entity Framework
 builder.Services.AddDbContext<ERPDbContext>(options =>
-    options.UseSqlServer(AppConstants.SQL_CONNECTION_STRING));
+    options.UseSqlServer(connectionString));
 
-// Add Dapper and Stored Procedure Executor
-builder.Services.AddScoped<IStoredProcedureExecutor>(provider =>
-    new StoredProcedureExecutor(AppConstants.SQL_CONNECTION_STRING));
+builder.Services.AddErpInfrastructure(connectionString);
+builder.Services.AddErpCoreModule();
+builder.Services.AddErpAdminModule();
+builder.Services.AddErpSalesModule();
+builder.Services.AddErpCrmModule();
+builder.Services.AddErpFinanceModule();
+builder.Services.AddErpInventoryModule();
+builder.Services.AddErpHrmModule();
+builder.Services.AddErpProcurementModule();
+builder.Services.AddErpManufacturingModule();
+builder.Services.AddErpProjectsModule();
+builder.Services.AddErpReportsModule();
 
-// Add Redis
-builder.Services.AddSingleton<IConnectionMultiplexer>(provider =>
-    ConnectionMultiplexer.Connect(AppConstants.REDIS_CONNECTION_STRING));
-
-// Add Repositories
-builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-// Add Services
-builder.Services.AddScoped<ITenantService, TenantService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IAuditService, AuditService>();
-
-// Add API Services
-builder.Services.AddScoped<ITenantApiService, TenantApiService>();
-builder.Services.AddScoped<IAuthApiService, AuthApiService>();
-
-// Add Mappers
-builder.Services.AddScoped<TenantMapper>();
-
-// Add Validators
-builder.Services.AddScoped<CreateTenantValidator>();
-builder.Services.AddScoped<UpdateTenantValidator>();
-builder.Services.AddScoped<LoginValidator>();
-builder.Services.AddScoped<RefreshTokenValidator>();
-
-// Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateTenantValidator>();
 
-// Add HttpContextAccessor for audit logging
-builder.Services.AddHttpContextAccessor();
+var redisEnabled = builder.Configuration.GetValue("Redis:Enabled", false);
+var redisConnection = builder.Configuration.GetConnectionString("Redis");
+if (redisEnabled && !string.IsNullOrWhiteSpace(redisConnection))
+{
+    builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+        ConnectionMultiplexer.Connect(redisConnection));
+}
+else
+{
+    Log.Information("Redis disabled or not configured — skipping Redis connection.");
+}
 
-// Add JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -82,33 +91,83 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = AppConstants.JWT_ISSUER,
-            ValidAudience = AppConstants.JWT_AUDIENCE,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AppConstants.JWT_SECRET_KEY)),
-            ClockSkew = TimeSpan.Zero
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+            ClockSkew = TimeSpan.Zero,
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
-// Add GraphQL
-builder.Services
-    .AddGraphQLServer()
-    .AddQueryType<CoreQuery>()
-    .AddMutationType<CoreMutation>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
 
-// Add CORS
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("DefaultCors", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        if (corsOrigins.Length == 0 || builder.Environment.IsDevelopment())
+        {
+            var origins = corsOrigins.Length > 0
+                ? corsOrigins
+                : new[] { "http://localhost:3000", "http://localhost:5173", "https://localhost:3000", "https://localhost:5173" };
+            policy.WithOrigins(origins)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+        else
+        {
+            policy.WithOrigins(corsOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
     });
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services
+    .AddGraphQLServer()
+    .AddAuthorization()
+    .AddQueryType<CoreQuery>()
+    .AddMutationType<CoreMutation>()
+    .AddTypeExtension<SalesQueries>()
+    .AddTypeExtension<SalesMutations>()
+    .AddTypeExtension<HRMQueries>()
+    .AddTypeExtension<HRMMutations>()
+    .AddTypeExtension<InventoryQueries>()
+    .AddTypeExtension<InventoryMutations>()
+    .AddTypeExtension<ProjectsQueries>()
+    .AddTypeExtension<ProjectsMutations>()
+    .AddTypeExtension<ManufacturingQueries>()
+    .AddTypeExtension<ManufacturingMutations>()
+    .AddTypeExtension<ReportsQueries>()
+    .AddTypeExtension<ReportsMutations>()
+    .AddTypeExtension<AdminQueries>()
+    .AddTypeExtension<AdminMutations>()
+    .AddTypeExtension<CRMQueries>()
+    .AddTypeExtension<CRMMutations>()
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -138,9 +197,15 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddScoped<DatabaseDeploymentService>(sp =>
+{
+    var context = sp.GetRequiredService<ERPDbContext>();
+    var logger = sp.GetRequiredService<ILogger<DatabaseDeploymentService>>();
+    return new DatabaseDeploymentService(context, connectionString, logger);
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -148,23 +213,59 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowAll");
-
+app.UseCors("DefaultCors");
+app.UseRateLimiter();
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<TenantMiddleware>();
-
 app.UseAuthentication();
+app.UseMiddleware<TenantMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGraphQL();
+app.MapGraphQL().RequireAuthorization();
 
-// Ensure database is created
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription().AllowAnonymous();
+}
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ERPDbContext>();
-    context.Database.EnsureCreated();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var failOnMigration = builder.Configuration.GetValue("Database:FailOnMigrationError", !app.Environment.IsDevelopment());
+    var deploySql = builder.Configuration.GetValue("Database:DeploySqlScripts", true);
+    var failOnSqlDeploy = builder.Configuration.GetValue("Database:FailOnSqlDeployError", false);
+
+    try
+    {
+        context.Database.Migrate();
+        logger.LogInformation("Database migrations applied successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Database migration failed");
+        if (failOnMigration)
+            throw;
+        logger.LogWarning("Continuing without EnsureCreated fallback to avoid schema drift.");
+    }
+
+    if (deploySql)
+    {
+        try
+        {
+            var deploymentService = scope.ServiceProvider.GetRequiredService<DatabaseDeploymentService>();
+            deploymentService.DeployAllAsync(deployTables: true, deployStoredProcedures: true)
+                .GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deploying SQL scripts");
+            if (failOnSqlDeploy)
+                throw;
+        }
+    }
 }
 
-app.Run(); 
+app.Run();
+
+public partial class Program { }

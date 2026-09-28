@@ -52,14 +52,14 @@ public class StockTransferService : IStockTransferService
 
     public async Task<IEnumerable<StockTransferDto>> GetByFromWarehouseAsync(Guid warehouseId)
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("GetByFromWarehouseAsync method needs to be implemented in the repository");
+        var entities = await _repository.GetByWarehouseAsync(warehouseId, Guid.Empty);
+        return entities.Where(e => e.FromWarehouseId == warehouseId).Select(MapToDto);
     }
 
     public async Task<IEnumerable<StockTransferDto>> GetByToWarehouseAsync(Guid warehouseId)
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("GetByToWarehouseAsync method needs to be implemented in the repository");
+        var entities = await _repository.GetByWarehouseAsync(warehouseId, Guid.Empty);
+        return entities.Where(e => e.ToWarehouseId == warehouseId).Select(MapToDto);
     }
 
     public async Task<IEnumerable<StockTransferDto>> GetByWarehouseAsync(Guid warehouseId)

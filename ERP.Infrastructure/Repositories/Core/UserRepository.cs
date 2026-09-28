@@ -16,12 +16,12 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
-        return await _executor.ExecuteSingleAsync<User>("getUserById", new { Id = id });
+        return await _executor.ExecuteSingleAsync<User>("[Core].[sp_GetUserById]", new { Id = id });
     }
 
     public async Task<IEnumerable<User>> GetAllAsync()
     {
-        return await _executor.ExecuteQueryAsync<User>("getAllUsers");
+        return await _executor.ExecuteQueryAsync<User>("[Core].[sp_GetAllUsers]");
     }
 
     public async Task<PagedResult<User>> GetPagedAsync(int pageNumber, int pageSize)
@@ -40,12 +40,12 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByEmailAsync(string email)
     {
-        return await _executor.ExecuteSingleAsync<User>("getUserByEmail", new { PrimaryEmail = email });
+        return await _executor.ExecuteSingleAsync<User>("[Core].[sp_GetUserByEmail]", new { PrimaryEmail = email });
     }
 
     public async Task<User?> GetByEmailAndTenantAsync(string email, Guid tenantId)
     {
-        return await _executor.ExecuteSingleAsync<User>("getUserByEmailAndTenant", new { PrimaryEmail = email, TenantId = tenantId });
+        return await _executor.ExecuteSingleAsync<User>("[Core].[sp_GetUserByEmailAndTenant]", new { PrimaryEmail = email, TenantId = tenantId });
     }
 
     public async Task<IEnumerable<User>> GetByCompanyAsync(Guid companyId)
@@ -101,10 +101,11 @@ public class UserRepository : IUserRepository
             RefreshToken = user.RefreshToken,
             RefreshTokenExpires = user.RefreshTokenExpires,
             CreatedAt = user.CreatedAt,
-            CreatedBy = user.CreatedBy
+            CreatedBy = user.CreatedBy,
+            IsTenantOwner = user.IsTenantOwner
         };
 
-        return await _executor.ExecuteScalarAsync<Guid>("addUser", parameters);
+        return await _executor.ExecuteScalarAsync<Guid>("[Core].[sp_CreateUser]", parameters);
     }
 
     public async Task<bool> UpdateAsync(User user)
@@ -112,6 +113,7 @@ public class UserRepository : IUserRepository
         var parameters = new
         {
             Id = user.Id,
+            TenantId = user.TenantId,
             CompanyId = user.CompanyId,
             Salutation = user.Salutation,
             FirstName = user.FirstName,
@@ -144,16 +146,23 @@ public class UserRepository : IUserRepository
             PasswordResetToken = user.PasswordResetToken,
             PasswordResetExpires = user.PasswordResetExpires,
             UpdatedAt = user.UpdatedAt,
-            UpdatedBy = user.UpdatedBy
+            UpdatedBy = user.UpdatedBy,
+            IsTenantOwner = user.IsTenantOwner
         };
 
-        var rowsAffected = await _executor.ExecuteNonQueryAsync("updateUser", parameters);
+        var rowsAffected = await _executor.ExecuteNonQueryAsync("[Core].[sp_UpdateUser]", parameters);
         return rowsAffected > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var rowsAffected = await _executor.ExecuteNonQueryAsync("deleteUser", new { Id = id });
+        // Note: This method needs TenantId, but it's not in the signature
+        // This is a design issue - DeleteAsync should accept TenantId
+        // For now, we'll need to get the user first to get TenantId
+        var user = await GetByIdAsync(id);
+        if (user == null) return false;
+        
+        var rowsAffected = await _executor.ExecuteNonQueryAsync("[Core].[sp_DeleteUser]", new { Id = id, TenantId = user.TenantId });
         return rowsAffected > 0;
     }
 
@@ -179,8 +188,14 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> UpdatePasswordAsync(Guid userId, string passwordHash)
     {
-        var rowsAffected = await _executor.ExecuteNonQueryAsync("updateUserPassword", 
-            new { UserId = userId, PasswordHash = passwordHash });
+        // Note: This method needs TenantId, but it's not in the signature
+        // This is a design issue - UpdatePasswordAsync should accept TenantId
+        // For now, we'll need to get the user first to get TenantId
+        var user = await GetByIdAsync(userId);
+        if (user == null) return false;
+        
+        var rowsAffected = await _executor.ExecuteNonQueryAsync("[Core].[sp_UpdateUserPassword]", 
+            new { Id = userId, TenantId = user.TenantId, PasswordHash = passwordHash });
         return rowsAffected > 0;
     }
 }

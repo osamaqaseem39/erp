@@ -7,6 +7,7 @@ public interface ITenantService
     Task<TenantDto?> GetByIdAsync(Guid id);
     Task<IEnumerable<TenantDto>> GetAllAsync();
     Task<IEnumerable<TenantDto>> GetActiveAsync();
+    Task<IEnumerable<LoginTenantOptionDto>> GetLoginOptionsAsync();
     Task<TenantDto?> GetByDomainAsync(string domain);
     Task<Guid> CreateAsync(CreateTenantDto dto);
     Task<bool> UpdateAsync(UpdateTenantDto dto);

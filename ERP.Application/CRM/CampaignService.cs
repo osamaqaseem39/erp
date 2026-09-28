@@ -1,8 +1,5 @@
-using ERP.Application.Interfaces;
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
-using ERP.Infrastructure.Repositories;
-using ERP.Infrastructure.Interfaces;
 using ERP.Infrastructure.Interfaces.CRM;
 using ERP.Domain.CRM;
 
@@ -32,8 +29,7 @@ public class CampaignService : ICampaignService
     public async Task<Guid> CreateAsync(CreateCampaignDto dto)
     {
         var entity = MapToEntity(dto);
-        var createdEntity = await _repository.AddAsync(entity);
-        return createdEntity.Id;
+        return await _repository.CreateAsync(entity);
     }
 
     public async Task<bool> UpdateAsync(UpdateCampaignDto dto)
@@ -42,32 +38,32 @@ public class CampaignService : ICampaignService
         if (entity == null) return false;
 
         MapToEntity(dto, entity);
-        await _repository.UpdateAsync(entity);
-        return true;
+        return await _repository.UpdateAsync(entity);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        await _repository.DeleteAsync(id);
-        return true;
+        return await _repository.DeleteAsync(id);
     }
 
     public async Task<IEnumerable<CampaignDto>> GetByStatusAsync(string status)
     {
-        // TODO: Implement when repository method is available
-        return new List<CampaignDto>();
+        var entities = await _repository.GetByStatusAsync(status);
+        return entities.Select(MapToDto);
     }
 
     public async Task<IEnumerable<CampaignDto>> GetByTypeAsync(string campaignType)
     {
-        // TODO: Implement when repository method is available
-        return new List<CampaignDto>();
+        var entities = await _repository.GetByTypeAsync(campaignType);
+        return entities.Select(MapToDto);
     }
 
     public async Task<IEnumerable<CampaignDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
     {
-        // TODO: Implement when repository method is available
-        return new List<CampaignDto>();
+        var entities = await _repository.GetAllAsync();
+        return entities
+            .Where(c => c.StartDate >= startDate && c.StartDate <= endDate)
+            .Select(MapToDto);
     }
 
     public async Task<bool> LaunchAsync(Guid id)
@@ -77,8 +73,7 @@ public class CampaignService : ICampaignService
 
         entity.Status = "Active";
         entity.LaunchDate = DateTime.UtcNow;
-        await _repository.UpdateAsync(entity);
-        return true;
+        return await _repository.UpdateAsync(entity);
     }
 
     public async Task<bool> PauseAsync(Guid id)
@@ -88,8 +83,7 @@ public class CampaignService : ICampaignService
 
         entity.Status = "Paused";
         entity.PausedDate = DateTime.UtcNow;
-        await _repository.UpdateAsync(entity);
-        return true;
+        return await _repository.UpdateAsync(entity);
     }
 
     public async Task<bool> CompleteAsync(Guid id)
@@ -99,8 +93,7 @@ public class CampaignService : ICampaignService
 
         entity.Status = "Completed";
         entity.CompletedDate = DateTime.UtcNow;
-        await _repository.UpdateAsync(entity);
-        return true;
+        return await _repository.UpdateAsync(entity);
     }
 
     private static CampaignDto MapToDto(Campaign entity)

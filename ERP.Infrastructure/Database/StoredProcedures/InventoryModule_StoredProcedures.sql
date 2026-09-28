@@ -3,6 +3,13 @@
 -- Multi-tenant SaaS ERP System
 -- =============================================
 
+-- Create Inventory Schema if it doesn't exist
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Inventory')
+BEGIN
+    EXEC('CREATE SCHEMA [Inventory]')
+END
+GO
+
 -- =============================================
 -- WAREHOUSE MANAGEMENT PROCEDURES
 -- =============================================
@@ -85,6 +92,89 @@ BEGIN
 END
 GO
 
+-- Update Warehouse
+CREATE OR ALTER PROCEDURE [Inventory].[sp_UpdateWarehouse]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @WarehouseCode NVARCHAR(50) = NULL,
+    @WarehouseName NVARCHAR(200) = NULL,
+    @Address NVARCHAR(500) = NULL,
+    @City NVARCHAR(100) = NULL,
+    @State NVARCHAR(100) = NULL,
+    @Country NVARCHAR(100) = NULL,
+    @ZipCode NVARCHAR(20) = NULL,
+    @Phone NVARCHAR(20) = NULL,
+    @Email NVARCHAR(200) = NULL,
+    @ManagerId UNIQUEIDENTIFIER = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate warehouse exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[Warehouses] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Warehouse not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Inventory].[Warehouses]
+    SET 
+        WarehouseCode = ISNULL(@WarehouseCode, WarehouseCode),
+        WarehouseName = ISNULL(@WarehouseName, WarehouseName),
+        Address = ISNULL(@Address, Address),
+        City = ISNULL(@City, City),
+        State = ISNULL(@State, State),
+        Country = ISNULL(@Country, Country),
+        ZipCode = ISNULL(@ZipCode, ZipCode),
+        Phone = ISNULL(@Phone, Phone),
+        Email = ISNULL(@Email, Email),
+        ManagerId = ISNULL(@ManagerId, ManagerId),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Warehouse (Soft Delete)
+CREATE OR ALTER PROCEDURE [Inventory].[sp_DeleteWarehouse]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate warehouse exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[Warehouses] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Warehouse not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if warehouse has stock
+    IF EXISTS (SELECT 1 FROM [Inventory].[StockBalances] WHERE WarehouseId = @Id AND TenantId = @TenantId AND QuantityOnHand > 0)
+    BEGIN
+        RAISERROR('Cannot delete warehouse with stock. Please transfer or adjust stock first.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Inventory].[Warehouses]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- ITEM CATEGORY PROCEDURES
 -- =============================================
@@ -148,6 +238,91 @@ BEGIN
     );
     
     SELECT @Id as Id;
+END
+GO
+
+-- Update Item Category
+CREATE OR ALTER PROCEDURE [Inventory].[sp_UpdateItemCategory]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @CategoryName NVARCHAR(200) = NULL,
+    @CategoryCode NVARCHAR(50) = NULL,
+    @ParentCategoryId UNIQUEIDENTIFIER = NULL,
+    @Description NVARCHAR(500) = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate category exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[ItemCategories] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Item category not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if trying to set parent to itself
+    IF @ParentCategoryId = @Id
+    BEGIN
+        RAISERROR('Category cannot be its own parent.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Inventory].[ItemCategories]
+    SET 
+        CategoryName = ISNULL(@CategoryName, CategoryName),
+        CategoryCode = ISNULL(@CategoryCode, CategoryCode),
+        ParentCategoryId = @ParentCategoryId, -- Allow NULL explicitly
+        Description = ISNULL(@Description, Description),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Item Category (Soft Delete)
+CREATE OR ALTER PROCEDURE [Inventory].[sp_DeleteItemCategory]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate category exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[ItemCategories] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Item category not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if category has child categories
+    IF EXISTS (SELECT 1 FROM [Inventory].[ItemCategories] WHERE ParentCategoryId = @Id AND TenantId = @TenantId AND IsActive = 1)
+    BEGIN
+        RAISERROR('Cannot delete category with child categories. Please delete or reassign child categories first.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if category has items
+    IF EXISTS (SELECT 1 FROM [Inventory].[Items] WHERE CategoryId = @Id AND TenantId = @TenantId AND IsActive = 1)
+    BEGIN
+        RAISERROR('Cannot delete category with items. Please reassign items to another category first.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Inventory].[ItemCategories]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
 END
 GO
 
@@ -271,6 +446,99 @@ BEGIN
     );
     
     SELECT @Id as Id;
+END
+GO
+
+-- Update Item
+CREATE OR ALTER PROCEDURE [Inventory].[sp_UpdateItem]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @ItemCode NVARCHAR(50) = NULL,
+    @ItemName NVARCHAR(200) = NULL,
+    @Description NVARCHAR(1000) = NULL,
+    @CategoryId UNIQUEIDENTIFIER = NULL,
+    @UnitOfMeasure NVARCHAR(50) = NULL,
+    @ItemType NVARCHAR(50) = NULL,
+    @BarCode NVARCHAR(100) = NULL,
+    @SKU NVARCHAR(100) = NULL,
+    @CostPrice DECIMAL(18,2) = NULL,
+    @SellingPrice DECIMAL(18,2) = NULL,
+    @MinStockLevel DECIMAL(18,2) = NULL,
+    @MaxStockLevel DECIMAL(18,2) = NULL,
+    @ReorderLevel DECIMAL(18,2) = NULL,
+    @IsSerialized BIT = NULL,
+    @IsBatchTracked BIT = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate item exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[Items] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Item not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Inventory].[Items]
+    SET 
+        ItemCode = ISNULL(@ItemCode, ItemCode),
+        ItemName = ISNULL(@ItemName, ItemName),
+        Description = ISNULL(@Description, Description),
+        CategoryId = ISNULL(@CategoryId, CategoryId),
+        UnitOfMeasure = ISNULL(@UnitOfMeasure, UnitOfMeasure),
+        ItemType = ISNULL(@ItemType, ItemType),
+        BarCode = ISNULL(@BarCode, BarCode),
+        SKU = ISNULL(@SKU, SKU),
+        CostPrice = ISNULL(@CostPrice, CostPrice),
+        SellingPrice = ISNULL(@SellingPrice, SellingPrice),
+        MinStockLevel = ISNULL(@MinStockLevel, MinStockLevel),
+        MaxStockLevel = ISNULL(@MaxStockLevel, MaxStockLevel),
+        ReorderLevel = ISNULL(@ReorderLevel, ReorderLevel),
+        IsSerialized = ISNULL(@IsSerialized, IsSerialized),
+        IsBatchTracked = ISNULL(@IsBatchTracked, IsBatchTracked),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Item (Soft Delete)
+CREATE OR ALTER PROCEDURE [Inventory].[sp_DeleteItem]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate item exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[Items] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Item not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if item has stock
+    IF EXISTS (SELECT 1 FROM [Inventory].[StockBalances] WHERE ItemId = @Id AND TenantId = @TenantId AND QuantityOnHand > 0)
+    BEGIN
+        RAISERROR('Cannot delete item with stock. Please adjust or transfer stock first.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Inventory].[Items]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
 END
 GO
 
@@ -520,6 +788,130 @@ BEGIN
 END
 GO
 
+-- Get All Inventory Adjustments
+CREATE OR ALTER PROCEDURE [Inventory].[sp_GetAllInventoryAdjustments]
+    @TenantId UNIQUEIDENTIFIER,
+    @WarehouseId UNIQUEIDENTIFIER = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        Id, AdjustmentNumber, AdjustmentDate, WarehouseId, Reason, Status,
+        TotalValue, Notes, ApprovedBy, ApprovedAt, TenantId, CreatedAt,
+        UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Inventory].[InventoryAdjustments]
+    WHERE TenantId = @TenantId
+        AND (@WarehouseId IS NULL OR WarehouseId = @WarehouseId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR AdjustmentDate >= @StartDate)
+        AND (@EndDate IS NULL OR AdjustmentDate <= @EndDate)
+    ORDER BY AdjustmentDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Inventory].[InventoryAdjustments]
+    WHERE TenantId = @TenantId
+        AND (@WarehouseId IS NULL OR WarehouseId = @WarehouseId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR AdjustmentDate >= @StartDate)
+        AND (@EndDate IS NULL OR AdjustmentDate <= @EndDate);
+END
+GO
+
+-- Update Inventory Adjustment
+CREATE OR ALTER PROCEDURE [Inventory].[sp_UpdateInventoryAdjustment]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @AdjustmentNumber NVARCHAR(50) = NULL,
+    @AdjustmentDate DATETIME2 = NULL,
+    @WarehouseId UNIQUEIDENTIFIER = NULL,
+    @Reason NVARCHAR(200) = NULL,
+    @Notes NVARCHAR(1000) = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate adjustment exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[InventoryAdjustments] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Inventory adjustment not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if adjustment is approved
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Inventory].[InventoryAdjustments] WHERE Id = @Id;
+    
+    IF @Status = 'Approved'
+    BEGIN
+        RAISERROR('Cannot update approved adjustment.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Inventory].[InventoryAdjustments]
+    SET 
+        AdjustmentNumber = ISNULL(@AdjustmentNumber, AdjustmentNumber),
+        AdjustmentDate = ISNULL(@AdjustmentDate, AdjustmentDate),
+        WarehouseId = ISNULL(@WarehouseId, WarehouseId),
+        Reason = ISNULL(@Reason, Reason),
+        Notes = ISNULL(@Notes, Notes),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Inventory Adjustment
+CREATE OR ALTER PROCEDURE [Inventory].[sp_DeleteInventoryAdjustment]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate adjustment exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[InventoryAdjustments] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Inventory adjustment not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if adjustment is approved
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Inventory].[InventoryAdjustments] WHERE Id = @Id;
+    
+    IF @Status = 'Approved'
+    BEGIN
+        RAISERROR('Cannot delete approved adjustment.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete adjustment items first
+    DELETE FROM [Inventory].[InventoryAdjustmentItems]
+    WHERE AdjustmentId = @Id AND TenantId = @TenantId;
+    
+    -- Delete adjustment
+    DELETE FROM [Inventory].[InventoryAdjustments]
+    WHERE Id = @Id AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- STOCK TRANSFER PROCEDURES
 -- =============================================
@@ -588,6 +980,259 @@ BEGIN
 END
 GO
 
+-- Get All Stock Transfers
+CREATE OR ALTER PROCEDURE [Inventory].[sp_GetAllStockTransfers]
+    @TenantId UNIQUEIDENTIFIER,
+    @FromWarehouseId UNIQUEIDENTIFIER = NULL,
+    @ToWarehouseId UNIQUEIDENTIFIER = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        Id, TransferNumber, TransferDate, FromWarehouseId, ToWarehouseId, Status,
+        TotalValue, Notes, ApprovedBy, ApprovedAt, TenantId, CreatedAt,
+        UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Inventory].[StockTransfers]
+    WHERE TenantId = @TenantId
+        AND (@FromWarehouseId IS NULL OR FromWarehouseId = @FromWarehouseId)
+        AND (@ToWarehouseId IS NULL OR ToWarehouseId = @ToWarehouseId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR TransferDate >= @StartDate)
+        AND (@EndDate IS NULL OR TransferDate <= @EndDate)
+    ORDER BY TransferDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Inventory].[StockTransfers]
+    WHERE TenantId = @TenantId
+        AND (@FromWarehouseId IS NULL OR FromWarehouseId = @FromWarehouseId)
+        AND (@ToWarehouseId IS NULL OR ToWarehouseId = @ToWarehouseId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR TransferDate >= @StartDate)
+        AND (@EndDate IS NULL OR TransferDate <= @EndDate);
+END
+GO
+
+-- Get Stock Transfers by From Warehouse
+CREATE OR ALTER PROCEDURE [Inventory].[sp_GetStockTransfersByFromWarehouse]
+    @FromWarehouseId UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @Status NVARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        Id, TransferNumber, TransferDate, FromWarehouseId, ToWarehouseId, Status,
+        TotalValue, Notes, ApprovedBy, ApprovedAt, TenantId, CreatedAt,
+        UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Inventory].[StockTransfers]
+    WHERE FromWarehouseId = @FromWarehouseId
+        AND TenantId = @TenantId
+        AND (@Status IS NULL OR Status = @Status)
+    ORDER BY TransferDate DESC;
+END
+GO
+
+-- Get Stock Transfers by To Warehouse
+CREATE OR ALTER PROCEDURE [Inventory].[sp_GetStockTransfersByToWarehouse]
+    @ToWarehouseId UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @Status NVARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        Id, TransferNumber, TransferDate, FromWarehouseId, ToWarehouseId, Status,
+        TotalValue, Notes, ApprovedBy, ApprovedAt, TenantId, CreatedAt,
+        UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Inventory].[StockTransfers]
+    WHERE ToWarehouseId = @ToWarehouseId
+        AND TenantId = @TenantId
+        AND (@Status IS NULL OR Status = @Status)
+    ORDER BY TransferDate DESC;
+END
+GO
+
+-- Get Stock Transfers by Status
+CREATE OR ALTER PROCEDURE [Inventory].[sp_GetStockTransfersByStatus]
+    @Status NVARCHAR(50),
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        Id, TransferNumber, TransferDate, FromWarehouseId, ToWarehouseId, Status,
+        TotalValue, Notes, ApprovedBy, ApprovedAt, TenantId, CreatedAt,
+        UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Inventory].[StockTransfers]
+    WHERE Status = @Status
+        AND TenantId = @TenantId
+    ORDER BY TransferDate DESC;
+END
+GO
+
+-- Update Stock Transfer
+CREATE OR ALTER PROCEDURE [Inventory].[sp_UpdateStockTransfer]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @TransferNumber NVARCHAR(50) = NULL,
+    @TransferDate DATETIME2 = NULL,
+    @FromWarehouseId UNIQUEIDENTIFIER = NULL,
+    @ToWarehouseId UNIQUEIDENTIFIER = NULL,
+    @Notes NVARCHAR(1000) = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate transfer exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[StockTransfers] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Stock transfer not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if transfer is completed
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Inventory].[StockTransfers] WHERE Id = @Id;
+    
+    IF @Status = 'Completed'
+    BEGIN
+        RAISERROR('Cannot update completed transfer.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Inventory].[StockTransfers]
+    SET 
+        TransferNumber = ISNULL(@TransferNumber, TransferNumber),
+        TransferDate = ISNULL(@TransferDate, TransferDate),
+        FromWarehouseId = ISNULL(@FromWarehouseId, FromWarehouseId),
+        ToWarehouseId = ISNULL(@ToWarehouseId, ToWarehouseId),
+        Notes = ISNULL(@Notes, Notes),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Stock Transfer
+CREATE OR ALTER PROCEDURE [Inventory].[sp_DeleteStockTransfer]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate transfer exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[StockTransfers] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Stock transfer not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if transfer is completed
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Inventory].[StockTransfers] WHERE Id = @Id;
+    
+    IF @Status = 'Completed'
+    BEGIN
+        RAISERROR('Cannot delete completed transfer.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete transfer items first
+    DELETE FROM [Inventory].[StockTransferItems]
+    WHERE TransferId = @Id AND TenantId = @TenantId;
+    
+    -- Delete transfer
+    DELETE FROM [Inventory].[StockTransfers]
+    WHERE Id = @Id AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Approve Stock Transfer
+CREATE OR ALTER PROCEDURE [Inventory].[sp_ApproveStockTransfer]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @ApprovedBy UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate transfer exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[StockTransfers] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Stock transfer not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Inventory].[StockTransfers]
+    SET 
+        Status = 'Approved',
+        ApprovedBy = @ApprovedBy,
+        ApprovedAt = GETUTCDATE(),
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Complete Stock Transfer
+CREATE OR ALTER PROCEDURE [Inventory].[sp_CompleteStockTransfer]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate transfer exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Inventory].[StockTransfers] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Stock transfer not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if transfer is approved
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Inventory].[StockTransfers] WHERE Id = @Id;
+    
+    IF @Status != 'Approved'
+    BEGIN
+        RAISERROR('Only approved transfers can be completed.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Inventory].[StockTransfers]
+    SET 
+        Status = 'Completed',
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- UNITS OF MEASURE PROCEDURES
 -- =============================================
@@ -644,6 +1289,109 @@ BEGIN
     );
     
     SELECT @Id as Id;
+END
+GO
+
+-- Get Unit of Measure by ID
+CREATE OR ALTER PROCEDURE Inventory.sp_GetUnitOfMeasureById
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        uom.Id,
+        uom.UnitCode,
+        uom.UnitName,
+        uom.UnitType,
+        uom.BaseUnitId,
+        uom.ConversionFactor,
+        uom.IsActive,
+        uom.TenantId,
+        uom.CreatedAt,
+        uom.UpdatedAt,
+        uom.CreatedBy,
+        uom.UpdatedBy,
+        base.UnitName as BaseUnitName
+    FROM Inventory.UnitsOfMeasure uom
+    LEFT JOIN Inventory.UnitsOfMeasure base ON uom.BaseUnitId = base.Id
+    WHERE uom.Id = @Id 
+    AND uom.TenantId = @TenantId
+    AND uom.IsActive = 1;
+END
+GO
+
+-- Update Unit of Measure
+CREATE OR ALTER PROCEDURE Inventory.sp_UpdateUnitOfMeasure
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @UnitCode NVARCHAR(50) = NULL,
+    @UnitName NVARCHAR(100) = NULL,
+    @UnitType NVARCHAR(50) = NULL,
+    @BaseUnitId UNIQUEIDENTIFIER = NULL,
+    @ConversionFactor DECIMAL(18,6) = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate unit exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM Inventory.UnitsOfMeasure WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Unit of measure not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE Inventory.UnitsOfMeasure
+    SET 
+        UnitCode = ISNULL(@UnitCode, UnitCode),
+        UnitName = ISNULL(@UnitName, UnitName),
+        UnitType = ISNULL(@UnitType, UnitType),
+        BaseUnitId = @BaseUnitId, -- Allow NULL explicitly
+        ConversionFactor = ISNULL(@ConversionFactor, ConversionFactor),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Unit of Measure (Soft Delete)
+CREATE OR ALTER PROCEDURE Inventory.sp_DeleteUnitOfMeasure
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate unit exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM Inventory.UnitsOfMeasure WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Unit of measure not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if unit is used by items
+    IF EXISTS (SELECT 1 FROM Inventory.Items WHERE UnitOfMeasure = (SELECT UnitCode FROM Inventory.UnitsOfMeasure WHERE Id = @Id) AND TenantId = @TenantId AND IsActive = 1)
+    BEGIN
+        RAISERROR('Cannot delete unit of measure that is used by items.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE Inventory.UnitsOfMeasure
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
 END
 GO
 

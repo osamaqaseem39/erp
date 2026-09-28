@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Api.Services;
 using ERP.Shared.DTOs.HRM;
@@ -10,6 +11,7 @@ namespace ERP.Api.Controllers.HRM;
 
 [ApiController]
 [Route("api/hrm/performance")]
+[Authorize]
 public class PerformanceController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IPerformanceService _service;

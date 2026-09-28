@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.SCM.Interfaces;
 using ERP.Shared.DTOs.Inventory;
@@ -7,6 +8,7 @@ namespace ERP.Api.Controllers.Inventory;
 
 [ApiController]
 [Route("api/inventory/valuation-methods")]
+[Authorize]
 public class InventoryValuationMethodController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IInventoryValuationMethodService _service;

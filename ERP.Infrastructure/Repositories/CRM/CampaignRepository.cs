@@ -1,66 +1,54 @@
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Repositories.CRM;
 
-public class CampaignRepository : ICampaignRepository
+public class CampaignRepository : CrmRepositoryBase, ICampaignRepository
 {
-    private readonly ERPDbContext _context;
-
-    public CampaignRepository(ERPDbContext context)
+    public CampaignRepository(ERPDbContext context, ITenantProvider tenantProvider)
+        : base(context, tenantProvider)
     {
-        _context = context;
     }
 
-    public async Task<Campaign?> GetByIdAsync(Guid id)
-    {
-        return await _context.Campaigns.FindAsync(id);
-    }
+    private IQueryable<Campaign> CampaignsQuery() => ApplyTenant(Context.Campaigns);
 
-    public async Task<IEnumerable<Campaign>> GetAllAsync()
-    {
-        return await _context.Campaigns.ToListAsync();
-    }
+    public async Task<Campaign?> GetByIdAsync(Guid id) =>
+        await CampaignsQuery().FirstOrDefaultAsync(c => c.Id == id);
 
-    public async Task<IEnumerable<Campaign>> GetByStatusAsync(string status)
-    {
-        return await _context.Campaigns
-            .Where(c => c.Status == status)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<Campaign>> GetAllAsync() =>
+        await CampaignsQuery().ToListAsync();
 
-    public async Task<IEnumerable<Campaign>> GetByTypeAsync(string campaignType)
-    {
-        return await _context.Campaigns
-            .Where(c => c.CampaignType == campaignType)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<Campaign>> GetByStatusAsync(string status) =>
+        await CampaignsQuery().Where(c => c.Status == status).ToListAsync();
+
+    public async Task<IEnumerable<Campaign>> GetByTypeAsync(string campaignType) =>
+        await CampaignsQuery().Where(c => c.CampaignType == campaignType).ToListAsync();
 
     public async Task<Guid> CreateAsync(Campaign campaign)
     {
-        _context.Campaigns.Add(campaign);
-        await _context.SaveChangesAsync();
+        if (TenantId.HasValue && TenantId != Guid.Empty)
+            campaign.TenantId = TenantId.Value;
+
+        Context.Campaigns.Add(campaign);
+        await Context.SaveChangesAsync();
         return campaign.Id;
     }
 
     public async Task<bool> UpdateAsync(Campaign campaign)
     {
-        _context.Campaigns.Update(campaign);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        if (!MatchesTenant(campaign)) return false;
+        Context.Campaigns.Update(campaign);
+        return await Context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
         var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.Campaigns.Remove(entity);
-            var result = await _context.SaveChangesAsync();
-            return result > 0;
-        }
-        return false;
+        if (entity == null) return false;
+        Context.Campaigns.Remove(entity);
+        return await Context.SaveChangesAsync() > 0;
     }
 }

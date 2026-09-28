@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.HRM;
 using ERP.Shared.DTOs.HRM;
@@ -8,6 +9,7 @@ namespace ERP.Api.Controllers.HRM;
 
 [ApiController]
 [Route("api/hrm/training")]
+[Authorize]
 public class TrainingController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ITrainingService _service;

@@ -1,49 +1,62 @@
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Repositories.CRM;
 
-public class ContactRepository : IContactRepository
+public class ContactRepository : CrmRepositoryBase, IContactRepository
 {
-    private readonly ERPDbContext _context;
-
-    public ContactRepository(ERPDbContext context)
+    public ContactRepository(ERPDbContext context, ITenantProvider tenantProvider)
+        : base(context, tenantProvider)
     {
-        _context = context;
     }
 
-    public async Task<Contact?> GetByIdAsync(int id)
+    private IQueryable<Contact> ContactsQuery() =>
+        ApplyTenant(Context.Contacts.Include(c => c.Customer));
+
+    public async Task<Contact?> GetByIdAsync(Guid id) =>
+        await ContactsQuery().FirstOrDefaultAsync(c => c.Id == id);
+
+    public async Task<IEnumerable<Contact>> GetAllAsync() =>
+        await ContactsQuery().ToListAsync();
+
+    public async Task<IEnumerable<Contact>> GetByCustomerAsync(Guid customerId) =>
+        await ContactsQuery().Where(c => c.CustomerId == customerId).ToListAsync();
+
+    public async Task<IEnumerable<Contact>> SearchAsync(string searchTerm)
     {
-        return await _context.Contacts.FindAsync(id);
+        var term = searchTerm.Trim();
+        return await ContactsQuery().Where(c =>
+            c.FirstName.Contains(term) ||
+            c.LastName.Contains(term) ||
+            (c.Email != null && c.Email.Contains(term)) ||
+            (c.Phone != null && c.Phone.Contains(term))).ToListAsync();
     }
 
-    public async Task<IEnumerable<Contact>> GetAllAsync()
+    public async Task<Guid> CreateAsync(Contact contact)
     {
-        return await _context.Contacts.ToListAsync();
+        if (TenantId.HasValue && TenantId != Guid.Empty)
+            contact.TenantId = TenantId.Value;
+
+        Context.Contacts.Add(contact);
+        await Context.SaveChangesAsync();
+        return contact.Id;
     }
 
-    public async Task<Contact> AddAsync(Contact entity)
+    public async Task<bool> UpdateAsync(Contact contact)
     {
-        _context.Contacts.Add(entity);
-        await _context.SaveChangesAsync();
-        return entity;
+        if (!MatchesTenant(contact)) return false;
+        Context.Contacts.Update(contact);
+        return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task UpdateAsync(Contact entity)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        _context.Contacts.Update(entity);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.Contacts.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        var contact = await GetByIdAsync(id);
+        if (contact == null) return false;
+        Context.Contacts.Remove(contact);
+        return await Context.SaveChangesAsync() > 0;
     }
 }

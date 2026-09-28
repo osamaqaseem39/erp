@@ -1,14 +1,17 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ERP.Api.Abstractions;
 using ERP.Api.Services;
 using ERP.Api.Validators;
 using ERP.Shared.DTOs.Core;
-using FluentValidation;
+using System.Security.Claims;
 
 namespace ERP.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[EnableRateLimiting("auth")]
 public class AuthController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IAuthApiService _authService;
@@ -27,6 +30,7 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
         var validationResult = await _loginValidator.ValidateAsync(loginDto);
@@ -39,6 +43,7 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("refresh")]
+    [AllowAnonymous]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
     {
         var validationResult = await _refreshTokenValidator.ValidateAsync(refreshTokenDto);
@@ -51,6 +56,7 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("logout")]
+    [AllowAnonymous]
     public async Task<IActionResult> Logout([FromBody] RefreshTokenDto refreshTokenDto)
     {
         var validationResult = await _refreshTokenValidator.ValidateAsync(refreshTokenDto);
@@ -63,20 +69,36 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("change-password")]
+    [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
     {
-        return await HandleAsync(() => _authService.ChangePasswordAsync(changePasswordDto));
+        var userId = GetCurrentUserId();
+        return await HandleAsync(() => _authService.ChangePasswordAsync(
+            userId,
+            changePasswordDto.CurrentPassword,
+            changePasswordDto.NewPassword));
     }
 
     [HttpPost("reset-password")]
+    [AllowAnonymous]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
     {
         return await HandleAsync(() => _authService.ResetPasswordAsync(resetPasswordDto));
     }
 
     [HttpPost("verify-email")]
+    [AllowAnonymous]
     public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto verifyEmailDto)
     {
         return await HandleAsync(() => _authService.VerifyEmailAsync(verifyEmailDto.Token));
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value;
+        if (Guid.TryParse(claim, out var userId))
+            return userId;
+        throw new UnauthorizedAccessException("User ID not found in token");
     }
 }

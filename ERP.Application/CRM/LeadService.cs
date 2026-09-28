@@ -1,18 +1,24 @@
 using ERP.Application.Interfaces.CRM;
-using ERP.Shared.DTOs.CRM;
-using ERP.Infrastructure.Repositories;
-using ERP.Infrastructure.Interfaces.CRM;
 using ERP.Domain.CRM;
+using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.DTOs.CRM;
 
 namespace ERP.Application.CRM;
 
 public class LeadService : ILeadService
 {
     private readonly ILeadRepository _repository;
+    private readonly ICustomerRepository _customerRepository;
+    private readonly IOpportunityRepository _opportunityRepository;
 
-    public LeadService(ILeadRepository repository)
+    public LeadService(
+        ILeadRepository repository,
+        ICustomerRepository customerRepository,
+        IOpportunityRepository opportunityRepository)
     {
         _repository = repository;
+        _customerRepository = customerRepository;
+        _opportunityRepository = opportunityRepository;
     }
 
     public async Task<LeadDto?> GetByIdAsync(Guid id)
@@ -30,6 +36,9 @@ public class LeadService : ILeadService
     public async Task<Guid> CreateAsync(CreateLeadDto dto)
     {
         var entity = MapToEntity(dto);
+        if (string.IsNullOrWhiteSpace(entity.LeadCode))
+            entity.LeadCode = CrmLineCalculator.GenerateNumber("LD");
+
         return await _repository.CreateAsync(entity);
     }
 
@@ -42,10 +51,7 @@ public class LeadService : ILeadService
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
-    {
-        return await _repository.DeleteAsync(id);
-    }
+    public async Task<bool> DeleteAsync(Guid id) => await _repository.DeleteAsync(id);
 
     public async Task<IEnumerable<LeadDto>> GetBySourceAsync(string source)
     {
@@ -71,86 +77,141 @@ public class LeadService : ILeadService
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid opportunityId)
+    public async Task<Guid> ConvertToOpportunityAsync(Guid leadId)
     {
-        var entity = await _repository.GetByIdAsync(leadId);
-        if (entity == null) return Guid.Empty;
+        var lead = await _repository.GetByIdAsync(leadId);
+        if (lead == null) return Guid.Empty;
 
-        entity.Status = "Converted";
-        entity.ConvertedDate = DateTime.UtcNow;
-        await _repository.UpdateAsync(entity);
+        var displayName = !string.IsNullOrWhiteSpace(lead.CompanyName)
+            ? lead.CompanyName!
+            : $"{lead.FirstName} {lead.LastName}".Trim();
+
+        var opportunity = new Opportunity
+        {
+            TenantId = lead.TenantId,
+            OpportunityCode = CrmLineCalculator.GenerateNumber("OP"),
+            OpportunityName = displayName,
+            Title = displayName,
+            LeadId = lead.Id,
+            Description = lead.Notes,
+            Stage = "Qualification",
+            Status = "Open",
+            Amount = lead.EstimatedValue ?? 0,
+            Probability = 10,
+            Currency = "USD",
+            Source = string.IsNullOrWhiteSpace(lead.Source) ? lead.LeadSource : lead.Source,
+            AssignedTo = lead.AssignedTo,
+            AssignedToUserId = lead.AssignedToUserId ?? lead.AssignedTo,
+            Notes = lead.Notes,
+            CreatedBy = lead.CreatedBy
+        };
+
+        var opportunityId = await _opportunityRepository.CreateAsync(opportunity);
+
+        lead.Status = "Converted";
+        lead.ConvertedDate = DateTime.UtcNow;
+        await _repository.UpdateAsync(lead);
+
         return opportunityId;
     }
 
     public async Task<Guid> ConvertToCustomerAsync(Guid leadId)
     {
-        var entity = await _repository.GetByIdAsync(leadId);
-        if (entity == null) return Guid.Empty;
+        var lead = await _repository.GetByIdAsync(leadId);
+        if (lead == null) return Guid.Empty;
 
-        entity.Status = "Converted";
-        entity.ConvertedDate = DateTime.UtcNow;
-        await _repository.UpdateAsync(entity);
-        return Guid.NewGuid(); // Return new customer ID
-    }
+        var displayName = !string.IsNullOrWhiteSpace(lead.CompanyName)
+            ? lead.CompanyName!
+            : $"{lead.FirstName} {lead.LastName}".Trim();
 
-    private static LeadDto MapToDto(Lead entity)
-    {
-        return new LeadDto
+        var customer = new Customer
         {
-            Id = entity.Id,
-            TenantId = entity.TenantId,
-            CompanyId = entity.CompanyId,
-            LeadCode = entity.LeadCode,
-            CompanyName = entity.CompanyName,
-            ContactPerson = entity.ContactPerson,
-            Email = entity.Email,
-            Phone = entity.Phone,
-            Address = entity.Address,
-            City = entity.City,
-            State = entity.State,
-            Country = entity.Country,
-            PostalCode = entity.PostalCode,
-            Industry = entity.Industry,
-            Source = entity.Source,
-            Status = entity.Status,
-            AssignedTo = entity.AssignedTo,
-            AssignedToName = entity.AssignedToUser?.FirstName + " " + entity.AssignedToUser?.LastName ?? string.Empty,
-            LeadScore = entity.LeadScore,
-            Notes = entity.Notes,
-            ConvertedDate = entity.ConvertedDate,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-            CreatedBy = entity.CreatedBy,
-            UpdatedBy = entity.UpdatedBy,
-            IsActive = entity.IsActive
+            TenantId = lead.TenantId,
+            CompanyId = lead.CompanyId ?? Guid.Empty,
+            CustomerCode = CrmLineCalculator.GenerateNumber("CU"),
+            CustomerName = displayName,
+            CompanyName = lead.CompanyName ?? displayName,
+            ContactPerson = lead.ContactPerson ?? $"{lead.FirstName} {lead.LastName}".Trim(),
+            Email = lead.Email,
+            Phone = lead.Phone,
+            Address = lead.Address,
+            City = lead.City,
+            State = lead.State,
+            Country = lead.Country,
+            PostalCode = lead.PostalCode,
+            Industry = lead.Industry,
+            CustomerType = string.IsNullOrWhiteSpace(lead.CompanyName) ? "Individual" : "Company",
+            Status = "Active",
+            Notes = lead.Notes,
+            CreatedBy = lead.CreatedBy
         };
+
+        var customerId = await _customerRepository.CreateAsync(customer);
+
+        lead.Status = "Converted";
+        lead.ConvertedDate = DateTime.UtcNow;
+        await _repository.UpdateAsync(lead);
+
+        return customerId;
     }
 
-    private static Lead MapToEntity(CreateLeadDto dto)
+    private static LeadDto MapToDto(Lead entity) => new()
     {
-        return new Lead
-        {
-            TenantId = dto.TenantId,
-            CompanyId = dto.CompanyId,
-            LeadCode = dto.LeadCode,
-            CompanyName = dto.CompanyName,
-            ContactPerson = dto.ContactPerson,
-            Email = dto.Email,
-            Phone = dto.Phone,
-            Address = dto.Address,
-            City = dto.City,
-            State = dto.State,
-            Country = dto.Country,
-            PostalCode = dto.PostalCode,
-            Industry = dto.Industry,
-            Source = dto.Source,
-            Status = dto.Status,
-            AssignedTo = dto.AssignedTo,
-            LeadScore = dto.LeadScore,
-            Notes = dto.Notes,
-            CreatedBy = dto.CreatedBy
-        };
-    }
+        Id = entity.Id,
+        TenantId = entity.TenantId,
+        CompanyId = entity.CompanyId,
+        LeadCode = entity.LeadCode,
+        FirstName = entity.FirstName,
+        LastName = entity.LastName,
+        EstimatedValue = entity.EstimatedValue,
+        CompanyName = entity.CompanyName,
+        ContactPerson = entity.ContactPerson,
+        Email = entity.Email,
+        Phone = entity.Phone,
+        Address = entity.Address,
+        City = entity.City,
+        State = entity.State,
+        Country = entity.Country,
+        PostalCode = entity.PostalCode,
+        Industry = entity.Industry,
+        Source = entity.Source,
+        Status = entity.Status,
+        AssignedTo = entity.AssignedTo,
+        AssignedToName = entity.AssignedToUser != null
+            ? $"{entity.AssignedToUser.FirstName} {entity.AssignedToUser.LastName}".Trim()
+            : string.Empty,
+        LeadScore = entity.LeadScore,
+        Notes = entity.Notes,
+        ConvertedDate = entity.ConvertedDate,
+        CreatedAt = entity.CreatedAt,
+        UpdatedAt = entity.UpdatedAt,
+        CreatedBy = entity.CreatedBy,
+        UpdatedBy = entity.UpdatedBy,
+        IsActive = entity.IsActive
+    };
+
+    private static Lead MapToEntity(CreateLeadDto dto) => new()
+    {
+        TenantId = dto.TenantId,
+        CompanyId = dto.CompanyId,
+        LeadCode = dto.LeadCode,
+        CompanyName = dto.CompanyName,
+        ContactPerson = dto.ContactPerson,
+        Email = dto.Email,
+        Phone = dto.Phone,
+        Address = dto.Address,
+        City = dto.City,
+        State = dto.State,
+        Country = dto.Country,
+        PostalCode = dto.PostalCode,
+        Industry = dto.Industry,
+        Source = dto.Source,
+        Status = dto.Status,
+        AssignedTo = dto.AssignedTo,
+        LeadScore = dto.LeadScore,
+        Notes = dto.Notes,
+        CreatedBy = dto.CreatedBy
+    };
 
     private static void MapToEntity(UpdateLeadDto dto, Lead entity)
     {
@@ -170,5 +231,6 @@ public class LeadService : ILeadService
         entity.LeadScore = dto.LeadScore;
         entity.Notes = dto.Notes;
         entity.UpdatedBy = dto.UpdatedBy;
+        entity.UpdatedAt = DateTime.UtcNow;
     }
 }

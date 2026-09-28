@@ -28,24 +28,14 @@ public class TenantRepository : ITenantRepository
     public async Task<IEnumerable<Tenant>> GetAllAsync()
     {
         return await _context.Tenants
-            .Include(t => t.Subscriptions)
-            .Include(t => t.Companies)
-            .Include(t => t.Users)
-            .Include(t => t.Roles)
-            .Include(t => t.AuditLogs)
-            .Include(t => t.Settings)
+            .AsNoTracking()
             .ToListAsync();
     }
 
     public async Task<IEnumerable<Tenant>> GetActiveAsync()
     {
         return await _context.Tenants
-            .Include(t => t.Subscriptions)
-            .Include(t => t.Companies)
-            .Include(t => t.Users)
-            .Include(t => t.Roles)
-            .Include(t => t.AuditLogs)
-            .Include(t => t.Settings)
+            .AsNoTracking()
             .Where(t => t.IsActive)
             .ToListAsync();
     }

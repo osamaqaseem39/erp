@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.SCM.Interfaces;
 using ERP.Shared.DTOs.Inventory;
@@ -7,6 +8,7 @@ namespace ERP.Api.Controllers.Inventory;
 
 [ApiController]
 [Route("api/inventory/serial-numbers")]
+[Authorize]
 public class SerialNumberController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ISerialNumberService _service;

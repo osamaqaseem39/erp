@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Inventory;
 using ERP.Shared.DTOs.Inventory;
@@ -8,6 +9,7 @@ namespace ERP.Api.Controllers.Inventory;
 
 [ApiController]
 [Route("api/inventory/stock-transfers")]
+[Authorize]
 public class StockTransferController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IStockTransferService _service;

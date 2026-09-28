@@ -1,81 +1,64 @@
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Database;
+using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Repositories.CRM;
 
-public class SalesOrderRepository : ISalesOrderRepository
+public class SalesOrderRepository : CrmRepositoryBase, ISalesOrderRepository
 {
-    private readonly ERPDbContext _context;
-
-    public SalesOrderRepository(ERPDbContext context)
+    public SalesOrderRepository(ERPDbContext context, ITenantProvider tenantProvider)
+        : base(context, tenantProvider)
     {
-        _context = context;
     }
 
-    public async Task<SalesOrder?> GetByIdAsync(Guid id)
-    {
-        return await _context.SalesOrders
+    private IQueryable<SalesOrder> SalesOrdersQuery() =>
+        ApplyTenant(Context.SalesOrders
             .Include(so => so.Customer)
-            .Include(so => so.SalesOrderLines)
-            .FirstOrDefaultAsync(so => so.Id == id);
-    }
+            .Include(so => so.SalesOrderLines));
 
-    public async Task<IEnumerable<SalesOrder>> GetAllAsync()
-    {
-        return await _context.SalesOrders
-            .Include(so => so.Customer)
-            .Include(so => so.SalesOrderLines)
-            .ToListAsync();
-    }
+    public async Task<SalesOrder?> GetByIdAsync(Guid id) =>
+        await SalesOrdersQuery().FirstOrDefaultAsync(so => so.Id == id);
 
-    public async Task<IEnumerable<SalesOrder>> GetByCustomerAsync(Guid customerId)
-    {
-        return await _context.SalesOrders
-            .Include(so => so.Customer)
-            .Include(so => so.SalesOrderLines)
-            .Where(so => so.CustomerId == customerId)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<SalesOrder>> GetAllAsync() =>
+        await SalesOrdersQuery().ToListAsync();
 
-    public async Task<IEnumerable<SalesOrder>> GetByStatusAsync(string status)
-    {
-        return await _context.SalesOrders
-            .Include(so => so.Customer)
-            .Include(so => so.SalesOrderLines)
-            .Where(so => so.Status == status)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<SalesOrder>> GetByCustomerAsync(Guid customerId) =>
+        await SalesOrdersQuery().Where(so => so.CustomerId == customerId).ToListAsync();
 
-    public async Task<SalesOrder?> GetByNumberAsync(string salesOrderNumber)
-    {
-        return await _context.SalesOrders
-            .Include(so => so.Customer)
-            .Include(so => so.SalesOrderLines)
-            .FirstOrDefaultAsync(so => so.SalesOrderNumber == salesOrderNumber);
-    }
+    public async Task<IEnumerable<SalesOrder>> GetByStatusAsync(string status) =>
+        await SalesOrdersQuery().Where(so => so.Status == status).ToListAsync();
+
+    public async Task<SalesOrder?> GetByNumberAsync(string salesOrderNumber) =>
+        await SalesOrdersQuery().FirstOrDefaultAsync(so =>
+            so.OrderNumber == salesOrderNumber || so.SalesOrderNumber == salesOrderNumber);
+
+    public async Task<IEnumerable<SalesOrder>> GetByDateRangeAsync(DateTime startDate, DateTime endDate) =>
+        await SalesOrdersQuery().Where(so => so.OrderDate >= startDate && so.OrderDate <= endDate).ToListAsync();
 
     public async Task<Guid> CreateAsync(SalesOrder salesOrder)
     {
-        _context.SalesOrders.Add(salesOrder);
-        await _context.SaveChangesAsync();
+        if (TenantId.HasValue && TenantId != Guid.Empty)
+            salesOrder.TenantId = TenantId.Value;
+
+        Context.SalesOrders.Add(salesOrder);
+        await Context.SaveChangesAsync();
         return salesOrder.Id;
     }
 
     public async Task<bool> UpdateAsync(SalesOrder salesOrder)
     {
-        _context.SalesOrders.Update(salesOrder);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        if (!MatchesTenant(salesOrder)) return false;
+        Context.SalesOrders.Update(salesOrder);
+        return await Context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var salesOrder = await _context.SalesOrders.FindAsync(id);
+        var salesOrder = await GetByIdAsync(id);
         if (salesOrder == null) return false;
-
-        _context.SalesOrders.Remove(salesOrder);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        Context.SalesOrders.Remove(salesOrder);
+        return await Context.SaveChangesAsync() > 0;
     }
 }

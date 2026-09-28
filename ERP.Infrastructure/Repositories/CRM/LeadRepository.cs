@@ -1,77 +1,68 @@
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Database;
+using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Repositories.CRM;
 
-public class LeadRepository : ILeadRepository
+public class LeadRepository : CrmRepositoryBase, ILeadRepository
 {
-    private readonly ERPDbContext _context;
-
-    public LeadRepository(ERPDbContext context)
+    public LeadRepository(ERPDbContext context, ITenantProvider tenantProvider)
+        : base(context, tenantProvider)
     {
-        _context = context;
     }
 
-    public async Task<Lead?> GetByIdAsync(Guid id)
-    {
-        return await _context.Leads
-            .Include(l => l.Activities)
-            .FirstOrDefaultAsync(l => l.Id == id);
-    }
+    private IQueryable<Lead> LeadsQuery() =>
+        ApplyTenant(Context.Leads.Include(l => l.Activities));
 
-    public async Task<IEnumerable<Lead>> GetAllAsync()
-    {
-        return await _context.Leads
-            .Include(l => l.Activities)
-            .ToListAsync();
-    }
+    public async Task<Lead?> GetByIdAsync(Guid id) =>
+        await LeadsQuery().FirstOrDefaultAsync(l => l.Id == id);
 
-    public async Task<IEnumerable<Lead>> GetByStatusAsync(string status)
-    {
-        return await _context.Leads
-            .Include(l => l.Activities)
-            .Where(l => l.Status == status)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<Lead>> GetAllAsync() =>
+        await LeadsQuery().ToListAsync();
 
-    public async Task<IEnumerable<Lead>> GetBySourceAsync(string source)
-    {
-        return await _context.Leads
-            .Include(l => l.Activities)
-            .Where(l => l.Source == source)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<Lead>> GetByStatusAsync(string status) =>
+        await LeadsQuery().Where(l => l.Status == status).ToListAsync();
 
-    public async Task<IEnumerable<Lead>> GetByAssignedToAsync(Guid assignedToId)
+    public async Task<IEnumerable<Lead>> GetBySourceAsync(string source) =>
+        await LeadsQuery().Where(l => l.Source == source).ToListAsync();
+
+    public async Task<IEnumerable<Lead>> GetByAssignedToAsync(Guid assignedToId) =>
+        await LeadsQuery().Where(l => l.AssignedToId == assignedToId || l.AssignedTo == assignedToId).ToListAsync();
+
+    public async Task<IEnumerable<Lead>> SearchAsync(string searchTerm)
     {
-        return await _context.Leads
-            .Include(l => l.Activities)
-            .Where(l => l.AssignedToId == assignedToId)
-            .ToListAsync();
+        var term = searchTerm.Trim();
+        return await LeadsQuery().Where(l =>
+            (l.CompanyName != null && l.CompanyName.Contains(term)) ||
+            (l.ContactPerson != null && l.ContactPerson.Contains(term)) ||
+            (l.Email != null && l.Email.Contains(term)) ||
+            l.LeadCode.Contains(term)).ToListAsync();
     }
 
     public async Task<Guid> CreateAsync(Lead lead)
     {
-        _context.Leads.Add(lead);
-        await _context.SaveChangesAsync();
+        if (TenantId.HasValue && TenantId != Guid.Empty)
+            lead.TenantId = TenantId.Value;
+
+        Context.Leads.Add(lead);
+        await Context.SaveChangesAsync();
         return lead.Id;
     }
 
     public async Task<bool> UpdateAsync(Lead lead)
     {
-        _context.Leads.Update(lead);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        if (!MatchesTenant(lead)) return false;
+        Context.Leads.Update(lead);
+        return await Context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var lead = await _context.Leads.FindAsync(id);
+        var lead = await GetByIdAsync(id);
         if (lead == null) return false;
-
-        _context.Leads.Remove(lead);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        Context.Leads.Remove(lead);
+        return await Context.SaveChangesAsync() > 0;
     }
 }

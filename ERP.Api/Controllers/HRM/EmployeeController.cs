@@ -2,11 +2,13 @@ using ERP.Api.Abstractions;
 using ERP.Application.HRM;
 using ERP.Shared.DTOs.HRM;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ERP.Api.Controllers.HRM;
 
 [ApiController]
 [Route("api/hrm/employees")]
+[Authorize]
 public class EmployeeController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IEmployeeService _employeeService;

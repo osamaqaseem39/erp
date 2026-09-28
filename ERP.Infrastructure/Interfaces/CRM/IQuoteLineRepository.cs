@@ -4,9 +4,7 @@ namespace ERP.Infrastructure.Interfaces.CRM;
 
 public interface IQuoteLineRepository
 {
-    Task<QuoteLine?> GetByIdAsync(int id);
-    Task<IEnumerable<QuoteLine>> GetAllAsync();
-    Task<QuoteLine> AddAsync(QuoteLine entity);
-    Task UpdateAsync(QuoteLine entity);
-    Task DeleteAsync(int id);
+    Task<IEnumerable<QuoteLine>> GetByQuoteIdAsync(Guid quoteId);
+    Task<Guid> CreateAsync(QuoteLine line);
+    Task<bool> DeleteByQuoteIdAsync(Guid quoteId);
 }

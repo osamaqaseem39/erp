@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
@@ -7,6 +8,7 @@ using FluentValidation;
 
 namespace ERP.Api.Controllers.CRM;
 
+[Authorize]
 [ApiController]
 [Route("api/crm/leads")]
 public class LeadController : ERP.Api.Abstractions.ControllerBase
@@ -53,9 +55,7 @@ public class LeadController : ERP.Api.Abstractions.ControllerBase
     [HttpGet("assigned/{assignedTo}")]
     public async Task<IActionResult> GetByAssignedTo(Guid assignedTo)
     {
-        // Note: ILeadService doesn't have GetByAssignedToAsync method
-        // This would need to be implemented or use a different approach
-        return await HandleAsync(() => _service.GetAllAsync());
+        return await HandleAsync(() => _service.GetByAssignedToAsync(assignedTo));
     }
 
     [HttpPost]
@@ -93,5 +93,11 @@ public class LeadController : ERP.Api.Abstractions.ControllerBase
     public async Task<IActionResult> ConvertToCustomer(Guid id)
     {
         return await HandleAsync(() => _service.ConvertToCustomerAsync(id));
+    }
+
+    [HttpPost("{id}/convert-to-opportunity")]
+    public async Task<IActionResult> ConvertToOpportunity(Guid id)
+    {
+        return await HandleAsync(() => _service.ConvertToOpportunityAsync(id));
     }
 }

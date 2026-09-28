@@ -1,4 +1,5 @@
 using ERP.Application.Core;
+using ERP.Application.Interfaces.Core;
 using ERP.Shared.DTOs.Core;
 using ERP.Api.Mappers;
 using ERP.Shared.Exceptions;
@@ -53,6 +54,11 @@ public class TenantApiService : BaseApiService<TenantDto, CreateTenantDto, Updat
         if (string.IsNullOrWhiteSpace(domain))
             throw new ValidationException("Domain cannot be empty");
 
-        return await _tenantService.GetBySubdomainAsync(domain);
+        return await _tenantService.GetByDomainAsync(domain);
+    }
+
+    public async Task<IEnumerable<LoginTenantOptionDto>> GetLoginOptionsAsync()
+    {
+        return await _tenantService.GetLoginOptionsAsync();
     }
 }

@@ -1,6 +1,5 @@
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
-using ERP.Infrastructure.Repositories;
 using ERP.Infrastructure.Interfaces.CRM;
 using ERP.Domain.CRM;
 
@@ -30,8 +29,7 @@ public class CustomerService : ICustomerService
     public async Task<Guid> CreateAsync(CreateCustomerDto dto)
     {
         var entity = MapToEntity(dto);
-        var createdEntity = await _repository.AddAsync(entity);
-        return createdEntity.Id;
+        return await _repository.CreateAsync(entity);
     }
 
     public async Task<bool> UpdateAsync(UpdateCustomerDto dto)
@@ -40,32 +38,36 @@ public class CustomerService : ICustomerService
         if (entity == null) return false;
 
         MapToEntity(dto, entity);
-        await _repository.UpdateAsync(entity);
-        return true;
+        return await _repository.UpdateAsync(entity);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        await _repository.DeleteAsync(id);
-        return true;
+        return await _repository.DeleteAsync(id);
     }
 
     public async Task<IEnumerable<CustomerDto>> SearchAsync(string searchTerm)
     {
-        // TODO: Implement when repository method is available
-        return new List<CustomerDto>();
+        var term = searchTerm.Trim();
+        var entities = await _repository.GetAllAsync();
+        return entities
+            .Where(c =>
+                c.CompanyName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                c.CustomerCode.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                (c.Email != null && c.Email.Contains(term, StringComparison.OrdinalIgnoreCase)))
+            .Select(MapToDto);
     }
 
     public async Task<IEnumerable<CustomerDto>> GetByStatusAsync(string status)
     {
-        // TODO: Implement when repository method is available
-        return new List<CustomerDto>();
+        var entities = await _repository.GetByStatusAsync(status);
+        return entities.Select(MapToDto);
     }
 
     public async Task<IEnumerable<CustomerDto>> GetByIndustryAsync(string industry)
     {
-        // TODO: Implement when repository method is available
-        return new List<CustomerDto>();
+        var entities = await _repository.GetByIndustryAsync(industry);
+        return entities.Select(MapToDto);
     }
 
     private static CustomerDto MapToDto(Customer entity)

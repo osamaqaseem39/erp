@@ -3,6 +3,13 @@
 -- Multi-tenant SaaS ERP System
 -- =============================================
 
+-- Create CRM Schema if it doesn't exist
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'CRM')
+BEGIN
+    EXEC('CREATE SCHEMA [CRM]')
+END
+GO
+
 -- =============================================
 -- CUSTOMER MANAGEMENT PROCEDURES
 -- =============================================
@@ -119,42 +126,78 @@ GO
 CREATE OR ALTER PROCEDURE [CRM].[sp_UpdateCustomer]
     @Id UNIQUEIDENTIFIER,
     @TenantId UNIQUEIDENTIFIER,
-    @CustomerName NVARCHAR(200),
-    @CustomerType NVARCHAR(50),
-    @PrimaryEmail NVARCHAR(200),
-    @SecondaryEmail NVARCHAR(200),
-    @PrimaryPhone NVARCHAR(20),
-    @SecondaryPhone NVARCHAR(20),
-    @Website NVARCHAR(200),
-    @TaxNumber NVARCHAR(50),
-    @CreditLimit DECIMAL(18,2),
-    @PaymentTerms NVARCHAR(100),
-    @Currency NVARCHAR(10),
-    @Status NVARCHAR(50),
-    @Notes NVARCHAR(1000),
-    @UpdatedBy NVARCHAR(100)
+    @CustomerCode NVARCHAR(50) = NULL,
+    @CustomerName NVARCHAR(200) = NULL,
+    @CustomerType NVARCHAR(50) = NULL,
+    @PrimaryEmail NVARCHAR(200) = NULL,
+    @SecondaryEmail NVARCHAR(200) = NULL,
+    @PrimaryPhone NVARCHAR(20) = NULL,
+    @SecondaryPhone NVARCHAR(20) = NULL,
+    @Website NVARCHAR(200) = NULL,
+    @TaxNumber NVARCHAR(50) = NULL,
+    @CreditLimit DECIMAL(18,2) = NULL,
+    @PaymentTerms NVARCHAR(100) = NULL,
+    @Currency NVARCHAR(10) = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @Notes NVARCHAR(1000) = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
     
+    -- Validate customer exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [CRM].[Customers] WHERE Id = @Id AND TenantId = @TenantId AND IsActive = 1)
+    BEGIN
+        RAISERROR('Customer not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
     UPDATE [CRM].[Customers]
     SET 
-        CustomerName = @CustomerName,
-        CustomerType = @CustomerType,
-        PrimaryEmail = @PrimaryEmail,
-        SecondaryEmail = @SecondaryEmail,
-        PrimaryPhone = @PrimaryPhone,
-        SecondaryPhone = @SecondaryPhone,
-        Website = @Website,
-        TaxNumber = @TaxNumber,
-        CreditLimit = @CreditLimit,
-        PaymentTerms = @PaymentTerms,
-        Currency = @Currency,
-        Status = @Status,
-        Notes = @Notes,
+        CustomerCode = ISNULL(@CustomerCode, CustomerCode),
+        CustomerName = ISNULL(@CustomerName, CustomerName),
+        CustomerType = ISNULL(@CustomerType, CustomerType),
+        PrimaryEmail = ISNULL(@PrimaryEmail, PrimaryEmail),
+        SecondaryEmail = ISNULL(@SecondaryEmail, SecondaryEmail),
+        PrimaryPhone = ISNULL(@PrimaryPhone, PrimaryPhone),
+        SecondaryPhone = ISNULL(@SecondaryPhone, SecondaryPhone),
+        Website = ISNULL(@Website, Website),
+        TaxNumber = ISNULL(@TaxNumber, TaxNumber),
+        CreditLimit = ISNULL(@CreditLimit, CreditLimit),
+        PaymentTerms = ISNULL(@PaymentTerms, PaymentTerms),
+        Currency = ISNULL(@Currency, Currency),
+        Status = ISNULL(@Status, Status),
+        Notes = ISNULL(@Notes, Notes),
         UpdatedAt = GETUTCDATE(),
-        UpdatedBy = @UpdatedBy
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
     WHERE Id = @Id AND TenantId = @TenantId AND IsActive = 1;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Customer (Soft Delete)
+CREATE OR ALTER PROCEDURE [CRM].[sp_DeleteCustomer]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate customer exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [CRM].[Customers] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Customer not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [CRM].[Customers]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
     
     SELECT @@ROWCOUNT as RowsAffected;
 END
@@ -738,7 +781,7 @@ GO
 -- =============================================
 
 -- Get All Campaigns
-CREATE OR ALTER PROCEDURE CRM.sp_GetAllCampaigns
+CREATE OR ALTER PROCEDURE [CRM].sp_GetAllCampaigns
     @TenantId UNIQUEIDENTIFIER,
     @Status NVARCHAR(50) = NULL,
     @CampaignType NVARCHAR(50) = NULL,
@@ -767,7 +810,7 @@ BEGIN
             c.CreatedBy,
             c.UpdatedBy,
             ROW_NUMBER() OVER (ORDER BY c.CreatedAt DESC) AS RowNum
-        FROM CRM.Campaigns c
+        FROM [CRM].Campaigns c
         WHERE c.TenantId = @TenantId
         AND (@Status IS NULL OR c.Status = @Status)
         AND (@CampaignType IS NULL OR c.CampaignType = @CampaignType)
@@ -793,7 +836,7 @@ BEGIN
     
     -- Return total count
     SELECT COUNT(*) as TotalCount
-    FROM CRM.Campaigns c
+    FROM [CRM].Campaigns c
     WHERE c.TenantId = @TenantId
     AND (@Status IS NULL OR c.Status = @Status)
     AND (@CampaignType IS NULL OR c.CampaignType = @CampaignType)
@@ -802,7 +845,7 @@ END
 GO
 
 -- Create Campaign
-CREATE OR ALTER PROCEDURE CRM.sp_CreateCampaign
+CREATE OR ALTER PROCEDURE [CRM].sp_CreateCampaign
     @CampaignName NVARCHAR(200),
     @CampaignType NVARCHAR(50),
     @StartDate DATETIME2,
@@ -818,7 +861,7 @@ BEGIN
     
     DECLARE @Id UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO CRM.Campaigns (
+    INSERT INTO [CRM].Campaigns (
         Id, CampaignName, CampaignType, StartDate, EndDate, Budget,
         ExpectedRevenue, Description, TenantId, CreatedBy
     )
@@ -836,7 +879,7 @@ GO
 -- =============================================
 
 -- Get All Customer Groups
-CREATE OR ALTER PROCEDURE CRM.sp_GetAllCustomerGroups
+CREATE OR ALTER PROCEDURE [CRM].sp_GetAllCustomerGroups
     @TenantId UNIQUEIDENTIFIER,
     @IsActive BIT = NULL
 AS
@@ -853,7 +896,7 @@ BEGIN
         cg.UpdatedAt,
         cg.CreatedBy,
         cg.UpdatedBy
-    FROM CRM.CustomerGroups cg
+    FROM [CRM].CustomerGroups cg
     WHERE cg.TenantId = @TenantId
     AND (@IsActive IS NULL OR cg.IsActive = @IsActive)
     ORDER BY cg.GroupName;
@@ -861,7 +904,7 @@ END
 GO
 
 -- Create Customer Group
-CREATE OR ALTER PROCEDURE CRM.sp_CreateCustomerGroup
+CREATE OR ALTER PROCEDURE [CRM].sp_CreateCustomerGroup
     @GroupName NVARCHAR(100),
     @Description NVARCHAR(500) = NULL,
     @DiscountPercentage DECIMAL(5,2) = 0,
@@ -873,7 +916,7 @@ BEGIN
     
     DECLARE @Id UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO CRM.CustomerGroups (
+    INSERT INTO [CRM].CustomerGroups (
         Id, GroupName, Description, DiscountPercentage, TenantId, CreatedBy
     )
     VALUES (
@@ -889,7 +932,7 @@ GO
 -- =============================================
 
 -- Get Customer Contact Persons
-CREATE OR ALTER PROCEDURE CRM.sp_GetCustomerContactPersons
+CREATE OR ALTER PROCEDURE [CRM].sp_GetCustomerContactPersons
     @CustomerId UNIQUEIDENTIFIER,
     @TenantId UNIQUEIDENTIFIER
 AS
@@ -912,8 +955,8 @@ BEGIN
         cp.UpdatedAt,
         cp.CreatedBy,
         cp.UpdatedBy
-    FROM CRM.ContactPersons cp
-    INNER JOIN CRM.Customers c ON cp.CustomerId = c.Id
+    FROM [CRM].ContactPersons cp
+    INNER JOIN [CRM].Customers c ON cp.CustomerId = c.Id
     WHERE c.Id = @CustomerId 
     AND c.TenantId = @TenantId
     AND cp.IsActive = 1
@@ -922,7 +965,7 @@ END
 GO
 
 -- Add Contact Person
-CREATE OR ALTER PROCEDURE CRM.sp_AddContactPerson
+CREATE OR ALTER PROCEDURE [CRM].sp_AddContactPerson
     @CustomerId UNIQUEIDENTIFIER,
     @FirstName NVARCHAR(100),
     @LastName NVARCHAR(100),
@@ -943,12 +986,12 @@ BEGIN
     -- If this is set as primary, unset other primary contacts
     IF @IsPrimary = 1
     BEGIN
-        UPDATE CRM.ContactPersons
+            UPDATE [CRM].ContactPersons
         SET IsPrimary = 0
         WHERE CustomerId = @CustomerId;
     END
     
-    INSERT INTO CRM.ContactPersons (
+    INSERT INTO [CRM].ContactPersons (
         Id, CustomerId, FirstName, LastName, JobTitle, Department,
         Email, Phone, Mobile, IsPrimary, TenantId, CreatedBy
     )
@@ -966,7 +1009,7 @@ GO
 -- =============================================
 
 -- Get All Sales Territories
-CREATE OR ALTER PROCEDURE CRM.sp_GetAllSalesTerritories
+CREATE OR ALTER PROCEDURE [CRM].sp_GetAllSalesTerritories
     @TenantId UNIQUEIDENTIFIER,
     @IsActive BIT = NULL
 AS
@@ -984,8 +1027,8 @@ BEGIN
         st.CreatedBy,
         st.UpdatedBy,
         u.FirstName + ' ' + u.LastName as ManagerName
-    FROM CRM.SalesTerritories st
-    LEFT JOIN Core.Users u ON st.ManagerId = u.Id
+    FROM [CRM].SalesTerritories st
+    LEFT JOIN [Core].Users u ON st.ManagerId = u.Id
     WHERE st.TenantId = @TenantId
     AND (@IsActive IS NULL OR st.IsActive = @IsActive)
     ORDER BY st.TerritoryName;
@@ -993,7 +1036,7 @@ END
 GO
 
 -- Create Sales Territory
-CREATE OR ALTER PROCEDURE CRM.sp_CreateSalesTerritory
+CREATE OR ALTER PROCEDURE [CRM].sp_CreateSalesTerritory
     @TerritoryName NVARCHAR(100),
     @Description NVARCHAR(500) = NULL,
     @ManagerId UNIQUEIDENTIFIER = NULL,
@@ -1005,7 +1048,7 @@ BEGIN
     
     DECLARE @Id UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO CRM.SalesTerritories (
+    INSERT INTO [CRM].SalesTerritories (
         Id, TerritoryName, Description, ManagerId, TenantId, CreatedBy
     )
     VALUES (
@@ -1021,7 +1064,7 @@ GO
 -- =============================================
 
 -- Get Discount Policies
-CREATE OR ALTER PROCEDURE CRM.sp_GetDiscountPolicies
+CREATE OR ALTER PROCEDURE [CRM].sp_GetDiscountPolicies
     @TenantId UNIQUEIDENTIFIER,
     @CustomerGroupId UNIQUEIDENTIFIER = NULL,
     @CustomerId UNIQUEIDENTIFIER = NULL,
@@ -1056,9 +1099,9 @@ BEGIN
             cg.GroupName as CustomerGroupName,
             c.CustomerName,
             ROW_NUMBER() OVER (ORDER BY dp.CreatedAt DESC) AS RowNum
-        FROM CRM.DiscountPolicies dp
-        LEFT JOIN CRM.CustomerGroups cg ON dp.CustomerGroupId = cg.Id
-        LEFT JOIN CRM.Customers c ON dp.CustomerId = c.Id
+        FROM [CRM].DiscountPolicies dp
+        LEFT JOIN [CRM].CustomerGroups cg ON dp.CustomerGroupId = cg.Id
+        LEFT JOIN [CRM].Customers c ON dp.CustomerId = c.Id
         WHERE dp.TenantId = @TenantId
         AND (@CustomerGroupId IS NULL OR dp.CustomerGroupId = @CustomerGroupId)
         AND (@CustomerId IS NULL OR dp.CustomerId = @CustomerId)
@@ -1089,7 +1132,7 @@ BEGIN
     
     -- Return total count
     SELECT COUNT(*) as TotalCount
-    FROM CRM.DiscountPolicies dp
+    FROM [CRM].DiscountPolicies dp
     WHERE dp.TenantId = @TenantId
     AND (@CustomerGroupId IS NULL OR dp.CustomerGroupId = @CustomerGroupId)
     AND (@CustomerId IS NULL OR dp.CustomerId = @CustomerId)
@@ -1098,7 +1141,7 @@ END
 GO
 
 -- Create Discount Policy
-CREATE OR ALTER PROCEDURE CRM.sp_CreateDiscountPolicy
+CREATE OR ALTER PROCEDURE [CRM].sp_CreateDiscountPolicy
     @PolicyName NVARCHAR(100),
     @CustomerGroupId UNIQUEIDENTIFIER = NULL,
     @CustomerId UNIQUEIDENTIFIER = NULL,
@@ -1118,7 +1161,7 @@ BEGIN
     
     DECLARE @Id UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO CRM.DiscountPolicies (
+    INSERT INTO [CRM].DiscountPolicies (
         Id, PolicyName, CustomerGroupId, CustomerId, ItemGroupId, ItemId,
         DiscountType, DiscountValue, MinQuantity, MinAmount, ValidFrom, ValidTo,
         TenantId, CreatedBy
@@ -1138,7 +1181,7 @@ GO
 -- =============================================
 
 -- Get Return Orders
-CREATE OR ALTER PROCEDURE CRM.sp_GetReturnOrders
+CREATE OR ALTER PROCEDURE [CRM].sp_GetReturnOrders
     @TenantId UNIQUEIDENTIFIER,
     @CustomerId UNIQUEIDENTIFIER = NULL,
     @Status NVARCHAR(50) = NULL,
@@ -1171,10 +1214,10 @@ BEGIN
             so.OrderNumber as SalesOrderNumber,
             u.FirstName + ' ' + u.LastName as ApprovedByName,
             ROW_NUMBER() OVER (ORDER BY ro.CreatedAt DESC) AS RowNum
-        FROM CRM.ReturnOrders ro
-        INNER JOIN CRM.Customers c ON ro.CustomerId = c.Id
-        LEFT JOIN CRM.SalesOrders so ON ro.SalesOrderId = so.Id
-        LEFT JOIN Core.Users u ON ro.ApprovedBy = u.Id
+        FROM [CRM].ReturnOrders ro
+        INNER JOIN [CRM].Customers c ON ro.CustomerId = c.Id
+        LEFT JOIN [CRM].SalesOrders so ON ro.SalesOrderId = so.Id
+        LEFT JOIN [Core].Users u ON ro.ApprovedBy = u.Id
         WHERE c.TenantId = @TenantId
         AND (@CustomerId IS NULL OR ro.CustomerId = @CustomerId)
         AND (@Status IS NULL OR ro.Status = @Status)
@@ -1204,8 +1247,8 @@ BEGIN
     
     -- Return total count
     SELECT COUNT(*) as TotalCount
-    FROM CRM.ReturnOrders ro
-    INNER JOIN CRM.Customers c ON ro.CustomerId = c.Id
+    FROM [CRM].ReturnOrders ro
+    INNER JOIN [CRM].Customers c ON ro.CustomerId = c.Id
     WHERE c.TenantId = @TenantId
     AND (@CustomerId IS NULL OR ro.CustomerId = @CustomerId)
     AND (@Status IS NULL OR ro.Status = @Status)
@@ -1214,7 +1257,7 @@ END
 GO
 
 -- Create Return Order
-CREATE OR ALTER PROCEDURE CRM.sp_CreateReturnOrder
+CREATE OR ALTER PROCEDURE [CRM].sp_CreateReturnOrder
     @ReturnNumber NVARCHAR(50),
     @ReturnDate DATETIME2,
     @CustomerId UNIQUEIDENTIFIER,
@@ -1229,7 +1272,7 @@ BEGIN
     
     DECLARE @Id UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO CRM.ReturnOrders (
+    INSERT INTO [CRM].ReturnOrders (
         Id, ReturnNumber, ReturnDate, CustomerId, SalesOrderId, Reason, Notes, TenantId, CreatedBy
     )
     VALUES (
@@ -1245,7 +1288,7 @@ GO
 -- =============================================
 
 -- Get All Price Lists
-CREATE OR ALTER PROCEDURE CRM.sp_GetAllPriceLists
+CREATE OR ALTER PROCEDURE [CRM].sp_GetAllPriceLists
     @TenantId UNIQUEIDENTIFIER,
     @IsActive BIT = NULL
 AS
@@ -1264,7 +1307,7 @@ BEGIN
         pl.UpdatedAt,
         pl.CreatedBy,
         pl.UpdatedBy
-    FROM CRM.PriceLists pl
+    FROM [CRM].PriceLists pl
     WHERE pl.TenantId = @TenantId
     AND (@IsActive IS NULL OR pl.IsActive = @IsActive)
     ORDER BY pl.IsDefault DESC, pl.PriceListName;
@@ -1272,7 +1315,7 @@ END
 GO
 
 -- Create Price List
-CREATE OR ALTER PROCEDURE CRM.sp_CreatePriceList
+CREATE OR ALTER PROCEDURE [CRM].sp_CreatePriceList
     @PriceListName NVARCHAR(100),
     @Description NVARCHAR(500) = NULL,
     @ValidFrom DATETIME2,
@@ -1289,12 +1332,12 @@ BEGIN
     -- If this is set as default, unset other default price lists
     IF @IsDefault = 1
     BEGIN
-        UPDATE CRM.PriceLists
+        UPDATE [CRM].PriceLists
         SET IsDefault = 0
         WHERE TenantId = @TenantId;
     END
     
-    INSERT INTO CRM.PriceLists (
+    INSERT INTO [CRM].PriceLists (
         Id, PriceListName, Description, ValidFrom, ValidTo, IsDefault, TenantId, CreatedBy
     )
     VALUES (
@@ -1310,7 +1353,7 @@ GO
 -- =============================================
 
 -- Get Service Contracts
-CREATE OR ALTER PROCEDURE CRM.sp_GetServiceContracts
+CREATE OR ALTER PROCEDURE [CRM].sp_GetServiceContracts
     @TenantId UNIQUEIDENTIFIER,
     @CustomerId UNIQUEIDENTIFIER = NULL,
     @Status NVARCHAR(50) = NULL,
@@ -1341,8 +1384,8 @@ BEGIN
             sc.UpdatedBy,
             c.CustomerName,
             ROW_NUMBER() OVER (ORDER BY sc.CreatedAt DESC) AS RowNum
-        FROM CRM.ServiceContracts sc
-        INNER JOIN CRM.Customers c ON sc.CustomerId = c.Id
+        FROM [CRM].ServiceContracts sc
+        INNER JOIN [CRM].Customers c ON sc.CustomerId = c.Id
         WHERE c.TenantId = @TenantId
         AND (@CustomerId IS NULL OR sc.CustomerId = @CustomerId)
         AND (@Status IS NULL OR sc.Status = @Status)
@@ -1370,8 +1413,8 @@ BEGIN
     
     -- Return total count
     SELECT COUNT(*) as TotalCount
-    FROM CRM.ServiceContracts sc
-    INNER JOIN CRM.Customers c ON sc.CustomerId = c.Id
+    FROM [CRM].ServiceContracts sc
+    INNER JOIN [CRM].Customers c ON sc.CustomerId = c.Id
     WHERE c.TenantId = @TenantId
     AND (@CustomerId IS NULL OR sc.CustomerId = @CustomerId)
     AND (@Status IS NULL OR sc.Status = @Status)
@@ -1380,7 +1423,7 @@ END
 GO
 
 -- Create Service Contract
-CREATE OR ALTER PROCEDURE CRM.sp_CreateServiceContract
+CREATE OR ALTER PROCEDURE [CRM].sp_CreateServiceContract
     @ContractNumber NVARCHAR(50),
     @CustomerId UNIQUEIDENTIFIER,
     @ServiceType NVARCHAR(100),
@@ -1398,7 +1441,7 @@ BEGIN
     
     DECLARE @Id UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO CRM.ServiceContracts (
+    INSERT INTO [CRM].ServiceContracts (
         Id, ContractNumber, CustomerId, ServiceType, StartDate, EndDate,
         ContractValue, BillingFrequency, Description, Terms, TenantId, CreatedBy
     )

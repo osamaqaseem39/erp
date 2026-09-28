@@ -40,3 +40,13 @@ public class UpdateTenantDto : UpdateDto
     public string? ConnectionString { get; set; }
     public bool? IsActive { get; set; }
 }
+
+/// <summary>
+/// Minimal tenant fields for the public login tenant picker.
+/// </summary>
+public class LoginTenantOptionDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Domain { get; set; } = string.Empty;
+}

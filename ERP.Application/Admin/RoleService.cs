@@ -75,7 +75,7 @@ public class RoleService : IRoleService
         return new RoleDto
         {
             Id = entity.Id,
-            Name = entity.Name,
+            Name = entity.RoleName,
             Description = entity.Description,
             IsActive = entity.IsActive,
             CreatedAt = entity.CreatedAt,
@@ -88,7 +88,7 @@ public class RoleService : IRoleService
         return new Role
         {
             Id = Guid.NewGuid(),
-            Name = dto.Name,
+            RoleName = dto.Name,
             Description = dto.Description,
             IsActive = dto.IsActive,
             TenantId = tenantId,
@@ -99,7 +99,7 @@ public class RoleService : IRoleService
 
     private static void MapToEntity(UpdateRoleDto dto, Role entity, Guid userId)
     {
-        entity.Name = dto.Name;
+        entity.RoleName = dto.Name;
         entity.Description = dto.Description;
         entity.IsActive = dto.IsActive;
         entity.UpdatedBy = userId.ToString();
@@ -111,9 +111,9 @@ public class RoleService : IRoleService
         return new PermissionDto
         {
             Id = entity.Id,
-            Name = entity.Name,
+            Name = $"{entity.ModuleName}.{entity.ActionName}",
             Description = entity.Description,
-            Module = entity.Module,
+            Module = entity.ModuleName,
             IsActive = entity.IsActive,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt

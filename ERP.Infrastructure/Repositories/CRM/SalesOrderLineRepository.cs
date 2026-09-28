@@ -1,49 +1,37 @@
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Repositories.CRM;
 
-public class SalesOrderLineRepository : ISalesOrderLineRepository
+public class SalesOrderLineRepository : CrmRepositoryBase, ISalesOrderLineRepository
 {
-    private readonly ERPDbContext _context;
-
-    public SalesOrderLineRepository(ERPDbContext context)
+    public SalesOrderLineRepository(ERPDbContext context, ITenantProvider tenantProvider)
+        : base(context, tenantProvider)
     {
-        _context = context;
     }
 
-    public async Task<SalesOrderLine?> GetByIdAsync(int id)
+    public async Task<IEnumerable<SalesOrderLine>> GetBySalesOrderIdAsync(Guid salesOrderId) =>
+        await ApplyTenant(Context.SalesOrderLines.Where(l => l.SalesOrderId == salesOrderId)).ToListAsync();
+
+    public async Task<Guid> CreateAsync(SalesOrderLine line)
     {
-        return await _context.SalesOrderLines.FindAsync(id);
+        if (TenantId.HasValue && TenantId != Guid.Empty)
+            line.TenantId = TenantId.Value;
+
+        Context.SalesOrderLines.Add(line);
+        await Context.SaveChangesAsync();
+        return line.Id;
     }
 
-    public async Task<IEnumerable<SalesOrderLine>> GetAllAsync()
+    public async Task<bool> DeleteBySalesOrderIdAsync(Guid salesOrderId)
     {
-        return await _context.SalesOrderLines.ToListAsync();
-    }
+        var lines = await ApplyTenant(Context.SalesOrderLines.Where(l => l.SalesOrderId == salesOrderId)).ToListAsync();
+        if (lines.Count == 0) return true;
 
-    public async Task<SalesOrderLine> AddAsync(SalesOrderLine entity)
-    {
-        _context.SalesOrderLines.Add(entity);
-        await _context.SaveChangesAsync();
-        return entity;
-    }
-
-    public async Task UpdateAsync(SalesOrderLine entity)
-    {
-        _context.SalesOrderLines.Update(entity);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.SalesOrderLines.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        Context.SalesOrderLines.RemoveRange(lines);
+        return await Context.SaveChangesAsync() > 0;
     }
 }

@@ -3,11 +3,13 @@ using ERP.Application.Interfaces.Finance;
 using ERP.Shared.DTOs.Finance;
 using ERP.Api.Validators.Finance;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ERP.Api.Controllers.Finance;
 
 [ApiController]
 [Route("api/finance/fixed-assets")]
+[Authorize]
 public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IFixedAssetService _service;

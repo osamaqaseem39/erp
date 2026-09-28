@@ -30,6 +30,7 @@ public class SalesOrderDto : BaseDto
     public string? CustomerName { get; set; }
     public string? QuoteNumber { get; set; }
     public string? AssignedToUserName { get; set; }
+    public List<SalesOrderLineDto> SalesOrderLines { get; set; } = new();
 }
 
 public class CreateSalesOrderDto : CreateDto
@@ -52,6 +53,7 @@ public class CreateSalesOrderDto : CreateDto
     public string? BillingAddress { get; set; }
     public string? Notes { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public List<CreateSalesOrderLineDto> SalesOrderLines { get; set; } = new();
 }
 
 public class UpdateSalesOrderDto : UpdateDto
@@ -73,4 +75,5 @@ public class UpdateSalesOrderDto : UpdateDto
     public string? BillingAddress { get; set; }
     public string? Notes { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public List<CreateSalesOrderLineDto> SalesOrderLines { get; set; } = new();
 }

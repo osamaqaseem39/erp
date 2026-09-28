@@ -1,0 +1,61 @@
+/*
+Template Name: Konrix - Responsive Tailwind Admin Dashboard
+Version: 1.0
+Author: CoderThemes
+Email: support@coderthemes.com
+File: Main Css File
+*/
+
+// All @use statements must come before any other rules
+// Custom Variables
+@use "config/variables" as *;
+@use "config/theme-config" as *;
+
+// Structure
+@use "structure/sidenav" as *;
+@use "structure/topbar" as *;
+
+// Components
+@use "components/reboot" as *;
+@use "components/buttons" as *;
+@use "components/card" as *;
+@use "components/forms" as *;
+@use "components/badges" as *;
+@use "components/tables" as *;
+@use "components/print" as *;
+@use "components/helper" as *;
+
+// Plugins (Extended UI Components) 
+@use "plugins/swiper" as *;
+@use "plugins/simplebar" as *;
+@use "plugins/prismjs" as *;
+@use "plugins/sweetalert2" as *;
+@use "plugins/sortablejs" as *;
+@use "plugins/tour" as *;
+@use "plugins/glightbox" as *;
+@use "plugins/tippy-tooltip" as *;
+
+// Chart Plugins
+@use "plugins/apexcharts" as *;
+
+// Advanced Form Plugins
+@use "plugins/dropzone" as *;
+@use "plugins/range-slider" as *;
+@use "plugins/flatpicker" as *;
+@use "plugins/colorpicker" as *;
+@use "plugins/choices" as *;
+@use "plugins/quilljs" as *;
+
+// Data Table
+@use "plugins/gridjs" as *;
+
+// Map Plugins
+@use "plugins/vector-maps" as *;
+@use "plugins/google-map" as *;
+
+// App Pages Plugins
+@use "plugins/fullcalendar" as *;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

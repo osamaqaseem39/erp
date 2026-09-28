@@ -42,16 +42,11 @@ public class UserDto : BaseDto
     public string? TimeZone { get; set; }
     public string? Status { get; set; }
     
-    // Security properties
+    // Security properties (tokens never exposed on DTO)
     public DateTime? LastLoginDate { get; set; }
     public bool IsLocked { get; set; } = false;
     public int FailedLoginAttempts { get; set; } = 0;
     public DateTime? LockedUntil { get; set; }
-    public string? EmailVerificationToken { get; set; }
-    public string? PasswordResetToken { get; set; }
-    public DateTime? PasswordResetExpires { get; set; }
-    public string? RefreshToken { get; set; }
-    public DateTime? RefreshTokenExpires { get; set; }
     
     // Navigation properties
     public string CompanyName { get; set; } = string.Empty;

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
@@ -7,6 +8,7 @@ using FluentValidation;
 
 namespace ERP.Api.Controllers.CRM;
 
+[Authorize]
 [ApiController]
 [Route("api/crm/customers")]
 public class CustomerController : ERP.Api.Abstractions.ControllerBase

@@ -5,6 +5,7 @@ namespace ERP.Api.Middlewares;
 public class TenantMiddleware
 {
     private readonly RequestDelegate _next;
+    private static readonly string[] SuperAdminRoles = ["SuperAdmin", "SUPER_ADMIN"];
 
     public TenantMiddleware(RequestDelegate next)
     {
@@ -13,9 +14,7 @@ public class TenantMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Extract tenant ID from JWT token or header
-        var tenantId = GetTenantId(context);
-        
+        var tenantId = ResolveTenantId(context);
         if (tenantId.HasValue)
         {
             context.Items["TenantId"] = tenantId.Value;
@@ -24,28 +23,39 @@ public class TenantMiddleware
         await _next(context);
     }
 
-    private static Guid? GetTenantId(HttpContext context)
+    private static Guid? ResolveTenantId(HttpContext context)
     {
-        // Try to get tenant ID from JWT token claims
         var user = context.User;
+        Guid? claimTenantId = null;
+
         if (user.Identity?.IsAuthenticated == true)
         {
-            var tenantIdClaim = user.FindFirst("TenantId");
-            if (tenantIdClaim != null && Guid.TryParse(tenantIdClaim.Value, out var tenantId))
+            var tenantIdClaim = user.FindFirst("TenantId") ?? user.FindFirst("tenant_id");
+            if (tenantIdClaim != null && Guid.TryParse(tenantIdClaim.Value, out var parsed))
             {
-                return tenantId;
+                claimTenantId = parsed;
             }
         }
 
-        // Try to get tenant ID from header
-        if (context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdHeader))
+        Guid? headerTenantId = null;
+        if (context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdHeader) &&
+            Guid.TryParse(tenantIdHeader, out var headerParsed))
         {
-            if (Guid.TryParse(tenantIdHeader, out var headerTenantId))
-            {
-                return headerTenantId;
-            }
+            headerTenantId = headerParsed;
         }
 
-        return null;
+        // Authenticated non-super-admin: JWT claim wins; header spoofing ignored
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var isSuperAdmin = SuperAdminRoles.Any(r => user.IsInRole(r));
+            if (!isSuperAdmin)
+                return claimTenantId;
+
+            // SuperAdmin may override via header
+            return headerTenantId ?? claimTenantId;
+        }
+
+        // Anonymous (login/setup): allow header for tenant scoping only
+        return headerTenantId;
     }
 }

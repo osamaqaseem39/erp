@@ -2,10 +2,12 @@ using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
 using ERP.Api.Validators.CRM;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP.Api.Controllers.CRM;
 
+[Authorize]
 [ApiController]
 [Route("api/crm/contacts")]
 public class ContactController : ERP.Api.Abstractions.ControllerBase

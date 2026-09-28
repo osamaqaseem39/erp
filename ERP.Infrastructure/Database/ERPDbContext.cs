@@ -84,6 +84,10 @@ public class ERPDbContext : DbContext
     public DbSet<Opportunity> Opportunities { get; set; }
     public DbSet<Activity> Activities { get; set; }
     public DbSet<Campaign> Campaigns { get; set; }
+    public DbSet<CustomerGroup> CustomerGroups { get; set; }
+    public DbSet<PriceList> PriceLists { get; set; }
+    public DbSet<SalesTerritory> SalesTerritories { get; set; }
+    public DbSet<ReturnOrder> ReturnOrders { get; set; }
     public DbSet<Contact> Contacts { get; set; }
     public DbSet<SalesOrder> SalesOrders { get; set; }
     public DbSet<SalesOrderLine> SalesOrderLines { get; set; }
@@ -159,11 +163,16 @@ public class ERPDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure Tenant
+        // Configure Tenant (Core schema)
         modelBuilder.Entity<Tenant>(entity =>
         {
+            entity.ToTable("Tenants", "Core");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.TenantName).IsRequired().HasMaxLength(200);
+
+            entity.Property(e => e.TenantName)
+                  .IsRequired()
+                  .HasMaxLength(200);
+
             entity.Property(e => e.Domain).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Industry).HasMaxLength(100);
             entity.Property(e => e.Country).HasMaxLength(100);
@@ -173,9 +182,10 @@ public class ERPDbContext : DbContext
             entity.HasIndex(e => e.Domain).IsUnique();
         });
 
-        // Configure Plan
+        // Configure Plan (Core schema)
         modelBuilder.Entity<Plan>(entity =>
         {
+            entity.ToTable("Plans", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.PlanName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
@@ -183,9 +193,10 @@ public class ERPDbContext : DbContext
             entity.Property(e => e.FeaturesJSON).HasMaxLength(4000);
         });
 
-        // Configure Subscription
+        // Configure Subscription (Core schema)
         modelBuilder.Entity<Subscription>(entity =>
         {
+            entity.ToTable("Subscriptions", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.PaymentStatus).HasMaxLength(50);
             
@@ -203,6 +214,7 @@ public class ERPDbContext : DbContext
         // Configure Company
         modelBuilder.Entity<Company>(entity =>
         {
+            entity.ToTable("Companies", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.CompanyName).IsRequired().HasMaxLength(200);
             entity.Property(e => e.LegalName).HasMaxLength(200);
@@ -218,23 +230,29 @@ public class ERPDbContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.Website).HasMaxLength(200);
             entity.Property(e => e.LogoUrl).HasMaxLength(500);
-            
-            // Tenant relationship will be handled by TenantId foreign key
+            entity.Ignore(e => e.CompanyCode);
+            entity.Ignore(e => e.TaxId);
+            entity.Ignore(e => e.Address);
+            entity.Ignore(e => e.PostalCode);
+            entity.Ignore(e => e.Currency);
         });
 
-        // Configure Role
+        // Configure Role (Core schema)
         modelBuilder.Entity<Role>(entity =>
         {
+            entity.ToTable("Roles", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.RoleName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
-            
-            // Tenant relationship will be handled by TenantId foreign key
+            // DB column is RoleName only — Name/Notes are app-layer aliases
+            entity.Ignore(e => e.Name);
+            entity.Ignore(e => e.Notes);
         });
 
-        // Configure User
+        // Configure User (Core schema)
         modelBuilder.Entity<User>(entity =>
         {
+            entity.ToTable("Users", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Salutation).HasMaxLength(10);
             entity.Property(e => e.FirstName).IsRequired().HasMaxLength(100);
@@ -270,10 +288,15 @@ public class ERPDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Configure UserRole
+        // Configure UserRole (Core schema)
         modelBuilder.Entity<UserRole>(entity =>
         {
+            entity.ToTable("UserRoles", "Core");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.AssignedAt).HasColumnName("AssignedDate");
+            entity.Ignore(e => e.AssignedBy);
+            entity.Ignore(e => e.ExpiresAt);
+            entity.Ignore(e => e.IsActive);
             
             entity.HasOne(e => e.User)
                 .WithMany(u => u.UserRoles)
@@ -286,18 +309,24 @@ public class ERPDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Configure Permission
+        // Configure Permission (Core schema)
         modelBuilder.Entity<Permission>(entity =>
         {
+            entity.ToTable("Permissions", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.ModuleName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.ActionName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Ignore(e => e.Name);
+            entity.Ignore(e => e.Module);
+            entity.Ignore(e => e.Action);
+            entity.Ignore(e => e.Notes);
         });
 
-        // Configure RolePermission
+        // Configure RolePermission (Core schema)
         modelBuilder.Entity<RolePermission>(entity =>
         {
+            entity.ToTable("RolePermissions", "Core");
             entity.HasKey(e => e.Id);
             
             entity.HasOne(e => e.Role)
@@ -311,9 +340,10 @@ public class ERPDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Configure AuditLog
+        // Configure AuditLog (Core schema)
         modelBuilder.Entity<AuditLog>(entity =>
         {
+            entity.ToTable("AuditLogs", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Action).IsRequired().HasMaxLength(100);
             entity.Property(e => e.EntityName).IsRequired().HasMaxLength(100);
@@ -334,9 +364,10 @@ public class ERPDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Configure Setting
+        // Configure Setting (Core schema)
         modelBuilder.Entity<Setting>(entity =>
         {
+            entity.ToTable("Settings", "Core");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.SettingKey).IsRequired().HasMaxLength(100);
             entity.Property(e => e.SettingValue).HasMaxLength(1000);
@@ -355,6 +386,9 @@ public class ERPDbContext : DbContext
         
         // Configure SCM/Inventory Entities
         ConfigureSCMEntities(modelBuilder);
+        
+        // Configure remaining entities with minimal configuration to prevent migration errors
+        ConfigureRemainingEntities(modelBuilder);
     }
 
     private void ConfigureHRMEntities(ModelBuilder modelBuilder)
@@ -629,7 +663,12 @@ public class ERPDbContext : DbContext
             entity.HasOne(e => e.JobApplication)
                 .WithMany(ja => ja.Interviews)
                 .HasForeignKey(e => e.JobApplicationId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            entity.HasOne(e => e.Candidate)
+                .WithMany()
+                .HasForeignKey(e => e.CandidateId)
+                .OnDelete(DeleteBehavior.Restrict);
                 
             entity.HasOne(e => e.Interviewer)
                 .WithMany()
@@ -852,6 +891,312 @@ public class ERPDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.BatchSerialId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+    }
+
+    private void ConfigureRemainingEntities(ModelBuilder modelBuilder)
+    {
+        // CRM Entities - Basic configuration
+        modelBuilder.Entity<Customer>().HasKey(e => e.Id);
+        modelBuilder.Entity<Lead>().HasKey(e => e.Id);
+        modelBuilder.Entity<Opportunity>().HasKey(e => e.Id);
+        modelBuilder.Entity<Activity>().HasKey(e => e.Id);
+        modelBuilder.Entity<Campaign>().HasKey(e => e.Id);
+        ConfigureCrmExtendedEntities(modelBuilder);
+        modelBuilder.Entity<Contact>().HasKey(e => e.Id);
+        modelBuilder.Entity<SalesOrder>().HasKey(e => e.Id);
+        modelBuilder.Entity<SalesOrderLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<SalesInvoice>().HasKey(e => e.Id);
+        modelBuilder.Entity<SalesInvoiceLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<Quote>().HasKey(e => e.Id);
+        modelBuilder.Entity<QuoteLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<SystemSetting>().HasKey(e => e.Id);
+        modelBuilder.Entity<SystemLog>().HasKey(e => e.Id);
+
+        // Manufacturing Entities
+        modelBuilder.Entity<WorkCenter>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProductionOrder>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProductionOrderLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProductionRun>().HasKey(e => e.Id);
+
+        // Project Entities
+        modelBuilder.Entity<Project>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProjectTask>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProjectResource>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProjectDocument>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProjectMilestone>().HasKey(e => e.Id);
+
+        // Procurement Entities
+        modelBuilder.Entity<Vendor>().HasKey(e => e.Id);
+        modelBuilder.Entity<VendorBankAccount>().HasKey(e => e.Id);
+        // Configure GoodsReceiptNote with proper cascade settings
+        modelBuilder.Entity<GoodsReceiptNote>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // PurchaseOrder relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.PurchaseOrder)
+                .WithMany(po => po.GoodsReceiptNotes)
+                .HasForeignKey(e => e.POId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            // User relationship - use Restrict to avoid cascade path with Tenant
+            entity.HasOne(e => e.ReceivedByUser)
+                .WithMany()
+                .HasForeignKey(e => e.ReceivedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            // Vendor relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Vendor)
+                .WithMany()
+                .HasForeignKey(e => e.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure GoodsReceiptNoteDetail with proper cascade settings
+        modelBuilder.Entity<GoodsReceiptNoteDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Item relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Item)
+                .WithMany()
+                .HasForeignKey(e => e.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure PurchaseOrder with proper cascade settings
+        modelBuilder.Entity<PurchaseOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Vendor relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Vendor)
+                .WithMany()
+                .HasForeignKey(e => e.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure PurchaseOrderDetail with proper cascade settings
+        modelBuilder.Entity<PurchaseOrderDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // PurchaseOrder relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.PurchaseOrder)
+                .WithMany(po => po.Details)
+                .HasForeignKey(e => e.POId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure PurchaseInvoice with proper cascade settings
+        modelBuilder.Entity<PurchaseInvoice>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Vendor relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Vendor)
+                .WithMany()
+                .HasForeignKey(e => e.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure PurchaseInvoiceDetail with proper cascade settings
+        modelBuilder.Entity<PurchaseInvoiceDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // PurchaseInvoice relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.PurchaseInvoice)
+                .WithMany(pi => pi.Details)
+                .HasForeignKey(e => e.InvoiceId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure PurchaseRequisition with proper cascade settings
+        modelBuilder.Entity<PurchaseRequisition>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            entity.HasOne(e => e.Company)
+                .WithMany()
+                .HasForeignKey(e => e.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            entity.HasOne(e => e.RequestedByUser)
+                .WithMany()
+                .HasForeignKey(e => e.RequestedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure PurchaseRequisitionDetail with proper cascade settings
+        modelBuilder.Entity<PurchaseRequisitionDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // UnitOfMeasure relationship - use Restrict to avoid cascade path issues
+            entity.HasOne(e => e.UnitOfMeasure)
+                .WithMany()
+                .HasForeignKey(e => e.UnitOfMeasureId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<RequestForQuotation>().HasKey(e => e.Id);
+        // Configure RFQDetail with proper cascade settings
+        modelBuilder.Entity<RFQDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // RequestForQuotation relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.RequestForQuotation)
+                .WithMany(rfq => rfq.Details)
+                .HasForeignKey(e => e.RFQId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            // UnitOfMeasure relationship - use Restrict to avoid cascade path issues
+            entity.HasOne(e => e.UnitOfMeasure)
+                .WithMany()
+                .HasForeignKey(e => e.UnitOfMeasureId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure RFQVendorResponse with proper cascade settings
+        modelBuilder.Entity<RFQVendorResponse>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Vendor relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Vendor)
+                .WithMany()
+                .HasForeignKey(e => e.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure RFQVendorResponseDetail with proper cascade settings
+        modelBuilder.Entity<RFQVendorResponseDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // RFQVendorResponse relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.RFQVendorResponse)
+                .WithMany(rfqvr => rfqvr.Details)
+                .HasForeignKey(e => e.RFQResponseId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Sales/POS Entities
+        modelBuilder.Entity<POSSession>().HasKey(e => e.Id);
+        modelBuilder.Entity<POSTransaction>().HasKey(e => e.Id);
+        modelBuilder.Entity<POSTransactionLine>().HasKey(e => e.Id);
+
+        // Additional SCM/Inventory Entities
+        // Configure Item with proper cascade settings
+        modelBuilder.Entity<Item>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // ItemCategory relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<ItemCategory>().HasKey(e => e.Id);
+        modelBuilder.Entity<ItemGroup>().HasKey(e => e.Id);
+        modelBuilder.Entity<ItemAttribute>().HasKey(e => e.Id);
+        modelBuilder.Entity<ItemVariant>().HasKey(e => e.Id);
+        modelBuilder.Entity<ItemVariantAttribute>().HasKey(e => e.Id);
+        modelBuilder.Entity<ItemPricing>().HasKey(e => e.Id);
+        modelBuilder.Entity<UnitOfMeasure>().HasKey(e => e.Id);
+        // Configure StockBalance with proper cascade settings
+        modelBuilder.Entity<StockBalance>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Item relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Item)
+                .WithMany()
+                .HasForeignKey(e => e.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure StockLedger with proper cascade settings
+        modelBuilder.Entity<StockLedger>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Item relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Item)
+                .WithMany()
+                .HasForeignKey(e => e.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configure InventoryAdjustment with proper cascade settings
+        modelBuilder.Entity<InventoryAdjustment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            
+            // Item relationship - use Restrict to avoid cascade path with Company
+            entity.HasOne(e => e.Item)
+                .WithMany(i => i.InventoryAdjustments)
+                .HasForeignKey(e => e.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<InventoryValuationMethod>().HasKey(e => e.Id);
+        modelBuilder.Entity<ReorderRule>().HasKey(e => e.Id);
+        modelBuilder.Entity<Barcode>().HasKey(e => e.Id);
+        modelBuilder.Entity<BatchNumber>().HasKey(e => e.Id);
+        modelBuilder.Entity<SerialNumber>().HasKey(e => e.Id);
+        modelBuilder.Entity<BatchSerialTracking>().HasKey(e => e.Id);
+
+        // Report Entities
+        modelBuilder.Entity<Report>().HasKey(e => e.Id);
+        modelBuilder.Entity<ReportExecution>().HasKey(e => e.Id);
+        modelBuilder.Entity<ReportSchedule>().HasKey(e => e.Id);
+
+        // Additional Finance Entities
+        modelBuilder.Entity<Payment>().HasKey(e => e.Id);
+        modelBuilder.Entity<Bill>().HasKey(e => e.Id);
+        modelBuilder.Entity<BillLine>().HasKey(e => e.BillLineId);
+        modelBuilder.Entity<Journal>().HasKey(e => e.Id);
+        modelBuilder.Entity<JournalEntry>().HasKey(e => e.Id);
+        modelBuilder.Entity<Invoice>().HasKey(e => e.Id);
+        modelBuilder.Entity<InvoiceLine>().HasKey(e => e.InvoiceLineId);
+        modelBuilder.Entity<Bank>().HasKey(e => e.Id);
+        modelBuilder.Entity<BankAccount>().HasKey(e => e.Id);
+        modelBuilder.Entity<BankTransaction>().HasKey(e => e.BankTxId);
+        modelBuilder.Entity<BankReconciliation>().HasKey(e => e.ReconciliationId);
+        modelBuilder.Entity<Budget>().HasKey(e => e.Id);
+        modelBuilder.Entity<CostCenter>().HasKey(e => e.Id);
+        modelBuilder.Entity<TaxCode>().HasKey(e => e.Id);
+        modelBuilder.Entity<TaxRate>().HasKey(e => e.Id);
+        modelBuilder.Entity<PaymentApplication>().HasKey(e => e.Id);
+        modelBuilder.Entity<IntercompanyTransaction>().HasKey(e => e.IntercompanyId);
+    }
+
+    private static void ConfigureCrmExtendedEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CustomerGroup>(entity =>
+        {
+            entity.ToTable("CustomerGroups");
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<PriceList>(entity =>
+        {
+            entity.ToTable("PriceLists");
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<SalesTerritory>(entity =>
+        {
+            entity.ToTable("SalesTerritories");
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<ReturnOrder>(entity =>
+        {
+            entity.ToTable("ReturnOrders");
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.Customer)
+                .WithMany()
+                .HasForeignKey(e => e.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.SalesOrder)
+                .WithMany()
+                .HasForeignKey(e => e.SalesOrderId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

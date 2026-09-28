@@ -3,6 +3,13 @@
 -- Multi-tenant SaaS ERP System
 -- =============================================
 
+-- Create Finance Schema if it doesn't exist
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Finance')
+BEGIN
+    EXEC('CREATE SCHEMA [Finance]')
+END
+GO
+
 -- =============================================
 -- CHART OF ACCOUNTS PROCEDURES
 -- =============================================
@@ -86,6 +93,81 @@ BEGIN
 END
 GO
 
+-- Update Account
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateAccount]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @AccountCode NVARCHAR(50) = NULL,
+    @AccountName NVARCHAR(200) = NULL,
+    @AccountType NVARCHAR(50) = NULL,
+    @ParentAccountId UNIQUEIDENTIFIER = NULL,
+    @Level INT = NULL,
+    @Description NVARCHAR(500) = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate account exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[ChartOfAccounts] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Account not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Finance].[ChartOfAccounts]
+    SET 
+        AccountCode = ISNULL(@AccountCode, AccountCode),
+        AccountName = ISNULL(@AccountName, AccountName),
+        AccountType = ISNULL(@AccountType, AccountType),
+        ParentAccountId = ISNULL(@ParentAccountId, ParentAccountId),
+        Level = ISNULL(@Level, Level),
+        Description = ISNULL(@Description, Description),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Account (Soft Delete)
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteAccount]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate account exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[ChartOfAccounts] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Account not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if account has child accounts
+    IF EXISTS (SELECT 1 FROM [Finance].[ChartOfAccounts] WHERE ParentAccountId = @Id AND TenantId = @TenantId AND IsActive = 1)
+    BEGIN
+        RAISERROR('Cannot delete account with child accounts. Please delete or reassign child accounts first.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Finance].[ChartOfAccounts]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- BANK MANAGEMENT PROCEDURES
 -- =============================================
@@ -122,6 +204,253 @@ BEGIN
     FROM [Finance].[BankAccounts] ba
     INNER JOIN [Finance].[Banks] b ON ba.BankId = b.Id
     WHERE ba.Id = @Id AND ba.TenantId = @TenantId AND ba.IsActive = 1;
+END
+GO
+
+-- Get All Banks
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetAllBanks]
+    @TenantId UNIQUEIDENTIFIER,
+    @IsActive BIT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        Id, BankName, BankCode, SwiftCode, Address, Phone, Email, Website,
+        IsActive, TenantId, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Finance].[Banks]
+    WHERE TenantId = @TenantId
+    AND (@IsActive IS NULL OR IsActive = @IsActive)
+    ORDER BY BankName;
+END
+GO
+
+-- Get Bank Accounts by Bank ID
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetBankAccountsByBankId]
+    @BankId UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        ba.Id, ba.BankId, ba.AccountName, ba.AccountNumber, ba.AccountType,
+        ba.Currency, ba.OpeningBalance, ba.CurrentBalance, ba.IsActive,
+        ba.TenantId, ba.CreatedAt, ba.UpdatedAt, ba.CreatedBy, ba.UpdatedBy,
+        b.BankName, b.BankCode
+    FROM [Finance].[BankAccounts] ba
+    INNER JOIN [Finance].[Banks] b ON ba.BankId = b.Id
+    WHERE ba.BankId = @BankId
+    AND ba.TenantId = @TenantId
+    AND ba.IsActive = 1
+    ORDER BY ba.AccountName;
+END
+GO
+
+-- Create Bank
+CREATE OR ALTER PROCEDURE [Finance].[sp_CreateBank]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @BankName NVARCHAR(200),
+    @BankCode NVARCHAR(50),
+    @SwiftCode NVARCHAR(20) = NULL,
+    @Address NVARCHAR(500) = NULL,
+    @Phone NVARCHAR(20) = NULL,
+    @Email NVARCHAR(200) = NULL,
+    @Website NVARCHAR(200) = NULL,
+    @IsActive BIT = 1,
+    @CreatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    INSERT INTO [Finance].[Banks] (
+        Id, TenantId, BankName, BankCode, SwiftCode, Address,
+        Phone, Email, Website, IsActive, CreatedAt, CreatedBy
+    )
+    VALUES (
+        @Id, @TenantId, @BankName, @BankCode, @SwiftCode, @Address,
+        @Phone, @Email, @Website, @IsActive, GETUTCDATE(), @CreatedBy
+    );
+    
+    SELECT @Id as Id;
+END
+GO
+
+-- Update Bank
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateBank]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @BankName NVARCHAR(200) = NULL,
+    @BankCode NVARCHAR(50) = NULL,
+    @SwiftCode NVARCHAR(20) = NULL,
+    @Address NVARCHAR(500) = NULL,
+    @Phone NVARCHAR(20) = NULL,
+    @Email NVARCHAR(200) = NULL,
+    @Website NVARCHAR(200) = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate bank exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Banks] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Bank not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Finance].[Banks]
+    SET 
+        BankName = ISNULL(@BankName, BankName),
+        BankCode = ISNULL(@BankCode, BankCode),
+        SwiftCode = ISNULL(@SwiftCode, SwiftCode),
+        Address = ISNULL(@Address, Address),
+        Phone = ISNULL(@Phone, Phone),
+        Email = ISNULL(@Email, Email),
+        Website = ISNULL(@Website, Website),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Bank (Soft Delete)
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteBank]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate bank exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Banks] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Bank not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if bank has active accounts
+    IF EXISTS (SELECT 1 FROM [Finance].[BankAccounts] WHERE BankId = @Id AND TenantId = @TenantId AND IsActive = 1)
+    BEGIN
+        RAISERROR('Cannot delete bank with active accounts. Please deactivate or delete bank accounts first.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Finance].[Banks]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Create Bank Account
+CREATE OR ALTER PROCEDURE [Finance].[sp_CreateBankAccount]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @BankId UNIQUEIDENTIFIER,
+    @AccountName NVARCHAR(200),
+    @AccountNumber NVARCHAR(50),
+    @AccountType NVARCHAR(50),
+    @Currency NVARCHAR(10),
+    @OpeningBalance DECIMAL(18,2) = 0,
+    @IsActive BIT = 1,
+    @CreatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate bank exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Banks] WHERE Id = @BankId AND TenantId = @TenantId AND IsActive = 1)
+    BEGIN
+        RAISERROR('Bank not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    INSERT INTO [Finance].[BankAccounts] (
+        Id, TenantId, BankId, AccountName, AccountNumber, AccountType,
+        Currency, OpeningBalance, CurrentBalance, IsActive, CreatedAt, CreatedBy
+    )
+    VALUES (
+        @Id, @TenantId, @BankId, @AccountName, @AccountNumber, @AccountType,
+        @Currency, @OpeningBalance, @OpeningBalance, @IsActive, GETUTCDATE(), @CreatedBy
+    );
+    
+    SELECT @Id as Id;
+END
+GO
+
+-- Update Bank Account
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateBankAccount]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @AccountName NVARCHAR(200) = NULL,
+    @AccountNumber NVARCHAR(50) = NULL,
+    @AccountType NVARCHAR(50) = NULL,
+    @Currency NVARCHAR(10) = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate bank account exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[BankAccounts] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Bank account not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Finance].[BankAccounts]
+    SET 
+        AccountName = ISNULL(@AccountName, AccountName),
+        AccountNumber = ISNULL(@AccountNumber, AccountNumber),
+        AccountType = ISNULL(@AccountType, AccountType),
+        Currency = ISNULL(@Currency, Currency),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Bank Account (Soft Delete)
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteBankAccount]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate bank account exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[BankAccounts] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Bank account not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Finance].[BankAccounts]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
 END
 GO
 
@@ -236,6 +565,142 @@ BEGIN
 END
 GO
 
+-- Get All Invoices
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetAllInvoices]
+    @TenantId UNIQUEIDENTIFIER,
+    @CustomerId UNIQUEIDENTIFIER = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        Id, InvoiceNumber, InvoiceDate, DueDate, CustomerId, SubTotal,
+        TaxAmount, DiscountAmount, TotalAmount, PaidAmount, BalanceAmount,
+        Status, PaymentTerms, Notes, TenantId, CreatedAt, UpdatedAt,
+        CreatedBy, UpdatedBy
+    FROM [Finance].[Invoices]
+    WHERE TenantId = @TenantId
+        AND (@CustomerId IS NULL OR CustomerId = @CustomerId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR InvoiceDate >= @StartDate)
+        AND (@EndDate IS NULL OR InvoiceDate <= @EndDate)
+    ORDER BY InvoiceDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Finance].[Invoices]
+    WHERE TenantId = @TenantId
+        AND (@CustomerId IS NULL OR CustomerId = @CustomerId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR InvoiceDate >= @StartDate)
+        AND (@EndDate IS NULL OR InvoiceDate <= @EndDate);
+END
+GO
+
+-- Update Invoice
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateInvoice]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @InvoiceNumber NVARCHAR(50) = NULL,
+    @InvoiceDate DATETIME2 = NULL,
+    @DueDate DATETIME2 = NULL,
+    @CustomerId UNIQUEIDENTIFIER = NULL,
+    @SubTotal DECIMAL(18,2) = NULL,
+    @TaxAmount DECIMAL(18,2) = NULL,
+    @DiscountAmount DECIMAL(18,2) = NULL,
+    @TotalAmount DECIMAL(18,2) = NULL,
+    @PaymentTerms NVARCHAR(200) = NULL,
+    @Notes NVARCHAR(1000) = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate invoice exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Invoices] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Invoice not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Recalculate balance if amounts are updated
+    DECLARE @NewPaidAmount DECIMAL(18,2);
+    DECLARE @NewBalanceAmount DECIMAL(18,2);
+    
+    IF @TotalAmount IS NOT NULL
+    BEGIN
+        SELECT @NewPaidAmount = PaidAmount FROM [Finance].[Invoices] WHERE Id = @Id;
+        SET @NewBalanceAmount = @TotalAmount - @NewPaidAmount;
+    END
+    
+    UPDATE [Finance].[Invoices]
+    SET 
+        InvoiceNumber = ISNULL(@InvoiceNumber, InvoiceNumber),
+        InvoiceDate = ISNULL(@InvoiceDate, InvoiceDate),
+        DueDate = ISNULL(@DueDate, DueDate),
+        CustomerId = ISNULL(@CustomerId, CustomerId),
+        SubTotal = ISNULL(@SubTotal, SubTotal),
+        TaxAmount = ISNULL(@TaxAmount, TaxAmount),
+        DiscountAmount = ISNULL(@DiscountAmount, DiscountAmount),
+        TotalAmount = ISNULL(@TotalAmount, TotalAmount),
+        BalanceAmount = ISNULL(@NewBalanceAmount, BalanceAmount),
+        PaymentTerms = ISNULL(@PaymentTerms, PaymentTerms),
+        Notes = ISNULL(@Notes, Notes),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Invoice (Soft Delete)
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteInvoice]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate invoice exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Invoices] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Invoice not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if invoice is posted or paid
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Finance].[Invoices] WHERE Id = @Id;
+    
+    IF @Status IN ('Posted', 'Paid', 'PartiallyPaid')
+    BEGIN
+        RAISERROR('Cannot delete invoice that is posted or paid. Please void the invoice instead.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete invoice items first
+    DELETE FROM [Finance].[InvoiceItems]
+    WHERE InvoiceId = @Id AND TenantId = @TenantId;
+    
+    -- Delete invoice
+    DELETE FROM [Finance].[Invoices]
+    WHERE Id = @Id AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- Update Invoice Status
 CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateInvoiceStatus]
     @Id UNIQUEIDENTIFIER,
@@ -334,6 +799,142 @@ BEGIN
 END
 GO
 
+-- Get All Bills
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetAllBills]
+    @TenantId UNIQUEIDENTIFIER,
+    @VendorId UNIQUEIDENTIFIER = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        Id, BillNumber, BillDate, DueDate, VendorId, SubTotal,
+        TaxAmount, DiscountAmount, TotalAmount, PaidAmount, BalanceAmount,
+        Status, PaymentTerms, Notes, TenantId, CreatedAt, UpdatedAt,
+        CreatedBy, UpdatedBy
+    FROM [Finance].[Bills]
+    WHERE TenantId = @TenantId
+        AND (@VendorId IS NULL OR VendorId = @VendorId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR BillDate >= @StartDate)
+        AND (@EndDate IS NULL OR BillDate <= @EndDate)
+    ORDER BY BillDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Finance].[Bills]
+    WHERE TenantId = @TenantId
+        AND (@VendorId IS NULL OR VendorId = @VendorId)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR BillDate >= @StartDate)
+        AND (@EndDate IS NULL OR BillDate <= @EndDate);
+END
+GO
+
+-- Update Bill
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateBill]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @BillNumber NVARCHAR(50) = NULL,
+    @BillDate DATETIME2 = NULL,
+    @DueDate DATETIME2 = NULL,
+    @VendorId UNIQUEIDENTIFIER = NULL,
+    @SubTotal DECIMAL(18,2) = NULL,
+    @TaxAmount DECIMAL(18,2) = NULL,
+    @DiscountAmount DECIMAL(18,2) = NULL,
+    @TotalAmount DECIMAL(18,2) = NULL,
+    @PaymentTerms NVARCHAR(200) = NULL,
+    @Notes NVARCHAR(1000) = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate bill exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Bills] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Bill not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Recalculate balance if amounts are updated
+    DECLARE @NewPaidAmount DECIMAL(18,2);
+    DECLARE @NewBalanceAmount DECIMAL(18,2);
+    
+    IF @TotalAmount IS NOT NULL
+    BEGIN
+        SELECT @NewPaidAmount = PaidAmount FROM [Finance].[Bills] WHERE Id = @Id;
+        SET @NewBalanceAmount = @TotalAmount - @NewPaidAmount;
+    END
+    
+    UPDATE [Finance].[Bills]
+    SET 
+        BillNumber = ISNULL(@BillNumber, BillNumber),
+        BillDate = ISNULL(@BillDate, BillDate),
+        DueDate = ISNULL(@DueDate, DueDate),
+        VendorId = ISNULL(@VendorId, VendorId),
+        SubTotal = ISNULL(@SubTotal, SubTotal),
+        TaxAmount = ISNULL(@TaxAmount, TaxAmount),
+        DiscountAmount = ISNULL(@DiscountAmount, DiscountAmount),
+        TotalAmount = ISNULL(@TotalAmount, TotalAmount),
+        BalanceAmount = ISNULL(@NewBalanceAmount, BalanceAmount),
+        PaymentTerms = ISNULL(@PaymentTerms, PaymentTerms),
+        Notes = ISNULL(@Notes, Notes),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Bill (Soft Delete)
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteBill]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate bill exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Bills] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Bill not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if bill is posted or paid
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Finance].[Bills] WHERE Id = @Id;
+    
+    IF @Status IN ('Posted', 'Paid', 'PartiallyPaid')
+    BEGIN
+        RAISERROR('Cannot delete bill that is posted or paid. Please void the bill instead.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete bill items first
+    DELETE FROM [Finance].[BillItems]
+    WHERE BillId = @Id AND TenantId = @TenantId;
+    
+    -- Delete bill
+    DELETE FROM [Finance].[Bills]
+    WHERE Id = @Id AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- PAYMENT MANAGEMENT PROCEDURES
 -- =============================================
@@ -382,6 +983,122 @@ BEGIN
     );
     
     SELECT @Id as Id;
+END
+GO
+
+-- Get All Payments
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetAllPayments]
+    @TenantId UNIQUEIDENTIFIER,
+    @PaymentType NVARCHAR(50) = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        Id, PaymentNumber, PaymentDate, PaymentType, Amount, BankAccountId,
+        Reference, Description, Status, TenantId, CreatedAt, UpdatedAt,
+        CreatedBy, UpdatedBy
+    FROM [Finance].[Payments]
+    WHERE TenantId = @TenantId
+        AND (@PaymentType IS NULL OR PaymentType = @PaymentType)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR PaymentDate >= @StartDate)
+        AND (@EndDate IS NULL OR PaymentDate <= @EndDate)
+    ORDER BY PaymentDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Finance].[Payments]
+    WHERE TenantId = @TenantId
+        AND (@PaymentType IS NULL OR PaymentType = @PaymentType)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR PaymentDate >= @StartDate)
+        AND (@EndDate IS NULL OR PaymentDate <= @EndDate);
+END
+GO
+
+-- Update Payment
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdatePayment]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @PaymentNumber NVARCHAR(50) = NULL,
+    @PaymentDate DATETIME2 = NULL,
+    @PaymentType NVARCHAR(50) = NULL,
+    @Amount DECIMAL(18,2) = NULL,
+    @BankAccountId UNIQUEIDENTIFIER = NULL,
+    @Reference NVARCHAR(100) = NULL,
+    @Description NVARCHAR(500) = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate payment exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Payments] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Payment not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Finance].[Payments]
+    SET 
+        PaymentNumber = ISNULL(@PaymentNumber, PaymentNumber),
+        PaymentDate = ISNULL(@PaymentDate, PaymentDate),
+        PaymentType = ISNULL(@PaymentType, PaymentType),
+        Amount = ISNULL(@Amount, Amount),
+        BankAccountId = ISNULL(@BankAccountId, BankAccountId),
+        Reference = ISNULL(@Reference, Reference),
+        Description = ISNULL(@Description, Description),
+        Status = ISNULL(@Status, Status),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Payment
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeletePayment]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate payment exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Payments] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Payment not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if payment is posted
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Finance].[Payments] WHERE Id = @Id;
+    
+    IF @Status = 'Posted'
+    BEGIN
+        RAISERROR('Cannot delete payment that is posted.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete payment
+    DELETE FROM [Finance].[Payments]
+    WHERE Id = @Id AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
 END
 GO
 
@@ -476,6 +1193,129 @@ BEGIN
 END
 GO
 
+-- Get All Journal Entries
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetAllJournalEntries]
+    @TenantId UNIQUEIDENTIFIER,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        Id, EntryNumber, EntryDate, Reference, Description, TotalDebit,
+        TotalCredit, Status, PostedBy, PostedAt, TenantId, CreatedAt, UpdatedAt,
+        CreatedBy, UpdatedBy
+    FROM [Finance].[JournalEntries]
+    WHERE TenantId = @TenantId
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR EntryDate >= @StartDate)
+        AND (@EndDate IS NULL OR EntryDate <= @EndDate)
+    ORDER BY EntryDate DESC, EntryNumber DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Finance].[JournalEntries]
+    WHERE TenantId = @TenantId
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR EntryDate >= @StartDate)
+        AND (@EndDate IS NULL OR EntryDate <= @EndDate);
+END
+GO
+
+-- Update Journal Entry
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateJournalEntry]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @EntryNumber NVARCHAR(50) = NULL,
+    @EntryDate DATETIME2 = NULL,
+    @Reference NVARCHAR(100) = NULL,
+    @Description NVARCHAR(500) = NULL,
+    @TotalDebit DECIMAL(18,2) = NULL,
+    @TotalCredit DECIMAL(18,2) = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate journal entry exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[JournalEntries] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Journal entry not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if entry is posted
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Finance].[JournalEntries] WHERE Id = @Id;
+    
+    IF @Status = 'Posted'
+    BEGIN
+        RAISERROR('Cannot update journal entry that is posted.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Finance].[JournalEntries]
+    SET 
+        EntryNumber = ISNULL(@EntryNumber, EntryNumber),
+        EntryDate = ISNULL(@EntryDate, EntryDate),
+        Reference = ISNULL(@Reference, Reference),
+        Description = ISNULL(@Description, Description),
+        TotalDebit = ISNULL(@TotalDebit, TotalDebit),
+        TotalCredit = ISNULL(@TotalCredit, TotalCredit),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Journal Entry
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteJournalEntry]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate journal entry exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[JournalEntries] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Journal entry not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if entry is posted
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Finance].[JournalEntries] WHERE Id = @Id;
+    
+    IF @Status = 'Posted'
+    BEGIN
+        RAISERROR('Cannot delete journal entry that is posted.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete journal entry lines first
+    DELETE FROM [Finance].[JournalEntryLines]
+    WHERE JournalEntryId = @Id AND TenantId = @TenantId;
+    
+    -- Delete journal entry
+    DELETE FROM [Finance].[JournalEntries]
+    WHERE Id = @Id AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- TAX RATE PROCEDURES
 -- =============================================
@@ -542,6 +1382,70 @@ BEGIN
 END
 GO
 
+-- Update Tax Rate
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateTaxRate]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER,
+    @TaxName NVARCHAR(100) = NULL,
+    @TaxRate DECIMAL(5,2) = NULL,
+    @TaxType NVARCHAR(50) = NULL,
+    @Description NVARCHAR(500) = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate tax rate exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[TaxRates] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Tax rate not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Finance].[TaxRates]
+    SET 
+        TaxName = ISNULL(@TaxName, TaxName),
+        TaxRate = ISNULL(@TaxRate, TaxRate),
+        TaxType = ISNULL(@TaxType, TaxType),
+        Description = ISNULL(@Description, Description),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Tax Rate (Soft Delete)
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteTaxRate]
+    @Id UNIQUEIDENTIFIER,
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate tax rate exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[TaxRates] WHERE Id = @Id AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Tax rate not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Finance].[TaxRates]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE Id = @Id
+    AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- FISCAL YEARS PROCEDURES
 -- =============================================
@@ -556,10 +1460,11 @@ BEGIN
     
     SELECT 
         fy.Id,
-        fy.YearName,
+        fy.FiscalYear,
         fy.StartDate,
         fy.EndDate,
         fy.IsActive,
+        fy.IsClosed,
         fy.CreatedAt,
         fy.UpdatedAt,
         fy.CreatedBy,
@@ -573,7 +1478,7 @@ GO
 
 -- Create Fiscal Year
 CREATE OR ALTER PROCEDURE Finance.sp_CreateFiscalYear
-    @YearName NVARCHAR(100),
+    @FiscalYear NVARCHAR(10),
     @StartDate DATETIME2,
     @EndDate DATETIME2,
     @TenantId UNIQUEIDENTIFIER,
@@ -585,10 +1490,10 @@ BEGIN
     DECLARE @Id UNIQUEIDENTIFIER = NEWID();
     
     INSERT INTO Finance.FiscalYears (
-        Id, YearName, StartDate, EndDate, TenantId, CreatedBy
+        Id, FiscalYear, StartDate, EndDate, TenantId, CreatedBy
     )
     VALUES (
-        @Id, @YearName, @StartDate, @EndDate, @TenantId, @CreatedBy
+        @Id, @FiscalYear, @StartDate, @EndDate, @TenantId, @CreatedBy
     );
     
     SELECT @Id as Id;
@@ -735,7 +1640,7 @@ BEGIN
             bh.UpdatedAt,
             bh.CreatedBy,
             bh.UpdatedBy,
-            fy.YearName as FiscalYearName,
+            fy.FiscalYear as FiscalYearName,
             u.FirstName + ' ' + u.LastName as ApprovedByName,
             ROW_NUMBER() OVER (ORDER BY bh.CreatedAt DESC) AS RowNum
         FROM Finance.BudgetHeaders bh
@@ -1001,7 +1906,7 @@ BEGIN
         ds.UpdatedAt,
         ds.CreatedBy,
         ds.UpdatedBy,
-        fy.YearName as FiscalYearName,
+        fy.FiscalYear as FiscalYearName,
         p.PeriodName
     FROM Finance.DepreciationSchedules ds
     INNER JOIN Finance.FixedAssets fa ON ds.AssetId = fa.Id
@@ -1115,5 +2020,181 @@ BEGIN
     END CATCH
 END
 GO
+
+-- =============================================
+-- CURRENCY PROCEDURES
+-- =============================================
+
+-- Get Currency by Code
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetCurrencyByCode]
+    @CurrencyCode NVARCHAR(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        Id, CurrencyCode, CurrencyName, Symbol, ExchangeRate,
+        IsBaseCurrency, IsActive, TenantId, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Finance].[Currencies]
+    WHERE CurrencyCode = @CurrencyCode;
+END
+GO
+
+-- Get All Currencies
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetAllCurrencies]
+    @TenantId UNIQUEIDENTIFIER = NULL,
+    @IsActive BIT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        Id, CurrencyCode, CurrencyName, Symbol, ExchangeRate,
+        IsBaseCurrency, IsActive, TenantId, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Finance].[Currencies]
+    WHERE (@TenantId IS NULL OR TenantId = @TenantId)
+        AND (@IsActive IS NULL OR IsActive = @IsActive)
+    ORDER BY CurrencyCode;
+END
+GO
+
+-- Get Active Currencies
+CREATE OR ALTER PROCEDURE [Finance].[sp_GetActiveCurrencies]
+    @TenantId UNIQUEIDENTIFIER = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        Id, CurrencyCode, CurrencyName, Symbol, ExchangeRate,
+        IsBaseCurrency, IsActive, TenantId, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy
+    FROM [Finance].[Currencies]
+    WHERE IsActive = 1
+        AND (@TenantId IS NULL OR TenantId = @TenantId)
+    ORDER BY CurrencyCode;
+END
+GO
+
+-- Create Currency
+CREATE OR ALTER PROCEDURE [Finance].[sp_CreateCurrency]
+    @Id UNIQUEIDENTIFIER,
+    @CurrencyCode NVARCHAR(10),
+    @CurrencyName NVARCHAR(100),
+    @Symbol NVARCHAR(10) = NULL,
+    @ExchangeRate DECIMAL(18,6) = 1,
+    @IsBaseCurrency BIT = 0,
+    @IsActive BIT = 1,
+    @TenantId UNIQUEIDENTIFIER,
+    @CreatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Check if currency code already exists for this tenant
+    IF EXISTS (SELECT 1 FROM [Finance].[Currencies] WHERE CurrencyCode = @CurrencyCode AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Currency code already exists for this tenant.', 16, 1);
+        RETURN;
+    END
+    
+    INSERT INTO [Finance].[Currencies] (
+        Id, CurrencyCode, CurrencyName, Symbol, ExchangeRate,
+        IsBaseCurrency, IsActive, TenantId, CreatedAt, CreatedBy
+    )
+    VALUES (
+        @Id, @CurrencyCode, @CurrencyName, @Symbol, @ExchangeRate,
+        @IsBaseCurrency, @IsActive, @TenantId, GETUTCDATE(), @CreatedBy
+    );
+    
+    SELECT @Id as Id, @CurrencyCode as CurrencyCode;
+END
+GO
+
+-- Update Currency
+CREATE OR ALTER PROCEDURE [Finance].[sp_UpdateCurrency]
+    @CurrencyCode NVARCHAR(10),
+    @TenantId UNIQUEIDENTIFIER,
+    @CurrencyName NVARCHAR(100) = NULL,
+    @Symbol NVARCHAR(10) = NULL,
+    @ExchangeRate DECIMAL(18,6) = NULL,
+    @IsBaseCurrency BIT = NULL,
+    @IsActive BIT = NULL,
+    @UpdatedBy NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate currency exists
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Currencies] WHERE CurrencyCode = @CurrencyCode AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Currency not found.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Finance].[Currencies]
+    SET 
+        CurrencyName = ISNULL(@CurrencyName, CurrencyName),
+        Symbol = ISNULL(@Symbol, Symbol),
+        ExchangeRate = ISNULL(@ExchangeRate, ExchangeRate),
+        IsBaseCurrency = ISNULL(@IsBaseCurrency, IsBaseCurrency),
+        IsActive = ISNULL(@IsActive, IsActive),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE CurrencyCode = @CurrencyCode AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Currency (Soft Delete)
+CREATE OR ALTER PROCEDURE [Finance].[sp_DeleteCurrency]
+    @CurrencyCode NVARCHAR(10),
+    @TenantId UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate currency exists
+    IF NOT EXISTS (SELECT 1 FROM [Finance].[Currencies] WHERE CurrencyCode = @CurrencyCode AND TenantId = @TenantId)
+    BEGIN
+        RAISERROR('Currency not found.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if currency is base currency
+    IF EXISTS (SELECT 1 FROM [Finance].[Currencies] WHERE CurrencyCode = @CurrencyCode AND TenantId = @TenantId AND IsBaseCurrency = 1)
+    BEGIN
+        RAISERROR('Cannot delete base currency.', 16, 1);
+        RETURN;
+    END
+    
+    -- Soft delete by setting IsActive = 0
+    UPDATE [Finance].[Currencies]
+    SET 
+        IsActive = 0,
+        UpdatedAt = GETUTCDATE()
+    WHERE CurrencyCode = @CurrencyCode AND TenantId = @TenantId;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Check if Currency Exists
+CREATE OR ALTER PROCEDURE [Finance].[sp_CurrencyExists]
+    @CurrencyCode NVARCHAR(10),
+    @TenantId UNIQUEIDENTIFIER = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT CASE WHEN EXISTS (SELECT 1 FROM [Finance].[Currencies] 
+                             WHERE CurrencyCode = @CurrencyCode 
+                             AND (@TenantId IS NULL OR TenantId = @TenantId)) 
+                THEN 1 ELSE 0 END as CurrencyExists;
+END
+GO
+
+-- Note: Exchange Rates are managed in Core schema, not Finance schema
+-- Exchange Rate stored procedures should be in CoreModule_StoredProcedures.sql
 
 PRINT 'Finance Module stored procedures created successfully!'

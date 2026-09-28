@@ -1,5 +1,6 @@
 using HotChocolate;
 using ERP.Application.Core;
+using ERP.Application.Interfaces.Core;
 using ERP.Infrastructure.Services;
 using ERP.Shared.DTOs.Core;
 
@@ -20,7 +21,7 @@ public class CoreQuery
 
     public async Task<TenantDto?> GetTenantByDomain(string domain, [Service] ITenantService tenantService)
     {
-        return await tenantService.GetBySubdomainAsync(domain);
+        return await tenantService.GetByDomainAsync(domain);
     }
 
     // Audit Log Queries

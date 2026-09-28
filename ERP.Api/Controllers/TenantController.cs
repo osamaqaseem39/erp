@@ -1,14 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Api.Services;
 using ERP.Api.Validators;
 using ERP.Shared.DTOs.Core;
-using FluentValidation;
 
 namespace ERP.Api.Controllers;
 
 [ApiController]
 [Route("api/tenants")]
+[Authorize]
 public class TenantController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ITenantApiService _tenantService;
@@ -38,7 +39,21 @@ public class TenantController : ERP.Api.Abstractions.ControllerBase
         return await HandleAsync(() => _tenantService.GetAllAsync());
     }
 
+    /// <summary>
+    /// Public active-tenant list for the login tenant picker (id/name/domain only).
+    /// </summary>
+    [HttpGet("login-options")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetLoginOptions()
+    {
+        return await HandleAsync(() => _tenantService.GetLoginOptionsAsync());
+    }
+
+    /// <summary>
+    /// Public tenant lookup by domain for login UI (connection string never included).
+    /// </summary>
     [HttpGet("domain/{domain}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetByDomain(string domain)
     {
         return await HandleAsync(() => _tenantService.GetByDomainAsync(domain));
@@ -59,7 +74,7 @@ public class TenantController : ERP.Api.Abstractions.ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTenantDto dto)
     {
-        dto.Id = id; // Ensure ID consistency
+        dto.Id = id;
         var validationResult = await _updateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
         {

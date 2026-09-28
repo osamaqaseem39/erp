@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Inventory;
 using ERP.Api.Validators.Inventory;
@@ -9,6 +10,7 @@ namespace ERP.Api.Controllers.Inventory;
 
 [ApiController]
 [Route("api/inventory/stock")]
+[Authorize]
 public class StockController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IStockService _service;

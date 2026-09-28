@@ -43,6 +43,7 @@ public class User : BaseEntity
     public string? TimeZone { get; set; }
     public string? PasswordSalt { get; set; }
     public string? Status { get; set; }
+    public bool IsTenantOwner { get; set; } = false;
     
     // Security and authentication properties
     public DateTime? LastLoginDate { get; set; }

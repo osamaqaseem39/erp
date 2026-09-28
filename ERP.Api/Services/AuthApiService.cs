@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ERP.Application.Core;
 using ERP.Shared.DTOs.Core;
 using ERP.Shared.Exceptions;
@@ -9,7 +10,7 @@ public interface IAuthApiService
     Task<AuthResponseDto?> LoginAsync(LoginDto loginDto);
     Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto refreshTokenDto);
     Task<bool> LogoutAsync(string refreshToken);
-    Task<bool> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
+    Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
     Task<bool> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     Task<bool> VerifyEmailAsync(string token);
 }
@@ -46,17 +47,17 @@ public class AuthApiService : IAuthApiService
         if (string.IsNullOrWhiteSpace(refreshToken))
             throw new ValidationException("Refresh token cannot be empty");
 
-        // For now, we'll need to get the user ID from the token or context
-        // This is a simplified implementation
-        return await Task.FromResult(true);
+        return await _authService.LogoutByRefreshTokenAsync(refreshToken);
     }
 
-    public async Task<bool> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
+    public async Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
     {
-        if (changePasswordDto == null)
-            throw new ValidationException("Change password DTO cannot be null");
+        if (userId == Guid.Empty)
+            throw new ValidationException("User is required");
+        if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
+            throw new ValidationException("Current and new passwords are required");
 
-        return await _authService.ChangePasswordAsync(changePasswordDto.UserId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+        return await _authService.ChangePasswordAsync(userId, currentPassword, newPassword);
     }
 
     public async Task<bool> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
@@ -64,9 +65,19 @@ public class AuthApiService : IAuthApiService
         if (resetPasswordDto == null)
             throw new ValidationException("Reset password DTO cannot be null");
 
-        // For now, we'll need to get the tenant ID from context
-        // This is a simplified implementation
-        return await Task.FromResult(true);
+        if (!string.IsNullOrWhiteSpace(resetPasswordDto.Token) &&
+            !string.IsNullOrWhiteSpace(resetPasswordDto.NewPassword))
+        {
+            return await _authService.CompletePasswordResetAsync(
+                resetPasswordDto.Email,
+                resetPasswordDto.Token,
+                resetPasswordDto.NewPassword);
+        }
+
+        if (string.IsNullOrWhiteSpace(resetPasswordDto.Email) || resetPasswordDto.TenantId == Guid.Empty)
+            throw new ValidationException("Email and TenantId are required to request a password reset");
+
+        return await _authService.ResetPasswordAsync(resetPasswordDto.Email, resetPasswordDto.TenantId);
     }
 
     public async Task<bool> VerifyEmailAsync(string token)

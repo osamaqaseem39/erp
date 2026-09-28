@@ -46,5 +46,9 @@ public class CreateSalesOrderValidator : BaseValidator<CreateSalesOrderDto>
         RuleFor(x => x.Notes)
             .MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters")
             .When(x => !string.IsNullOrEmpty(x.Notes));
+
+        RuleForEach(x => x.SalesOrderLines)
+            .SetValidator(new CreateSalesOrderLineValidator())
+            .When(x => x.SalesOrderLines.Count > 0);
     }
 }

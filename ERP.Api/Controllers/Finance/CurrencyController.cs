@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces;
 using ERP.Api.Validators.Finance;
@@ -9,6 +10,7 @@ namespace ERP.Api.Controllers.Finance;
 
 [ApiController]
 [Route("api/finance/currencies")]
+[Authorize]
 public class CurrencyController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ICurrencyService _service;

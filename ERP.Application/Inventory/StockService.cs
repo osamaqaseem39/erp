@@ -46,14 +46,45 @@ public class StockService : IStockService
 
     public async Task<decimal> GetStockLevelAsync(Guid itemId, Guid warehouseId)
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("GetStockLevelAsync method needs to be implemented in the repository");
+        var entity = await _repository.GetByItemAndWarehouseAsync(itemId, warehouseId, Guid.Empty);
+        return entity?.AvailableQuantity ?? entity?.CurrentQuantity ?? 0m;
     }
 
     public async Task<bool> AdjustStockAsync(StockAdjustmentDto dto)
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("AdjustStockAsync method needs to be implemented in the repository");
+        foreach (var detail in dto.Details)
+        {
+            var qty = detail.QuantityDifference != 0
+                ? detail.QuantityDifference
+                : detail.QuantityCounted - detail.QuantityOnHand;
+
+            var entity = await _repository.GetByItemAndWarehouseAsync(detail.ItemId, dto.WarehouseId, dto.TenantId);
+            if (entity == null)
+            {
+                entity = new StockBalance
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = dto.TenantId,
+                    ItemId = detail.ItemId,
+                    WarehouseId = dto.WarehouseId,
+                    CurrentQuantity = detail.QuantityCounted,
+                    ReservedQuantity = 0,
+                    LastUpdated = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = dto.CreatedBy
+                };
+                await _repository.CreateAsync(entity);
+            }
+            else
+            {
+                entity.CurrentQuantity += qty;
+                entity.LastUpdated = DateTime.UtcNow;
+                entity.UpdatedBy = dto.UpdatedBy ?? dto.CreatedBy;
+                await _repository.UpdateAsync(entity);
+            }
+        }
+
+        return true;
     }
 
     public async Task<Guid> CreateAsync(StockBalanceDto dto)
@@ -80,14 +111,49 @@ public class StockService : IStockService
 
     public async Task<bool> TransferStockAsync(StockTransferDto dto)
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("TransferStockAsync method needs to be implemented in the repository");
+        foreach (var detail in dto.Details)
+        {
+            var from = await _repository.GetByItemAndWarehouseAsync(detail.ItemId, dto.FromWarehouseId, dto.TenantId);
+            if (from == null || from.CurrentQuantity < detail.Quantity)
+                return false;
+
+            from.CurrentQuantity -= detail.Quantity;
+            from.LastUpdated = DateTime.UtcNow;
+            await _repository.UpdateAsync(from);
+
+            var to = await _repository.GetByItemAndWarehouseAsync(detail.ItemId, dto.ToWarehouseId, dto.TenantId);
+            if (to == null)
+            {
+                to = new StockBalance
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = dto.TenantId,
+                    ItemId = detail.ItemId,
+                    WarehouseId = dto.ToWarehouseId,
+                    CurrentQuantity = detail.Quantity,
+                    ReservedQuantity = 0,
+                    LastUpdated = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = dto.CreatedBy
+                };
+                await _repository.CreateAsync(to);
+            }
+            else
+            {
+                to.CurrentQuantity += detail.Quantity;
+                to.LastUpdated = DateTime.UtcNow;
+                await _repository.UpdateAsync(to);
+            }
+        }
+
+        return true;
     }
 
     public async Task<IEnumerable<StockLedgerDto>> GetStockLedgerAsync(Guid itemId, Guid warehouseId)
     {
-        // This method needs to be implemented in the repository
-        throw new NotImplementedException("GetStockLedgerAsync method needs to be implemented in the repository");
+        // Ledger repository wiring is optional; return empty until ledger is fully wired.
+        await Task.CompletedTask;
+        return Enumerable.Empty<StockLedgerDto>();
     }
 
     private static StockBalanceDto MapToDto(StockBalance entity)

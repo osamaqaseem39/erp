@@ -3,12 +3,19 @@
 -- Multi-tenant SaaS ERP System
 -- =============================================
 
+-- Create Procurement Schema if it doesn't exist
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Procurement')
+BEGIN
+    EXEC('CREATE SCHEMA [Procurement]')
+END
+GO
+
 -- =============================================
 -- VENDOR MANAGEMENT PROCEDURES
 -- =============================================
 
 -- Get Vendor by Code
-CREATE OR ALTER PROCEDURE Procurement.sp_GetVendorByCode
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetVendorByCode]
     @VendorCode NVARCHAR(50),
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
@@ -40,8 +47,8 @@ BEGIN
         v.CreatedBy,
         v.UpdatedBy,
         c.CompanyName
-    FROM Procurement.Vendors v
-    INNER JOIN Core.Companies c ON v.CompanyID = c.Id
+    FROM [Procurement].Vendors v
+    INNER JOIN [Core].Companies c ON v.CompanyID = c.Id
     WHERE v.VendorCode = @VendorCode 
     AND v.CompanyID = @CompanyID
     AND v.TenantID = @TenantID
@@ -50,7 +57,7 @@ END
 GO
 
 -- Get Vendor by Email
-CREATE OR ALTER PROCEDURE Procurement.sp_GetVendorByEmail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetVendorByEmail]
     @Email NVARCHAR(255),
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -81,8 +88,8 @@ BEGIN
         v.CreatedBy,
         v.UpdatedBy,
         c.CompanyName
-    FROM Procurement.Vendors v
-    INNER JOIN Core.Companies c ON v.CompanyID = c.Id
+    FROM [Procurement].Vendors v
+    INNER JOIN [Core].Companies c ON v.CompanyID = c.Id
     WHERE v.Email = @Email 
     AND v.TenantID = @TenantID
     AND v.IsActive = 1;
@@ -90,7 +97,7 @@ END
 GO
 
 -- Get Vendor by ID
-CREATE OR ALTER PROCEDURE Procurement.sp_GetVendorById
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetVendorById]
     @VendorID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -121,8 +128,8 @@ BEGIN
         v.CreatedBy,
         v.UpdatedBy,
         c.CompanyName
-    FROM Procurement.Vendors v
-    INNER JOIN Core.Companies c ON v.CompanyID = c.Id
+    FROM [Procurement].Vendors v
+    INNER JOIN [Core].Companies c ON v.CompanyID = c.Id
     WHERE v.VendorID = @VendorID 
     AND v.TenantID = @TenantID
     AND v.IsActive = 1;
@@ -130,7 +137,7 @@ END
 GO
 
 -- Get All Vendors with Pagination
-CREATE OR ALTER PROCEDURE Procurement.sp_GetAllVendors
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetAllVendors]
     @TenantID UNIQUEIDENTIFIER,
     @CompanyID UNIQUEIDENTIFIER = NULL,
     @SearchTerm NVARCHAR(255) = NULL,
@@ -148,8 +155,8 @@ BEGIN
     WITH FilteredVendors AS (
         SELECT 
             v.VendorID,
-            v.CompanyID,
-            v.TenantID,
+        v.CompanyID,
+        v.TenantID,
             v.VendorCode,
             v.VendorName,
             v.ContactPerson,
@@ -175,8 +182,8 @@ BEGIN
                     CASE WHEN @SortBy = 'CreatedAt' AND @SortDirection = 'ASC' THEN v.CreatedAt END ASC,
                     CASE WHEN @SortBy = 'CreatedAt' AND @SortDirection = 'DESC' THEN v.CreatedAt END DESC
             ) AS RowNum
-        FROM Procurement.Vendors v
-        INNER JOIN Core.Companies c ON v.CompanyID = c.Id
+        FROM [Procurement].Vendors v
+        INNER JOIN [Core].Companies c ON v.CompanyID = c.Id
         WHERE v.TenantID = @TenantID
         AND (@CompanyID IS NULL OR v.CompanyID = @CompanyID)
         AND (@SearchTerm IS NULL OR 
@@ -210,9 +217,9 @@ BEGIN
     
     -- Return total count
     SELECT COUNT(*) as TotalCount
-    FROM Procurement.Vendors v
+    FROM [Procurement].Vendors v
     WHERE v.TenantID = @TenantID
-    AND (@CompanyID IS NULL OR v.CompanyID = @CompanyID)
+        AND (@CompanyID IS NULL OR v.CompanyID = @CompanyID)
     AND (@SearchTerm IS NULL OR 
          v.VendorName LIKE '%' + @SearchTerm + '%' OR 
          v.VendorCode LIKE '%' + @SearchTerm + '%' OR
@@ -222,7 +229,7 @@ END
 GO
 
 -- Create Vendor
-CREATE OR ALTER PROCEDURE Procurement.sp_CreateVendor
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreateVendor]
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @VendorCode NVARCHAR(50),
@@ -246,7 +253,7 @@ BEGIN
     
     DECLARE @VendorID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.Vendors (
+    INSERT INTO [Procurement].Vendors (
         VendorID, CompanyID, TenantID, VendorCode, VendorName, ContactPerson,
         PhoneNumber, Email, AddressLine1, AddressLine2, City, State, Country,
         PostalCode, TaxNumber, PaymentTerms, CreditLimit, CreatedBy
@@ -262,7 +269,7 @@ END
 GO
 
 -- Update Vendor
-CREATE OR ALTER PROCEDURE Procurement.sp_UpdateVendor
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdateVendor]
     @VendorID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @VendorCode NVARCHAR(50) = NULL,
@@ -285,7 +292,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    UPDATE Procurement.Vendors
+    UPDATE [Procurement].Vendors
     SET 
         VendorCode = ISNULL(@VendorCode, VendorCode),
         VendorName = ISNULL(@VendorName, VendorName),
@@ -312,7 +319,7 @@ END
 GO
 
 -- Delete Vendor
-CREATE OR ALTER PROCEDURE Procurement.sp_DeleteVendor
+CREATE OR ALTER PROCEDURE [Procurement].[sp_DeleteVendor]
     @VendorID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -320,7 +327,7 @@ BEGIN
     SET NOCOUNT ON;
     
     -- Soft delete - set IsActive to 0
-    UPDATE Procurement.Vendors
+    UPDATE [Procurement].Vendors
     SET IsActive = 0, UpdatedAt = GETUTCDATE()
     WHERE VendorID = @VendorID 
     AND TenantID = @TenantID;
@@ -334,7 +341,7 @@ GO
 -- =============================================
 
 -- Get Purchase Requisition by ID
-CREATE OR ALTER PROCEDURE Procurement.sp_GetPurchaseRequisitionById
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseRequisitionById]
     @PRID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -346,7 +353,7 @@ BEGIN
         pr.CompanyID,
         pr.TenantID,
         pr.RequestedByUserID,
-        pr.DepartmentID,
+        pr.DepartmentId as DepartmentID,
         pr.RequestDate,
         pr.RequiredByDate,
         pr.Status,
@@ -357,16 +364,16 @@ BEGIN
         pr.UpdatedBy,
         u.FirstName + ' ' + u.LastName as RequestedByName,
         c.CompanyName
-    FROM Procurement.PurchaseRequisitions pr
-    INNER JOIN Core.Users u ON pr.RequestedByUserID = u.Id
-    INNER JOIN Core.Companies c ON pr.CompanyID = c.Id
+    FROM [Procurement].PurchaseRequisitions pr
+    INNER JOIN [Core].Users u ON pr.RequestedByUserID = u.Id
+    INNER JOIN [Core].Companies c ON pr.CompanyID = c.Id
     WHERE pr.PRID = @PRID 
     AND pr.TenantID = @TenantID;
 END
 GO
 
 -- Get Purchase Requisition Details
-CREATE OR ALTER PROCEDURE Procurement.sp_GetPurchaseRequisitionDetails
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseRequisitionDetails]
     @PRID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -375,25 +382,24 @@ BEGIN
     
     SELECT 
         prd.PRDetailID,
-        prd.PRID,
+        prd.PRId as PRID,
         prd.ItemID,
         prd.QuantityRequested,
-        prd.UnitOfMeasureID,
+        prd.UnitOfMeasureId as UnitOfMeasureID,
         prd.EstimatedUnitPrice,
         prd.Remarks,
         i.ItemName,
         i.ItemCode
         -- uom.UnitName, -- TODO: Create UnitOfMeasures table
         -- uom.UnitSymbol -- TODO: Create UnitOfMeasures table
-    FROM Procurement.PurchaseRequisitionDetails prd
-    INNER JOIN Inventory.Items i ON prd.ItemID = i.Id
-    -- INNER JOIN Inventory.UnitOfMeasures uom ON prd.UnitOfMeasureID = uom.UnitOfMeasureID -- TODO: Create UnitOfMeasures table
-    WHERE prd.PRID = @PRID;
+    FROM [Procurement].PurchaseRequisitionDetails prd
+    INNER JOIN [Inventory].Items i ON prd.ItemID = i.Id
+    WHERE prd.PRId = @PRID;
 END
 GO
 
 -- Create Purchase Requisition
-CREATE OR ALTER PROCEDURE Procurement.sp_CreatePurchaseRequisition
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreatePurchaseRequisition]
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @RequestedByUserID UNIQUEIDENTIFIER,
@@ -407,13 +413,13 @@ BEGIN
     
     DECLARE @PRID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.PurchaseRequisitions (
+    INSERT INTO [Procurement].PurchaseRequisitions (
         PRID, CompanyID, TenantID, RequestedByUserID, DepartmentID,
-        RequiredByDate, Remarks, CreatedBy
+        RequestDate, RequiredByDate, Status, Remarks, CreatedBy
     )
     VALUES (
         @PRID, @CompanyID, @TenantID, @RequestedByUserID, @DepartmentID,
-        @RequiredByDate, @Remarks, @CreatedBy
+        GETUTCDATE(), @RequiredByDate, 'Draft', @Remarks, @CreatedBy
     );
     
     SELECT @PRID as PRID;
@@ -421,7 +427,7 @@ END
 GO
 
 -- Add Purchase Requisition Detail
-CREATE OR ALTER PROCEDURE Procurement.sp_AddPurchaseRequisitionDetail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddPurchaseRequisitionDetail]
     @PRID UNIQUEIDENTIFIER,
     @ItemID UNIQUEIDENTIFIER,
     @QuantityRequested DECIMAL(18,4),
@@ -435,7 +441,7 @@ BEGIN
     
     DECLARE @PRDetailID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.PurchaseRequisitionDetails (
+    INSERT INTO [Procurement].PurchaseRequisitionDetails (
         PRDetailID, PRID, ItemID, QuantityRequested, UnitOfMeasureID,
         EstimatedUnitPrice, Remarks, CreatedBy
     )
@@ -449,7 +455,7 @@ END
 GO
 
 -- Update Purchase Requisition Status
-CREATE OR ALTER PROCEDURE Procurement.sp_UpdatePurchaseRequisitionStatus
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdatePurchaseRequisitionStatus]
     @PRID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @Status NVARCHAR(50),
@@ -458,7 +464,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    UPDATE Procurement.PurchaseRequisitions
+    UPDATE [Procurement].PurchaseRequisitions
     SET 
         Status = @Status,
         UpdatedAt = GETUTCDATE(),
@@ -470,12 +476,143 @@ BEGIN
 END
 GO
 
+-- Get All Purchase Requisitions
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetAllPurchaseRequisitions]
+    @TenantID UNIQUEIDENTIFIER,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        pr.PRID,
+        pr.CompanyID,
+        pr.TenantID,
+        pr.RequestedByUserID,
+        pr.DepartmentId as DepartmentID,
+        pr.RequestDate,
+        pr.RequiredByDate,
+        pr.Status,
+        pr.Remarks,
+        pr.CreatedAt,
+        pr.UpdatedAt,
+        pr.CreatedBy,
+        pr.UpdatedBy,
+        u.FirstName + ' ' + u.LastName as RequestedByName,
+        c.CompanyName
+    FROM [Procurement].PurchaseRequisitions pr
+    INNER JOIN [Core].Users u ON pr.RequestedByUserID = u.Id
+    INNER JOIN [Core].Companies c ON pr.CompanyID = c.Id
+    WHERE pr.TenantId = @TenantID
+        AND (@Status IS NULL OR pr.Status = @Status)
+        AND (@StartDate IS NULL OR pr.RequestDate >= @StartDate)
+        AND (@EndDate IS NULL OR pr.RequestDate <= @EndDate)
+    ORDER BY pr.RequestDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Procurement].PurchaseRequisitions
+    WHERE TenantId = @TenantID
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR RequestDate >= @StartDate)
+        AND (@EndDate IS NULL OR RequestDate <= @EndDate);
+END
+GO
+
+-- Update Purchase Requisition
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdatePurchaseRequisition]
+    @PRID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER,
+    @DepartmentID UNIQUEIDENTIFIER = NULL,
+    @RequiredByDate DATETIME2 = NULL,
+    @Remarks NVARCHAR(MAX) = NULL,
+    @UpdatedBy NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate PR exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseRequisitions WHERE PRID = @PRID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase requisition not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if PR is approved
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseRequisitions WHERE PRID = @PRID;
+    
+    IF @Status = 'Approved'
+    BEGIN
+        RAISERROR('Cannot update approved purchase requisition.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Procurement].PurchaseRequisitions
+    SET 
+        DepartmentId = ISNULL(@DepartmentID, DepartmentId),
+        RequiredByDate = ISNULL(@RequiredByDate, RequiredByDate),
+        Remarks = ISNULL(@Remarks, Remarks),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE PRID = @PRID
+    AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Purchase Requisition
+CREATE OR ALTER PROCEDURE [Procurement].[sp_DeletePurchaseRequisition]
+    @PRID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate PR exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseRequisitions WHERE PRID = @PRID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase requisition not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if PR is approved
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseRequisitions WHERE PRID = @PRID;
+    
+    IF @Status = 'Approved'
+    BEGIN
+        RAISERROR('Cannot delete approved purchase requisition.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete PR details first
+    DELETE FROM [Procurement].PurchaseRequisitionDetails
+    WHERE PRID = @PRID;
+    
+    -- Delete PR
+    DELETE FROM [Procurement].PurchaseRequisitions
+    WHERE PRID = @PRID AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- PURCHASE ORDER PROCEDURES
 -- =============================================
 
 -- Get Purchase Order by ID
-CREATE OR ALTER PROCEDURE Procurement.sp_GetPurchaseOrderById
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseOrderById]
     @POID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -502,16 +639,16 @@ BEGIN
         v.VendorName,
         v.VendorCode,
         c.CompanyName
-    FROM Procurement.PurchaseOrders po
-    INNER JOIN Procurement.Vendors v ON po.VendorID = v.VendorID
-    INNER JOIN Core.Companies c ON po.CompanyID = c.Id
+    FROM [Procurement].PurchaseOrders po
+    INNER JOIN [Procurement].Vendors v ON po.VendorID = v.VendorID
+    INNER JOIN [Core].Companies c ON po.CompanyID = c.Id
     WHERE po.POID = @POID 
     AND po.TenantID = @TenantID;
 END
 GO
 
 -- Get Purchase Order Details
-CREATE OR ALTER PROCEDURE Procurement.sp_GetPurchaseOrderDetails
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseOrderDetails]
     @POID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -529,18 +666,17 @@ BEGIN
         pod.NetAmount,
         pod.ReceivedQuantity,
         i.ItemName,
-        i.ItemCode,
+        i.ItemCode
         -- uom.UnitName, -- TODO: Create UnitOfMeasures table
         -- uom.UnitSymbol -- TODO: Create UnitOfMeasures table
-    FROM Procurement.PurchaseOrderDetails pod
-    INNER JOIN Inventory.Items i ON pod.ItemID = i.Id
-    -- INNER JOIN Inventory.UnitOfMeasures uom ON i.UnitOfMeasureID = uom.UnitOfMeasureID -- TODO: Create UnitOfMeasures table
+    FROM [Procurement].PurchaseOrderDetails pod
+    INNER JOIN [Inventory].Items i ON pod.ItemID = i.Id
     WHERE pod.POID = @POID;
 END
 GO
 
 -- Create Purchase Order
-CREATE OR ALTER PROCEDURE Procurement.sp_CreatePurchaseOrder
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreatePurchaseOrder]
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @RFQID UNIQUEIDENTIFIER = NULL,
@@ -556,13 +692,13 @@ BEGIN
     
     DECLARE @POID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.PurchaseOrders (
+    INSERT INTO [Procurement].PurchaseOrders (
         POID, CompanyID, TenantID, RFQID, VendorID,
-        ExpectedDeliveryDate, Currency, PaymentTerms, DeliveryTerms, CreatedBy
+        OrderDate, ExpectedDeliveryDate, Currency, PaymentTerms, DeliveryTerms, Status, CreatedBy
     )
     VALUES (
         @POID, @CompanyID, @TenantID, @RFQID, @VendorID,
-        @ExpectedDeliveryDate, @Currency, @PaymentTerms, @DeliveryTerms, @CreatedBy
+        GETUTCDATE(), @ExpectedDeliveryDate, @Currency, @PaymentTerms, @DeliveryTerms, 'Draft', @CreatedBy
     );
     
     SELECT @POID as POID;
@@ -570,7 +706,7 @@ END
 GO
 
 -- Add Purchase Order Detail
-CREATE OR ALTER PROCEDURE Procurement.sp_AddPurchaseOrderDetail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddPurchaseOrderDetail]
     @POID UNIQUEIDENTIFIER,
     @ItemID UNIQUEIDENTIFIER,
     @QuantityOrdered DECIMAL(18,4),
@@ -588,7 +724,7 @@ BEGIN
     -- Calculate net amount
     SET @NetAmount = (@QuantityOrdered * @UnitPrice) - ((@QuantityOrdered * @UnitPrice * @Discount) / 100) + @TaxAmount;
     
-    INSERT INTO Procurement.PurchaseOrderDetails (
+    INSERT INTO [Procurement].PurchaseOrderDetails (
         PODetailID, POID, ItemID, QuantityOrdered, UnitPrice,
         Discount, TaxAmount, NetAmount, CreatedBy
     )
@@ -598,10 +734,10 @@ BEGIN
     );
     
     -- Update PO total amount
-    UPDATE Procurement.PurchaseOrders
+    UPDATE [Procurement].PurchaseOrders
     SET TotalAmount = (
         SELECT SUM(NetAmount) 
-        FROM Procurement.PurchaseOrderDetails 
+        FROM [Procurement].PurchaseOrderDetails 
         WHERE POID = @POID
     )
     WHERE POID = @POID;
@@ -611,7 +747,7 @@ END
 GO
 
 -- Update Purchase Order Status
-CREATE OR ALTER PROCEDURE Procurement.sp_UpdatePurchaseOrderStatus
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdatePurchaseOrderStatus]
     @POID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @Status NVARCHAR(50),
@@ -621,7 +757,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    UPDATE Procurement.PurchaseOrders
+    UPDATE [Procurement].PurchaseOrders
     SET 
         Status = @Status,
         ApprovedBy = ISNULL(@ApprovedBy, ApprovedBy),
@@ -634,12 +770,346 @@ BEGIN
 END
 GO
 
+-- Get All Purchase Orders
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetAllPurchaseOrders]
+    @TenantID UNIQUEIDENTIFIER,
+    @VendorID UNIQUEIDENTIFIER = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        po.POID,
+        po.CompanyID,
+        po.TenantID,
+        po.RFQID,
+        po.VendorID,
+        po.OrderDate,
+        po.ExpectedDeliveryDate,
+        po.Currency,
+        po.TotalAmount,
+        po.PaymentTerms,
+        po.DeliveryTerms,
+        po.Status,
+        po.CreatedBy,
+        po.ApprovedBy,
+        po.CreatedAt,
+        po.UpdatedAt,
+        v.VendorName,
+        v.VendorCode,
+        c.CompanyName
+    FROM [Procurement].PurchaseOrders po
+    INNER JOIN [Procurement].Vendors v ON po.VendorID = v.VendorID
+    INNER JOIN [Core].Companies c ON po.CompanyID = c.Id
+    WHERE po.TenantId = @TenantID
+        AND (@VendorID IS NULL OR po.VendorID = @VendorID)
+        AND (@Status IS NULL OR po.Status = @Status)
+        AND (@StartDate IS NULL OR po.OrderDate >= @StartDate)
+        AND (@EndDate IS NULL OR po.OrderDate <= @EndDate)
+    ORDER BY po.OrderDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Procurement].PurchaseOrders
+    WHERE TenantId = @TenantID
+        AND (@VendorID IS NULL OR VendorID = @VendorID)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR OrderDate >= @StartDate)
+        AND (@EndDate IS NULL OR OrderDate <= @EndDate);
+END
+GO
+
+-- Get Purchase Orders by Vendor
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseOrdersByVendor]
+    @VendorID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER,
+    @Status NVARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        po.POID,
+        po.CompanyID,
+        po.TenantID,
+        po.RFQID,
+        po.VendorID,
+        po.OrderDate,
+        po.ExpectedDeliveryDate,
+        po.Currency,
+        po.TotalAmount,
+        po.PaymentTerms,
+        po.DeliveryTerms,
+        po.Status,
+        po.CreatedBy,
+        po.ApprovedBy,
+        po.CreatedAt,
+        po.UpdatedAt,
+        v.VendorName,
+        v.VendorCode,
+        c.CompanyName
+    FROM [Procurement].PurchaseOrders po
+    INNER JOIN [Procurement].Vendors v ON po.VendorID = v.VendorID
+    INNER JOIN [Core].Companies c ON po.CompanyID = c.Id
+    WHERE po.VendorID = @VendorID
+        AND po.TenantId = @TenantID
+        AND (@Status IS NULL OR po.Status = @Status)
+    ORDER BY po.OrderDate DESC;
+END
+GO
+
+-- Get Purchase Orders by Status
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseOrdersByStatus]
+    @Status NVARCHAR(50),
+    @TenantID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        po.POID,
+        po.CompanyID,
+        po.TenantID,
+        po.RFQID,
+        po.VendorID,
+        po.OrderDate,
+        po.ExpectedDeliveryDate,
+        po.Currency,
+        po.TotalAmount,
+        po.PaymentTerms,
+        po.DeliveryTerms,
+        po.Status,
+        po.CreatedBy,
+        po.ApprovedBy,
+        po.CreatedAt,
+        po.UpdatedAt,
+        v.VendorName,
+        v.VendorCode,
+        c.CompanyName
+    FROM [Procurement].PurchaseOrders po
+    INNER JOIN [Procurement].Vendors v ON po.VendorID = v.VendorID
+    INNER JOIN [Core].Companies c ON po.CompanyID = c.Id
+    WHERE po.Status = @Status
+        AND po.TenantId = @TenantID
+    ORDER BY po.OrderDate DESC;
+END
+GO
+
+-- Get Purchase Orders by Date Range
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseOrdersByDateRange]
+    @StartDate DATETIME2,
+    @EndDate DATETIME2,
+    @TenantID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        po.POID,
+        po.CompanyID,
+        po.TenantID,
+        po.RFQID,
+        po.VendorID,
+        po.OrderDate,
+        po.ExpectedDeliveryDate,
+        po.Currency,
+        po.TotalAmount,
+        po.PaymentTerms,
+        po.DeliveryTerms,
+        po.Status,
+        po.CreatedBy,
+        po.ApprovedBy,
+        po.CreatedAt,
+        po.UpdatedAt,
+        v.VendorName,
+        v.VendorCode,
+        c.CompanyName
+    FROM [Procurement].PurchaseOrders po
+    INNER JOIN [Procurement].Vendors v ON po.VendorID = v.VendorID
+    INNER JOIN [Core].Companies c ON po.CompanyID = c.Id
+    WHERE po.OrderDate >= @StartDate
+        AND po.OrderDate <= @EndDate
+        AND po.TenantId = @TenantID
+    ORDER BY po.OrderDate DESC;
+END
+GO
+
+-- Update Purchase Order
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdatePurchaseOrder]
+    @POID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER,
+    @VendorID UNIQUEIDENTIFIER = NULL,
+    @ExpectedDeliveryDate DATETIME2 = NULL,
+    @Currency NVARCHAR(3) = NULL,
+    @PaymentTerms NVARCHAR(100) = NULL,
+    @DeliveryTerms NVARCHAR(255) = NULL,
+    @UpdatedBy NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate PO exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseOrders WHERE POID = @POID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase order not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if PO is approved or completed
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseOrders WHERE POID = @POID;
+    
+    IF @Status IN ('Approved', 'Completed', 'Received')
+    BEGIN
+        RAISERROR('Cannot update purchase order that is approved, completed, or received.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Procurement].PurchaseOrders
+    SET 
+        VendorID = ISNULL(@VendorID, VendorID),
+        ExpectedDeliveryDate = ISNULL(@ExpectedDeliveryDate, ExpectedDeliveryDate),
+        Currency = ISNULL(@Currency, Currency),
+        PaymentTerms = ISNULL(@PaymentTerms, PaymentTerms),
+        DeliveryTerms = ISNULL(@DeliveryTerms, DeliveryTerms),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE POID = @POID
+    AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Purchase Order
+CREATE OR ALTER PROCEDURE [Procurement].[sp_DeletePurchaseOrder]
+    @POID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate PO exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseOrders WHERE POID = @POID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase order not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if PO is approved or completed
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseOrders WHERE POID = @POID;
+    
+    IF @Status IN ('Approved', 'Completed', 'Received')
+    BEGIN
+        RAISERROR('Cannot delete purchase order that is approved, completed, or received.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete PO details first
+    DELETE FROM [Procurement].PurchaseOrderDetails
+    WHERE POID = @POID;
+    
+    -- Delete PO
+    DELETE FROM [Procurement].PurchaseOrders
+    WHERE POID = @POID AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Approve Purchase Order
+CREATE OR ALTER PROCEDURE [Procurement].[sp_ApprovePurchaseOrder]
+    @POID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER,
+    @ApprovedBy NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate PO exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseOrders WHERE POID = @POID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase order not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if PO is already approved
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseOrders WHERE POID = @POID;
+    
+    IF @Status = 'Approved'
+    BEGIN
+        RAISERROR('Purchase order is already approved.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Procurement].PurchaseOrders
+    SET 
+        Status = 'Approved',
+        ApprovedBy = @ApprovedBy,
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = @ApprovedBy
+    WHERE POID = @POID
+    AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Reject Purchase Order
+CREATE OR ALTER PROCEDURE [Procurement].[sp_RejectPurchaseOrder]
+    @POID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER,
+    @RejectedBy NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate PO exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseOrders WHERE POID = @POID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase order not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if PO is already completed or received
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseOrders WHERE POID = @POID;
+    
+    IF @Status IN ('Completed', 'Received')
+    BEGIN
+        RAISERROR('Cannot reject purchase order that is completed or received.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Procurement].PurchaseOrders
+    SET 
+        Status = 'Rejected',
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = @RejectedBy
+    WHERE POID = @POID
+    AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- GOODS RECEIPT NOTE PROCEDURES
 -- =============================================
 
 -- Get GRN by ID
-CREATE OR ALTER PROCEDURE Procurement.sp_GetGRNById
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetGRNById]
     @GRNID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -653,7 +1123,7 @@ BEGIN
         grn.POID,
         grn.ReceivedDate,
         grn.WarehouseID,
-        grn.ReceivedByUserID,
+        grn.ReceivedByUserId as ReceivedByUserID,
         grn.Status,
         grn.Remarks,
         grn.CreatedAt,
@@ -662,18 +1132,18 @@ BEGIN
         v.VendorName,
         w.WarehouseName,
         u.FirstName + ' ' + u.LastName as ReceivedByName
-    FROM Procurement.GoodsReceiptNote grn
-    INNER JOIN Procurement.PurchaseOrders po ON grn.POID = po.POID
-    INNER JOIN Procurement.Vendors v ON po.VendorID = v.VendorID
-    INNER JOIN Inventory.Warehouses w ON grn.WarehouseID = w.WarehouseID
-    INNER JOIN Core.Users u ON grn.ReceivedByUserID = u.Id
+    FROM [Procurement].GoodsReceiptNote grn
+    INNER JOIN [Procurement].PurchaseOrders po ON grn.POID = po.POID
+    INNER JOIN [Procurement].Vendors v ON po.VendorID = v.VendorID
+    INNER JOIN [Inventory].Warehouses w ON grn.WarehouseID = w.Id
+    INNER JOIN [Core].Users u ON grn.ReceivedByUserId = u.Id
     WHERE grn.GRNID = @GRNID 
     AND grn.TenantID = @TenantID;
 END
 GO
 
 -- Create GRN
-CREATE OR ALTER PROCEDURE Procurement.sp_CreateGRN
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreateGRN]
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @POID UNIQUEIDENTIFIER,
@@ -687,9 +1157,9 @@ BEGIN
     
     DECLARE @GRNID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.GoodsReceiptNote (
+    INSERT INTO [Procurement].GoodsReceiptNote (
         GRNID, CompanyID, TenantID, POID, WarehouseID,
-        ReceivedByUserID, Remarks, CreatedBy
+        ReceivedByUserId, Remarks, CreatedBy
     )
     VALUES (
         @GRNID, @CompanyID, @TenantID, @POID, @WarehouseID,
@@ -701,7 +1171,7 @@ END
 GO
 
 -- Add GRN Detail
-CREATE OR ALTER PROCEDURE Procurement.sp_AddGRNDetail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddGRNDetail]
     @GRNID UNIQUEIDENTIFIER,
     @ItemID UNIQUEIDENTIFIER,
     @QuantityReceived DECIMAL(18,4),
@@ -719,8 +1189,8 @@ BEGIN
     -- Calculate total amount
     SET @TotalAmount = (@QuantityReceived * @UnitPrice) + @TaxAmount;
     
-    INSERT INTO Procurement.GoodsReceiptNoteDetails (
-        GRNDetailID, GRNID, ItemID, QuantityReceived, BatchSerialID,
+    INSERT INTO [Procurement].GoodsReceiptNoteDetails (
+        GRNDetailID, GRNID, ItemID, QuantityReceived, BatchSerialId,
         UnitPrice, TaxAmount, TotalAmount, CreatedBy
     )
     VALUES (
@@ -731,8 +1201,8 @@ BEGIN
     -- Update received quantity in PO details
     UPDATE pod
     SET ReceivedQuantity = pod.ReceivedQuantity + @QuantityReceived
-    FROM Procurement.PurchaseOrderDetails pod
-    INNER JOIN Procurement.GoodsReceiptNote grn ON pod.POID = grn.POID
+    FROM [Procurement].PurchaseOrderDetails pod
+    INNER JOIN [Procurement].GoodsReceiptNote grn ON pod.POID = grn.POID
     WHERE grn.GRNID = @GRNID 
     AND pod.ItemID = @ItemID;
     
@@ -741,7 +1211,7 @@ END
 GO
 
 -- Post GRN (Update inventory)
-CREATE OR ALTER PROCEDURE Procurement.sp_PostGRN
+CREATE OR ALTER PROCEDURE [Procurement].[sp_PostGRN]
     @GRNID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @PostedBy NVARCHAR(255)
@@ -752,7 +1222,7 @@ BEGIN
     
     BEGIN TRY
         -- Update GRN status
-        UPDATE Procurement.GoodsReceiptNote
+        UPDATE [Procurement].GoodsReceiptNote
         SET 
             Status = 'Posted',
             UpdatedAt = GETUTCDATE(),
@@ -761,48 +1231,52 @@ BEGIN
         AND TenantID = @TenantID;
         
         -- Update inventory stock balances
-        INSERT INTO Inventory.StockLedger (
-            StockLedgerID, ItemID, WarehouseID, TransactionType, 
-            Quantity, UnitPrice, ReferenceID, ReferenceType, 
-            TransactionDate, TenantID, CreatedBy
+        INSERT INTO [Inventory].StockLedgers (
+            Id, ItemId, WarehouseId, TransactionType,
+            TransactionDate, Quantity, UnitCost, TotalCost,
+            Reference, ReferenceId, TenantId, CreatedBy
         )
         SELECT 
             NEWID(),
             grnd.ItemID,
             grn.WarehouseID,
             'GRN',
+            grn.ReceivedDate,
             grnd.QuantityReceived,
             grnd.UnitPrice,
-            @GRNID,
+            grnd.QuantityReceived * grnd.UnitPrice,
             'GRN',
-            grn.ReceivedDate,
+            @GRNID,
             @TenantID,
             @PostedBy
-        FROM Procurement.GoodsReceiptNoteDetails grnd
-        INNER JOIN Procurement.GoodsReceiptNote grn ON grnd.GRNID = grn.GRNID
+        FROM [Procurement].GoodsReceiptNoteDetails grnd
+        INNER JOIN [Procurement].GoodsReceiptNote grn ON grnd.GRNID = grn.GRNID
         WHERE grn.GRNID = @GRNID;
         
         -- Update stock balances
-        MERGE Inventory.StockBalances AS target
+        MERGE [Inventory].StockBalances AS target
         USING (
             SELECT 
                 grnd.ItemID,
                 grn.WarehouseID,
-                SUM(grnd.QuantityReceived) as Quantity,
-                AVG(grnd.UnitPrice) as UnitPrice
-            FROM Procurement.GoodsReceiptNoteDetails grnd
-            INNER JOIN Procurement.GoodsReceiptNote grn ON grnd.GRNID = grn.GRNID
+                SUM(grnd.QuantityReceived) as Quantity
+            FROM [Procurement].GoodsReceiptNoteDetails grnd
+            INNER JOIN [Procurement].GoodsReceiptNote grn ON grnd.GRNID = grn.GRNID
             WHERE grn.GRNID = @GRNID
             GROUP BY grnd.ItemID, grn.WarehouseID
-        ) AS source ON target.ItemID = source.ItemID AND target.WarehouseID = source.WarehouseID
+        ) AS source ON target.ItemId = source.ItemID
+            AND target.WarehouseId = source.WarehouseID
+            AND target.TenantId = @TenantID
         WHEN MATCHED THEN
             UPDATE SET 
                 QuantityOnHand = target.QuantityOnHand + source.Quantity,
+                QuantityAvailable = target.QuantityAvailable + source.Quantity,
+                LastUpdated = GETUTCDATE(),
                 UpdatedAt = GETUTCDATE(),
                 UpdatedBy = @PostedBy
         WHEN NOT MATCHED THEN
-            INSERT (StockBalanceID, ItemID, WarehouseID, QuantityOnHand, UnitPrice, TenantID, CreatedBy)
-            VALUES (NEWID(), source.ItemID, source.WarehouseID, source.Quantity, source.UnitPrice, @TenantID, @PostedBy);
+            INSERT (Id, ItemId, WarehouseId, QuantityOnHand, QuantityReserved, QuantityAvailable, LastUpdated, TenantId, CreatedBy)
+            VALUES (NEWID(), source.ItemID, source.WarehouseID, source.Quantity, 0, source.Quantity, GETUTCDATE(), @TenantID, @PostedBy);
         
         COMMIT TRANSACTION;
         SELECT 1 as Success;
@@ -814,12 +1288,148 @@ BEGIN
 END
 GO
 
+-- Get All GRNs
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetAllGRNs]
+    @TenantID UNIQUEIDENTIFIER,
+    @POID UNIQUEIDENTIFIER = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        grn.GRNID,
+        grn.CompanyID,
+        grn.TenantID,
+        grn.POID,
+        grn.ReceivedDate,
+        grn.WarehouseID,
+        grn.ReceivedByUserId as ReceivedByUserID,
+        grn.Status,
+        grn.Remarks,
+        grn.CreatedAt,
+        grn.UpdatedAt,
+        po.POID as PurchaseOrderID,
+        v.VendorName,
+        w.WarehouseName,
+        u.FirstName + ' ' + u.LastName as ReceivedByName
+    FROM [Procurement].GoodsReceiptNote grn
+    INNER JOIN [Procurement].PurchaseOrders po ON grn.POID = po.POID
+    INNER JOIN [Procurement].Vendors v ON po.VendorID = v.VendorID
+    INNER JOIN [Inventory].Warehouses w ON grn.WarehouseID = w.Id
+    INNER JOIN [Core].Users u ON grn.ReceivedByUserId = u.Id
+    WHERE grn.TenantId = @TenantID
+        AND (@POID IS NULL OR grn.POID = @POID)
+        AND (@Status IS NULL OR grn.Status = @Status)
+        AND (@StartDate IS NULL OR grn.ReceivedDate >= @StartDate)
+        AND (@EndDate IS NULL OR grn.ReceivedDate <= @EndDate)
+    ORDER BY grn.ReceivedDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Procurement].GoodsReceiptNote
+    WHERE TenantId = @TenantID
+        AND (@POID IS NULL OR POID = @POID)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR ReceivedDate >= @StartDate)
+        AND (@EndDate IS NULL OR ReceivedDate <= @EndDate);
+END
+GO
+
+-- Update GRN
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdateGRN]
+    @GRNID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER,
+    @ReceivedDate DATETIME2 = NULL,
+    @WarehouseID UNIQUEIDENTIFIER = NULL,
+    @Remarks NVARCHAR(MAX) = NULL,
+    @UpdatedBy NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate GRN exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].GoodsReceiptNote WHERE GRNID = @GRNID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('GRN not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if GRN is posted
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].GoodsReceiptNote WHERE GRNID = @GRNID;
+    
+    IF @Status = 'Posted'
+    BEGIN
+        RAISERROR('Cannot update posted GRN.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Procurement].GoodsReceiptNote
+    SET 
+        ReceivedDate = ISNULL(@ReceivedDate, ReceivedDate),
+        WarehouseID = ISNULL(@WarehouseID, WarehouseID),
+        Remarks = ISNULL(@Remarks, Remarks),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE GRNID = @GRNID
+    AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete GRN
+CREATE OR ALTER PROCEDURE [Procurement].[sp_DeleteGRN]
+    @GRNID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate GRN exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].GoodsReceiptNote WHERE GRNID = @GRNID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('GRN not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if GRN is posted
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].GoodsReceiptNote WHERE GRNID = @GRNID;
+    
+    IF @Status = 'Posted'
+    BEGIN
+        RAISERROR('Cannot delete posted GRN.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete GRN details first
+    DELETE FROM [Procurement].GoodsReceiptNoteDetails
+    WHERE GRNID = @GRNID;
+    
+    -- Delete GRN
+    DELETE FROM [Procurement].GoodsReceiptNote
+    WHERE GRNID = @GRNID AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- PURCHASE INVOICE PROCEDURES
 -- =============================================
 
 -- Get Purchase Invoice by ID
-CREATE OR ALTER PROCEDURE Procurement.sp_GetPurchaseInvoiceById
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseInvoiceById]
     @InvoiceID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -845,16 +1455,16 @@ BEGIN
         v.VendorName,
         v.VendorCode,
         c.CompanyName
-    FROM Procurement.PurchaseInvoices pi
-    INNER JOIN Procurement.Vendors v ON pi.VendorID = v.VendorID
-    INNER JOIN Core.Companies c ON pi.CompanyID = c.Id
+    FROM [Procurement].PurchaseInvoices pi
+    INNER JOIN [Procurement].Vendors v ON pi.VendorID = v.VendorID
+    INNER JOIN [Core].Companies c ON pi.CompanyID = c.Id
     WHERE pi.InvoiceID = @InvoiceID 
     AND pi.TenantID = @TenantID;
 END
 GO
 
 -- Create Purchase Invoice
-CREATE OR ALTER PROCEDURE Procurement.sp_CreatePurchaseInvoice
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreatePurchaseInvoice]
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @POID UNIQUEIDENTIFIER = NULL,
@@ -870,13 +1480,13 @@ BEGIN
     
     DECLARE @InvoiceID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.PurchaseInvoices (
+    INSERT INTO [Procurement].PurchaseInvoices (
         InvoiceID, CompanyID, TenantID, POID, VendorID,
-        InvoiceNumber, InvoiceDate, DueDate, Currency, CreatedBy
+        InvoiceNumber, InvoiceDate, DueDate, Currency, Status, CreatedBy
     )
     VALUES (
         @InvoiceID, @CompanyID, @TenantID, @POID, @VendorID,
-        @InvoiceNumber, @InvoiceDate, @DueDate, @Currency, @CreatedBy
+        @InvoiceNumber, @InvoiceDate, @DueDate, @Currency, 'Pending', @CreatedBy
     );
     
     SELECT @InvoiceID as InvoiceID;
@@ -884,7 +1494,7 @@ END
 GO
 
 -- Add Purchase Invoice Detail
-CREATE OR ALTER PROCEDURE Procurement.sp_AddPurchaseInvoiceDetail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddPurchaseInvoiceDetail]
     @InvoiceID UNIQUEIDENTIFIER,
     @ItemID UNIQUEIDENTIFIER,
     @Quantity DECIMAL(18,4),
@@ -901,7 +1511,7 @@ BEGIN
     -- Calculate net amount
     SET @NetAmount = (@Quantity * @UnitPrice) + @TaxAmount;
     
-    INSERT INTO Procurement.PurchaseInvoiceDetails (
+    INSERT INTO [Procurement].PurchaseInvoiceDetails (
         InvoiceDetailID, InvoiceID, ItemID, Quantity, UnitPrice,
         TaxAmount, NetAmount, CreatedBy
     )
@@ -911,22 +1521,22 @@ BEGIN
     );
     
     -- Update invoice totals
-    UPDATE Procurement.PurchaseInvoices
+    UPDATE [Procurement].PurchaseInvoices
     SET 
         TotalAmount = (
             SELECT SUM(NetAmount) 
-            FROM Procurement.PurchaseInvoiceDetails 
-            WHERE InvoiceID = @InvoiceID
+            FROM [Procurement].PurchaseInvoiceDetails 
+            WHERE InvoiceId = @InvoiceID
         ),
         TaxAmount = (
             SELECT SUM(TaxAmount) 
-            FROM Procurement.PurchaseInvoiceDetails 
-            WHERE InvoiceID = @InvoiceID
+            FROM [Procurement].PurchaseInvoiceDetails 
+            WHERE InvoiceId = @InvoiceID
         ),
         NetPayable = (
             SELECT SUM(NetAmount) 
-            FROM Procurement.PurchaseInvoiceDetails 
-            WHERE InvoiceID = @InvoiceID
+            FROM [Procurement].PurchaseInvoiceDetails 
+            WHERE InvoiceId = @InvoiceID
         )
     WHERE InvoiceID = @InvoiceID;
     
@@ -935,7 +1545,7 @@ END
 GO
 
 -- Update Purchase Invoice Status
-CREATE OR ALTER PROCEDURE Procurement.sp_UpdatePurchaseInvoiceStatus
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdatePurchaseInvoiceStatus]
     @InvoiceID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @Status NVARCHAR(50),
@@ -944,7 +1554,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    UPDATE Procurement.PurchaseInvoices
+    UPDATE [Procurement].PurchaseInvoices
     SET 
         Status = @Status,
         UpdatedAt = GETUTCDATE(),
@@ -956,12 +1566,151 @@ BEGIN
 END
 GO
 
+-- Get All Purchase Invoices
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetAllPurchaseInvoices]
+    @TenantID UNIQUEIDENTIFIER,
+    @VendorID UNIQUEIDENTIFIER = NULL,
+    @Status NVARCHAR(50) = NULL,
+    @StartDate DATETIME2 = NULL,
+    @EndDate DATETIME2 = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    SELECT 
+        pi.InvoiceID,
+        pi.CompanyID,
+        pi.TenantID,
+        pi.POID,
+        pi.VendorID,
+        pi.InvoiceNumber,
+        pi.InvoiceDate,
+        pi.DueDate,
+        pi.Currency,
+        pi.TotalAmount,
+        pi.TaxAmount,
+        pi.NetPayable,
+        pi.Status,
+        pi.CreatedAt,
+        pi.UpdatedAt,
+        v.VendorName,
+        v.VendorCode,
+        c.CompanyName
+    FROM [Procurement].PurchaseInvoices pi
+    INNER JOIN [Procurement].Vendors v ON pi.VendorID = v.VendorID
+    INNER JOIN [Core].Companies c ON pi.CompanyID = c.Id
+    WHERE pi.TenantId = @TenantID
+        AND (@VendorID IS NULL OR pi.VendorID = @VendorID)
+        AND (@Status IS NULL OR pi.Status = @Status)
+        AND (@StartDate IS NULL OR pi.InvoiceDate >= @StartDate)
+        AND (@EndDate IS NULL OR pi.InvoiceDate <= @EndDate)
+    ORDER BY pi.InvoiceDate DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+    
+    -- Get total count
+    SELECT COUNT(*) as TotalCount
+    FROM [Procurement].PurchaseInvoices
+    WHERE TenantId = @TenantID
+        AND (@VendorID IS NULL OR VendorID = @VendorID)
+        AND (@Status IS NULL OR Status = @Status)
+        AND (@StartDate IS NULL OR InvoiceDate >= @StartDate)
+        AND (@EndDate IS NULL OR InvoiceDate <= @EndDate);
+END
+GO
+
+-- Update Purchase Invoice
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdatePurchaseInvoice]
+    @InvoiceID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER,
+    @InvoiceNumber NVARCHAR(100) = NULL,
+    @InvoiceDate DATETIME2 = NULL,
+    @DueDate DATETIME2 = NULL,
+    @Currency NVARCHAR(3) = NULL,
+    @UpdatedBy NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate invoice exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseInvoices WHERE InvoiceID = @InvoiceID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase invoice not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if invoice is paid
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseInvoices WHERE InvoiceID = @InvoiceID;
+    
+    IF @Status = 'Paid'
+    BEGIN
+        RAISERROR('Cannot update paid purchase invoice.', 16, 1);
+        RETURN;
+    END
+    
+    UPDATE [Procurement].PurchaseInvoices
+    SET 
+        InvoiceNumber = ISNULL(@InvoiceNumber, InvoiceNumber),
+        InvoiceDate = ISNULL(@InvoiceDate, InvoiceDate),
+        DueDate = ISNULL(@DueDate, DueDate),
+        Currency = ISNULL(@Currency, Currency),
+        UpdatedAt = GETUTCDATE(),
+        UpdatedBy = ISNULL(@UpdatedBy, UpdatedBy)
+    WHERE InvoiceID = @InvoiceID
+    AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
+-- Delete Purchase Invoice
+CREATE OR ALTER PROCEDURE [Procurement].[sp_DeletePurchaseInvoice]
+    @InvoiceID UNIQUEIDENTIFIER,
+    @TenantID UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Validate invoice exists and belongs to tenant
+    IF NOT EXISTS (SELECT 1 FROM [Procurement].PurchaseInvoices WHERE InvoiceID = @InvoiceID AND TenantID = @TenantID)
+    BEGIN
+        RAISERROR('Purchase invoice not found or does not belong to the tenant.', 16, 1);
+        RETURN;
+    END
+    
+    -- Check if invoice is paid
+    DECLARE @Status NVARCHAR(50);
+    SELECT @Status = Status FROM [Procurement].PurchaseInvoices WHERE InvoiceID = @InvoiceID;
+    
+    IF @Status = 'Paid'
+    BEGIN
+        RAISERROR('Cannot delete paid purchase invoice.', 16, 1);
+        RETURN;
+    END
+    
+    -- Delete invoice details first
+    DELETE FROM [Procurement].PurchaseInvoiceDetails
+    WHERE InvoiceID = @InvoiceID;
+    
+    -- Delete invoice
+    DELETE FROM [Procurement].PurchaseInvoices
+    WHERE InvoiceID = @InvoiceID AND TenantID = @TenantID;
+    
+    SELECT @@ROWCOUNT as RowsAffected;
+END
+GO
+
 -- =============================================
 -- REQUEST FOR QUOTATION PROCEDURES
 -- =============================================
 
 -- Get RFQ by ID
-CREATE OR ALTER PROCEDURE Procurement.sp_GetRFQById
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetRFQById]
     @RFQID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -973,25 +1722,21 @@ BEGIN
         rfq.CompanyID,
         rfq.TenantID,
         rfq.PRID,
-        rfq.RFQNumber,
-        rfq.RFQDate,
+        rfq.IssuedDate as RFQDate,
         rfq.DueDate,
         rfq.Status,
-        rfq.Remarks,
         rfq.CreatedAt,
-        rfq.UpdatedAt,
         rfq.CreatedBy,
-        rfq.UpdatedBy,
         c.CompanyName
-    FROM Procurement.RequestForQuotation rfq
-    INNER JOIN Core.Companies c ON rfq.CompanyID = c.Id
+    FROM [Procurement].RequestForQuotation rfq
+    INNER JOIN [Core].Companies c ON rfq.CompanyID = c.Id
     WHERE rfq.RFQID = @RFQID 
     AND rfq.TenantID = @TenantID;
 END
 GO
 
 -- Get RFQ Details
-CREATE OR ALTER PROCEDURE Procurement.sp_GetRFQDetails
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetRFQDetails]
     @RFQID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -1003,21 +1748,18 @@ BEGIN
         rfqd.RFQID,
         rfqd.ItemID,
         rfqd.QuantityRequested,
-        rfqd.UnitOfMeasureID,
+        rfqd.UnitOfMeasureId as UnitOfMeasureID,
         rfqd.Remarks,
         i.ItemName,
         i.ItemCode
-        -- uom.UnitName, -- TODO: Create UnitOfMeasures table
-        -- uom.UnitSymbol -- TODO: Create UnitOfMeasures table
-    FROM Procurement.RFQDetails rfqd
-    INNER JOIN Inventory.Items i ON rfqd.ItemID = i.Id
-    -- INNER JOIN Inventory.UnitOfMeasures uom ON rfqd.UnitOfMeasureID = uom.UnitOfMeasureID -- TODO: Create UnitOfMeasures table
+    FROM [Procurement].RFQDetails rfqd
+    INNER JOIN [Inventory].Items i ON rfqd.ItemID = i.Id
     WHERE rfqd.RFQID = @RFQID;
 END
 GO
 
 -- Create RFQ
-CREATE OR ALTER PROCEDURE Procurement.sp_CreateRFQ
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreateRFQ]
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @PRID UNIQUEIDENTIFIER = NULL,
@@ -1031,11 +1773,11 @@ BEGIN
     
     DECLARE @RFQID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.RequestForQuotation (
-        RFQID, CompanyID, TenantID, PRID, RFQNumber, DueDate, Remarks, CreatedBy
+    INSERT INTO [Procurement].RequestForQuotation (
+        RFQID, CompanyID, TenantID, PRID, IssuedDate, DueDate, Status, CreatedBy
     )
     VALUES (
-        @RFQID, @CompanyID, @TenantID, @PRID, @RFQNumber, @DueDate, @Remarks, @CreatedBy
+        @RFQID, @CompanyID, @TenantID, @PRID, GETUTCDATE(), @DueDate, 'Open', @CreatedBy
     );
     
     SELECT @RFQID as RFQID;
@@ -1043,7 +1785,7 @@ END
 GO
 
 -- Add RFQ Detail
-CREATE OR ALTER PROCEDURE Procurement.sp_AddRFQDetail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddRFQDetail]
     @RFQID UNIQUEIDENTIFIER,
     @ItemID UNIQUEIDENTIFIER,
     @QuantityRequested DECIMAL(18,4),
@@ -1056,8 +1798,8 @@ BEGIN
     
     DECLARE @RFQDetailID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.RFQDetails (
-        RFQDetailID, RFQID, ItemID, QuantityRequested, UnitOfMeasureID, Remarks, CreatedBy
+    INSERT INTO [Procurement].RFQDetails (
+        RFQDetailID, RFQID, ItemID, QuantityRequested, UnitOfMeasureId, Remarks, CreatedBy
     )
     VALUES (
         @RFQDetailID, @RFQID, @ItemID, @QuantityRequested, @UnitOfMeasureID, @Remarks, @CreatedBy
@@ -1068,7 +1810,7 @@ END
 GO
 
 -- Get RFQ Vendor Responses
-CREATE OR ALTER PROCEDURE Procurement.sp_GetRFQVendorResponses
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetRFQVendorResponses]
     @RFQID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -1082,15 +1824,13 @@ BEGIN
         rvr.ResponseDate,
         rvr.Status,
         rvr.TotalQuotedAmount,
-        rvr.ValidityDays,
-        rvr.Remarks,
+        rvr.DeliveryTime as ValidityDays,
         rvr.CreatedAt,
-        rvr.UpdatedAt,
         v.VendorName,
         v.VendorCode
-    FROM Procurement.RFQVendorResponses rvr
-    INNER JOIN Procurement.Vendors v ON rvr.VendorID = v.VendorID
-    INNER JOIN Procurement.RequestForQuotation rfq ON rvr.RFQID = rfq.RFQID
+    FROM [Procurement].RFQVendorResponses rvr
+    INNER JOIN [Procurement].Vendors v ON rvr.VendorID = v.VendorID
+    INNER JOIN [Procurement].RequestForQuotation rfq ON rvr.RFQID = rfq.RFQID
     WHERE rfq.RFQID = @RFQID 
     AND rfq.TenantID = @TenantID
     ORDER BY rvr.ResponseDate DESC;
@@ -1098,7 +1838,7 @@ END
 GO
 
 -- Add RFQ Vendor Response
-CREATE OR ALTER PROCEDURE Procurement.sp_AddRFQVendorResponse
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddRFQVendorResponse]
     @RFQID UNIQUEIDENTIFIER,
     @VendorID UNIQUEIDENTIFIER,
     @ValidityDays INT = 30,
@@ -1110,11 +1850,11 @@ BEGIN
     
     DECLARE @RFQResponseID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.RFQVendorResponses (
-        RFQResponseID, RFQID, VendorID, ValidityDays, Remarks, CreatedBy
+    INSERT INTO [Procurement].RFQVendorResponses (
+        RFQResponseID, RFQID, VendorID, ResponseDate, DeliveryTime, Status, CreatedBy
     )
     VALUES (
-        @RFQResponseID, @RFQID, @VendorID, @ValidityDays, @Remarks, @CreatedBy
+        @RFQResponseID, @RFQID, @VendorID, GETUTCDATE(), @ValidityDays, 'Submitted', @CreatedBy
     );
     
     SELECT @RFQResponseID as RFQResponseID;
@@ -1122,7 +1862,7 @@ END
 GO
 
 -- Add RFQ Vendor Response Detail
-CREATE OR ALTER PROCEDURE Procurement.sp_AddRFQVendorResponseDetail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddRFQVendorResponseDetail]
     @RFQResponseID UNIQUEIDENTIFIER,
     @ItemID UNIQUEIDENTIFIER,
     @QuotedUnitPrice DECIMAL(18,4),
@@ -1137,23 +1877,24 @@ BEGIN
     DECLARE @RFQResponseDetailID UNIQUEIDENTIFIER = NEWID();
     DECLARE @NetAmount DECIMAL(18,2);
     
-    -- Calculate net amount
-    SET @NetAmount = @QuotedUnitPrice - ((@QuotedUnitPrice * @Discount) / 100) + @TaxAmount;
+    -- Calculate final unit price
+    DECLARE @FinalUnitPrice DECIMAL(18,2);
+    SET @FinalUnitPrice = @QuotedUnitPrice - ((@QuotedUnitPrice * @Discount) / 100) + @TaxAmount;
     
-    INSERT INTO Procurement.RFQVendorResponseDetails (
-        RFQResponseDetailID, RFQResponseID, ItemID, QuotedUnitPrice,
-        Discount, TaxAmount, NetAmount, Remarks, CreatedBy
+    INSERT INTO [Procurement].RFQVendorResponseDetails (
+        ResponseDetailID, RFQResponseID, ItemID, QuotedUnitPrice,
+        Discount, TaxAmount, FinalUnitPrice, CreatedBy
     )
     VALUES (
         @RFQResponseDetailID, @RFQResponseID, @ItemID, @QuotedUnitPrice,
-        @Discount, @TaxAmount, @NetAmount, @Remarks, @CreatedBy
+        @Discount, @TaxAmount, @FinalUnitPrice, @CreatedBy
     );
     
     -- Update response total amount
-    UPDATE Procurement.RFQVendorResponses
+    UPDATE [Procurement].RFQVendorResponses
     SET TotalQuotedAmount = (
-        SELECT SUM(NetAmount) 
-        FROM Procurement.RFQVendorResponseDetails 
+        SELECT SUM(FinalUnitPrice) 
+        FROM [Procurement].RFQVendorResponseDetails 
         WHERE RFQResponseID = @RFQResponseID
     )
     WHERE RFQResponseID = @RFQResponseID;
@@ -1163,7 +1904,7 @@ END
 GO
 
 -- Update RFQ Status
-CREATE OR ALTER PROCEDURE Procurement.sp_UpdateRFQStatus
+CREATE OR ALTER PROCEDURE [Procurement].[sp_UpdateRFQStatus]
     @RFQID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @Status NVARCHAR(50),
@@ -1172,11 +1913,8 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    UPDATE Procurement.RequestForQuotation
-    SET 
-        Status = @Status,
-        UpdatedAt = GETUTCDATE(),
-        UpdatedBy = @UpdatedBy
+    UPDATE [Procurement].[RequestForQuotation]
+    SET Status = @Status
     WHERE RFQID = @RFQID 
     AND TenantID = @TenantID;
     
@@ -1189,7 +1927,7 @@ GO
 -- =============================================
 
 -- Get Vendor Bank Accounts
-CREATE OR ALTER PROCEDURE Procurement.sp_GetVendorBankAccounts
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetVendorBankAccounts]
     @VendorID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -1207,8 +1945,8 @@ BEGIN
         vba.IsPrimary,
         vba.CreatedAt,
         vba.CreatedBy
-    FROM Procurement.VendorBankAccounts vba
-    INNER JOIN Procurement.Vendors v ON vba.VendorID = v.VendorID
+    FROM [Procurement].VendorBankAccounts vba
+    INNER JOIN [Procurement].[Vendors] v ON vba.VendorID = v.VendorID
     WHERE v.VendorID = @VendorID 
     AND v.TenantID = @TenantID
     ORDER BY vba.IsPrimary DESC, vba.CreatedAt DESC;
@@ -1216,7 +1954,7 @@ END
 GO
 
 -- Add Vendor Bank Account
-CREATE OR ALTER PROCEDURE Procurement.sp_AddVendorBankAccount
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddVendorBankAccount]
     @VendorID UNIQUEIDENTIFIER,
     @BankName NVARCHAR(255),
     @AccountNumber NVARCHAR(50),
@@ -1234,12 +1972,12 @@ BEGIN
     -- If this is set as primary, unset other primary accounts
     IF @IsPrimary = 1
     BEGIN
-        UPDATE Procurement.VendorBankAccounts
+        UPDATE [Procurement].[VendorBankAccounts]
         SET IsPrimary = 0
         WHERE VendorID = @VendorID;
     END
     
-    INSERT INTO Procurement.VendorBankAccounts (
+    INSERT INTO [Procurement].VendorBankAccounts (
         VendorBankAccountID, VendorID, BankName, AccountNumber,
         IBAN, SWIFTCode, Currency, IsPrimary, CreatedBy
     )
@@ -1257,7 +1995,7 @@ GO
 -- =============================================
 
 -- Get All Vendor Groups
-CREATE OR ALTER PROCEDURE Procurement.sp_GetAllVendorGroups
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetAllVendorGroups]
     @TenantID UNIQUEIDENTIFIER,
     @IsActive BIT = NULL
 AS
@@ -1273,7 +2011,7 @@ BEGIN
         vg.UpdatedAt,
         vg.CreatedBy,
         vg.UpdatedBy
-    FROM Procurement.VendorGroups vg
+    FROM [Procurement].VendorGroups vg
     WHERE vg.TenantID = @TenantID
     AND (@IsActive IS NULL OR vg.IsActive = @IsActive)
     ORDER BY vg.GroupName;
@@ -1281,7 +2019,7 @@ END
 GO
 
 -- Create Vendor Group
-CREATE OR ALTER PROCEDURE Procurement.sp_CreateVendorGroup
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreateVendorGroup]
     @GroupName NVARCHAR(100),
     @Description NVARCHAR(500) = NULL,
     @TenantID UNIQUEIDENTIFIER,
@@ -1292,7 +2030,7 @@ BEGIN
     
     DECLARE @VendorGroupID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.VendorGroups (
+    INSERT INTO [Procurement].VendorGroups (
         VendorGroupID, GroupName, Description, TenantID, CreatedBy
     )
     VALUES (
@@ -1308,7 +2046,7 @@ GO
 -- =============================================
 
 -- Get Vendor Contacts
-CREATE OR ALTER PROCEDURE Procurement.sp_GetVendorContacts
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetVendorContacts]
     @VendorID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -1330,8 +2068,8 @@ BEGIN
         vc.UpdatedAt,
         vc.CreatedBy,
         vc.UpdatedBy
-    FROM Procurement.VendorContacts vc
-    INNER JOIN Procurement.Vendors v ON vc.VendorID = v.VendorID
+    FROM [Procurement].VendorContacts vc
+    INNER JOIN [Procurement].[Vendors] v ON vc.VendorID = v.VendorID
     WHERE v.VendorID = @VendorID 
     AND v.TenantID = @TenantID
     AND vc.IsActive = 1
@@ -1340,7 +2078,7 @@ END
 GO
 
 -- Add Vendor Contact
-CREATE OR ALTER PROCEDURE Procurement.sp_AddVendorContact
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddVendorContact]
     @VendorID UNIQUEIDENTIFIER,
     @ContactPerson NVARCHAR(255),
     @JobTitle NVARCHAR(100) = NULL,
@@ -1360,12 +2098,12 @@ BEGIN
     -- If this is set as primary, unset other primary contacts
     IF @IsPrimary = 1
     BEGIN
-        UPDATE Procurement.VendorContacts
+        UPDATE VendorContacts
         SET IsPrimary = 0
         WHERE VendorID = @VendorID;
     END
     
-    INSERT INTO Procurement.VendorContacts (
+    INSERT INTO [Procurement].VendorContacts (
         VendorContactID, VendorID, ContactPerson, JobTitle, Department,
         Email, PhoneNumber, MobileNumber, IsPrimary, TenantID, CreatedBy
     )
@@ -1383,7 +2121,7 @@ GO
 -- =============================================
 
 -- Get Vendor Ratings
-CREATE OR ALTER PROCEDURE Procurement.sp_GetVendorRatings
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetVendorRatings]
     @VendorID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @PageNumber INT = 1,
@@ -1408,9 +2146,9 @@ BEGIN
             vr.RatedByUserID,
             u.FirstName + ' ' + u.LastName as RatedByName,
             ROW_NUMBER() OVER (ORDER BY vr.RatingDate DESC) AS RowNum
-        FROM Procurement.VendorRatings vr
-        INNER JOIN Procurement.Vendors v ON vr.VendorID = v.VendorID
-        INNER JOIN Core.Users u ON vr.RatedByUserID = u.Id
+        FROM [Procurement].VendorRatings vr
+        INNER JOIN [Procurement].[Vendors] v ON vr.VendorID = v.VendorID
+        INNER JOIN [Core].Users u ON vr.RatedByUserID = u.Id
         WHERE v.VendorID = @VendorID 
         AND v.TenantID = @TenantID
     )
@@ -1431,15 +2169,15 @@ BEGIN
     
     -- Return total count
     SELECT COUNT(*) as TotalCount
-    FROM Procurement.VendorRatings vr
-    INNER JOIN Procurement.Vendors v ON vr.VendorID = v.VendorID
+    FROM [Procurement].VendorRatings vr
+    INNER JOIN [Procurement].[Vendors] v ON vr.VendorID = v.VendorID
     WHERE v.VendorID = @VendorID 
     AND v.TenantID = @TenantID;
 END
 GO
 
 -- Add Vendor Rating
-CREATE OR ALTER PROCEDURE Procurement.sp_AddVendorRating
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddVendorRating]
     @VendorID UNIQUEIDENTIFIER,
     @QualityRating DECIMAL(3,2),
     @DeliveryRating DECIMAL(3,2),
@@ -1456,7 +2194,7 @@ BEGIN
     
     DECLARE @VendorRatingID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.VendorRatings (
+    INSERT INTO [Procurement].VendorRatings (
         VendorRatingID, VendorID, QualityRating, DeliveryRating, ServiceRating,
         PriceRating, OverallRating, Comments, RatedByUserID, TenantID, CreatedBy
     )
@@ -1474,7 +2212,7 @@ GO
 -- =============================================
 
 -- Get Contract Agreements
-CREATE OR ALTER PROCEDURE Procurement.sp_GetContractAgreements
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetContractAgreements]
     @VendorID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @Status NVARCHAR(50) = NULL
@@ -1499,8 +2237,8 @@ BEGIN
         ca.UpdatedAt,
         ca.CreatedBy,
         ca.UpdatedBy
-    FROM Procurement.ContractAgreements ca
-    INNER JOIN Procurement.Vendors v ON ca.VendorID = v.VendorID
+    FROM [Procurement].ContractAgreements ca
+    INNER JOIN [Procurement].[Vendors] v ON ca.VendorID = v.VendorID
     WHERE v.VendorID = @VendorID 
     AND v.TenantID = @TenantID
     AND (@Status IS NULL OR ca.Status = @Status)
@@ -1509,7 +2247,7 @@ END
 GO
 
 -- Create Contract Agreement
-CREATE OR ALTER PROCEDURE Procurement.sp_CreateContractAgreement
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreateContractAgreement]
     @VendorID UNIQUEIDENTIFIER,
     @ContractNumber NVARCHAR(50),
     @ContractName NVARCHAR(255),
@@ -1528,7 +2266,7 @@ BEGIN
     
     DECLARE @ContractID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.ContractAgreements (
+    INSERT INTO [Procurement].ContractAgreements (
         ContractID, VendorID, ContractNumber, ContractName, StartDate, EndDate,
         ContractValue, Currency, ContractType, Terms, Notes, TenantID, CreatedBy
     )
@@ -1546,7 +2284,7 @@ GO
 -- =============================================
 
 -- Get Purchase Return Orders
-CREATE OR ALTER PROCEDURE Procurement.sp_GetPurchaseReturnOrders
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetPurchaseReturnOrders]
     @TenantID UNIQUEIDENTIFIER,
     @CompanyID UNIQUEIDENTIFIER = NULL,
     @VendorID UNIQUEIDENTIFIER = NULL,
@@ -1581,10 +2319,10 @@ BEGIN
             c.CompanyName,
             u.FirstName + ' ' + u.LastName as ApprovedByName,
             ROW_NUMBER() OVER (ORDER BY pro.ReturnDate DESC) AS RowNum
-        FROM Procurement.PurchaseReturnOrders pro
-        INNER JOIN Procurement.Vendors v ON pro.VendorID = v.VendorID
-        INNER JOIN Core.Companies c ON pro.CompanyID = c.Id
-        LEFT JOIN Core.Users u ON pro.ApprovedByUserID = u.Id
+        FROM [Procurement].PurchaseReturnOrders pro
+        INNER JOIN [Procurement].[Vendors] v ON pro.VendorID = v.VendorID
+        INNER JOIN [Core].[Companies] c ON pro.CompanyID = c.Id
+        LEFT JOIN [Core].[Users] u ON pro.ApprovedByUserID = u.Id
         WHERE pro.TenantID = @TenantID
         AND (@CompanyID IS NULL OR pro.CompanyID = @CompanyID)
         AND (@VendorID IS NULL OR pro.VendorID = @VendorID)
@@ -1615,7 +2353,7 @@ BEGIN
     
     -- Return total count
     SELECT COUNT(*) as TotalCount
-    FROM Procurement.PurchaseReturnOrders pro
+    FROM [Procurement].PurchaseReturnOrders pro
     WHERE pro.TenantID = @TenantID
     AND (@CompanyID IS NULL OR pro.CompanyID = @CompanyID)
     AND (@VendorID IS NULL OR pro.VendorID = @VendorID)
@@ -1624,7 +2362,7 @@ END
 GO
 
 -- Create Purchase Return Order
-CREATE OR ALTER PROCEDURE Procurement.sp_CreatePurchaseReturnOrder
+CREATE OR ALTER PROCEDURE [Procurement].[sp_CreatePurchaseReturnOrder]
     @CompanyID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @VendorID UNIQUEIDENTIFIER,
@@ -1639,7 +2377,7 @@ BEGIN
     
     DECLARE @ReturnOrderID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.PurchaseReturnOrders (
+    INSERT INTO [Procurement].PurchaseReturnOrders (
         ReturnOrderID, CompanyID, TenantID, VendorID, POID,
         ReturnNumber, Reason, Notes, CreatedBy
     )
@@ -1653,7 +2391,7 @@ END
 GO
 
 -- Add Purchase Return Order Detail
-CREATE OR ALTER PROCEDURE Procurement.sp_AddPurchaseReturnOrderDetail
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddPurchaseReturnOrderDetail]
     @ReturnOrderID UNIQUEIDENTIFIER,
     @ItemID UNIQUEIDENTIFIER,
     @QuantityReturned DECIMAL(18,4),
@@ -1671,7 +2409,7 @@ BEGIN
     -- Calculate total amount
     SET @TotalAmount = @QuantityReturned * @UnitPrice;
     
-    INSERT INTO Procurement.PurchaseReturnOrderDetails (
+    INSERT INTO [Procurement].PurchaseReturnOrderDetails (
         ReturnDetailID, ReturnOrderID, ItemID, QuantityReturned,
         UnitPrice, TotalAmount, Reason, TenantID, CreatedBy
     )
@@ -1681,10 +2419,10 @@ BEGIN
     );
     
     -- Update return order total
-    UPDATE Procurement.PurchaseReturnOrders
+    UPDATE [Procurement].PurchaseReturnOrders
     SET TotalAmount = (
         SELECT SUM(TotalAmount) 
-        FROM Procurement.PurchaseReturnOrderDetails 
+        FROM [Procurement].PurchaseReturnOrderDetails 
         WHERE ReturnOrderID = @ReturnOrderID
     )
     WHERE ReturnOrderID = @ReturnOrderID;
@@ -1698,7 +2436,7 @@ GO
 -- =============================================
 
 -- Get Landed Costs
-CREATE OR ALTER PROCEDURE Procurement.sp_GetLandedCosts
+CREATE OR ALTER PROCEDURE [Procurement].[sp_GetLandedCosts]
     @POID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER
 AS
@@ -1719,16 +2457,16 @@ BEGIN
         lc.UpdatedAt,
         lc.CreatedBy,
         lc.UpdatedBy
-    FROM Procurement.LandedCost lc
-    INNER JOIN Procurement.PurchaseOrders po ON lc.POID = po.POID
-    WHERE po.POID = @POID 
+    FROM [Procurement].LandedCost lc
+    INNER JOIN PurchaseOrders po ON lc.POID = po.POID
+        WHERE po.POID = @POID
     AND po.TenantID = @TenantID
     ORDER BY lc.CreatedAt DESC;
 END
 GO
 
 -- Add Landed Cost
-CREATE OR ALTER PROCEDURE Procurement.sp_AddLandedCost
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AddLandedCost]
     @POID UNIQUEIDENTIFIER,
     @CostType NVARCHAR(50),
     @CostDescription NVARCHAR(255),
@@ -1743,7 +2481,7 @@ BEGIN
     
     DECLARE @LandedCostID UNIQUEIDENTIFIER = NEWID();
     
-    INSERT INTO Procurement.LandedCost (
+    INSERT INTO [Procurement].LandedCost (
         LandedCostID, POID, CostType, CostDescription, CostAmount,
         Currency, AllocationMethod, TenantID, CreatedBy
     )
@@ -1757,7 +2495,7 @@ END
 GO
 
 -- Allocate Landed Cost
-CREATE OR ALTER PROCEDURE Procurement.sp_AllocateLandedCost
+CREATE OR ALTER PROCEDURE [Procurement].[sp_AllocateLandedCost]
     @LandedCostID UNIQUEIDENTIFIER,
     @TenantID UNIQUEIDENTIFIER,
     @AllocatedBy NVARCHAR(255)
@@ -1773,18 +2511,18 @@ BEGIN
         
         -- Get landed cost details
         SELECT @POID = POID, @AllocationMethod = AllocationMethod, @TotalCost = CostAmount
-        FROM Procurement.LandedCost
+        FROM [Procurement].LandedCost
         WHERE LandedCostID = @LandedCostID AND TenantID = @TenantID;
         
         -- Delete existing allocations
-        DELETE FROM Procurement.LandedCostAllocations
+        DELETE FROM [Procurement].LandedCostAllocations
         WHERE LandedCostID = @LandedCostID;
         
         -- Allocate based on method
         IF @AllocationMethod = 'Equal'
         BEGIN
             -- Equal allocation across all PO details
-            INSERT INTO Procurement.LandedCostAllocations (
+            INSERT INTO [Procurement].LandedCostAllocations (
                 AllocationID, LandedCostID, PODetailID, AllocatedAmount, AllocationPercentage, TenantID, CreatedBy
             )
             SELECT 
@@ -1795,29 +2533,29 @@ BEGIN
                 100.0 / COUNT(*) OVER(),
                 @TenantID,
                 @AllocatedBy
-            FROM Procurement.PurchaseOrderDetails pod
+                FROM [Procurement].PurchaseOrderDetails pod
             WHERE pod.POID = @POID;
         END
         ELSE IF @AllocationMethod = 'Value'
         BEGIN
             -- Allocate based on line value
-            INSERT INTO Procurement.LandedCostAllocations (
+            INSERT INTO [Procurement].LandedCostAllocations (
                 AllocationID, LandedCostID, PODetailID, AllocatedAmount, AllocationPercentage, TenantID, CreatedBy
             )
             SELECT 
                 NEWID(),
                 @LandedCostID,
                 pod.PODetailID,
-                (@TotalCost * pod.NetAmount) / (SELECT SUM(NetAmount) FROM Procurement.PurchaseOrderDetails WHERE POID = @POID),
-                (pod.NetAmount * 100.0) / (SELECT SUM(NetAmount) FROM Procurement.PurchaseOrderDetails WHERE POID = @POID),
+                (@TotalCost * pod.NetAmount) / (SELECT SUM(NetAmount) FROM [Procurement].[PurchaseOrderDetails] WHERE POID = @POID),
+                (pod.NetAmount * 100.0) / (SELECT SUM(NetAmount) FROM [Procurement].[PurchaseOrderDetails] WHERE POID = @POID),
                 @TenantID,
                 @AllocatedBy
-            FROM Procurement.PurchaseOrderDetails pod
+                FROM [Procurement].PurchaseOrderDetails pod
             WHERE pod.POID = @POID;
         END
         
         -- Update landed cost as allocated
-        UPDATE Procurement.LandedCost
+        UPDATE [Procurement].LandedCost
         SET 
             IsAllocated = 1,
             AllocatedAt = GETUTCDATE(),

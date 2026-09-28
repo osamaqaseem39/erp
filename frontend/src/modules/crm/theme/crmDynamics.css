@@ -1,0 +1,422 @@
+/**
+ * Microsoft Dynamics 365 Sales theme — applies when html[data-crm-theme="dynamics"]
+ * Covers sidebar, topbar, main content, lists, forms, tables, and buttons.
+ */
+
+html[data-crm-theme="dynamics"] {
+  font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+}
+
+/* ─── Sidebar ─── */
+html[data-crm-theme="dynamics"] .app-menu {
+  background: #ffffff !important;
+  border-right: 1px solid #edebe9;
+  box-shadow: none !important;
+}
+
+html[data-crm-theme="dynamics"] .app-menu .srcollbar {
+  border-top-color: #edebe9 !important;
+}
+
+html[data-crm-theme="dynamics"] .logo-box {
+  border-bottom: 1px solid #edebe9;
+  background: #faf9f8;
+}
+
+html[data-crm-theme="dynamics"] .menu .menu-title {
+  color: #605e5c !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 1 !important;
+}
+
+html[data-crm-theme="dynamics"] .menu .menu-link {
+  color: #323130 !important;
+  border-radius: 2px !important;
+  font-size: 14px !important;
+  border-left: 3px solid transparent;
+  margin-left: 2px;
+}
+
+html[data-crm-theme="dynamics"] .menu .menu-link:hover {
+  background-color: #f3f2f1 !important;
+  color: #323130 !important;
+}
+
+html[data-crm-theme="dynamics"] .menu > .menu-item > .menu-link.active,
+html[data-crm-theme="dynamics"] .menu .menu-link.active {
+  background-color: #eff6fc !important;
+  color: #0078d4 !important;
+  border-left-color: #0078d4 !important;
+  font-weight: 600;
+}
+
+html[data-crm-theme="dynamics"] .menu .menu-link.active .menu-icon,
+html[data-crm-theme="dynamics"] .menu > .menu-item > .menu-link.active .menu-icon {
+  color: #0078d4 !important;
+}
+
+html[data-crm-theme="dynamics"] .menu .sub-menu .menu-link.active {
+  background-color: #eff6fc !important;
+  color: #0078d4 !important;
+}
+
+/* ─── Main content area ─── */
+html[data-crm-theme="dynamics"] main.flex-grow {
+  background-color: #f3f2f1 !important;
+  padding: 1rem 1.5rem !important;
+}
+
+html[data-crm-theme="dynamics"] .page-content {
+  background-color: #f3f2f1;
+}
+
+/* ─── Topbar ─── */
+html[data-crm-theme="dynamics"] .app-header,
+html[data-crm-theme="dynamics"] header.topbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #edebe9 !important;
+  box-shadow: none !important;
+}
+
+/* ─── Cards (lists, forms, dashboard) ─── */
+html[data-crm-theme="dynamics"] .card {
+  background: #ffffff !important;
+  border: 1px solid #edebe9 !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+}
+
+html[data-crm-theme="dynamics"] .card-header {
+  background: #faf9f8 !important;
+  border-bottom: 1px solid #edebe9 !important;
+  padding: 0.75rem 1rem !important;
+}
+
+html[data-crm-theme="dynamics"] .card-title {
+  color: #323130 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+html[data-crm-theme="dynamics"] .card-body {
+  padding: 1rem !important;
+}
+
+/* ─── Buttons ─── */
+html[data-crm-theme="dynamics"] .btn-primary,
+html[data-crm-theme="dynamics"] a.btn-primary,
+html[data-crm-theme="dynamics"] button.btn-primary {
+  background-color: #0078d4 !important;
+  border-color: #0078d4 !important;
+  color: #ffffff !important;
+  border-radius: 2px !important;
+  font-weight: 500;
+}
+
+html[data-crm-theme="dynamics"] .btn-primary i,
+html[data-crm-theme="dynamics"] a.btn-primary i,
+html[data-crm-theme="dynamics"] button.btn-primary i {
+  color: #ffffff !important;
+}
+
+html[data-crm-theme="dynamics"] .btn-primary:hover:not(:disabled),
+html[data-crm-theme="dynamics"] a.btn-primary:hover,
+html[data-crm-theme="dynamics"] button.btn-primary:hover:not(:disabled) {
+  background-color: #106ebe !important;
+  border-color: #106ebe !important;
+  color: #ffffff !important;
+}
+
+html[data-crm-theme="dynamics"] .btn-soft-primary {
+  background-color: #eff6fc !important;
+  color: #0078d4 !important;
+  border: 1px solid #c7e0f4 !important;
+  border-radius: 2px !important;
+}
+
+html[data-crm-theme="dynamics"] .btn-soft-secondary,
+html[data-crm-theme="dynamics"] .btn-soft-success,
+html[data-crm-theme="dynamics"] .btn-soft-info,
+html[data-crm-theme="dynamics"] .btn-soft-warning,
+html[data-crm-theme="dynamics"] .btn-soft-danger {
+  border-radius: 2px !important;
+  border: 1px solid #edebe9 !important;
+  background: #ffffff !important;
+  color: #323130 !important;
+}
+
+html[data-crm-theme="dynamics"] .btn-soft-secondary:hover,
+html[data-crm-theme="dynamics"] .btn:not(.btn-primary):hover {
+  background: #f3f2f1 !important;
+}
+
+/* ─── Tables ─── */
+html[data-crm-theme="dynamics"] .table thead th,
+html[data-crm-theme="dynamics"] table thead th {
+  background: #faf9f8 !important;
+  color: #605e5c !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid #edebe9 !important;
+  padding: 0.5rem 1rem !important;
+}
+
+html[data-crm-theme="dynamics"] .table tbody td,
+html[data-crm-theme="dynamics"] table tbody td {
+  color: #323130 !important;
+  border-bottom: 1px solid #edebe9 !important;
+  padding: 0.625rem 1rem !important;
+  font-size: 14px;
+}
+
+html[data-crm-theme="dynamics"] .table-hover tbody tr:hover,
+html[data-crm-theme="dynamics"] table tbody tr:hover {
+  background-color: #f3f2f1 !important;
+}
+
+html[data-crm-theme="dynamics"] .table a.text-primary,
+html[data-crm-theme="dynamics"] table a.font-medium {
+  color: #0078d4 !important;
+}
+
+html[data-crm-theme="dynamics"] .table a.text-primary:hover,
+html[data-crm-theme="dynamics"] table a:hover {
+  color: #106ebe !important;
+  text-decoration: underline;
+}
+
+/* ─── Forms ─── */
+html[data-crm-theme="dynamics"] .form-input,
+html[data-crm-theme="dynamics"] .form-select,
+html[data-crm-theme="dynamics"] .form-textarea,
+html[data-crm-theme="dynamics"] input.form-input,
+html[data-crm-theme="dynamics"] select.form-select,
+html[data-crm-theme="dynamics"] textarea {
+  border: 1px solid #8a8886 !important;
+  border-radius: 2px !important;
+  font-size: 14px !important;
+}
+
+html[data-crm-theme="dynamics"] .form-input:focus,
+html[data-crm-theme="dynamics"] .form-select:focus,
+html[data-crm-theme="dynamics"] textarea:focus {
+  border-color: #0078d4 !important;
+  box-shadow: 0 0 0 1px #0078d4 !important;
+  outline: none !important;
+}
+
+html[data-crm-theme="dynamics"] label,
+html[data-crm-theme="dynamics"] .block.text-sm.font-medium {
+  color: #323130 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+}
+
+/* ─── Alerts & badges ─── */
+html[data-crm-theme="dynamics"] .alert-danger {
+  background: #fde7e9 !important;
+  border: 1px solid #f1bbbc !important;
+  color: #a4262c !important;
+  border-radius: 2px !important;
+}
+
+html[data-crm-theme="dynamics"] .badge-soft-success {
+  background: #dff6dd !important;
+  color: #107c10 !important;
+  border-radius: 2px !important;
+}
+
+html[data-crm-theme="dynamics"] .badge-soft-info,
+html[data-crm-theme="dynamics"] .badge-soft-primary {
+  background: #eff6fc !important;
+  color: #0078d4 !important;
+  border-radius: 2px !important;
+}
+
+html[data-crm-theme="dynamics"] .badge-soft-danger {
+  background: #fde7e9 !important;
+  color: #a4262c !important;
+  border-radius: 2px !important;
+}
+
+html[data-crm-theme="dynamics"] .badge-soft-warning {
+  background: #fff4ce !important;
+  color: #8a6116 !important;
+  border-radius: 2px !important;
+}
+
+html[data-crm-theme="dynamics"] .badge-soft-secondary {
+  background: #f3f2f1 !important;
+  color: #605e5c !important;
+  border-radius: 2px !important;
+}
+
+/* ─── Spinners ─── */
+html[data-crm-theme="dynamics"] .spinner-border.text-primary {
+  color: #0078d4 !important;
+}
+
+/* ─── Breadcrumb area (page titles) ─── */
+html[data-crm-theme="dynamics"] h4.text-slate-900,
+html[data-crm-theme="dynamics"] h4.text-lg.font-medium {
+  color: #323130 !important;
+  font-weight: 600 !important;
+}
+
+/* ─── Dashboard scoped (crm-dynamics wrapper) ─── */
+html[data-crm-theme="dynamics"] .crm-dynamics {
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+  margin-top: -0.25rem;
+}
+
+html[data-crm-theme="dynamics"] .crm-dynamics .apexcharts-legend-text,
+html[data-crm-theme="dynamics"] .crm-dynamics .apexcharts-text {
+  font-family: inherit !important;
+}
+
+html[data-crm-theme="dynamics"] .simplebar-scrollbar::before {
+  background: #c8c6c4;
+}
+
+/* Search / filter inputs in list toolbars */
+html[data-crm-theme="dynamics"] .card-body .form-input,
+html[data-crm-theme="dynamics"] .card-body input[type="search"],
+html[data-crm-theme="dynamics"] .card-body input[type="text"] {
+  max-height: 32px;
+}
+
+/* CRM list/form: title is outside the card */
+html[data-crm-theme="dynamics"] .crm-entity-list > .card-header,
+html[data-crm-theme="dynamics"] .crm-entity-form > .card-header {
+  display: none;
+}
+
+html[data-crm-theme="dynamics"] .crm-entity-form > .card-body {
+  padding-top: 1.25rem !important;
+}
+
+/* ─── CRM entity form pages (Dynamics 365 model-driven) ─── */
+html[data-crm-theme="dynamics"] .crm-entity-form-page {
+  background-color: #f3f2f1;
+}
+
+html[data-crm-theme="dynamics"] .crm-entity-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-section + .crm-form-section {
+  margin-top: 0;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-section-body--two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  html[data-crm-theme="dynamics"] .crm-form-section-body--two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-crm-theme="dynamics"] .crm-form-section-body--single {
+  max-width: 720px;
+}
+
+/* Horizontal label | field rows (matches lead hub summary fields) */
+html[data-crm-theme="dynamics"] .crm-form-field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 38%) 1fr;
+  gap: 0.25rem 1rem;
+  align-items: start;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #edebe9;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row:last-child {
+  border-bottom-width: 0;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row .crm-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #323130;
+  margin-bottom: 0;
+  padding-top: 0.375rem;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row .crm-form-control,
+html[data-crm-theme="dynamics"] .crm-form-field-row .form-input,
+html[data-crm-theme="dynamics"] .crm-form-field-row .form-select,
+html[data-crm-theme="dynamics"] .crm-form-field-row textarea.crm-form-control {
+  width: 100%;
+  min-height: 32px;
+  padding: 0.375rem 0;
+  border: 0 !important;
+  border-bottom: 1px solid #edebe9 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 0.875rem;
+  color: #323130;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row .crm-form-control:focus,
+html[data-crm-theme="dynamics"] .crm-form-field-row .form-input:focus,
+html[data-crm-theme="dynamics"] .crm-form-field-row .form-select:focus,
+html[data-crm-theme="dynamics"] .crm-form-field-row textarea.crm-form-control:focus {
+  outline: none !important;
+  border-bottom-color: #0078d4 !important;
+  box-shadow: none !important;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row .crm-form-control::placeholder,
+html[data-crm-theme="dynamics"] .crm-form-field-row .form-input::placeholder {
+  color: #c8c6c4;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row .text-xs.text-red-600 {
+  grid-column: 2;
+  margin-top: 0.125rem;
+}
+
+/* Checkbox / radio inside field rows */
+html[data-crm-theme="dynamics"] .crm-form-field-row:has(input[type="checkbox"]),
+html[data-crm-theme="dynamics"] .crm-form-field-row:has(input[type="radio"]) {
+  align-items: center;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row input[type="checkbox"],
+html[data-crm-theme="dynamics"] .crm-form-field-row input[type="radio"] {
+  border-color: #8a8886;
+  accent-color: #0078d4;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-field-row .flex.items-center {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: none;
+  padding: 0;
+}
+
+html[data-crm-theme="dynamics"] .crm-form-footer {
+  margin-top: 0.5rem;
+}
+
+/* Sortable list column headers */
+html[data-crm-theme="dynamics"] .table thead button[type="button"],
+html[data-crm-theme="dynamics"] .crm-dynamics table thead button[type="button"] {
+  cursor: pointer;
+}

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@erp/common": ["libs/common/src"],
+      "@erp/common/*": ["libs/common/src/*"],
+      "@erp/database": ["libs/database/src"],
+      "@erp/database/*": ["libs/database/src/*"],
+      "@erp/security": ["libs/security/src"],
+      "@erp/security/*": ["libs/security/src/*"],
+      "@erp/contracts": ["libs/contracts/src"],
+      "@erp/contracts/*": ["libs/contracts/src/*"],
+      "@erp/audit-client": ["libs/audit-client/src"],
+      "@erp/audit-client/*": ["libs/audit-client/src/*"]
+    }
+  }
+}

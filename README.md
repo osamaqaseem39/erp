@@ -1,222 +1,167 @@
-# ERP SaaS Solution
+## Documentation
 
-A complete Enterprise Resource Planning (ERP) SaaS solution built with ASP.NET Core 8, following SOLID principles and Domain-Driven Design (DDD) patterns.
+Full documentation lives in [`docs/`](docs/). Start with [Project Overview](docs/PROJECT_OVERVIEW.md).
 
-## 🏗️ Architecture
+| Document | Description |
+|----------|-------------|
+| [Project Overview](docs/PROJECT_OVERVIEW.md) | Purpose, layout, what is DI-wired |
+| [Features](docs/FEATURES.md) | Feature matrix (wired vs scaffolded) |
+| [Architecture](docs/ARCHITECTURE.md) | Clean Architecture + multi-tenancy |
+| [Database](docs/DATABASE.md) | EF model, schemas, migrations |
+| [API](docs/API.md) | REST + GraphQL route map |
+| [Frontend](docs/FRONTEND.md) | React SPA routes and stack |
+| [Backend](docs/BACKEND.md) | Services and DI registration |
+| [User Roles](docs/USER_ROLES.md) | SuperAdmin, RBAC, permissions |
+| [Business Modules](docs/BUSINESS_MODULES.md) | Module inventory |
+| [Deployment](docs/DEPLOYMENT.md) | Run, config, bootstrap |
+| [Portfolio Content](docs/PORTFOLIO_CONTENT.md) | Case-study copy |
+| [Changelog](docs/CHANGELOG.md) | Doc / state notes |
+| [CRM Module Status](docs/CRM_MODULE_STATUS.md) | Living CRM completion tracker |
+| [ERP UI Program](docs/erp-ui-program/PLAN.md) | Module-by-module dashboard/UX plan, checkpoints, agent prompts |
 
-- **Framework**: ASP.NET Core 8 Web API
-- **Database**: SQL Server with Stored Procedures for all CRUD operations
-- **API Style**: Hybrid - GraphQL (queries) + REST (mutations)
-- **Multi-tenancy**: Full support with TenantId in all tables
-- **Authentication**: JWT + Refresh tokens
-- **Authorization**: Role-Based Access Control (RBAC)
-- **Logging**: Serilog
-- **Caching**: Redis
-- **Containerization**: Docker-ready
+Also useful: [SETUP_GUIDE.md](SETUP_GUIDE.md) (older manual steps; prefer setup API + `/setup` UI).
 
-## 📁 Project Structure
+---
 
-```
-ERP.SaaS.sln
-├── ERP.Api/                     → Presentation layer
-│   ├── Controllers/            → REST endpoints per module
-│   ├── GraphQL/                → Queries & Mutations per module
-│   ├── Middlewares/            → JWT, RBAC, Exception handling
-│   └── Program.cs
-├── ERP.Application/             → Application services
-│   ├── Core/                   → Core master data services
-│   ├── HRM/                    → HRM services
-│   ├── Finance/                → Accounting, Payroll, Tax
-│   ├── CRM/                    → Customer Relationship
-│   ├── SCM/                    → Supply Chain & Inventory
-│   ├── Sales/                  → Sales & POS
-│   ├── Procurement/            → Vendor & Purchase
-│   ├── Projects/               → Project management
-│   ├── Manufacturing/          → Production & BOM
-│   ├── Reports/                → Reporting & BI
-│   └── Admin/                  → RBAC, Tenants
-├── ERP.Domain/                  → Entities & Value Objects
-├── ERP.Infrastructure/          → Persistence & Infrastructure
-│   ├── Database/               → SQL + Stored Procedure executor
-│   ├── Repositories/           → Repository per module
-│   └── Services/               → Logging, Email, Caching
-├── ERP.Shared/                  → Shared kernel
-│   ├── DTOs/                   → Data transfer objects
-│   ├── Exceptions/
-│   ├── Helpers/
-│   └── Constants/
-└── ERP.Tests/                   → Unit & Integration tests
-```
+# ERP SaaS Platform
 
-## 🚀 Getting Started
+A full-stack, multi-tenant ERP system with a modern React frontend and a layered ASP.NET Core backend.
 
-### Prerequisites
+This repository contains:
 
-- .NET 8 SDK
-- SQL Server 2022 or later
-- Redis Server
-- Docker (optional)
+- A backend API built with ASP.NET Core (`net9.0`) following Domain/Application/Infrastructure layering.
+- A frontend admin portal built with React + TypeScript + Vite + Tailwind.
+- Core ERP modules (users, roles, tenants, inventory, finance, CRM, HRM, procurement, manufacturing, projects, POS).
 
-### Installation
+**Runtime honesty:** Core, Admin, CRM, Sales/POS, Finance, HRM, Inventory/SCM, Procurement, Manufacturing, Projects, and Reports are DI-registered (see [Features](docs/FEATURES.md)). Some Finance/HRM/Procurement services are still stubs pending full business logic.
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd erp
-   ```
+## Architecture Overview
 
-2. **Restore packages**
-   ```bash
-   dotnet restore
-   ```
+### Backend (`.NET`)
 
-3. **Update connection strings**
-   - Update `AppConstants.SQL_CONNECTION_STRING` in `ERP.Shared/Constants/AppConstants.cs`
-   - Update `AppConstants.REDIS_CONNECTION_STRING` in the same file
+- `ERP.Api`: HTTP API host, auth, middleware, Swagger, GraphQL endpoint.
+- `ERP.Application`: application services/use cases and orchestration.
+- `ERP.Domain`: core business entities and domain logic.
+- `ERP.Infrastructure`: data access (EF Core SQL Server + Dapper), persistence concerns.
+- `ERP.Shared`: shared contracts/utilities.
+- `ERP.Tests`: automated test project.
 
-4. **Run the application**
-   ```bash
-   dotnet run --project ERP.Api
-   ```
+### Frontend (`React`)
 
-### Using Docker
+- `frontend`: SPA admin UI built with React 18, TypeScript, Vite, Redux, Redux-Saga, Tailwind, and FrostUI components.
+- Route-driven module structure under `frontend/src` (routes in `frontend/src/routes`).
+- Theming and UI styling under `frontend/src/assets/scss`.
 
-1. **Build and run with Docker Compose**
-   ```bash
-   docker-compose up -d
-   ```
+## Tech Stack
 
-2. **Access the application**
-   - API: http://localhost:5000
-   - Swagger UI: http://localhost:5000/swagger
-   - GraphQL Playground: http://localhost:5000/graphql
+- **Backend**: ASP.NET Core Web API, EF Core, SQL Server, Dapper, FluentValidation, JWT auth, Swagger, HotChocolate GraphQL
+- **Frontend**: React, TypeScript, Vite, Redux Toolkit, Redux-Saga, Tailwind CSS, Sass
+- **Tooling**: npm, .NET SDK, ESLint, TypeScript compiler
 
-## 🔧 Configuration
+## Prerequisites
 
-### Database Setup
+- [.NET SDK 9.0+](https://dotnet.microsoft.com/)
+- [Node.js 18+](https://nodejs.org/) and npm
+- SQL Server instance (local or remote)
+- Redis (default `localhost:6379` — required by current host startup)
 
-1. Create the database:
-   ```sql
-   CREATE DATABASE ERPSaaS;
-   ```
+## Getting Started
 
-2. Run the stored procedures script:
-   ```bash
-   sqlcmd -S localhost -d ERPSaaS -i ERP.Infrastructure/Database/StoredProcedures.sql
-   ```
+### 1) Backend setup
 
-### Environment Variables
-
-- `ASPNETCORE_ENVIRONMENT`: Development/Production
-- `ConnectionStrings__DefaultConnection`: SQL Server connection string
-- `Redis__ConnectionString`: Redis connection string
-
-## 📚 API Documentation
-
-### REST Endpoints
-
-- **Authentication**: `/api/auth`
-  - `POST /login` - User login
-  - `POST /refresh` - Refresh token
-  - `POST /logout` - User logout
-
-- **Tenants**: `/api/tenant`
-  - `GET /{id}` - Get tenant by ID
-  - `GET /` - Get all tenants (paginated)
-  - `POST /` - Create tenant
-  - `PUT /{id}` - Update tenant
-  - `DELETE /{id}` - Delete tenant
-
-### GraphQL
-
-- **Queries**:
-  - `getTenant(id: ID!)` - Get tenant by ID
-  - `getAllTenants` - Get all tenants
-  - `getTenantBySubdomain(subdomain: String!)` - Get tenant by subdomain
-
-- **Mutations**:
-  - `addTenant(input: CreateTenantDto!)` - Create tenant
-  - `updateTenant(input: UpdateTenantDto!)` - Update tenant
-  - `deleteTenant(id: ID!)` - Delete tenant
-
-## 🔐 Authentication & Authorization
-
-### JWT Token Structure
-
-```json
-{
-  "sub": "user-id",
-  "email": "user@example.com",
-  "role": "User",
-  "TenantId": "tenant-id",
-  "exp": 1234567890
-}
-```
-
-### RBAC Roles
-
-- **SuperAdmin**: Full system access
-- **Admin**: Tenant-level administration
-- **Manager**: Department-level management
-- **User**: Basic user access
-
-## 🏢 Multi-tenancy
-
-The system supports multi-tenancy with:
-- Tenant isolation at the database level
-- Tenant-specific connection strings
-- Tenant-aware middleware
-- Tenant context in all operations
-
-## 🧪 Testing
+From repository root:
 
 ```bash
-# Run all tests
-dotnet test
-
-# Run specific test project
-dotnet test ERP.Tests
+dotnet restore ERP.SaaS.sln
+dotnet build ERP.SaaS.sln
+dotnet run --project ERP.Api
 ```
 
-## 📈 Monitoring & Logging
+Update `ERP.Shared/Constants/AppConstants.cs` SQL/Redis/JWT values for your machine before first run.
 
-- **Serilog** for structured logging
-- **Redis** for caching and session management
-- **Health checks** for system monitoring
+Default dev URLs (from launch settings):
 
-## 🔄 Development Workflow
+- `https://localhost:7062`
+- `http://localhost:5252`
 
-1. Create feature branch
-2. Implement domain entities
-3. Add stored procedures
-4. Create repositories
-5. Implement application services
-6. Add API controllers/GraphQL resolvers
-7. Write tests
-8. Create pull request
+Useful endpoints:
 
-## 📝 Stored Procedure Naming Convention
+- Swagger: `https://localhost:7062/swagger`
+- GraphQL: `https://localhost:7062/graphql`
 
-- **Insert**: `add{Table}`
-- **Update**: `update{Table}`
-- **Delete**: `delete{Table}`
-- **Get by ID**: `get{Table}ById`
-- **Get All**: `getAll{Table}`
-- **Get All Paged**: `getAll{Table}Paged`
-- **Check Exists**: `{table}Exists`
+### 2) Frontend setup
 
-## 🤝 Contributing
+In a new terminal:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## 📄 License
+Vite default URL: `http://localhost:5173`
 
-This project is licensed under the MIT License.
+Frontend API base URL:
 
-## 🆘 Support
+- `frontend/src/config.ts`
+- Fallback default: `https://localhost:7062/api`
+- Override via env: `VITE_API_BASE_URL`
 
-For support and questions, please contact the development team or create an issue in the repository.
+### 3) Initial data/bootstrap (automated)
+
+On first run, the frontend detects whether a super admin exists and redirects you to setup automatically.
+
+1. Start the backend API (database schema deploys on startup).
+2. Start the frontend (`npm run dev`).
+3. Open `http://localhost:5173` — you will be sent to `/setup` if the system is not initialized.
+4. Complete the super admin setup form (creates the first tenant + super admin user).
+5. You are redirected to login with tenant ID and email pre-filled; enter your password and sign in.
+
+API alternative: `GET /api/setup/super-admin/exists` and `POST /api/setup/super-admin` (Swagger).
+
+### Core module API (after login)
+
+| Area | Endpoints |
+|------|-----------|
+| Permissions | `GET /api/admin/permissions`, `POST /api/admin/permissions/seed` |
+| Users | `GET/POST/PUT/DELETE /api/admin/users` |
+| Roles | `GET/POST/PUT/DELETE /api/admin/roles`, `GET/POST .../permissions` |
+| Tenants | `GET /api/tenants` (public read), mutations require auth |
+| Settings | `/api/admin/system-settings` |
+| Audit / logs | `/api/admin/audit-logs`, `/api/admin/system-logs` |
+| CRM | `/api/crm/*` (see docs) |
+| POS / sales invoices | `/api/sales/*` |
+
+## Project Structure
+
+```text
+ERP.Api/
+ERP.Application/
+ERP.Domain/
+ERP.Infrastructure/
+ERP.Shared/
+ERP.Tests/
+frontend/
+docs/
+```
+
+## Available Scripts
+
+### Frontend (`frontend/package.json`)
+
+- `npm run dev` — start Vite dev server
+- `npm run build` — type-check + production build
+- `npm run lint` — run ESLint
+- `npm run preview` — preview production build
+
+### Backend
+
+- `dotnet run --project ERP.Api` — start API
+- `dotnet test ERP.SaaS.sln` — run tests
+
+## Notes
+
+- This is an actively evolving ERP codebase; modules and UI flows may change frequently.
+- Keep backend and frontend running together for full feature validation.
+- Ensure CORS/API URL configuration is aligned when running across different hosts/ports.
+- Treat Finance/HRM/Inventory/etc. UI as preview until DI registration is completed.

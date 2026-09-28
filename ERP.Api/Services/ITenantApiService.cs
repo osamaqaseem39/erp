@@ -5,4 +5,5 @@ namespace ERP.Api.Services;
 public interface ITenantApiService : IApiService<TenantDto, CreateTenantDto, UpdateTenantDto>
 {
     Task<TenantDto?> GetByDomainAsync(string domain);
+    Task<IEnumerable<LoginTenantOptionDto>> GetLoginOptionsAsync();
 }

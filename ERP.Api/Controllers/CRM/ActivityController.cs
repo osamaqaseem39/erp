@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
@@ -7,6 +8,7 @@ using FluentValidation;
 
 namespace ERP.Api.Controllers.CRM;
 
+[Authorize]
 [ApiController]
 [Route("api/crm/activities")]
 public class ActivityController : ERP.Api.Abstractions.ControllerBase
@@ -54,6 +56,12 @@ public class ActivityController : ERP.Api.Abstractions.ControllerBase
     public async Task<IActionResult> GetByOpportunity(Guid opportunityId)
     {
         return await HandleAsync(() => _service.GetByOpportunityAsync(opportunityId));
+    }
+
+    [HttpGet("related/{entityType}/{entityId}")]
+    public async Task<IActionResult> GetByRelatedEntity(string entityType, Guid entityId)
+    {
+        return await HandleAsync(() => _service.GetByEntityAsync(entityType, entityId));
     }
 
     [HttpGet("assigned/{assignedTo}")]
@@ -104,4 +112,21 @@ public class ActivityController : ERP.Api.Abstractions.ControllerBase
     {
         return await HandleAsync(() => _service.DeleteAsync(id));
     }
+
+    [HttpPost("{id}/complete")]
+    public async Task<IActionResult> Complete(Guid id)
+    {
+        return await HandleAsync(() => _service.CompleteAsync(id));
+    }
+
+    [HttpPost("{id}/reschedule")]
+    public async Task<IActionResult> Reschedule(Guid id, [FromBody] RescheduleActivityRequest request)
+    {
+        return await HandleAsync(() => _service.RescheduleAsync(id, request.NewDate));
+    }
+}
+
+public class RescheduleActivityRequest
+{
+    public DateTime NewDate { get; set; }
 }

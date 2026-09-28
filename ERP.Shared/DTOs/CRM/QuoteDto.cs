@@ -24,6 +24,7 @@ public class QuoteDto : BaseDto
     public string? OpportunityName { get; set; }
     public string? AssignedToUserName { get; set; }
     public Guid? CompanyId { get; set; }
+    public List<QuoteLineDto> QuoteLines { get; set; } = new();
 }
 
 public class CreateQuoteDto : CreateDto
@@ -42,6 +43,7 @@ public class CreateQuoteDto : CreateDto
     public string? Terms { get; set; }
     public Guid? AssignedToUserId { get; set; }
     public Guid? CompanyId { get; set; }
+    public List<CreateQuoteLineDto> QuoteLines { get; set; } = new();
 }
 
 public class UpdateQuoteDto : UpdateDto
@@ -59,4 +61,5 @@ public class UpdateQuoteDto : UpdateDto
     public string? Notes { get; set; }
     public string? Terms { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public List<CreateQuoteLineDto> QuoteLines { get; set; } = new();
 }

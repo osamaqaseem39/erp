@@ -37,6 +37,38 @@ public class CRMQueries
         return await customerService.SearchAsync(searchTerm);
     }
 
+    // Contact Queries
+    public async Task<ContactDto?> GetContact(
+        [Service] IContactService contactService,
+        Guid contactId)
+    {
+        return await contactService.GetByIdAsync(contactId);
+    }
+
+    public async Task<IEnumerable<ContactDto>> GetContacts(
+        [Service] IContactService contactService,
+        Guid? customerId = null)
+    {
+        if (customerId.HasValue)
+            return await contactService.GetByCustomerAsync(customerId.Value);
+
+        return await contactService.GetAllAsync();
+    }
+
+    public async Task<IEnumerable<ContactDto>> SearchContacts(
+        [Service] IContactService contactService,
+        string searchTerm)
+    {
+        return await contactService.SearchAsync(searchTerm);
+    }
+
+    public async Task<IEnumerable<ContactDto>> GetContactsByCustomer(
+        [Service] IContactService contactService,
+        Guid customerId)
+    {
+        return await contactService.GetByCustomerAsync(customerId);
+    }
+
     // Lead Queries
     public async Task<LeadDto?> GetLead(
         [Service] ILeadService leadService,
@@ -81,9 +113,7 @@ public class CRMQueries
         [Service] ILeadService leadService,
         Guid assignedTo)
     {
-        // Note: ILeadService doesn't have GetByAssignedToAsync method
-        // This would need to be implemented or use a different approach
-        return await leadService.GetAllAsync();
+        return await leadService.GetByAssignedToAsync(assignedTo);
     }
 
     // Opportunity Queries
@@ -272,9 +302,7 @@ public class CRMQueries
         Guid relatedToId,
         string relatedToType)
     {
-        // Note: IActivityService doesn't have GetByRelatedToAsync method
-        // This would need to be implemented or use a different approach
-        return await activityService.GetAllAsync();
+        return await activityService.GetByEntityAsync(relatedToType, relatedToId);
     }
 
     public async Task<IEnumerable<ActivityDto>> GetActivitiesByAssignedTo(

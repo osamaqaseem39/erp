@@ -45,5 +45,9 @@ public class CreateQuoteValidator : BaseValidator<CreateQuoteDto>
         RuleFor(x => x.Notes)
             .MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters")
             .When(x => !string.IsNullOrEmpty(x.Notes));
+
+        RuleForEach(x => x.QuoteLines)
+            .SetValidator(new CreateQuoteLineValidator())
+            .When(x => x.QuoteLines.Count > 0);
     }
 }

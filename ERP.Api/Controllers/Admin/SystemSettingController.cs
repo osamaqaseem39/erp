@@ -1,12 +1,14 @@
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Admin;
 using ERP.Shared.DTOs.Admin;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ERP.Api.Controllers.Admin;
 
 [ApiController]
 [Route("api/admin/system-settings")]
+[Authorize]
 public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ISystemSettingService _service;

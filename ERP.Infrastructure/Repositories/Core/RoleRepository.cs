@@ -43,7 +43,7 @@ public class RoleRepository : IRoleRepository
         return await _context.Roles
             .Include(r => r.UserRoles)
             .Include(r => r.RolePermissions)
-            .FirstOrDefaultAsync(r => r.Name == name);
+            .FirstOrDefaultAsync(r => r.RoleName == name);
     }
 
     public async Task<Guid> CreateAsync(Role role)

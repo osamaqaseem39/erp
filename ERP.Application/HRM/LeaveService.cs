@@ -6,7 +6,7 @@ using ERP.Domain.HRM;
 
 namespace ERP.Application.HRM;
 
-public class LeaveService : ILeaveService
+public class LeaveService : ERP.Application.Interfaces.HRM.ILeaveService
 {
     private readonly ILeaveRequestRepository _repository;
 

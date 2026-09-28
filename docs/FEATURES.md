@@ -1,0 +1,120 @@
+# Features — ERP SaaS
+
+Status is derived from controllers, application services, and **actual DI registration via `ERP.Api/Extensions/ModuleServiceCollectionExtensions.cs`** (invoked from `Program.cs`). Code that exists but is not registered is marked **Not DI-wired**.
+
+## Legend
+
+| Tag | Meaning |
+|-----|---------|
+| **Wired** | Repository + service registered in DI; controllers can resolve |
+| **Stub** | DI-wired with minimal / stub application service (expand business logic incrementally) |
+| **UI** | Routes/pages exist under `frontend/src` |
+
+---
+
+## Platform / Core — Wired
+
+| Feature | Surface |
+|---------|---------|
+| Super-admin bootstrap | `GET /api/setup/super-admin/exists`, `POST /api/setup/super-admin`; UI `/setup` |
+| Auth login / refresh / logout | `POST /api/auth/*` |
+| Change / reset password, verify email | `POST /api/auth/change-password`, `reset-password`, `verify-email` |
+| Tenants CRUD | `GET/POST/PUT/DELETE /api/tenants` (+ by domain) |
+| Users admin | `/api/admin/users` (+ activate/deactivate/reset-password) |
+| Roles + role permissions | `/api/admin/roles` |
+| Permission list + seed | `GET /api/admin/permissions`, `POST .../seed` |
+| System settings | `/api/admin/system-settings` |
+| Audit logs | `/api/admin/audit-logs` |
+| System logs | `/api/admin/system-logs` |
+| Tenant resolution | `TenantMiddleware` (JWT `TenantId` or `X-Tenant-Id`) → `HttpContextTenantProvider` |
+| Exception middleware | `ExceptionMiddleware` |
+| Swagger + JWT security scheme | Development |
+| GraphQL host | `/graphql` with module type extensions |
+| EF migrate / EnsureCreated fallback + SQL file deploy | On startup |
+
+## Sales / POS — Wired
+
+| Feature | Surface |
+|---------|---------|
+| Sales invoices | `/api/sales/invoices` (+ post/void) |
+| POS sessions | `/api/sales/pos-sessions` (+ close) |
+| POS transactions | `/api/sales/pos-transactions` |
+| Frontend | `/pos/sessions`, `/pos/transactions` (+ new/edit) |
+
+## CRM — Wired (most mature module)
+
+See [CRM_MODULE_STATUS.md](CRM_MODULE_STATUS.md) for layer-by-layer detail.
+
+| Area | REST base | Notable workflows |
+|------|-----------|-------------------|
+| Customers | `/api/crm/customers` | CRUD, search, filter by status/industry |
+| Contacts | `/api/crm/contacts` | CRUD, by customer, search |
+| Leads | `/api/crm/leads` | convert → customer; convert → opportunity |
+| Opportunities | `/api/crm/opportunities` | convert → quote |
+| Quotes | `/api/crm/quotes` | send; convert → sales order; line items |
+| Sales orders | `/api/crm/sales-orders` | approve / ship / invoice; line items |
+| Activities | `/api/crm/activities` | complete / reschedule |
+| Campaigns | `/api/crm/campaigns` | launch / pause / complete |
+| Customer groups, price lists, territories, return orders | `/api/crm/customer-groups`, `price-lists`, `sales-territories`, `return-orders` | CRUD |
+| Frontend | `/crm/*` list/new/edit + `/crm/dashboard` | |
+
+GraphQL: `CRMQueries` / `CRMMutations` registered (partial vs REST — see CRM status doc).
+
+---
+
+## Finance — Wired (some Stub)
+
+DI-registered via `AddErpFinanceModule`. Controllers under `ERP.Api/Controllers/Finance/`:
+
+| Area | Route prefix (examples) | Notes |
+|------|-------------------------|-------|
+| Accounting (CoA, journals, entries, TB/GL) | `/api/finance/accounting` | Stub service |
+| Chart of accounts | `/api/finance/chartofaccounts` | Wired |
+| Currencies / exchange rates | `/api/finance/currencies`, `/api/finance/exchange-rates` | Wired |
+| Banks | `/api/finance/banks` | Stub service |
+| Taxes | `/api/finance/taxes` | Wired |
+| Invoices / bills / payments / journals | `/api/finance/invoices`, `bills`, `payments`, `journals` | Invoice wired; bill stub |
+| Fixed assets + depreciation | `/api/finance/fixed-assets` | Stub service |
+| Finance reports | `/api/finance/reports` | Wired report service |
+
+CRM sales-order **Invoice** action creates a Finance invoice header (`SalesOrderService.InvoiceAsync`).
+
+Frontend routes exist under `/finance/*`.
+
+## HRM — Wired (some Stub)
+
+DI-registered via `AddErpHrmModule`. Routes include `/api/hrm/employees`, `departments`, `attendance`, `leaves`, `leave-requests`, `payroll`, `performance`, `recruitment`, `training`, `time-tracking`, `benefits`. Attendance/Benefits/Department/LeaveRequest use stub services where full domain logic is incomplete. Frontend under `/hrm/*`.
+
+## Inventory / SCM — Wired
+
+DI-registered via `AddErpInventoryModule`. Controllers under `/api/inventory/...`. Stock level/adjust/transfer implemented on `StockService`. Frontend under `/inventory/*` (companyId from auth session).
+
+## Procurement — Wired (Stub-heavy)
+
+DI-registered via `AddErpProcurementModule`. `/api/procurement/vendors` (VendorService) plus purchase order/invoice/requisition/GRN stub services.
+
+## Manufacturing — Wired
+
+DI-registered via `AddErpManufacturingModule`. `/api/manufacturing/production-orders`, work centers.
+
+## Projects — Wired
+
+DI-registered via `AddErpProjectsModule`. `/api/projects` plus document service.
+
+## Reports — Wired
+
+DI-registered via `AddErpReportsModule`. `/api/reports`.
+
+---
+
+## Frontend-only / template apps
+
+Routes under `/apps/calendar`, `/apps/tickets`, `/apps/file-manager`, `/apps/kanban`, `/apps/project/*`, and `/pages/*` come from the Konrix template and are **not** ERP domain APIs.
+
+## Gaps to call out honestly
+
+1. Several Finance/HRM/Procurement services are **DI stubs** — expand business logic beyond empty/NotImplemented returns.
+2. Schema dual-path (EF migrations + SQL file deploy) still needs ongoing reconciliation.
+3. Role/permission **authorization policies** are not yet enforced beyond authenticated user + JWT role claims.
+4. Integration / E2E tests are still thin (unit tests expanded for password hashing; CRM calculator remains).
+5. `SETUP_GUIDE.md` still describes older manual SQL bootstrap; prefer setup API + `/setup` UI.

@@ -1,5 +1,6 @@
 using HotChocolate;
 using ERP.Application.Core;
+using ERP.Application.Interfaces.Core;
 using ERP.Shared.DTOs.Core;
 
 namespace ERP.Api.GraphQL;
@@ -18,6 +19,6 @@ public class TenantQuery
 
     public async Task<TenantDto?> GetTenantBySubdomain(string subdomain, [Service] ITenantService tenantService)
     {
-        return await tenantService.GetBySubdomainAsync(subdomain);
+        return await tenantService.GetByDomainAsync(subdomain);
     }
 }

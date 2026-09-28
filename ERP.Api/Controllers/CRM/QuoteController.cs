@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
@@ -7,6 +8,7 @@ using ERP.Api.Validators.CRM;
 
 namespace ERP.Api.Controllers.CRM;
 
+[Authorize]
 [ApiController]
 [Route("api/crm/quotes")]
 public class QuoteController : ERP.Api.Abstractions.ControllerBase

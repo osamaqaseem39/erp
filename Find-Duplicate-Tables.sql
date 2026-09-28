@@ -1,0 +1,38 @@
+-- Find all duplicate tables across schemas
+USE [erp]
+GO
+
+-- Find tables that exist in multiple schemas
+SELECT 
+    TABLE_NAME,
+    STRING_AGG(TABLE_SCHEMA, ', ') AS Schemas,
+    COUNT(*) AS SchemaCount
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_TYPE = 'BASE TABLE'
+    AND TABLE_NAME NOT LIKE '__EFMigrationsHistory%'
+GROUP BY TABLE_NAME
+HAVING COUNT(*) > 1
+ORDER BY COUNT(*) DESC, TABLE_NAME;
+GO
+
+-- Show detailed breakdown
+SELECT 
+    TABLE_SCHEMA,
+    TABLE_NAME,
+    (SELECT COUNT(*) 
+     FROM INFORMATION_SCHEMA.COLUMNS c 
+     WHERE c.TABLE_SCHEMA = t.TABLE_SCHEMA 
+     AND c.TABLE_NAME = t.TABLE_NAME) AS ColumnCount
+FROM INFORMATION_SCHEMA.TABLES t
+WHERE TABLE_TYPE = 'BASE TABLE'
+    AND TABLE_NAME NOT LIKE '__EFMigrationsHistory%'
+    AND TABLE_NAME IN (
+        SELECT TABLE_NAME
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_TYPE = 'BASE TABLE'
+        GROUP BY TABLE_NAME
+        HAVING COUNT(*) > 1
+    )
+ORDER BY TABLE_NAME, TABLE_SCHEMA;
+GO
+

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces;
 using ERP.Shared.DTOs.Finance;
@@ -8,6 +9,7 @@ namespace ERP.Api.Controllers.Finance;
 
 [ApiController]
 [Route("api/finance/exchange-rates")]
+[Authorize]
 public class ExchangeRateController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IExchangeRateService _service;

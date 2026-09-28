@@ -6,7 +6,9 @@ public interface ICampaignRepository
 {
     Task<Campaign?> GetByIdAsync(Guid id);
     Task<IEnumerable<Campaign>> GetAllAsync();
-    Task<Campaign> AddAsync(Campaign entity);
-    Task UpdateAsync(Campaign entity);
-    Task DeleteAsync(Guid id);
+    Task<IEnumerable<Campaign>> GetByStatusAsync(string status);
+    Task<IEnumerable<Campaign>> GetByTypeAsync(string campaignType);
+    Task<Guid> CreateAsync(Campaign campaign);
+    Task<bool> UpdateAsync(Campaign campaign);
+    Task<bool> DeleteAsync(Guid id);
 }

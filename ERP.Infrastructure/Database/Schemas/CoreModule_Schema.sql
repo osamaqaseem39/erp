@@ -149,6 +149,7 @@ CREATE TABLE [Core].[Users] (
     [UpdatedAt] DATETIME2,
     [CreatedBy] NVARCHAR(100),
     [UpdatedBy] NVARCHAR(100),
+    [IsTenantOwner] BIT NOT NULL DEFAULT 0,
     FOREIGN KEY ([TenantId]) REFERENCES [Core].[Tenants]([Id]),
     FOREIGN KEY ([CompanyId]) REFERENCES [Core].[Companies]([Id])
 );

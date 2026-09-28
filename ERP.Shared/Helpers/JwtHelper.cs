@@ -1,34 +1,54 @@
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using ERP.Shared.Constants;
+using ERP.Shared.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ERP.Shared.Helpers;
 
 public static class JwtHelper
 {
-    public static string GenerateJwtToken(Guid userId, string email, string role, Guid tenantId)
+    private static JwtSettings _settings = new();
+
+    public static void Configure(JwtSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        if (string.IsNullOrWhiteSpace(settings.SecretKey) || settings.SecretKey.Length < 32)
+            throw new InvalidOperationException("Jwt:SecretKey must be configured and at least 32 characters.");
+        _settings = settings;
+    }
+
+    public static string GenerateJwtToken(Guid userId, string email, IEnumerable<string> roles, Guid tenantId)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(AppConstants.JWT_SECRET_KEY);
-        
+        var key = Encoding.UTF8.GetBytes(_settings.SecretKey);
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, userId.ToString()),
             new(ClaimTypes.Email, email),
-            new(ClaimTypes.Role, role),
             new("TenantId", tenantId.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
 
+        foreach (var role in roles.Where(r => !string.IsNullOrWhiteSpace(r)).Distinct())
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        if (!claims.Any(c => c.Type == ClaimTypes.Role))
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "User"));
+        }
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(AppConstants.JWT_EXPIRY_MINUTES),
-            Issuer = AppConstants.JWT_ISSUER,
-            Audience = AppConstants.JWT_AUDIENCE,
+            Expires = DateTime.UtcNow.AddMinutes(_settings.ExpiryMinutes),
+            Issuer = _settings.Issuer,
+            Audience = _settings.Audience,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
@@ -36,9 +56,14 @@ public static class JwtHelper
         return tokenHandler.WriteToken(token);
     }
 
+    /// <summary>Backward-compatible overload. </summary>
+    public static string GenerateJwtToken(Guid userId, string email, string role, Guid tenantId)
+        => GenerateJwtToken(userId, email, new[] { role }, tenantId);
+
     public static string GenerateRefreshToken()
     {
-        return Guid.NewGuid().ToString();
+        var bytes = RandomNumberGenerator.GetBytes(64);
+        return Convert.ToBase64String(bytes);
     }
 
     public static ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
@@ -48,16 +73,16 @@ public static class JwtHelper
             ValidateAudience = true,
             ValidateIssuer = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AppConstants.JWT_SECRET_KEY)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey)),
             ValidateLifetime = false,
-            ValidIssuer = AppConstants.JWT_ISSUER,
-            ValidAudience = AppConstants.JWT_AUDIENCE
+            ValidIssuer = _settings.Issuer,
+            ValidAudience = _settings.Audience
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-        
-        if (securityToken is not JwtSecurityToken jwtSecurityToken || 
+
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
             !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
         {
             throw new SecurityTokenException("Invalid token");
@@ -65,4 +90,7 @@ public static class JwtHelper
 
         return principal;
     }
+
+    public static int ExpiryMinutes => _settings.ExpiryMinutes;
+    public static int RefreshTokenExpiryDays => _settings.RefreshTokenExpiryDays;
 }
