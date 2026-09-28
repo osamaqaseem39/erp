@@ -1,72 +1,73 @@
 import { APICore } from '../../../../../helpers/api/apiCore';
+import { toPagedResult, toRequestParams, type PagedQuery, type PagedResult } from '../../../../../lib/erp/paging';
+import type { EntityOption } from '../../../../../components/erp/EntitySelect';
 import type { CustomerDto, CreateCustomerDto, UpdateCustomerDto } from '../types';
 
 const api = new APICore();
+const BASE = '/crm/customers';
+
+export interface CustomerFilters {
+  status: string;
+  industry: string;
+  customerType: string;
+}
+
+export type CustomerQuery = PagedQuery<CustomerFilters>;
+
+/** Sort keys accepted by GET /crm/customers/paged (backend whitelist in CustomerRepository.SortFields). */
+export const CUSTOMER_SORT_KEYS = ['customerName', 'customerCode', 'companyName', 'customerType', 'status', 'industry', 'email', 'creditLimit', 'createdAt'] as const;
 
 class CustomerService {
+  /** Server-side paged, filtered, sorted list. */
+  list = async (query: CustomerQuery, signal?: AbortSignal): Promise<PagedResult<CustomerDto>> => {
+    const response = await api.get(`${BASE}/paged`, toRequestParams(query), { signal });
+    return toPagedResult<CustomerDto>(response.data);
+  };
+
+  get = async (id: string, signal?: AbortSignal): Promise<CustomerDto> => {
+    const response = await api.get(`${BASE}/${id}`, null, { signal });
+    return response.data as CustomerDto;
+  };
+
+  /** Returns the new customer's id. */
+  create = async (customer: CreateCustomerDto): Promise<string> => {
+    const response = await api.create(BASE, customer);
+    return (response.data as { id: string }).id;
+  };
+
+  update = async (id: string, customer: UpdateCustomerDto): Promise<void> => {
+    await api.update(`${BASE}/${id}`, { ...customer, id });
+  };
+
+  /** Refused with 409 when the customer has related records; the message says which. */
+  remove = async (id: string): Promise<void> => {
+    await api.delete(`${BASE}/${id}`);
+  };
+
+  /** Options for EntitySelect pickers on other forms. */
+  searchOptions = async (searchTerm: string): Promise<EntityOption[]> => {
+    const page = await this.list({ pageNumber: 1, pageSize: 20, searchTerm, sortBy: 'customerName', sortDirection: 'asc' });
+    return page.items.map(toOption);
+  };
+
+  resolveOption = async (id: string): Promise<EntityOption | null> => {
+    try {
+      return toOption(await this.get(id));
+    } catch {
+      return null;
+    }
+  };
+
   /**
-   * Get all customers
+   * @deprecated Loads every customer. Kept for the dropdowns on other modules' forms until they
+   * move to EntitySelect + searchOptions.
    */
   getAll = async (): Promise<CustomerDto[]> => {
-    const response = await api.get('/crm/customers', null);
-    return Array.isArray(response.data) ? response.data : [response.data];
-  };
-
-  /**
-   * Get customer by ID
-   */
-  getById = async (id: string): Promise<CustomerDto> => {
-    const response = await api.get(`/crm/customers/${id}`, null);
-    return response.data as CustomerDto;
-  };
-
-  /**
-   * Search customers
-   */
-  search = async (searchTerm: string): Promise<CustomerDto[]> => {
-    const response = await api.get('/crm/customers/search', { searchTerm });
-    return Array.isArray(response.data) ? response.data : [response.data];
-  };
-
-  /**
-   * Get customers by status
-   */
-  getByStatus = async (status: string): Promise<CustomerDto[]> => {
-    const response = await api.get(`/crm/customers/status/${status}`, null);
-    return Array.isArray(response.data) ? response.data : [response.data];
-  };
-
-  /**
-   * Get customers by industry
-   */
-  getByIndustry = async (industry: string): Promise<CustomerDto[]> => {
-    const response = await api.get(`/crm/customers/industry/${industry}`, null);
-    return Array.isArray(response.data) ? response.data : [response.data];
-  };
-
-  /**
-   * Create new customer
-   */
-  create = async (customer: CreateCustomerDto): Promise<CustomerDto> => {
-    const response = await api.create('/crm/customers', customer);
-    return response.data as CustomerDto;
-  };
-
-  /**
-   * Update customer
-   */
-  update = async (id: string, customer: UpdateCustomerDto): Promise<CustomerDto> => {
-    const response = await api.update(`/crm/customers/${id}`, { ...customer, id });
-    return response.data as CustomerDto;
-  };
-
-  /**
-   * Delete customer
-   */
-  delete = async (id: string): Promise<void> => {
-    await api.delete(`/crm/customers/${id}`);
+    const response = await api.get(BASE, null);
+    return Array.isArray(response.data) ? response.data : [];
   };
 }
 
-export const customerService = new CustomerService();
+const toOption = (c: CustomerDto): EntityOption => ({ value: c.id ?? '', label: c.customerName, hint: c.customerCode });
 
+export const customerService = new CustomerService();

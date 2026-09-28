@@ -8,6 +8,7 @@ const CampaignList = React.lazy(() => import("../../modules/crm/entities/campaig
 const ContactForm = React.lazy(() => import("../../modules/crm/entities/contact/pages/ContactForm"));
 const ContactList = React.lazy(() => import("../../modules/crm/entities/contact/pages/ContactList"));
 const CrmDashboard = React.lazy(() => import("../../pages/crm/CrmDashboard"));
+const CustomerDetail = React.lazy(() => import("../../modules/crm/entities/customer/pages/CustomerDetail"));
 const CustomerForm = React.lazy(() => import("../../modules/crm/entities/customer/pages/CustomerForm"));
 const CustomerGroupForm = React.lazy(() => import("../../modules/crm/entities/customer-group/pages/CustomerGroupForm"));
 const CustomerGroupList = React.lazy(() => import("../../modules/crm/entities/customer-group/pages/CustomerGroupList"));
@@ -48,6 +49,11 @@ export const crmRoutes: RoutesProps = {
       path: "/crm/customers/new",
       name: "Add Customer",
       element: <CustomerForm />,
+    },
+    {
+      path: "/crm/customers/:id",
+      name: "Customer",
+      element: <CustomerDetail />,
     },
     {
       path: "/crm/customers/:id/edit",
