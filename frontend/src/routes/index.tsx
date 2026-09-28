@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 import { Navigate, Route, RouteProps } from "react-router-dom";
 
