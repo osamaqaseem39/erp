@@ -13,6 +13,7 @@ import {
 } from "../../constants/layout";
 
 // actions
+import type { UnknownAction } from "@reduxjs/toolkit";
 import { LayoutActionType } from "./actions";
 
 // utils
@@ -36,28 +37,28 @@ const INIT_STATE = () => {
 
 const Layout = (
   state: LayoutStateTypes = INIT_STATE(),
-  action: LayoutActionType<string>
-) => {
+  unknownAction: UnknownAction
+): LayoutStateTypes => {
+  const action = unknownAction as LayoutActionType<string>;
   switch (action.type) {
 
     case LayoutActionTypes.CHANGE_LAYOUT_THEME:
       return {
         ...state,
-        layoutTheme: action.payload,
+        layoutTheme: action.payload as LayoutStateTypes["layoutTheme"],
       };
 
     case LayoutActionTypes.CHANGE_LAYOUT_DIRECTION:
       return {
         ...state,
-        layoutDirection: action.payload,
+        layoutDirection: action.payload as LayoutStateTypes["layoutDirection"],
       };
 
     case LayoutActionTypes.CHANGE_LAYOUT_WIDTH: {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const layoutConfig = getLayoutConfigs(action.payload! && action.payload);
+      const layoutConfig = getLayoutConfigs(action.payload ?? "");
       return {
         ...state,
-        layoutWidth: action.payload,
+        layoutWidth: action.payload as LayoutStateTypes["layoutWidth"],
         ...layoutConfig,
       };
     }
@@ -65,25 +66,25 @@ const Layout = (
     case LayoutActionTypes.CHANGE_TOPBAR_THEME:
       return {
         ...state,
-        topBarTheme: action.payload,
+        topBarTheme: action.payload as LayoutStateTypes["topBarTheme"],
       };
 
     case LayoutActionTypes.CHANGE_SIDEBAR_THEME:
       return {
         ...state,
-        sideBarTheme: action.payload,
+        sideBarTheme: action.payload as LayoutStateTypes["sideBarTheme"],
       };
 
     case LayoutActionTypes.CHANGE_SIDEBAR_TYPE:
       return {
         ...state,
-        sideBarType: action.payload,
+        sideBarType: action.payload as LayoutStateTypes["sideBarType"],
       };
 
     case LayoutActionTypes.CHANGE_LAYOUT_POSITION:
       return {
         ...state,
-        layoutPosition: action.payload,
+        layoutPosition: action.payload as LayoutStateTypes["layoutPosition"],
       };
 
     case LayoutActionTypes.SHOW_RIGHT_SIDEBAR:

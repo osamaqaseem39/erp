@@ -1,6 +1,7 @@
+import type { UnknownAction } from "@reduxjs/toolkit";
 import { LayoutActionTypes } from "./constants";
 
-export interface LayoutActionType<TPayload> {
+export interface LayoutActionType<TPayload> extends UnknownAction {
   type:
   | LayoutActionTypes.CHANGE_LAYOUT_THEME
   | LayoutActionTypes.CHANGE_LAYOUT_DIRECTION

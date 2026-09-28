@@ -1,10 +1,6 @@
 import React from "react";
 import { Navigate, Route, RouteObject, RouteProps, Routes } from "react-router-dom";
 
-// redux
-import { RootState } from "../redux/store";
-import { useSelector } from "react-redux";
-
 // All layouts containers
 import DefaultLayout from "../layouts/Default";
 import VerticalLayout from "../layouts/Vertical";
@@ -16,8 +12,7 @@ const api = new APICore();
 
 function renderProtectedElement(
   route: RouteObject,
-  layoutProps: RouteProps,
-  Layout: RootState["Layout"]
+  layoutProps: RouteProps
 ) {
   if (!api.isUserAuthenticated()) {
     api.setLoggedInUser(null);
@@ -34,15 +29,13 @@ function renderProtectedElement(
 
   const RouteLayout = route.path === "/modules" ? DefaultLayout : VerticalLayout;
   return (
-    <RouteLayout {...layoutProps} layout={Layout}>
+    <RouteLayout {...layoutProps}>
       {route.element}
     </RouteLayout>
   );
 }
 
 const AllRoutes = (props: RouteProps) => {
-  const Layout = useSelector((state: RootState) => state.Layout);
-
   return (
     <React.Fragment>
       <Routes>
@@ -51,7 +44,7 @@ const AllRoutes = (props: RouteProps) => {
             <Route
               path={route.path}
               element={
-                <DefaultLayout {...props} layout={Layout}>
+                <DefaultLayout {...props}>
                   {route.element}
                 </DefaultLayout>
               }
@@ -65,7 +58,7 @@ const AllRoutes = (props: RouteProps) => {
           {(authProtectedFlattenRoutes || []).map((route: RouteObject, idx: number) => (
             <Route
               path={route.path}
-              element={renderProtectedElement(route, props, Layout)}
+              element={renderProtectedElement(route, props)}
               key={idx}
             />
           ))}

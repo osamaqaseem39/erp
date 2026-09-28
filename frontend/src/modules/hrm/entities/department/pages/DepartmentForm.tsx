@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { PageBreadcrumb } from "../../../../../components";
 import { VerticalForm, FormInput } from "../../../../../components";
 import { departmentService, type CreateDepartmentDto, type UpdateDepartmentDto, type DepartmentDto } from "../services";
-import { employeeService, type EmployeeDto } from "../../employee/services";
+import { employeeService, type EmployeeListDto } from "../../employee/services";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -22,7 +22,7 @@ const DepartmentForm: React.FC = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [employees, setEmployees] = useState<EmployeeDto[]>([]);
+  const [employees, setEmployees] = useState<EmployeeListDto[]>([]);
   const [departments, setDepartments] = useState<DepartmentDto[]>([]);
   const [department, setDepartment] = useState<DepartmentDto | null>(null);
 

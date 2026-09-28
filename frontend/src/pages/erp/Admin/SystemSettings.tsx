@@ -51,7 +51,7 @@ const SystemSettings = () => {
     }
   };
 
-  const categories = Array.from(new Set(sortedSettings.map(s => s.category).filter(Boolean)));
+  const categories = Array.from(new Set(settings.map(s => s.category).filter(Boolean)));
 
   const { sortKey, sortDir, toggleSort, sortRows } = useTableSort("key");
   const sortedSettings = useMemo(

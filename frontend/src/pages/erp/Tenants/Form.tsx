@@ -19,6 +19,8 @@ const tenantSchema = yup.object({
   isActive: yup.boolean(),
 });
 
+type TenantFormValues = yup.InferType<typeof tenantSchema>;
+
 const industries = ["Technology", "Finance", "Healthcare", "Retail", "Manufacturing", "Education", "Real Estate", "Other"];
 const countries = ["United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "India", "Other"];
 const statuses = ["Active", "Inactive", "Suspended", "Pending"];
@@ -45,7 +47,7 @@ const TenantForm = () => {
     }
   };
 
-  const onSubmit = async (data: CreateTenantDto | UpdateTenantDto) => {
+  const onSubmit = async (data: TenantFormValues) => {
     setError(null);
     setLoading(true);
     try {
@@ -81,7 +83,7 @@ const TenantForm = () => {
             </div>
           )}
 
-          <VerticalForm<CreateTenantDto | UpdateTenantDto>
+          <VerticalForm<TenantFormValues>
             onSubmit={onSubmit}
             resolver={yupResolver(tenantSchema)}
             defaultValues={{

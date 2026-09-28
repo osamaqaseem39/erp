@@ -1,0 +1,1 @@
+const l=[{value:"Draft",label:"Draft"},{value:"Issued",label:"Issued"},{value:"Approved",label:"Approved"},{value:"Paid",label:"Paid"},{value:"PartiallyPaid",label:"Partially Paid"},{value:"Overdue",label:"Overdue"},{value:"Cancelled",label:"Cancelled"},{value:"Void",label:"Void"}];export{l as B};

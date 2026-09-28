@@ -25,7 +25,7 @@ export interface SuperAdminSetupResponseDto {
 export const setupService = {
   checkSuperAdminExists: async (): Promise<boolean> => {
     try {
-      const response = await client.query({
+      const response = await client.query<{ checkSuperAdminExists?: { exists?: boolean } }>({
         query: CHECK_SUPER_ADMIN_EXISTS,
       });
       return response.data?.checkSuperAdminExists?.exists ?? false;
@@ -39,7 +39,7 @@ export const setupService = {
     dto: SuperAdminSetupDto
   ): Promise<SuperAdminSetupResponseDto> => {
     try {
-      const response = await client.mutate({
+      const response = await client.mutate<{ setupSuperAdmin?: { success?: boolean; message?: string; tenantId?: string; userId?: string; email?: string } }>({
         mutation: SETUP_SUPER_ADMIN,
         variables: {
           tenantName: dto.tenantName,

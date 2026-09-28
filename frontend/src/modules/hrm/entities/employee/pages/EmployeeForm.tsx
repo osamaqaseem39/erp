@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { PageBreadcrumb } from "../../../../../components";
 import { VerticalForm, FormInput } from "../../../../../components";
-import { employeeService, type CreateEmployeeDto, type UpdateEmployeeDto, type EmployeeDto } from "../services";
+import { employeeService, type CreateEmployeeDto, type UpdateEmployeeDto, type EmployeeDto, type EmployeeListDto } from "../services";
 import { departmentService, type DepartmentDto } from "../../department/services";
 import { 
   SALUTATION_OPTIONS, 
@@ -47,7 +47,7 @@ const EmployeeForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState<DepartmentDto[]>([]);
-  const [employees, setEmployees] = useState<EmployeeDto[]>([]);
+  const [employees, setEmployees] = useState<EmployeeListDto[]>([]);
   const [employee, setEmployee] = useState<EmployeeDto | null>(null);
   const [codeUnique, setCodeUnique] = useState<boolean>(true);
 

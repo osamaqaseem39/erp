@@ -1,26 +1,30 @@
-import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, CombinedGraphQLErrors } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
+import config from '../config';
+import { APICore } from '../helpers/api/apiCore';
+
+// The GraphQL endpoint lives beside the REST API: <host>/api -> <host>/graphql
+const graphqlUri = config.API_URL.replace(/\/api\/?$/, '') + '/graphql';
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:5252/graphql',
+  uri: graphqlUri,
   credentials: 'include',
 });
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }) =>
+const errorLink = onError(({ error }) => {
+  if (CombinedGraphQLErrors.is(error)) {
+    error.errors.forEach(({ message, locations, path }) =>
       console.error(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${path}`
       )
     );
-  }
-  if (networkError) {
-    console.error(`[Network error]: ${networkError}`);
+  } else {
+    console.error(`[Network error]: ${error}`);
   }
 });
 
 const authLink = new ApolloLink((operation, forward) => {
-  const token = localStorage.getItem('authToken');
+  const token = new APICore().getLoggedInUser()?.token;
   if (token) {
     operation.setContext({
       headers: {

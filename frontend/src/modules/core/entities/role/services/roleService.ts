@@ -15,8 +15,10 @@ export interface PermissionDto {
   id: string;
   name: string;
   description?: string;
-  resource?: string;
+  module?: string;
+  moduleName?: string;
   action?: string;
+  actionName?: string;
 }
 
 export interface CreateRoleDto {

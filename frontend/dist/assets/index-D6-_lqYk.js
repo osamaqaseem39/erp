@@ -1,0 +1,1 @@
+const e=[{value:"Draft",label:"Draft"},{value:"Pending",label:"Pending"},{value:"Approved",label:"Approved"},{value:"Shipped",label:"Shipped"},{value:"Invoiced",label:"Invoiced"},{value:"Completed",label:"Completed"},{value:"Cancelled",label:"Cancelled"}];export{e as S};

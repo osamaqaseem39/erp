@@ -33,7 +33,7 @@ export function countRecordsByMonth(
   return { labels: buckets.map((b) => b.label), counts };
 }
 
-export function groupCountByField<T extends Record<string, unknown>>(
+export function groupCountByField<T extends object>(
   items: T[],
   field: keyof T,
   fallback = "Unknown"
@@ -51,13 +51,13 @@ export function groupCountByField<T extends Record<string, unknown>>(
   };
 }
 
-export function sumNumericField<T extends Record<string, unknown>>(
+export function sumNumericField<T extends object>(
   items: T[],
   fields: Array<keyof T>
 ): number {
   return items.reduce((sum, item) => {
     for (const field of fields) {
-      const value = item[field];
+      const value: unknown = item[field];
       if (typeof value === "number" && !Number.isNaN(value)) {
         return sum + value;
       }

@@ -135,8 +135,9 @@ const CustomerForm: React.FC = () => {
         state: data.state ?? "",
         country: data.country ?? "",
         postalCode: data.postalCode ?? "",
-        customerType: data.customerType ?? "Individual",
-        status: data.status ?? "Active",
+        // Unknown values are kept so validation flags them instead of silently rewriting them.
+        customerType: (data.customerType ?? "Individual") as CustomerFormValues["customerType"],
+        status: (data.status ?? "Active") as CustomerFormValues["status"],
         industry: data.industry ?? "",
         creditLimit: data.creditLimit ?? 0,
         outstandingBalance: data.outstandingBalance ?? 0,

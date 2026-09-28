@@ -1,0 +1,1 @@
+const e=[{value:"Draft",label:"Draft"},{value:"Sent",label:"Sent"},{value:"Accepted",label:"Accepted"},{value:"Rejected",label:"Rejected"},{value:"Expired",label:"Expired"},{value:"Converted",label:"Converted"}];export{e as Q};

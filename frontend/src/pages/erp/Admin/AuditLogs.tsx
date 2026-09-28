@@ -31,7 +31,7 @@ const AuditLogs = () => {
     }
   };
 
-  const actions = Array.from(new Set(sortedLogs.map(l => l.action).filter(Boolean)));
+  const actions = Array.from(new Set(logs.map(l => l.action).filter(Boolean)));
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();

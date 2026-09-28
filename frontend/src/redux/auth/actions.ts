@@ -1,7 +1,8 @@
+import type { UnknownAction } from "@reduxjs/toolkit";
 // constants
 import { AuthActionTypes } from "./constants";
 
-export interface AuthActionType {
+export interface AuthActionType extends UnknownAction {
   type:
   | AuthActionTypes.API_RESPONSE_SUCCESS
   | AuthActionTypes.API_RESPONSE_ERROR

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { CHECK_SUPER_ADMIN_EXISTS } from '../graphql/queries/setupQueries';
 import { SETUP_SUPER_ADMIN } from '../graphql/mutations/setupMutations';
 

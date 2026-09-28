@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { sortTableData, type SortDirection } from "./sortTableData";
 
-export function useTableSort<T>(defaultKey: string, defaultDir: SortDirection = "asc") {
+export function useTableSort(defaultKey: string, defaultDir: SortDirection = "asc") {
   const [sortKey, setSortKey] = useState<string>(defaultKey);
   const [sortDir, setSortDir] = useState<SortDirection>(defaultDir);
 
@@ -17,8 +17,9 @@ export function useTableSort<T>(defaultKey: string, defaultDir: SortDirection = 
     [sortKey]
   );
 
+  // Generic per call so callers get their row type back without annotating the hook.
   const sortRows = useCallback(
-    (rows: T[], getValue?: (row: T, key: string) => unknown) =>
+    <T,>(rows: T[], getValue?: (row: T, key: string) => unknown): T[] =>
       sortTableData(rows, sortKey, sortDir, getValue),
     [sortKey, sortDir]
   );

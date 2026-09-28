@@ -91,7 +91,7 @@ const LeadList = forwardRef<LeadListHandle, LeadListProps>(function LeadList(
       sortRows(filteredLeads, (row, key) => {
         if (key === "name") return leadDisplayName(row);
         if (key === "topic") return leadTopicLine(row);
-        return (row as Record<string, unknown>)[key];
+        return (row as unknown as Record<string, unknown>)[key];
       }),
     [filteredLeads, sortRows]
   );

@@ -1,18 +1,23 @@
 import { ReactNode } from "react";
 import { Helmet } from "react-helmet";
+import config from "../config";
 
 interface PageTitleProps {
   breadCrumbItems?: string[];
   title: string;
   name?: string;
+  /** Module context (e.g. "HRM"). Only used in the document title; the page renders its own heading. */
+  subName?: string;
   children?: ReactNode;
 }
 
-const PageBreadcrumb = ({ breadCrumbItems, title, name, children }: PageTitleProps) => {
+const PageBreadcrumb = ({ breadCrumbItems, title, name, subName, children }: PageTitleProps) => {
+  const documentTitle = [title, subName, config.APP_NAME].filter(Boolean).join(" · ");
+
   return (
     <>
       <Helmet>
-        <title>{title} | Konrix - Responsive Tailwind Admin Dashboard</title>
+        <title>{documentTitle}</title>
       </Helmet>
       {name && <div className="flex justify-between items-center mb-6">
         <div className="flex gap-3">

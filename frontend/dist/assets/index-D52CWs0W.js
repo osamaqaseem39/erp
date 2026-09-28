@@ -1,0 +1,1 @@
+const e=[{value:"Asset",label:"Asset"},{value:"Liability",label:"Liability"},{value:"Equity",label:"Equity"},{value:"Revenue",label:"Revenue"},{value:"Expense",label:"Expense"},{value:"CostOfGoodsSold",label:"Cost of Goods Sold"},{value:"OtherIncome",label:"Other Income"},{value:"OtherExpense",label:"Other Expense"}];export{e as A};

@@ -9,6 +9,7 @@ interface TableRecord {
 }
 
 interface DataTableRecord {
+  [column: string]: string | number | undefined;
   id: number;
   name: string;
   email: string;

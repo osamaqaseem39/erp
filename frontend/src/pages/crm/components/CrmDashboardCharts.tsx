@@ -3,6 +3,11 @@ import type { ApexOptions } from "apexcharts";
 import ReactApexChart from "react-apexcharts";
 import { D365, D365_CHART_COLORS } from "../../../modules/crm/theme/crmDynamicsTheme";
 
+// Single y-axis config kept separate: ApexOptions types yaxis as object | array, which blocks spreading.
+const yAxisBase: ApexYAxis = {
+  labels: { style: { colors: D365.textSecondary, fontSize: "11px" } },
+};
+
 const chartBase: ApexOptions = {
   chart: {
     toolbar: { show: false },
@@ -20,9 +25,7 @@ const chartBase: ApexOptions = {
     axisBorder: { show: false },
     axisTicks: { show: false },
   },
-  yaxis: {
-    labels: { style: { colors: D365.textSecondary, fontSize: "11px" } },
-  },
+  yaxis: yAxisBase,
   legend: {
     fontSize: "12px",
     fontWeight: 400,
@@ -60,8 +63,8 @@ export const CrmGrowthChart: React.FC<GrowthChartProps> = ({
       },
       xaxis: { ...chartBase.xaxis, categories: labels },
       yaxis: {
-        ...chartBase.yaxis,
-        labels: { ...chartBase.yaxis?.labels, formatter: (v) => `${Math.round(v)}` },
+        ...yAxisBase,
+        labels: { ...yAxisBase.labels, formatter: (v) => `${Math.round(v)}` },
       },
       legend: { ...chartBase.legend, position: "top", horizontalAlign: "left" },
       series: [

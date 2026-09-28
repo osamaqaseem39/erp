@@ -1,5 +1,5 @@
 import { Swiper as Swiperjs, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation, Scrollbar, Mousewheel, EffectFade, EffectCreative, EffectFlip } from 'swiper';
+import { Autoplay, Pagination, Navigation, Scrollbar, Mousewheel, EffectFade, EffectCreative, EffectFlip } from 'swiper/modules';
 
 // components
 import { PageBreadcrumb } from '../../../components';

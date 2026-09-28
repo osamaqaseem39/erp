@@ -10,12 +10,6 @@ import { changeHTMLAttribute } from "../utils/layout";
 const loading = () => <div />;
 
 interface DefaultLayoutProps {
-  layout: {
-    layoutType: string;
-    layoutWidth: string;
-    sideBarTheme: string;
-    sideBarType: string;
-  };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children?: any;
 }

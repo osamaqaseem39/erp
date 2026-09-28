@@ -19,7 +19,7 @@ const DataTables = () => {
 
             <Grid
               data={dataTableRecords}
-              pagination={{ enabled: true, limit: 5 }}
+              pagination={{ limit: 5 }}
               search={true}
               sort={true}
             />
@@ -37,7 +37,7 @@ const DataTables = () => {
 
             <Grid
               data={dataTableRecords}
-              pagination={{ enabled: true, limit: 5 }}
+              pagination={{ limit: 5 }}
             />
           </div>
         </div>
@@ -53,7 +53,7 @@ const DataTables = () => {
 
             <Grid
               data={dataTableRecords}
-              pagination={{ enabled: true, limit: 5 }}
+              pagination={{ limit: 5 }}
               search={true}
             />
           </div>
@@ -69,7 +69,7 @@ const DataTables = () => {
             <p className="text-sm text-slate-700 dark:text-slate-400 mb-4">To enable sorting, simply add <code>sort: true</code> to your config:</p>
             <Grid
               data={dataTableRecords}
-              pagination={{ enabled: true, limit: 5 }}
+              pagination={{ limit: 5 }}
               sort={true}
             />
           </div>
@@ -114,7 +114,7 @@ const DataTables = () => {
               columns={['id', 'name', 'email', 'position', 'company', 'country']}
               height='300px'
               fixedHeader={true}
-              pagination={{ enabled: true, limit: 10 }}
+              pagination={{ limit: 10 }}
             />
           </div>
         </div>
@@ -143,7 +143,7 @@ const DataTables = () => {
                 'country',
               ]}
               sort={true}
-              pagination={{ enabled: true, limit: 5 }}
+              pagination={{ limit: 5 }}
             />
           </div>
         </div>

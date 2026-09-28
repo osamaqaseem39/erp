@@ -86,7 +86,6 @@ const RoleList = () => {
                 <tr>
                 <SortableTh columnKey="name" label="Name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-start p-3 font-semibold" />
                 <SortableTh columnKey="description" label="Description" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-start p-3 font-semibold" />
-                <SortableTh columnKey="permissionCount" label="Permissions" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-start p-3 font-semibold" />
                 <SortableTh columnKey="isActive" label="Status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-start p-3 font-semibold" />
                 <SortableTh columnKey="_Actions" label="Actions" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-end p-3 font-semibold" sortable={false} />
                 </tr>
@@ -94,7 +93,7 @@ const RoleList = () => {
                 <tbody>
                   {roles.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center p-8 text-gray-500">
+                      <td colSpan={4} className="text-center p-8 text-gray-500">
                         No roles found
                       </td>
                     </tr>
@@ -103,13 +102,6 @@ const RoleList = () => {
                       <tr key={role.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-3 font-medium">{role.name}</td>
                         <td className="p-3 text-gray-500">{role.description || '-'}</td>
-                        <td className="p-3">
-                          {role.permissions && role.permissions.length > 0 ? (
-                            <span className="badge bg-info">{role.permissions.length} permissions</span>
-                          ) : (
-                            <span className="text-gray-400">No permissions</span>
-                          )}
-                        </td>
                         <td className="p-3">
                           <span className={`badge ${role.isActive ? 'bg-success' : 'bg-secondary'}`}>
                             {role.isActive ? 'Active' : 'Inactive'}
