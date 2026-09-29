@@ -1,3 +1,4 @@
+using ERP.Infrastructure.Numbering;
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
 using ERP.Infrastructure.Repositories;
@@ -8,13 +9,15 @@ namespace ERP.Application.CRM;
 
 public class OpportunityService : IOpportunityService
 {
+    private readonly IDocumentNumberService _numbers;
     private readonly IOpportunityRepository _repository;
     private readonly IQuoteRepository _quoteRepository;
 
-    public OpportunityService(IOpportunityRepository repository, IQuoteRepository quoteRepository)
+    public OpportunityService(IOpportunityRepository repository, IQuoteRepository quoteRepository, IDocumentNumberService numbers)
     {
         _repository = repository;
         _quoteRepository = quoteRepository;
+        _numbers = numbers;
     }
 
     public async Task<OpportunityDto?> GetByIdAsync(Guid id)
@@ -82,7 +85,7 @@ public class OpportunityService : IOpportunityService
         {
             TenantId = entity.TenantId,
             CompanyId = entity.Customer?.CompanyId ?? Guid.Empty,
-            QuoteNumber = CrmLineCalculator.GenerateNumber("QT"),
+            QuoteNumber = await _numbers.NextAsync("crm.quote"),
             CustomerId = entity.CustomerId,
             OpportunityId = entity.Id,
             QuoteDate = DateTime.UtcNow,

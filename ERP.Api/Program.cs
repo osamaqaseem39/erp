@@ -83,10 +83,14 @@ builder.Services.AddMemoryCache();
 // Every change to tenant data is audited in the same transaction (see AuditSaveChangesInterceptor).
 builder.Services.AddScoped<ERP.Shared.Abstractions.IAuditContext, ERP.Api.Security.HttpAuditContext>();
 builder.Services.AddScoped<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>();
+builder.Services.AddScoped<ERP.Infrastructure.Auditing.TenantGuardInterceptor>();
 builder.Services.AddSingleton<ERP.Infrastructure.Logging.ISystemLogWriter, ERP.Infrastructure.Logging.SystemLogWriter>();
 builder.Services.AddDbContext<ERPDbContext>((sp, options) =>
     options.UseSqlServer(connectionString)
-        .AddInterceptors(sp.GetRequiredService<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>()));
+        // Guard first so the audit trail records the tenant the row actually lands in.
+        .AddInterceptors(
+            sp.GetRequiredService<ERP.Infrastructure.Auditing.TenantGuardInterceptor>(),
+            sp.GetRequiredService<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>()));
 
 builder.Services.AddErpInfrastructure(connectionString);
 builder.Services.AddErpCoreModule();

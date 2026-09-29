@@ -26,7 +26,7 @@ public class LeadConversionTests
         var leadRepo = new FakeLeadRepository(lead);
         var customerRepo = new FakeCustomerRepository();
         var opportunityRepo = new FakeOpportunityRepository();
-        var service = new LeadService(leadRepo, customerRepo, opportunityRepo);
+        var service = new LeadService(leadRepo, customerRepo, opportunityRepo, new FakeNumbers());
 
         var opportunityId = await service.ConvertToOpportunityAsync(leadId);
 
@@ -56,7 +56,7 @@ public class LeadConversionTests
         var leadRepo = new FakeLeadRepository(lead);
         var customerRepo = new FakeCustomerRepository();
         var opportunityRepo = new FakeOpportunityRepository();
-        var service = new LeadService(leadRepo, customerRepo, opportunityRepo);
+        var service = new LeadService(leadRepo, customerRepo, opportunityRepo, new FakeNumbers());
 
         var customerId = await service.ConvertToCustomerAsync(leadId);
 
@@ -131,5 +131,13 @@ public class LeadConversionTests
         public Task<IEnumerable<Opportunity>> GetByStageAsync(string stage) => Task.FromResult(Enumerable.Empty<Opportunity>());
         public Task<bool> UpdateAsync(Opportunity opportunity) => Task.FromResult(true);
         public Task<bool> DeleteAsync(Guid id) => Task.FromResult(true);
+    }
+
+    private sealed class FakeNumbers : ERP.Infrastructure.Numbering.IDocumentNumberService
+    {
+        private int _next;
+        public Task<string> NextAsync(string key, CancellationToken cancellationToken = default) => Task.FromResult($"{key}-{++_next}");
+        public Task<IReadOnlyList<ERP.Shared.DTOs.Core.DocumentSequenceDto>> ListAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<ERP.Shared.DTOs.Core.DocumentSequenceDto> UpdateAsync(string key, ERP.Shared.DTOs.Core.UpdateDocumentSequenceDto dto, CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }
 }

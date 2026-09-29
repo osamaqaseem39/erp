@@ -1,3 +1,4 @@
+using ERP.Infrastructure.Numbering;
 using ERP.Application.Interfaces.CRM;
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
@@ -7,6 +8,7 @@ namespace ERP.Application.CRM;
 
 public class LeadService : ILeadService
 {
+    private readonly IDocumentNumberService _numbers;
     private readonly ILeadRepository _repository;
     private readonly ICustomerRepository _customerRepository;
     private readonly IOpportunityRepository _opportunityRepository;
@@ -14,11 +16,13 @@ public class LeadService : ILeadService
     public LeadService(
         ILeadRepository repository,
         ICustomerRepository customerRepository,
-        IOpportunityRepository opportunityRepository)
+        IOpportunityRepository opportunityRepository,
+        IDocumentNumberService numbers)
     {
         _repository = repository;
         _customerRepository = customerRepository;
         _opportunityRepository = opportunityRepository;
+        _numbers = numbers;
     }
 
     public async Task<LeadDto?> GetByIdAsync(Guid id)
@@ -37,7 +41,7 @@ public class LeadService : ILeadService
     {
         var entity = MapToEntity(dto);
         if (string.IsNullOrWhiteSpace(entity.LeadCode))
-            entity.LeadCode = CrmLineCalculator.GenerateNumber("LD");
+            entity.LeadCode = await _numbers.NextAsync("crm.lead");
 
         return await _repository.CreateAsync(entity);
     }
@@ -89,7 +93,7 @@ public class LeadService : ILeadService
         var opportunity = new Opportunity
         {
             TenantId = lead.TenantId,
-            OpportunityCode = CrmLineCalculator.GenerateNumber("OP"),
+            OpportunityCode = await _numbers.NextAsync("crm.opportunity"),
             OpportunityName = displayName,
             Title = displayName,
             LeadId = lead.Id,
@@ -128,7 +132,7 @@ public class LeadService : ILeadService
         {
             TenantId = lead.TenantId,
             CompanyId = lead.CompanyId ?? Guid.Empty,
-            CustomerCode = CrmLineCalculator.GenerateNumber("CU"),
+            CustomerCode = await _numbers.NextAsync("crm.customer"),
             CustomerName = displayName,
             CompanyName = lead.CompanyName ?? displayName,
             ContactPerson = lead.ContactPerson ?? $"{lead.FirstName} {lead.LastName}".Trim(),

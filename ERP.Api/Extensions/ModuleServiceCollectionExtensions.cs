@@ -53,6 +53,9 @@ public static class ModuleServiceCollectionExtensions
         services.AddSingleton<ERP.Shared.Abstractions.ISecretProtector, ERP.Api.Security.DataProtectionSecretProtector>();
         services.AddScoped<ERP.Application.Core.Settings.ICoreSettingsService, ERP.Application.Core.Settings.CoreSettingsService>();
         services.AddScoped<ERP.Application.Core.ICompanyProfileService, ERP.Application.Core.CompanyProfileService>();
+        services.AddSingleton(TimeProvider.System);
+        services.AddScoped<ERP.Infrastructure.Numbering.IDocumentNumberService>(sp => new ERP.Infrastructure.Numbering.DocumentNumberService(
+            sp.GetRequiredService<ERP.Infrastructure.Database.ERPDbContext>(), sp.GetRequiredService<ITenantProvider>(), sp.GetRequiredService<TimeProvider>()));
         return services;
     }
 

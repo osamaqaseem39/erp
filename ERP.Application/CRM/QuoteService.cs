@@ -1,3 +1,4 @@
+using ERP.Infrastructure.Numbering;
 using ERP.Application.Interfaces.CRM;
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
@@ -7,6 +8,7 @@ namespace ERP.Application.CRM;
 
 public class QuoteService : IQuoteService
 {
+    private readonly IDocumentNumberService _numbers;
     private readonly IQuoteRepository _repository;
     private readonly IQuoteLineRepository _lineRepository;
     private readonly ISalesOrderRepository _salesOrderRepository;
@@ -16,12 +18,14 @@ public class QuoteService : IQuoteService
         IQuoteRepository repository,
         IQuoteLineRepository lineRepository,
         ISalesOrderRepository salesOrderRepository,
-        ISalesOrderLineRepository salesOrderLineRepository)
+        ISalesOrderLineRepository salesOrderLineRepository,
+        IDocumentNumberService numbers)
     {
         _repository = repository;
         _lineRepository = lineRepository;
         _salesOrderRepository = salesOrderRepository;
         _salesOrderLineRepository = salesOrderLineRepository;
+        _numbers = numbers;
     }
 
     public async Task<QuoteDto?> GetByIdAsync(Guid id)
@@ -40,7 +44,7 @@ public class QuoteService : IQuoteService
     {
         var entity = MapToEntity(dto);
         if (string.IsNullOrWhiteSpace(entity.QuoteNumber))
-            entity.QuoteNumber = CrmLineCalculator.GenerateNumber("QT");
+            entity.QuoteNumber = await _numbers.NextAsync("crm.quote");
 
         ApplyLineTotals(entity, dto.QuoteLines);
         var quoteId = await _repository.CreateAsync(entity);
@@ -103,7 +107,7 @@ public class QuoteService : IQuoteService
             ? quote.QuoteLines
             : (await _lineRepository.GetByQuoteIdAsync(id)).ToList();
 
-        var orderNumber = CrmLineCalculator.GenerateNumber("SO");
+        var orderNumber = await _numbers.NextAsync("crm.salesOrder");
         var salesOrder = new SalesOrder
         {
             TenantId = quote.TenantId,

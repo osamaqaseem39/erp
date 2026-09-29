@@ -1,3 +1,4 @@
+using ERP.Infrastructure.Numbering;
 using ERP.Application.Interfaces.CRM;
 using ERP.Application.Interfaces.Finance;
 using ERP.Domain.CRM;
@@ -10,6 +11,7 @@ namespace ERP.Application.CRM;
 
 public class SalesOrderService : ISalesOrderService
 {
+    private readonly IDocumentNumberService _numbers;
     private readonly ISalesOrderRepository _repository;
     private readonly ISalesOrderLineRepository _lineRepository;
     private readonly IInvoiceService _invoiceService;
@@ -17,11 +19,13 @@ public class SalesOrderService : ISalesOrderService
     public SalesOrderService(
         ISalesOrderRepository repository,
         ISalesOrderLineRepository lineRepository,
-        IInvoiceService invoiceService)
+        IInvoiceService invoiceService,
+        IDocumentNumberService numbers)
     {
         _repository = repository;
         _lineRepository = lineRepository;
         _invoiceService = invoiceService;
+        _numbers = numbers;
     }
 
     public async Task<SalesOrderDto?> GetByIdAsync(Guid id)
@@ -41,7 +45,7 @@ public class SalesOrderService : ISalesOrderService
         var entity = MapToEntity(dto);
         if (string.IsNullOrWhiteSpace(entity.OrderNumber))
         {
-            entity.OrderNumber = CrmLineCalculator.GenerateNumber("SO");
+            entity.OrderNumber = await _numbers.NextAsync("crm.salesOrder");
             entity.SalesOrderNumber = entity.OrderNumber;
         }
 

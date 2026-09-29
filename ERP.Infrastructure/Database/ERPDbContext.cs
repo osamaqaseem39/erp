@@ -29,6 +29,7 @@ public class ERPDbContext : DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<DocumentSequence> DocumentSequences { get; set; }
     public DbSet<Setting> Settings { get; set; }
     public DbSet<UserSession> UserSessions { get; set; }
 
@@ -341,6 +342,17 @@ public class ERPDbContext : DbContext
         });
 
         // Configure AuditLog (Core schema)
+        modelBuilder.Entity<DocumentSequence>(entity =>
+        {
+            entity.ToTable("DocumentSequences", "Core");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.SequenceKey).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Prefix).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.ResetPolicy).IsRequired().HasMaxLength(10);
+            // One sequence per key per tenant; the atomic increment relies on this.
+            entity.HasIndex(e => new { e.TenantId, e.SequenceKey }).IsUnique();
+        });
+
         modelBuilder.Entity<AuditLog>(entity =>
         {
             entity.ToTable("AuditLogs", "Core");
