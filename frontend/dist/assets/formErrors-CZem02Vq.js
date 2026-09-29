@@ -1,0 +1,1 @@
+import{u}from"./apiError-BColoHMF.js";function i(s,t,e){for(const[r,c]of Object.entries(s.fieldErrors))r&&e.includes(r)&&t(r,{type:"server",message:c.join(" ")},{shouldFocus:!1});const o=u(s,e),n=Object.keys(s.fieldErrors).some(r=>r&&e.includes(r));return o.length===0&&!n?[s.message]:o}export{i as a};

@@ -1,1 +1,0 @@
-import{a1 as o,j as e,a2 as u,Z as t,A as i}from"./index-DZ48RnVb.js";const p=()=>{const{isSetupComplete:r,isLoading:s}=o(),a=new i;return s||r===null?e.jsx(u,{}):r?a.isUserAuthenticated()?e.jsx(t,{to:"/modules",replace:!0}):e.jsx(t,{to:"/auth/login",replace:!0}):e.jsx(t,{to:"/setup",replace:!0})};export{p as default};

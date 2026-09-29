@@ -1,1 +1,0 @@
-import{j as r,P as t}from"./index-DZ48RnVb.js";const a=()=>r.jsx(r.Fragment,{children:r.jsx(t,{title:"Starter",name:"Starter Page",breadCrumbItems:["Konrix","Extra Pages","Starter Page"]})});export{a as default};

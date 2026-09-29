@@ -1,6 +1,6 @@
 import type { RoutesProps } from "./types";
 import { coreRoutes, moduleSelectionRoute } from "./modules/core.routes";
-import { dashboardRoutes, erpRoutes } from "./modules/erp-legacy.routes";
+import { legacyRedirectRoutes } from "./modules/erp-legacy.routes";
 import { hrmRoutes } from "./modules/hrm.routes";
 import { crmRoutes } from "./modules/crm.routes";
 import { posRoutes } from "./modules/pos.routes";
@@ -22,6 +22,7 @@ import {
   tableRoutes,
   ticketsAppRoutes,
   uiRoutes,
+  templateDashboardRoutes,
 } from "./modules/template.routes";
 
 export type { RoutesProps } from "./types";
@@ -39,14 +40,14 @@ const templateRoutes: RoutesProps[] = [
   tableRoutes,
   uiRoutes,
   chartRoutes,
+  templateDashboardRoutes,
 ];
 
 const moduleRoutes: RoutesProps[] = [
   moduleSelectionRoute,
   ...landingRoutes,
   coreRoutes,
-  dashboardRoutes,
-  erpRoutes,
+  ...legacyRedirectRoutes,
   hrmRoutes,
   crmRoutes,
   posRoutes,

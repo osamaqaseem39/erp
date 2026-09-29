@@ -1,125 +1,43 @@
-import React from "react";
+import { Navigate, useLocation, useParams } from "react-router-dom";
 import type { RoutesProps } from "../types";
 
-const AdminAssignPermissions = React.lazy(() => import("../../pages/erp/Admin/Roles/AssignPermissions"));
-const AdminResetPassword = React.lazy(() => import("../../pages/erp/Admin/Users/ResetPassword"));
-const AdminRoleForm = React.lazy(() => import("../../pages/erp/Admin/Roles/Form"));
-const AdminRoleList = React.lazy(() => import("../../pages/erp/Admin/Roles/List"));
-const AdminSystemSettingForm = React.lazy(() => import("../../pages/erp/Admin/SystemSettings/Form"));
-const AdminSystemSettings = React.lazy(() => import("../../pages/erp/Admin/SystemSettings"));
-const AdminUserForm = React.lazy(() => import("../../pages/erp/Admin/Users/Form"));
-const AdminUserList = React.lazy(() => import("../../pages/erp/Admin/Users/List"));
-const AuditLogs = React.lazy(() => import("../../pages/erp/Admin/AuditLogs"));
-const Dashboard = React.lazy(() => import("../../pages/dashboard/"));
-const ERPDashboard = React.lazy(() => import("../../pages/erp/Dashboard"));
-const ERPTenantForm = React.lazy(() => import("../../pages/erp/Tenants/Form"));
-const ERPTenantList = React.lazy(() => import("../../pages/erp/Tenants/List"));
-const SystemLogs = React.lazy(() => import("../../pages/erp/Admin/SystemLogs"));
+/**
+ * The /erp/* admin screens were duplicates of /core/settings/* and were removed in Checkpoint 1.
+ * These redirects keep old bookmarks and links working (ids and query strings are carried over).
+ */
+function LegacyRedirect({ to }: { to: string }) {
+  const params = useParams();
+  const { search } = useLocation();
+  const target = to.replace(/:(\w+)/g, (_, name: string) => encodeURIComponent(params[name] ?? ""));
+  return <Navigate to={`${target}${search}`} replace />;
+}
 
-export const dashboardRoutes: RoutesProps = {
-  path: "/home",
-  name: "Dashboards",
-  icon: "home",
-  header: "Navigation",
-  children: [
-    {
-      path: '/dashboard',
-      name: "Dashboard",
-      element: <Dashboard />,
-    },
-  ],
+const REDIRECTS: Record<string, string> = {
+  "/home": "/modules",
+  "/erp": "/core",
+  "/erp/dashboard": "/core",
+  "/erp/tenants": "/core/settings/tenants",
+  "/erp/tenants/new": "/core/settings/tenants/new",
+  "/erp/tenants/:id/edit": "/core/settings/tenants/:id/edit",
+  "/erp/admin/users": "/core/settings/users",
+  "/erp/admin/users/new": "/core/settings/users/new",
+  "/erp/admin/users/:id/edit": "/core/settings/users/:id/edit",
+  "/erp/admin/users/:id/reset-password": "/core/settings/users/:id/reset-password",
+  "/erp/admin/roles": "/core/settings/roles",
+  "/erp/admin/roles/new": "/core/settings/roles/new",
+  "/erp/admin/roles/:id/edit": "/core/settings/roles/:id/edit",
+  "/erp/admin/roles/:id/permissions": "/core/settings/roles/:id/permissions",
+  "/erp/admin/system-settings": "/core/settings/system-settings",
+  "/erp/admin/system-settings/new": "/core/settings/system-settings/new",
+  "/erp/admin/system-settings/:id/edit": "/core/settings/system-settings/:id/edit",
+  "/erp/admin/audit-logs": "/core/settings/audit-logs",
+  "/erp/admin/system-logs": "/core/settings/system-logs",
 };
 
-export const erpRoutes: RoutesProps = {
-  path: "/erp",
-  name: "ERP",
-  icon: "building",
-  header: "ERP",
-  children: [
-    {
-      path: "/erp/dashboard",
-      name: "ERP Dashboard",
-      element: <ERPDashboard />,
-    },
-    {
-      path: "/erp/tenants",
-      name: "Tenants",
-      element: <ERPTenantList />,
-    },
-    {
-      path: "/erp/tenants/new",
-      name: "Add Tenant",
-      element: <ERPTenantForm />,
-    },
-    {
-      path: "/erp/tenants/:id/edit",
-      name: "Edit Tenant",
-      element: <ERPTenantForm />,
-    },
-    {
-      path: "/erp/admin/users",
-      name: "Users",
-      element: <AdminUserList />,
-    },
-    {
-      path: "/erp/admin/users/new",
-      name: "Add User",
-      element: <AdminUserForm />,
-    },
-    {
-      path: "/erp/admin/users/:id/edit",
-      name: "Edit User",
-      element: <AdminUserForm />,
-    },
-    {
-      path: "/erp/admin/users/:id/reset-password",
-      name: "Reset Password",
-      element: <AdminResetPassword />,
-    },
-    {
-      path: "/erp/admin/roles",
-      name: "Roles",
-      element: <AdminRoleList />,
-    },
-    {
-      path: "/erp/admin/roles/new",
-      name: "Add Role",
-      element: <AdminRoleForm />,
-    },
-    {
-      path: "/erp/admin/roles/:id/edit",
-      name: "Edit Role",
-      element: <AdminRoleForm />,
-    },
-    {
-      path: "/erp/admin/roles/:id/permissions",
-      name: "Assign Permissions",
-      element: <AdminAssignPermissions />,
-    },
-    {
-      path: "/erp/admin/system-settings",
-      name: "System Settings",
-      element: <AdminSystemSettings />,
-    },
-    {
-      path: "/erp/admin/system-settings/new",
-      name: "Add System Setting",
-      element: <AdminSystemSettingForm />,
-    },
-    {
-      path: "/erp/admin/system-settings/:id/edit",
-      name: "Edit System Setting",
-      element: <AdminSystemSettingForm />,
-    },
-    {
-      path: "/erp/admin/audit-logs",
-      name: "Audit Logs",
-      element: <AuditLogs />,
-    },
-    {
-      path: "/erp/admin/system-logs",
-      name: "System Logs",
-      element: <SystemLogs />,
-    },
-  ],
-};
+export const legacyRedirectRoutes: RoutesProps[] = Object.entries(REDIRECTS).map(([path, to]) => ({
+  path,
+  name: `Redirect ${path}`,
+  element: <LegacyRedirect to={to} />,
+}));
+
+export const LEGACY_REDIRECTS = REDIRECTS;

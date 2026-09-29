@@ -1,0 +1,1 @@
+import{ac as o,j as e,ad as u,a8 as t,A as i}from"./index-DfwAFndo.js";const p=()=>{const{isSetupComplete:r,isLoading:s}=o(),a=new i;return s||r===null?e.jsx(u,{}):r?a.isUserAuthenticated()?e.jsx(t,{to:"/modules",replace:!0}):e.jsx(t,{to:"/auth/login",replace:!0}):e.jsx(t,{to:"/setup",replace:!0})};export{p as default};

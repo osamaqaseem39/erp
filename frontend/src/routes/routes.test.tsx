@@ -4,6 +4,9 @@ import legacyPaths from "./legacy-paths.json";
 import { flattenRoutes, getAuthProtectedRoutes, publicRoutes } from ".";
 import { buildRouteObjects } from "./router";
 import { registryLinks } from "../modules/registry";
+import { render, screen } from "@testing-library/react";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { legacyRedirectRoutes } from "./modules/erp-legacy.routes";
 
 const publicFlat = flattenRoutes(publicRoutes);
 const allProtected = flattenRoutes(getAuthProtectedRoutes(true));
@@ -66,5 +69,18 @@ describe("route table", () => {
       return !match || match[match.length - 1].route.path === "*";
     });
     expect(broken).toEqual([]);
+  });
+
+  it("redirects legacy /erp URLs, keeping ids and query strings", async () => {
+    const routes = [
+      ...legacyRedirectRoutes.map((r) => ({ path: r.path as string, element: r.element })),
+      { path: "/core/settings/users/:id/edit", element: <p>user editor</p> },
+    ];
+    const router = createMemoryRouter(routes, { initialEntries: ["/erp/admin/users/abc-123/edit?tab=roles"] });
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText("user editor")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/core/settings/users/abc-123/edit");
+    expect(router.state.location.search).toBe("?tab=roles");
   });
 });

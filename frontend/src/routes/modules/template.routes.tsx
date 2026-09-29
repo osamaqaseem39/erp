@@ -1,6 +1,8 @@
 import React from "react";
 import type { RoutesProps } from "../types";
 
+const TemplateDashboard = React.lazy(() => import("../../pages/dashboard/"));
+
 import TicketsApp from "../../pages/apps/Tickets";
 const Accordions = React.lazy(() => import("../../pages/ui/Accordions"));
 const Alerts = React.lazy(() => import("../../pages/ui/Alerts"));
@@ -458,4 +460,11 @@ export const chartRoutes: RoutesProps = {
   icon: "Chart",
   element: <Chart />,
   header: "Elements",
+};
+
+/** The Konrix demo dashboard (not an ERP page). */
+export const templateDashboardRoutes: RoutesProps = {
+  path: "/dashboard",
+  name: "Template dashboard",
+  element: <TemplateDashboard />,
 };
