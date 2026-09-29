@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Finance;
@@ -85,11 +86,5 @@ public class ReportsController : ERP.Api.Abstractions.ControllerBase
         return Ok(report);
     }
 
-    private Guid GetTenantId()
-    {
-        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
-        if (Guid.TryParse(tenantIdClaim, out var tenantId))
-            return tenantId;
-        throw new UnauthorizedAccessException("Tenant ID not found in token");
-    }
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
 }

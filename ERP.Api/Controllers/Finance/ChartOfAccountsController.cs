@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Application.Interfaces.Finance;
 using ERP.Shared.DTOs.Finance;
@@ -70,23 +71,7 @@ public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
         return Ok(accounts);
     }
 
-    private Guid GetTenantId()
-    {
-        // Extract tenant ID from JWT token or context
-        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
-        if (Guid.TryParse(tenantIdClaim, out var tenantId))
-            return tenantId;
-        
-        throw new UnauthorizedAccessException("Tenant ID not found in token");
-    }
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
 
-    private Guid GetUserId()
-    {
-        // Extract user ID from JWT token or context
-        var userIdClaim = User.FindFirst("user_id")?.Value;
-        if (Guid.TryParse(userIdClaim, out var userId))
-            return userId;
-        
-        throw new UnauthorizedAccessException("User ID not found in token");
-    }
+    private Guid GetUserId() => User.RequireUserId();
 }

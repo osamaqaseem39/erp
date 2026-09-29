@@ -6,7 +6,7 @@ public class AuditLogDto : BaseDto
 {
     public new Guid? Id { get; set; }
     public string EntityName { get; set; } = string.Empty;
-    public Guid EntityId { get; set; }
+    public string EntityId { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
     public string? OldValues { get; set; }
     public string? NewValues { get; set; }
@@ -22,7 +22,7 @@ public class CreateAuditLogDto
 {
     public Guid? TenantId { get; set; }
     public string EntityName { get; set; } = string.Empty;
-    public Guid EntityId { get; set; }
+    public string EntityId { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
     public string? OldValues { get; set; }
     public string? NewValues { get; set; }

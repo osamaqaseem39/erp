@@ -1,4 +1,4 @@
-using ERP.Api.Abstractions;
+using ERP.Api.Security;
 using ERP.Application.Interfaces.Admin;
 using ERP.Shared.DTOs.Admin;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ERP.Api.Controllers.Admin;
 
+/// <summary>
+/// Read-only view of the current tenant's audit trail. There are deliberately no write endpoints:
+/// entries are produced by the server when data changes, so they can't be forged or edited.
+/// </summary>
 [ApiController]
 [Route("api/admin/audit-logs")]
 [Authorize]
@@ -18,7 +22,15 @@ public class AuditLogController : ERP.Api.Abstractions.ControllerBase
         _service = service;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPaged([FromQuery] AuditLogPagedQuery query, CancellationToken cancellationToken)
+    {
+        // Only SuperAdmin may look across tenants; for everyone else the flag is ignored.
+        var allTenants = query.AllTenants && User.IsSuperAdmin();
+        return Ok(await _service.GetPagedAsync(query, allTenants, cancellationToken));
+    }
+
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var result = await _service.GetByIdAsync(id);
@@ -26,68 +38,18 @@ public class AuditLogController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var result = await _service.GetAllAsync();
-        return Ok(result);
-    }
+    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
     [HttpGet("entity/{entityName}/{entityId}")]
-    public async Task<IActionResult> GetByEntity(string entityName, string entityId)
-    {
-        var result = await _service.GetByEntityAsync(entityName, entityId);
-        return Ok(result);
-    }
+    public async Task<IActionResult> GetByEntity(string entityName, string entityId) => Ok(await _service.GetByEntityAsync(entityName, entityId));
 
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUser(Guid userId)
-    {
-        var result = await _service.GetByUserAsync(userId);
-        return Ok(result);
-    }
+    [HttpGet("user/{userId:guid}")]
+    public async Task<IActionResult> GetByUser(Guid userId) => Ok(await _service.GetByUserAsync(userId));
 
     [HttpGet("action/{action}")]
-    public async Task<IActionResult> GetByAction(string action)
-    {
-        var result = await _service.GetByActionAsync(action);
-        return Ok(result);
-    }
+    public async Task<IActionResult> GetByAction(string action) => Ok(await _service.GetByActionAsync(action));
 
     [HttpGet("date-range")]
-    public async Task<IActionResult> GetByDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
-    {
-        var result = await _service.GetByDateRangeAsync(startDate, endDate);
-        return Ok(result);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateAuditLogDto dto)
-    {
-        var id = await _service.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
-    }
-
-    [HttpPost("log-action")]
-    public async Task<IActionResult> LogAction([FromBody] LogActionDto dto)
-    {
-        var result = await _service.LogActionAsync(
-            dto.EntityName, 
-            dto.EntityId, 
-            dto.Action, 
-            dto.OldValues, 
-            dto.NewValues, 
-            dto.UserId);
-        return result ? Ok() : BadRequest();
-    }
-}
-
-// DTO for logging actions
-public class LogActionDto
-{
-    public string EntityName { get; set; } = string.Empty;
-    public Guid EntityId { get; set; }
-    public string Action { get; set; } = string.Empty;
-    public string? OldValues { get; set; }
-    public string? NewValues { get; set; }
-    public Guid? UserId { get; set; }
+    public async Task<IActionResult> GetByDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate) =>
+        Ok(await _service.GetByDateRangeAsync(startDate, endDate));
 }

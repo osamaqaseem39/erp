@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
 using ERP.Application.SCM.Interfaces;
@@ -78,27 +79,9 @@ public class InventoryController : ERP.Api.Abstractions.ControllerBase
         return Ok(new { Message = "Valuation functionality not yet implemented" });
     }
 
-    private Guid GetTenantId()
-    {
-        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
-        if (Guid.TryParse(tenantIdClaim, out var tenantId))
-            return tenantId;
-        throw new UnauthorizedAccessException("Tenant ID not found in token");
-    }
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
 
-    private Guid GetUserId()
-    {
-        var userIdClaim = User.FindFirst("user_id")?.Value;
-        if (Guid.TryParse(userIdClaim, out var userId))
-            return userId;
-        throw new UnauthorizedAccessException("User ID not found in token");
-    }
+    private Guid GetUserId() => User.RequireUserId();
 
-    private Guid GetCompanyId()
-    {
-        var companyIdClaim = User.FindFirst("company_id")?.Value;
-        if (Guid.TryParse(companyIdClaim, out var companyId))
-            return companyId;
-        throw new UnauthorizedAccessException("Company ID not found in token");
-    }
+    private Guid GetCompanyId() => User.RequireCompanyId();
 }

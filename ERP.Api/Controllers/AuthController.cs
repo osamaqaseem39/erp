@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using ERP.Api.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -94,12 +95,5 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
         return await HandleAsync(() => _authService.VerifyEmailAsync(verifyEmailDto.Token));
     }
 
-    private Guid GetCurrentUserId()
-    {
-        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value;
-        if (Guid.TryParse(claim, out var userId))
-            return userId;
-        throw new UnauthorizedAccessException("User ID not found in token");
-    }
+    private Guid GetCurrentUserId() => User.RequireUserId();
 }

@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ERP.Api.Abstractions;
@@ -63,15 +64,7 @@ public class InventoryValuationMethodController : ERP.Api.Abstractions.Controlle
         return success ? NoContent() : NotFound();
     }
 
-    private Guid GetTenantId()
-    {
-        // Implementation to get tenant ID from context
-        return Guid.NewGuid(); // Placeholder
-    }
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
 
-    private string GetCurrentUser()
-    {
-        // Implementation to get current user from context
-        return "system"; // Placeholder
-    }
+    private string GetCurrentUser() => User.RequireUserId().ToString();
 }

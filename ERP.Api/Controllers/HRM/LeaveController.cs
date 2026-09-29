@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using ERP.Api.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -107,11 +108,5 @@ public class LeaveController : ERP.Api.Abstractions.ControllerBase
         return BadRequest(new { Error = "Reject functionality not yet implemented" });
     }
 
-    private Guid GetUserId()
-    {
-        var userIdClaim = User.FindFirst("user_id")?.Value;
-        if (Guid.TryParse(userIdClaim, out var userId))
-            return userId;
-        throw new UnauthorizedAccessException("User ID not found in token");
-    }
+    private Guid GetUserId() => User.RequireUserId();
 }

@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using ERP.Application.SCM.Interfaces;
 using ERP.Shared.DTOs.Inventory;
 using Microsoft.AspNetCore.Authorization;
@@ -84,16 +85,7 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
         return NoContent();
     }
 
-    private Guid GetTenantId()
-    {
-        var tenantIdClaim = User.FindFirst("TenantId")?.Value;
-        if (Guid.TryParse(tenantIdClaim, out var tenantId))
-            return tenantId;
-        throw new UnauthorizedAccessException("Invalid tenant ID");
-    }
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
 
-    private string GetCurrentUser()
-    {
-        return User.FindFirst("sub")?.Value ?? "System";
-    }
+    private string GetCurrentUser() => User.RequireUserId().ToString();
 }

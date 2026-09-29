@@ -1,7 +1,9 @@
+using ERP.Shared.DTOs;
 using ERP.Shared.DTOs.Admin;
 
 namespace ERP.Application.Interfaces.Admin;
 
+/// <summary>Read access to the current tenant's audit trail. Entries are written server-side only.</summary>
 public interface IAuditLogService
 {
     Task<AuditLogDto?> GetByIdAsync(Guid id);
@@ -10,6 +12,5 @@ public interface IAuditLogService
     Task<IEnumerable<AuditLogDto>> GetByUserAsync(Guid userId);
     Task<IEnumerable<AuditLogDto>> GetByActionAsync(string action);
     Task<IEnumerable<AuditLogDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
-    Task<Guid> CreateAsync(CreateAuditLogDto dto);
-    Task<bool> LogActionAsync(string entityName, Guid entityId, string action, string? oldValues, string? newValues, Guid? userId);
+    Task<PagedResult<AuditLogDto>> GetPagedAsync(AuditLogPagedQuery query, bool allTenants, CancellationToken cancellationToken = default);
 }

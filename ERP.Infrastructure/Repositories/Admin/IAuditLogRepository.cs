@@ -1,7 +1,10 @@
 using ERP.Domain.Core;
+using ERP.Shared.DTOs;
+using ERP.Shared.DTOs.Admin;
 
 namespace ERP.Infrastructure.Repositories.Admin;
 
+/// <summary>Tenant-scoped and read-only: entries are written by the server's audit interceptor, never by API callers.</summary>
 public interface IAuditLogRepository
 {
     Task<AuditLog?> GetByIdAsync(Guid id);
@@ -10,7 +13,5 @@ public interface IAuditLogRepository
     Task<IEnumerable<AuditLog>> GetByUserAsync(Guid userId);
     Task<IEnumerable<AuditLog>> GetByActionAsync(string action);
     Task<IEnumerable<AuditLog>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
-    Task<Guid> CreateAsync(AuditLog auditLog);
-    Task<bool> UpdateAsync(AuditLog auditLog);
-    Task<bool> DeleteAsync(Guid id);
+    Task<PagedResult<AuditLog>> GetPagedAsync(AuditLogPagedQuery query, bool allTenants = false, CancellationToken cancellationToken = default);
 }

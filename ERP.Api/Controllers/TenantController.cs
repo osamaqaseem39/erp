@@ -10,7 +10,8 @@ namespace ERP.Api.Controllers;
 
 [ApiController]
 [Route("api/tenants")]
-[Authorize]
+// Platform administration: SuperAdmin only. The two sign-in lookups below opt out with [AllowAnonymous].
+[Authorize(Roles = "SuperAdmin,SUPER_ADMIN")]
 public class TenantController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ITenantApiService _tenantService;

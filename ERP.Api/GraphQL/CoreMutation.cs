@@ -5,6 +5,8 @@ using ERP.Shared.DTOs.Core;
 
 namespace ERP.Api.GraphQL;
 
+// Tenant administration and cross-tenant audit reads: SuperAdmin only.
+[HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
 public class CoreMutation
 {
     // Tenant Mutations

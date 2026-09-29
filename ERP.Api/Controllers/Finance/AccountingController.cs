@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Finance;
 using ERP.Shared.DTOs.Finance;
@@ -185,15 +186,7 @@ public class AccountingController : ERP.Api.Abstractions.ControllerBase
         return Ok(result);
     }
 
-    private Guid GetTenantId()
-    {
-        // Implementation to get tenant ID from context
-        return Guid.NewGuid(); // Placeholder
-    }
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
 
-    private Guid GetUserId()
-    {
-        // Implementation to get user ID from context
-        return Guid.NewGuid(); // Placeholder
-    }
+    private Guid GetUserId() => User.RequireUserId();
 }

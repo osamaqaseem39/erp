@@ -1,62 +1,49 @@
 using ERP.Domain.Admin;
 using ERP.Infrastructure.Database;
+using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Repositories.Admin;
 
-public class SystemSettingRepository : ISystemSettingRepository
+/// <summary>Settings of the current tenant only. Another tenant's ids behave as "not found".</summary>
+public class SystemSettingRepository : TenantScopedRepositoryBase, ISystemSettingRepository
 {
-    private readonly ERPDbContext _context;
-
-    public SystemSettingRepository(ERPDbContext context)
+    public SystemSettingRepository(ERPDbContext context, ITenantProvider tenantProvider) : base(context, tenantProvider)
     {
-        _context = context;
     }
 
-    public async Task<SystemSetting?> GetByIdAsync(Guid id)
-    {
-        return await _context.SystemSettings.FindAsync(id);
-    }
+    private IQueryable<SystemSetting> Settings => Scoped(Context.SystemSettings);
 
-    public async Task<IEnumerable<SystemSetting>> GetAllAsync()
-    {
-        return await _context.SystemSettings.ToListAsync();
-    }
+    public async Task<SystemSetting?> GetByIdAsync(Guid id) => await Settings.FirstOrDefaultAsync(s => s.Id == id);
 
-    public async Task<IEnumerable<SystemSetting>> GetByCategoryAsync(string category)
-    {
-        return await _context.SystemSettings
-            .Where(s => s.Category == category)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<SystemSetting>> GetAllAsync() =>
+        await Settings.OrderBy(s => s.Category).ThenBy(s => s.SettingKey).ToListAsync();
 
-    public async Task<SystemSetting?> GetByKeyAsync(string settingKey)
-    {
-        return await _context.SystemSettings
-            .FirstOrDefaultAsync(s => s.SettingKey == settingKey);
-    }
+    public async Task<IEnumerable<SystemSetting>> GetByCategoryAsync(string category) =>
+        await Settings.Where(s => s.Category == category).OrderBy(s => s.SettingKey).ToListAsync();
+
+    public async Task<SystemSetting?> GetByKeyAsync(string settingKey) =>
+        await Settings.FirstOrDefaultAsync(s => s.SettingKey == settingKey);
 
     public async Task<Guid> CreateAsync(SystemSetting systemSetting)
     {
-        _context.SystemSettings.Add(systemSetting);
-        await _context.SaveChangesAsync();
+        Context.SystemSettings.Add(Owned(systemSetting));
+        await Context.SaveChangesAsync();
         return systemSetting.Id;
     }
 
     public async Task<bool> UpdateAsync(SystemSetting systemSetting)
     {
-        _context.SystemSettings.Update(systemSetting);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        if (systemSetting.TenantId != CurrentTenantId) return false;
+        Context.SystemSettings.Update(systemSetting);
+        return await Context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var systemSetting = await _context.SystemSettings.FindAsync(id);
-        if (systemSetting == null) return false;
-
-        _context.SystemSettings.Remove(systemSetting);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        var setting = await GetByIdAsync(id);
+        if (setting == null) return false;
+        Context.SystemSettings.Remove(setting);
+        return await Context.SaveChangesAsync() > 0;
     }
 }

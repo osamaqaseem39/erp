@@ -58,7 +58,7 @@ public class AuthService : IAuthService
         await _db.SaveChangesAsync();
 
         var roles = await GetUserRoleNamesAsync(user.Id);
-        var token = JwtHelper.GenerateJwtToken(user.Id, user.PrimaryEmail ?? user.Email, roles, user.TenantId);
+        var token = JwtHelper.GenerateJwtToken(user.Id, user.PrimaryEmail ?? user.Email, roles, user.TenantId, user.CompanyId);
 
         return new AuthResponseDto
         {
@@ -87,7 +87,7 @@ public class AuthService : IAuthService
         await _db.SaveChangesAsync();
 
         var roles = await GetUserRoleNamesAsync(user.Id);
-        var token = JwtHelper.GenerateJwtToken(user.Id, user.PrimaryEmail ?? user.Email, roles, user.TenantId);
+        var token = JwtHelper.GenerateJwtToken(user.Id, user.PrimaryEmail ?? user.Email, roles, user.TenantId, user.CompanyId);
 
         return new AuthResponseDto
         {

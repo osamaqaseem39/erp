@@ -19,7 +19,7 @@ public static class JwtHelper
         _settings = settings;
     }
 
-    public static string GenerateJwtToken(Guid userId, string email, IEnumerable<string> roles, Guid tenantId)
+    public static string GenerateJwtToken(Guid userId, string email, IEnumerable<string> roles, Guid tenantId, Guid? companyId = null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_settings.SecretKey);
@@ -32,6 +32,11 @@ public static class JwtHelper
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
+
+        if (companyId.HasValue && companyId.Value != Guid.Empty)
+        {
+            claims.Add(new Claim("CompanyId", companyId.Value.ToString()));
+        }
 
         foreach (var role in roles.Where(r => !string.IsNullOrWhiteSpace(r)).Distinct())
         {

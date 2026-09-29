@@ -29,6 +29,12 @@ public static class ApiErrorMapper
                 Errors = v.Errors.Count > 0 ? new Dictionary<string, string[]> { [""] = v.Errors.ToArray() } : null,
             },
             ERPException erp => new ApiError { Status = erp.StatusCode, ErrorCode = erp.ErrorCode, Message = erp.Message },
+            UnauthorizedAccessException => new ApiError
+            {
+                Status = 401,
+                ErrorCode = ApiErrorCodes.Unauthorized,
+                Message = "Your session is missing required information. Please sign in again.",
+            },
             KeyNotFoundException nf => new ApiError { Status = 404, ErrorCode = ApiErrorCodes.NotFound, Message = nf.Message },
             NotImplementedException => new ApiError
             {

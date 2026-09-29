@@ -1,4 +1,4 @@
-using ERP.Api.Abstractions;
+using ERP.Api.Security;
 using ERP.Application.Interfaces.Admin;
 using ERP.Shared.DTOs.Admin;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ERP.Api.Controllers.Admin;
 
+/// <summary>
+/// Read-only view of the current tenant's system log (server errors and security events).
+/// No create/update/delete endpoints: a log that callers can edit can't be trusted.
+/// </summary>
 [ApiController]
 [Route("api/admin/system-logs")]
 [Authorize]
@@ -18,7 +22,14 @@ public class SystemLogController : ERP.Api.Abstractions.ControllerBase
         _service = service;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPaged([FromQuery] SystemLogPagedQuery query, CancellationToken cancellationToken)
+    {
+        var allTenants = query.AllTenants && User.IsSuperAdmin();
+        return Ok(await _service.GetPagedAsync(query, allTenants, cancellationToken));
+    }
+
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var result = await _service.GetByIdAsync(id);
@@ -26,52 +37,15 @@ public class SystemLogController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var result = await _service.GetAllAsync();
-        return Ok(result);
-    }
+    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
     [HttpGet("level/{logLevel}")]
-    public async Task<IActionResult> GetByLevel(string logLevel)
-    {
-        var result = await _service.GetByLevelAsync(logLevel);
-        return Ok(result);
-    }
+    public async Task<IActionResult> GetByLevel(string logLevel) => Ok(await _service.GetByLevelAsync(logLevel));
 
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUser(Guid userId)
-    {
-        var result = await _service.GetByUserAsync(userId);
-        return Ok(result);
-    }
+    [HttpGet("user/{userId:guid}")]
+    public async Task<IActionResult> GetByUser(Guid userId) => Ok(await _service.GetByUserAsync(userId));
 
     [HttpGet("date-range")]
-    public async Task<IActionResult> GetByDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
-    {
-        var result = await _service.GetByDateRangeAsync(startDate, endDate);
-        return Ok(result);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateSystemLogDto dto)
-    {
-        var id = await _service.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id }, new { id });
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSystemLogDto dto)
-    {
-        dto.Id = id;
-        var result = await _service.UpdateAsync(dto);
-        return result ? Ok() : NotFound();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
-    {
-        var result = await _service.DeleteAsync(id);
-        return result ? NoContent() : NotFound();
-    }
+    public async Task<IActionResult> GetByDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate) =>
+        Ok(await _service.GetByDateRangeAsync(startDate, endDate));
 }

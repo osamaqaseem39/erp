@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Sales;
 using ERP.Shared.DTOs.Sales;
@@ -82,17 +83,8 @@ public class POSTransactionController : ERP.Api.Abstractions.ControllerBase
         return Ok(new { Message = "POS transaction deleted successfully" });
     }
 
-    private Guid GetTenantIdFromContext()
-    {
-        if (HttpContext.Items.TryGetValue("TenantId", out var tenantId) && tenantId is Guid id)
-            return id;
-        return Guid.Empty;
-    }
+    private Guid GetTenantIdFromContext() => HttpContext.RequireTenantId();
 
-    private Guid GetUserIdFromContext()
-    {
-        var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("userId")?.Value;
-        return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
-    }
+    private Guid GetUserIdFromContext() => User.RequireUserId();
 }
 

@@ -1,3 +1,4 @@
+using ERP.Api.Security;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Core;
 using Microsoft.AspNetCore.Authorization;
@@ -35,19 +36,7 @@ public class PermissionController : ERP.Api.Abstractions.ControllerBase
         return Ok(permissions);
     }
 
-    private Guid GetTenantId()
-    {
-        var tenantIdClaim = User.FindFirst("tenant_id")?.Value;
-        if (Guid.TryParse(tenantIdClaim, out var tenantId))
-            return tenantId;
-        throw new UnauthorizedAccessException("Tenant ID not found in token");
-    }
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
 
-    private Guid GetUserId()
-    {
-        var userIdClaim = User.FindFirst("user_id")?.Value;
-        if (Guid.TryParse(userIdClaim, out var userId))
-            return userId;
-        throw new UnauthorizedAccessException("User ID not found in token");
-    }
+    private Guid GetUserId() => User.RequireUserId();
 }
