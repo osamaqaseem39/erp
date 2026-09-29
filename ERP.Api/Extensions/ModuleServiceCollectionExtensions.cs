@@ -52,6 +52,7 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ITenantProvider, HttpContextTenantProvider>();
         services.AddSingleton<ERP.Shared.Abstractions.ISecretProtector, ERP.Api.Security.DataProtectionSecretProtector>();
         services.AddScoped<ERP.Application.Core.Settings.ICoreSettingsService, ERP.Application.Core.Settings.CoreSettingsService>();
+        services.AddScoped<ERP.Application.Core.ICompanyProfileService, ERP.Application.Core.CompanyProfileService>();
         return services;
     }
 
