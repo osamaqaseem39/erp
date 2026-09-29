@@ -71,6 +71,12 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
   voided: "danger",
   expired: "danger",
   locked: "danger",
+  // log levels
+  error: "danger",
+  warning: "warning",
+  information: "info",
+  info: "info",
+  debug: "neutral",
 };
 
 const normalize = (status: string) => status.toLowerCase().replace(/[\s_-]+/g, "");

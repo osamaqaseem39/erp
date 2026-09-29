@@ -119,6 +119,8 @@ const getUserFromCookie = () => {
 /** Clears stored session and removes the API authorization header. */
 const clearAuthSession = () => {
   sessionStorage.removeItem(AUTH_SESSION_KEY);
+  // Tenant formatting context (modules/core/tenantContext.ts) belongs to the signed-in user.
+  sessionStorage.removeItem("erp.tenantContext");
   setAuthorization(null);
 };
 

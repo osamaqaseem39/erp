@@ -2,13 +2,17 @@ import React from "react";
 import type { RoutesProps } from "../types";
 
 const AssignPermissionsForm = React.lazy(() => import("../../modules/core/entities/role/pages/AssignPermissionsForm"));
-const AuditLogList = React.lazy(() => import("../../modules/core/entities/audit-log/pages/AuditLogList"));
-const CoreSettings = React.lazy(() => import("../../modules/core/entities/settings/pages/Settings"));
+const AuditLogExplorer = React.lazy(() => import("../../modules/core/pages/AuditLogExplorer"));
+const SettingsHub = React.lazy(() => import("../../modules/core/pages/SettingsHub"));
+const CompanyProfilePage = React.lazy(() => import("../../modules/core/pages/CompanyProfilePage"));
+const SettingsCategoryPage = React.lazy(() => import("../../modules/core/pages/SettingsCategoryPage"));
+const NumberingPage = React.lazy(() => import("../../modules/core/pages/NumberingPage"));
+const ReferenceDataPage = React.lazy(() => import("../../modules/core/pages/ReferenceDataPage"));
 const ModuleSelection = React.lazy(() => import("../../pages/modules/ModuleSelection"));
 const ResetPasswordForm = React.lazy(() => import("../../modules/core/entities/user/pages/ResetPasswordForm"));
 const RoleForm = React.lazy(() => import("../../modules/core/entities/role/pages/RoleForm"));
 const RoleList = React.lazy(() => import("../../modules/core/entities/role/pages/RoleList"));
-const SystemLogList = React.lazy(() => import("../../modules/core/entities/system-log/pages/SystemLogList"));
+const SystemLogExplorer = React.lazy(() => import("../../modules/core/pages/SystemLogExplorer"));
 const SystemSettingForm = React.lazy(() => import("../../modules/core/entities/settings/pages/SystemSettingForm"));
 const SystemSettingList = React.lazy(() => import("../../modules/core/entities/settings/pages/SystemSettingList"));
 const TenantForm = React.lazy(() => import("../../modules/core/entities/tenant/pages/TenantForm"));
@@ -31,7 +35,64 @@ export const coreRoutes: RoutesProps = {
     {
       path: "/core/settings",
       name: "Settings",
-      element: <CoreSettings />,
+      element: <SettingsHub />,
+    },
+    // Organization and system settings (Checkpoint 1)
+    {
+      path: "/core/settings/company",
+      name: "Company profile",
+      element: <CompanyProfilePage />,
+      permission: "core.company.view",
+    },
+    {
+      path: "/core/settings/preferences",
+      name: "Preferences",
+      element: (
+        <SettingsCategoryPage
+          category="preferences"
+          title="Preferences"
+          description="Language, date format and first day of the week for everyone in your organization."
+        />
+      ),
+      permission: "core.settings.view",
+    },
+    {
+      path: "/core/settings/security",
+      name: "Security",
+      element: (
+        <SettingsCategoryPage
+          category="security"
+          title="Security"
+          description="Session and sign-in rules."
+          notice="These values are saved now. Sign-in starts enforcing them in Checkpoint 2; until then the current built-in rules apply."
+        />
+      ),
+      permission: "core.settings.manage",
+    },
+    {
+      path: "/core/settings/email",
+      name: "Email",
+      element: (
+        <SettingsCategoryPage
+          category="email"
+          title="Email"
+          description="The mail server used to send email from the system."
+          notice="These settings are saved (the password encrypted), but the system doesn't send email yet."
+        />
+      ),
+      permission: "core.settings.manage",
+    },
+    {
+      path: "/core/settings/numbering",
+      name: "Document numbering",
+      element: <NumberingPage />,
+      permission: "core.sequences.manage",
+    },
+    {
+      path: "/core/settings/reference-data",
+      name: "Reference data",
+      element: <ReferenceDataPage />,
+      permission: "core.settings.view",
     },
     // Users
     {
@@ -80,44 +141,52 @@ export const coreRoutes: RoutesProps = {
       path: "/core/settings/tenants",
       name: "Tenants",
       element: <TenantList />,
+      superAdminOnly: true,
     },
     {
       path: "/core/settings/tenants/new",
       name: "Add Tenant",
       element: <TenantForm />,
+      superAdminOnly: true,
     },
     {
       path: "/core/settings/tenants/:id/edit",
       name: "Edit Tenant",
       element: <TenantForm />,
+      superAdminOnly: true,
     },
     // System Settings
     {
       path: "/core/settings/system-settings",
       name: "System Settings",
       element: <SystemSettingList />,
+      superAdminOnly: true,
     },
     {
       path: "/core/settings/system-settings/new",
       name: "Add System Setting",
       element: <SystemSettingForm />,
+      superAdminOnly: true,
     },
     {
       path: "/core/settings/system-settings/:id/edit",
       name: "Edit System Setting",
       element: <SystemSettingForm />,
+      superAdminOnly: true,
     },
     // Audit Logs
     {
       path: "/core/settings/audit-logs",
       name: "Audit Logs",
-      element: <AuditLogList />,
+      element: <AuditLogExplorer />,
+      permission: "core.audit.view",
     },
     // System Logs
     {
       path: "/core/settings/system-logs",
       name: "System Logs",
-      element: <SystemLogList />,
+      element: <SystemLogExplorer />,
+      permission: "core.logs.view",
     },
   ],
 };

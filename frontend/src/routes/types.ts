@@ -9,5 +9,7 @@ export interface RoutesProps {
   roles?: string[];
   /** Permission code required to open the route, e.g. "crm.customers.view" (enforced from Checkpoint 2). */
   permission?: string;
+  /** Platform administration: only SuperAdmin may open it (the API enforces the same). */
+  superAdminOnly?: boolean;
   children?: RoutesProps[];
 }

@@ -3,6 +3,7 @@ import { matchRoutes } from "react-router-dom";
 import legacyPaths from "./legacy-paths.json";
 import { flattenRoutes, getAuthProtectedRoutes, publicRoutes } from ".";
 import { buildRouteObjects } from "./router";
+import { registryLinks } from "../modules/registry";
 
 const publicFlat = flattenRoutes(publicRoutes);
 const allProtected = flattenRoutes(getAuthProtectedRoutes(true));
@@ -57,5 +58,13 @@ describe("route table", () => {
   it("serves /access-denied", () => {
     const match = matchRoutes(objects, "/access-denied");
     expect(match?.[match.length - 1].route.path).toBe("/access-denied");
+  });
+
+  it("resolves every link in the module registry (tiles, sidebars, landing pages)", () => {
+    const broken = registryLinks().filter((url) => {
+      const match = matchRoutes(objects, url);
+      return !match || match[match.length - 1].route.path === "*";
+    });
+    expect(broken).toEqual([]);
   });
 });

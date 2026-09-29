@@ -7,7 +7,19 @@ import reactRefresh from "eslint-plugin-react-refresh";
 // Code written under the ERP UI program is linted at error level.
 // Everything else is legacy: same rules, downgraded to warnings until its module is migrated
 // (see docs/modules/CP0_FOUNDATION_PLAN.md, decision D5).
-const STRICT_FILES = ["src/components/erp/**/*.{ts,tsx}", "src/lib/erp/**/*.{ts,tsx}", "src/routes/**/*.{ts,tsx}"];
+const STRICT_FILES = [
+  "src/components/erp/**/*.{ts,tsx}",
+  "src/lib/erp/**/*.{ts,tsx}",
+  "src/routes/**/*.{ts,tsx}",
+  "src/modules/registry.ts",
+  "src/modules/core/pages/**/*.{ts,tsx}",
+  "src/modules/core/utils/**/*.{ts,tsx}",
+  "src/modules/core/services/coreApi.ts",
+  "src/modules/core/tenantContext.ts",
+  "src/pages/modules/**/*.{ts,tsx}",
+  "src/constants/menu.ts",
+  "src/modules/crm/entities/customer/**/*.{ts,tsx}",
+];
 
 const tsRecommended = tsPlugin.configs["flat/recommended"];
 

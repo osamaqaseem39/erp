@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
+  ActivityTimeline,
   DataTable,
   DeleteDialog,
   DetailHeader,
@@ -27,6 +28,8 @@ import { opportunityService, type OpportunityDto } from "../../opportunity/servi
 import { quoteService, type QuoteDto } from "../../quote/services";
 import { salesOrderService, type SalesOrderDto } from "../../sales-order/services";
 import { activityService, type ActivityDto } from "../../activity/services";
+import { coreApi, type AuditLogEntry } from "../../../../core/services/coreApi";
+import { diffAuditEntry, REDACTED } from "../../../../core/utils/coreFormat";
 
 export default function CustomerDetail() {
   const { id = "" } = useParams<{ id: string }>();
@@ -42,6 +45,7 @@ export default function CustomerDetail() {
   const quotes = useResource((cid: string) => quoteService.getByCustomer(cid), id);
   const orders = useResource((cid: string) => salesOrderService.getByCustomer(cid), id);
   const activities = useResource((cid: string) => activityService.getByCustomer(cid), id);
+  const history = useResource((cid: string, signal) => coreApi.auditLogsForEntity("Customer", cid, signal), id);
 
   const breadcrumbs = [
     { label: "CRM", to: "/crm/dashboard" },
@@ -169,15 +173,8 @@ export default function CustomerDetail() {
           {
             key: "history",
             label: "History",
-            content: (
-              <div className="card">
-                <EmptyState
-                  variant="unavailable"
-                  title="Change history isn't recorded yet"
-                  description="Customer changes are not written to the audit log yet. History appears here once CRM auditing is enabled (Checkpoint 3)."
-                />
-              </div>
-            ),
+            count: history.data?.length,
+            content: <CustomerHistory state={history} />,
           },
         ]}
       />
@@ -275,6 +272,32 @@ function Related<T>({
         emptyState={<EmptyState compact title={`No ${title.toLowerCase()}`} description={`${title} for this customer will appear here.`} />}
       />
     </RelatedRecordsPanel>
+  );
+}
+
+const humanizeField = (field: string) => field.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase());
+const showValue = (v: unknown) => (v === undefined || v === null || v === "" ? undefined : v === REDACTED ? "hidden" : String(v));
+
+/** The customer's audit trail (written automatically since Checkpoint 1). */
+function CustomerHistory({ state }: { state: ResourceState<AuditLogEntry[]> }) {
+  if (state.error) return <div className="card"><ErrorState error={state.error} onRetry={state.refetch} compact /></div>;
+  if (!state.data) return <SkeletonCard lines={4} />;
+  return (
+    <div className="card p-5">
+      <ActivityTimeline
+        emptyText="Changes to this customer are recorded from now on."
+        items={state.data.map((entry) => ({
+          id: entry.id,
+          at: entry.timestamp,
+          actor: entry.userName ?? undefined,
+          title: entry.action,
+          changes:
+            entry.action === "Updated"
+              ? diffAuditEntry(entry).map((c) => ({ field: humanizeField(c.field), before: showValue(c.before), after: showValue(c.after) }))
+              : undefined,
+        }))}
+      />
+    </div>
   );
 }
 

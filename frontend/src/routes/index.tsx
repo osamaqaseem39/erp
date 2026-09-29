@@ -9,6 +9,7 @@ import { inventoryRoutes } from "./modules/inventory.routes";
 import { procurementRoutes } from "./modules/procurement.routes";
 import { manufacturingRoutes } from "./modules/manufacturing.routes";
 import { projectsRoutes } from "./modules/projects.routes";
+import { landingRoutes } from "./modules/landing.routes";
 import { authRoutes, otherPublicRoutes } from "./modules/public.routes";
 import { devRoutes } from "./modules/dev.routes";
 import {
@@ -42,6 +43,7 @@ const templateRoutes: RoutesProps[] = [
 
 const moduleRoutes: RoutesProps[] = [
   moduleSelectionRoute,
+  ...landingRoutes,
   coreRoutes,
   dashboardRoutes,
   erpRoutes,
