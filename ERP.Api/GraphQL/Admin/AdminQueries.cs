@@ -49,6 +49,7 @@ public class AdminQueries
     }
 
     // System Setting Queries
+    [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
     public async Task<SystemSettingDto?> GetSystemSetting(
         [Service] ISystemSettingService service,
         Guid settingId,
@@ -57,6 +58,7 @@ public class AdminQueries
         return await service.GetByIdAsync(settingId, tenantId);
     }
 
+    [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
     public async Task<IEnumerable<SystemSettingDto>> GetSystemSettings(
         [Service] ISystemSettingService service,
         Guid tenantId,
@@ -67,6 +69,7 @@ public class AdminQueries
         return await service.GetAllAsync(tenantId);
     }
 
+    [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
     public async Task<SystemSettingDto?> GetSystemSettingByKey(
         [Service] ISystemSettingService service,
         string key,

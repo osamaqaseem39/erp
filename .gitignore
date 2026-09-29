@@ -490,3 +490,6 @@ build-out*/
 build-crm-check/
 temp_batch_*.sql
 .kilo/worktrees/
+
+# Data Protection key ring (encrypts sensitive settings) - never commit
+**/App_Data/keys/

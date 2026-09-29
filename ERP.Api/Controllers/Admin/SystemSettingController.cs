@@ -9,7 +9,8 @@ namespace ERP.Api.Controllers.Admin;
 
 [ApiController]
 [Route("api/admin/system-settings")]
-[Authorize]
+// Raw key/value "advanced settings": SuperAdmin only. Tenant admins use /api/core/settings/{category}.
+[Authorize(Roles = "SuperAdmin,SUPER_ADMIN")]
 public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ISystemSettingService _service;

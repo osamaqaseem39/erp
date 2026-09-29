@@ -2,17 +2,34 @@ using ERP.Application.Interfaces.Admin;
 using ERP.Infrastructure.Repositories.Admin;
 using ERP.Shared.DTOs.Admin;
 using ERP.Domain.Admin;
+using ERP.Application.Core.Settings;
+using ERP.Shared.Abstractions;
+using ERP.Shared.Exceptions;
 
 namespace ERP.Application.Admin;
 
 public class SystemSettingService : ISystemSettingService
 {
     private readonly ISystemSettingRepository _systemSettingRepository;
+    private readonly ISecretProtector _protector;
 
-    public SystemSettingService(ISystemSettingRepository systemSettingRepository)
+    // Raw key/value access for SuperAdmin "advanced settings". Tenant scoping is enforced by the repository;
+    // the tenantId parameters are kept for the existing REST/GraphQL signatures.
+    public SystemSettingService(ISystemSettingRepository systemSettingRepository, ISecretProtector protector)
     {
         _systemSettingRepository = systemSettingRepository;
+        _protector = protector;
     }
+
+    /// <summary>Keys that belong to the catalog must satisfy its rules even when edited as raw values.</summary>
+    private static void ValidateAgainstCatalog(string key, string value)
+    {
+        var definition = SettingsCatalog.Find(key);
+        var error = definition?.Validate(value);
+        if (error != null) throw new ValidationException(error);
+    }
+
+    private string Stored(string value, bool encrypt) => encrypt && value.Length > 0 ? _protector.Protect(value) : value;
 
     public async Task<SystemSettingDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
@@ -44,11 +61,12 @@ public class SystemSettingService : ISystemSettingService
 
     public async Task<SystemSettingDto> CreateAsync(CreateSystemSettingDto dto, Guid tenantId, Guid userId)
     {
+        ValidateAgainstCatalog(dto.SettingKey, dto.SettingValue);
         var setting = new SystemSetting
         {
             Id = Guid.NewGuid(),
             SettingKey = dto.SettingKey,
-            SettingValue = dto.SettingValue,
+            SettingValue = Stored(dto.SettingValue, dto.IsEncrypted),
             Description = dto.Description,
             Category = dto.Category,
             SettingType = dto.SettingType,
@@ -69,7 +87,11 @@ public class SystemSettingService : ISystemSettingService
         if (setting == null)
             throw new KeyNotFoundException($"System Setting with ID '{dto.Id}' not found.");
 
-        setting.SettingValue = dto.SettingValue;
+        if (setting.IsReadOnly)
+            throw new ConflictException($"Setting '{setting.SettingKey}' is read-only.");
+        ValidateAgainstCatalog(setting.SettingKey, dto.SettingValue);
+
+        setting.SettingValue = Stored(dto.SettingValue, setting.IsEncrypted);
         setting.Description = dto.Description;
         setting.UpdatedBy = userId.ToString();
         setting.UpdatedAt = DateTime.UtcNow;
@@ -80,6 +102,10 @@ public class SystemSettingService : ISystemSettingService
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        var setting = await _systemSettingRepository.GetByIdAsync(id);
+        if (setting == null) return false;
+        if (setting.IsReadOnly)
+            throw new ConflictException($"Setting '{setting.SettingKey}' is read-only.");
         return await _systemSettingRepository.DeleteAsync(id);
     }
 
@@ -118,11 +144,13 @@ public class SystemSettingService : ISystemSettingService
         {
             Id = setting.Id,
             SettingKey = setting.SettingKey,
-            SettingValue = setting.SettingValue,
+            // Encrypted values never leave the server.
+            SettingValue = setting.IsEncrypted ? string.Empty : setting.SettingValue,
             Description = setting.Description,
             Category = setting.Category,
             SettingType = setting.SettingType,
-            IsEncrypted = setting.IsEncrypted
+            IsEncrypted = setting.IsEncrypted,
+            IsReadOnly = setting.IsReadOnly
         };
     }
 }

@@ -70,6 +70,7 @@ public class AdminMutations
     }
 
     // System Setting Mutations
+    [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
     public async Task<SystemSettingDto> AddSystemSetting(
         [Service] ISystemSettingService service,
         CreateSystemSettingDto input,
@@ -79,6 +80,7 @@ public class AdminMutations
         return await service.CreateAsync(input, tenantId, userId);
     }
 
+    [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
     public async Task<SystemSettingDto> UpdateSystemSetting(
         [Service] ISystemSettingService service,
         UpdateSystemSettingDto input,
@@ -88,6 +90,7 @@ public class AdminMutations
         return await service.UpdateAsync(input, tenantId, userId);
     }
 
+    [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
     public async Task<SystemSettingDto> UpsertSystemSetting(
         [Service] ISystemSettingService service,
         UpsertSystemSettingDto input,
@@ -97,6 +100,7 @@ public class AdminMutations
         return await service.UpsertAsync(input, tenantId, userId);
     }
 
+    [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]
     public async Task<bool> DeleteSystemSetting(
         [Service] ISystemSettingService service,
         Guid settingId,

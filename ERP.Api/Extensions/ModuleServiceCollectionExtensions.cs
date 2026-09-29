@@ -50,6 +50,8 @@ public static class ModuleServiceCollectionExtensions
     {
         services.AddScoped<IStoredProcedureExecutor>(_ => new StoredProcedureExecutor(connectionString));
         services.AddScoped<ITenantProvider, HttpContextTenantProvider>();
+        services.AddSingleton<ERP.Shared.Abstractions.ISecretProtector, ERP.Api.Security.DataProtectionSecretProtector>();
+        services.AddScoped<ERP.Application.Core.Settings.ICoreSettingsService, ERP.Application.Core.Settings.CoreSettingsService>();
         return services;
     }
 

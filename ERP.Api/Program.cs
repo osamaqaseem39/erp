@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using System.Reflection;
 using System.Threading.RateLimiting;
 using ERP.Api.Extensions;
@@ -72,6 +73,11 @@ builder.Services.AddControllers()
         };
     });
 builder.Services.AddHttpContextAccessor();
+// Keys that encrypt sensitive settings. Back up this folder: without it, stored secrets must be re-entered.
+var dataProtectionKeys = builder.Configuration["DataProtection:KeysPath"] ?? System.IO.Path.Combine(builder.Environment.ContentRootPath, "App_Data", "keys");
+builder.Services.AddDataProtection()
+    .SetApplicationName("ERP")
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeys));
 builder.Services.AddMemoryCache();
 
 // Every change to tenant data is audited in the same transaction (see AuditSaveChangesInterceptor).
