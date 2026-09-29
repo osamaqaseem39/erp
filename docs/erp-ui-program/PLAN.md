@@ -182,7 +182,7 @@ Exit criteria
 | # | Checkpoint | Gate A (plan) | Gate B (done) | Status doc | Notes |
 |---|------------|---------------|---------------|------------|-------|
 | 0 | Baseline & foundation | ✅ 2026-09-28 | ⏳ code complete; your walk-through pending | [CP0 status](../modules/CP0_FOUNDATION_STATUS.md) | |
-| 1 | Core / Settings | ☐ | ☐ | ☐ | |
+| 1 | Core / Settings | ✅ 2026-09-29 | ⏳ code complete; migration review + walk-through pending | [CP1 status](../modules/CP1_CORE_SETTINGS_STATUS.md) | security fixes beyond plan |
 | 2 | Admin + RBAC | ☐ | ☐ | ☐ | security milestone |
 | 3 | CRM (pilot) | ☐ | ☐ | ☐ | design-system freeze review |
 | 4 | Sales / POS | ☐ | ☐ | ☐ | |

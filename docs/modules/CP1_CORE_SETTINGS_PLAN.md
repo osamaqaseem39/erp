@@ -1,6 +1,6 @@
 # Checkpoint 1 — Core / Settings: Plan (Gate A)
 
-> Status: **awaiting approval**. No code has been changed for this checkpoint.
+> Status: **approved 2026-09-29 (D1–D8 as recommended) and implemented**. See [CP1_CORE_SETTINGS_STATUS.md](CP1_CORE_SETTINGS_STATUS.md).
 > Builds on: [CP0_FOUNDATION_STATUS.md](CP0_FOUNDATION_STATUS.md) · Program: [../erp-ui-program/PLAN.md](../erp-ui-program/PLAN.md)
 > Written: 2026-09-29
 
