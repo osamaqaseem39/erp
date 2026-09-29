@@ -51,6 +51,9 @@ The API applies EF migrations automatically at startup.
 - Rollback (after stopping the API): `dotnet ef database update FixTenantNameColumn --project ERP.Infrastructure --startup-project ERP.Api`
 - I deliberately kept the known ReturnOrder foreign-key drift out of it (see §6).
 
+### 4a-bis. Found while running (2026-09-29)
+EF Core's startup `Migrate()` had been **failing on every start, before Checkpoint 1**: the ReturnOrder foreign-key drift between `ERPDbContext` and the model snapshot tripped EF 9's pending-model-changes check, so no migration could apply. `20260929144919_SyncReturnOrderForeignKeys` is a **snapshot-only** migration that runs no SQL: the database already has those keys on `CRM.ReturnOrders` as `ON DELETE NO ACTION`, which matches the model. With it in place, both migrations applied on your database and `Core.DocumentSequences` exists.
+
 ### 4b. First start
 - A Data Protection key ring is created at `ERP.Api/App_Data/keys` (override with `DataProtection:KeysPath`). **Back it up.** It's gitignored. Losing it means re-entering the SMTP password, not losing data.
 - Sign out and back in once, so your token carries the new `CompanyId` claim (the company profile needs it).
@@ -81,7 +84,7 @@ The API applies EF migrations automatically at startup.
 | The sign-in page lists every tenant name to anonymous visitors (`/api/tenants/login-options`); decision D8 was deferred. | CP2 |
 | Services still copy `TenantId` from request bodies (neutralized by the guard). Remove per module. | Each module |
 | `HandleAsync<T>`'s class constraint makes create endpoints return an empty body (fixed for Customers only). | CP3, then each module |
-| ReturnOrder→Customer/SalesOrder FK drift between the DbContext and the migration snapshot. | CP3 schema reconciliation |
+| EF maps ReturnOrders to `dbo.ReturnOrders`, but in this database the table is `CRM.ReturnOrders` (created by the SQL scripts), so return-order screens likely fail against this database. The FK drift itself was resolved by the snapshot-only migration below. | CP3 schema reconciliation |
 | Changes with no signed-in user (first-run setup) aren't audited (`AuditLog.UserId` is a required FK). | Documented; revisit if needed |
 | Document numbers skip a value if a document fails to save after taking it. Strictly gapless numbering for invoices. | CP6 |
 | The second settings entity `Core/Setting` is unused apart from `Tenant.Settings`. | CP12 |
