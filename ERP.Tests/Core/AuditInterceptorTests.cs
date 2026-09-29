@@ -146,5 +146,6 @@ public class AuditInterceptorTests
         public Guid? TenantId => tenantId;
         public string? IpAddress => "127.0.0.1";
         public string? UserAgent => "tests";
+        public bool IsSuperAdmin => false;
     }
 }

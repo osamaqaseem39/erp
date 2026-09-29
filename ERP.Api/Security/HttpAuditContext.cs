@@ -23,4 +23,6 @@ public sealed class HttpAuditContext : IAuditContext
     public string? IpAddress => Http?.Connection.RemoteIpAddress?.ToString();
 
     public string? UserAgent => Http?.Request.Headers.UserAgent.ToString();
+
+    public bool IsSuperAdmin => Http?.User.IsSuperAdmin() == true;
 }
