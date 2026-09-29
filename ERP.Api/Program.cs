@@ -74,8 +74,13 @@ builder.Services.AddControllers()
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 
-builder.Services.AddDbContext<ERPDbContext>(options =>
-    options.UseSqlServer(connectionString));
+// Every change to tenant data is audited in the same transaction (see AuditSaveChangesInterceptor).
+builder.Services.AddScoped<ERP.Shared.Abstractions.IAuditContext, ERP.Api.Security.HttpAuditContext>();
+builder.Services.AddScoped<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>();
+builder.Services.AddSingleton<ERP.Infrastructure.Logging.ISystemLogWriter, ERP.Infrastructure.Logging.SystemLogWriter>();
+builder.Services.AddDbContext<ERPDbContext>((sp, options) =>
+    options.UseSqlServer(connectionString)
+        .AddInterceptors(sp.GetRequiredService<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>()));
 
 builder.Services.AddErpInfrastructure(connectionString);
 builder.Services.AddErpCoreModule();

@@ -1,5 +1,6 @@
 using ERP.Domain.Core;
 using ERP.Infrastructure.Database;
+using ERP.Infrastructure.Logging;
 using ERP.Shared.DTOs.Core;
 using ERP.Shared.Exceptions;
 using ERP.Shared.Helpers;
@@ -10,10 +11,12 @@ namespace ERP.Application.Core;
 public class AuthService : IAuthService
 {
     private readonly ERPDbContext _db;
+    private readonly ISystemLogWriter? _systemLog;
 
-    public AuthService(ERPDbContext db)
+    public AuthService(ERPDbContext db, ISystemLogWriter? systemLog = null)
     {
         _db = db;
+        _systemLog = systemLog;
     }
 
     public async Task<AuthResponseDto?> LoginAsync(LoginDto loginDto)
@@ -22,10 +25,18 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.PrimaryEmail == loginDto.PrimaryEmail && u.TenantId == loginDto.TenantId);
 
         if (user == null || !user.IsActive)
+        {
+            // Only for real tenants, so made-up tenant ids can't fill the log with junk rows.
+            if (await _db.Tenants.AnyAsync(t => t.Id == loginDto.TenantId))
+                await LogSecurityAsync("Warning", "Failed sign-in: unknown or inactive account", loginDto.TenantId, user?.Id, loginDto.PrimaryEmail);
             throw new UnauthorizedException("Invalid credentials");
+        }
 
         if (user.IsLocked && user.LockedUntil > DateTime.UtcNow)
+        {
+            await LogSecurityAsync("Warning", "Sign-in refused: account is locked", user.TenantId, user.Id, loginDto.PrimaryEmail);
             throw new UnauthorizedException("Account is locked");
+        }
 
         if (!PasswordHelper.VerifyPassword(loginDto.Password, user.PasswordHash, user.PasswordSalt))
         {
@@ -36,6 +47,9 @@ public class AuthService : IAuthService
                 user.LockedUntil = DateTime.UtcNow.AddMinutes(30);
             }
             await _db.SaveChangesAsync();
+            await LogSecurityAsync("Warning",
+                user.IsLocked ? "Account locked after repeated failed sign-ins" : "Failed sign-in: wrong password",
+                user.TenantId, user.Id, loginDto.PrimaryEmail);
             throw new UnauthorizedException("Invalid credentials");
         }
 
@@ -227,4 +241,7 @@ public class AuthService : IAuthService
             UpdatedBy = user.UpdatedBy
         };
     }
+
+    private Task LogSecurityAsync(string level, string message, Guid tenantId, Guid? userId, string? email) =>
+        _systemLog?.WriteAsync(level, SystemLogSources.Security, message, tenantId, userId, method: "Login", properties: new { email }) ?? Task.CompletedTask;
 }
