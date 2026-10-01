@@ -21,3 +21,11 @@ public class SystemLogPagedQuery : PagedRequest
     /// <summary>SuperAdmin only: include every tenant. Ignored for everyone else.</summary>
     public bool AllTenants { get; set; }
 }
+
+public class UserPagedQuery : PagedRequest
+{
+    /// <summary>active, inactive or locked.</summary>
+    public string? Status { get; set; }
+    public Guid? RoleId { get; set; }
+    public bool? WithoutRole { get; set; }
+}

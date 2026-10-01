@@ -1,3 +1,4 @@
+using ERP.Shared.Exceptions;
 using ERP.Application.Interfaces.Admin;
 using ERP.Domain.Core;
 using ERP.Infrastructure.Database;
@@ -54,7 +55,7 @@ public class UserService : IUserService
         var user = new User
         {
             Id = Guid.NewGuid(),
-            TenantId = dto.TenantId,
+            // TenantId is set by the repository from the signed-in caller, whatever the request says.
             CompanyId = dto.CompanyId, // May be null for tenant owner or if caller allows
             FirstName = dto.FirstName,
             LastName = dto.LastName,
@@ -90,15 +91,23 @@ public class UserService : IUserService
         // Create user
         var userId = await _userRepository.CreateAsync(user);
 
-        // Assign roles if provided
+        // Assign roles if provided. Only roles of the user's own organization are accepted.
         if (dto.RoleIds != null && dto.RoleIds.Any())
         {
-            foreach (var roleId in dto.RoleIds)
+            var created = await _userRepository.GetByIdAsync(userId);
+            var validRoleIds = await _context.Roles
+                .Where(r => dto.RoleIds.Contains(r.Id) && r.TenantId == created!.TenantId)
+                .Select(r => r.Id)
+                .ToListAsync();
+            if (validRoleIds.Count != dto.RoleIds.Distinct().Count())
+                throw new ValidationException("One or more roles don't exist in your organization.");
+
+            foreach (var roleId in validRoleIds)
             {
                 var userRole = new UserRole
                 {
                     Id = Guid.NewGuid(),
-                    TenantId = dto.TenantId,
+                    TenantId = created!.TenantId,
                     UserId = userId,
                     RoleId = roleId,
                     AssignedAt = DateTime.UtcNow,
@@ -154,7 +163,8 @@ public class UserService : IUserService
 
     public async Task<bool> ResetPasswordAsync(ResetUserPasswordDto dto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == dto.UserId);
+        // Scoped to the caller's organization: another tenant's user is "not found".
+        var user = await _userRepository.GetByIdAsync(dto.UserId);
         if (user == null) return false;
 
         var (hash, salt) = PasswordHelper.HashPassword(dto.NewPassword);

@@ -55,7 +55,8 @@ public class SetupService : ISetupService
         }
 
         // Validate email is not already in use
-        var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
+        // Setup runs before anyone can sign in, so it uses the context directly (no tenant in the request).
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.PrimaryEmail == dto.Email);
         if (existingUser != null)
         {
             throw new ValidationException($"Email {dto.Email} is already registered.");
@@ -164,7 +165,9 @@ public class SetupService : ISetupService
             IsTenantOwner = true
         };
 
-        var userId = await _userRepository.CreateAsync(user);
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        var userId = user.Id;
 
         // Assign SuperAdmin role to user
         var userRole = new UserRole
