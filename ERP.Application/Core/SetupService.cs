@@ -1,5 +1,5 @@
 using ERP.Application.Interfaces.Core;
-using IPermissionService = ERP.Application.Interfaces.Core.IPermissionService;
+using ERP.Infrastructure.Security;
 using ERP.Domain.Core;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Interfaces.Core;
@@ -19,7 +19,7 @@ public class SetupService : ISetupService
     private readonly ICompanyRepository _companyRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUserRoleRepository _userRoleRepository;
-    private readonly IPermissionService _permissionService;
+    private readonly IRbacSeeder _rbacSeeder;
     private readonly ERPDbContext _context;
 
     public SetupService(
@@ -27,14 +27,14 @@ public class SetupService : ISetupService
         ICompanyRepository companyRepository,
         IUserRepository userRepository,
         IUserRoleRepository userRoleRepository,
-        IPermissionService permissionService,
+        IRbacSeeder rbacSeeder,
         ERPDbContext context)
     {
         _tenantRepository = tenantRepository;
         _companyRepository = companyRepository;
         _userRepository = userRepository;
         _userRoleRepository = userRoleRepository;
-        _permissionService = permissionService;
+        _rbacSeeder = rbacSeeder;
         _context = context;
     }
 
@@ -184,8 +184,8 @@ public class SetupService : ISetupService
 
         await _userRoleRepository.AddAsync(userRole);
 
-        await _permissionService.SeedDefaultPermissionsAsync(tenant.Id, "System");
-        await _permissionService.AssignAllPermissionsToRoleAsync(superAdminRole.Id, tenant.Id);
+        // Permissions and the built-in roles (Administrator, Read-only, templates) for the new organization.
+        await _rbacSeeder.SeedTenantAsync(tenant.Id);
 
         return new SuperAdminSetupResponseDto
         {

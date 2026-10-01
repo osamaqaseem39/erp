@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
@@ -10,6 +11,7 @@ namespace ERP.Api.Controllers.Projects;
 [ApiController]
 [Route("api/projects")]
 [Authorize]
+[PermissionResource("projects.projects")]
 public class ProjectController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IProjectService _projectService;

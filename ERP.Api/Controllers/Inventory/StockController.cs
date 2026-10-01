@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Errors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -67,6 +68,7 @@ public class StockController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("adjust")]
+    [RequirePermission("inventory.stock.adjust")]
     public async Task<IActionResult> AdjustStock([FromBody] StockAdjustmentDto dto)
     {
         var validationResult = await _adjustmentValidator.ValidateAsync(dto);
@@ -79,6 +81,7 @@ public class StockController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("transfer")]
+    [RequirePermission("inventory.stockTransfers.create")]
     public async Task<IActionResult> TransferStock([FromBody] StockTransferDto dto)
     {
         var validationResult = await _transferValidator.ValidateAsync(dto);

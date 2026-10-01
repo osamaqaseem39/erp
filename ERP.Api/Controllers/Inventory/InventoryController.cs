@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
@@ -22,6 +23,7 @@ public class InventoryController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("stock-balance")]
+    [RequirePermission("inventory.stock.view")]
     public async Task<IActionResult> GetStockBalance([FromQuery] Guid itemId, [FromQuery] Guid? warehouseId = null)
     {
         var tenantId = GetTenantId();
@@ -33,6 +35,7 @@ public class InventoryController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("stock-balances")]
+    [RequirePermission("inventory.stock.view")]
     public async Task<IActionResult> GetAllStockBalances([FromQuery] Guid? warehouseId = null, [FromQuery] Guid? itemId = null)
     {
         var tenantId = GetTenantId();
@@ -43,6 +46,7 @@ public class InventoryController : ERP.Api.Abstractions.ControllerBase
 
 
     [HttpPost("transfer")]
+    [RequirePermission("inventory.stockTransfers.create")]
     public async Task<IActionResult> CreateTransfer([FromBody] CreateStockTransferDto dto)
     {
         var tenantId = GetTenantId();
@@ -52,6 +56,7 @@ public class InventoryController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("transfer/{id}")]
+    [RequirePermission("inventory.stockTransfers.view")]
     public async Task<IActionResult> GetTransfer(Guid id)
     {
         var tenantId = GetTenantId();
@@ -62,6 +67,7 @@ public class InventoryController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("transfer/{id}/complete")]
+    [RequirePermission("inventory.stockTransfers.complete")]
     public async Task<IActionResult> CompleteTransfer(Guid id)
     {
         var tenantId = GetTenantId();

@@ -329,6 +329,9 @@ public class ERPDbContext : DbContext
         {
             entity.ToTable("RolePermissions", "Core");
             entity.HasKey(e => e.Id);
+            // DB has IsAllowed and no assignment columns.
+            entity.Ignore(e => e.AssignedAt);
+            entity.Ignore(e => e.AssignedBy);
             
             entity.HasOne(e => e.Role)
                 .WithMany(r => r.RolePermissions)

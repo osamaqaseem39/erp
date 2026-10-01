@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
 using ERP.Api.Errors;
 using Microsoft.AspNetCore.Authorization;
@@ -71,6 +72,7 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("change-password")]
+    [SignedInOnly("Everyone can change their own password.")]
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
     {

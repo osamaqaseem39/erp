@@ -49,7 +49,11 @@ JwtHelper.Configure(jwtSettings);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 builder.Services.AddSingleton(jwtSettings);
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        // Every endpoint requires the permission derived from its route (see EndpointPermissions).
+        options.Filters.Add<ERP.Api.Security.Permissions.PermissionAuthorizationFilter>();
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         // Model-binding failures (malformed JSON, wrong types) use the same body as every other error.
@@ -85,12 +89,19 @@ builder.Services.AddScoped<ERP.Shared.Abstractions.IAuditContext, ERP.Api.Securi
 builder.Services.AddScoped<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>();
 builder.Services.AddScoped<ERP.Infrastructure.Auditing.TenantGuardInterceptor>();
 builder.Services.AddSingleton<ERP.Infrastructure.Logging.ISystemLogWriter, ERP.Infrastructure.Logging.SystemLogWriter>();
+// Permissions: catalog from the endpoints, per-user cache cleared when roles change.
+builder.Services.AddSingleton<ERP.Api.Security.Permissions.EndpointPermissions>();
+builder.Services.AddSingleton<ERP.Infrastructure.Security.IPermissionCatalog>(sp => sp.GetRequiredService<ERP.Api.Security.Permissions.EndpointPermissions>());
+builder.Services.AddSingleton<ERP.Infrastructure.Security.IEffectivePermissions, ERP.Infrastructure.Security.EffectivePermissions>();
+builder.Services.AddSingleton<ERP.Infrastructure.Security.PermissionCacheInvalidator>();
+builder.Services.AddScoped<ERP.Infrastructure.Security.IRbacSeeder, ERP.Infrastructure.Security.RbacSeeder>();
 builder.Services.AddDbContext<ERPDbContext>((sp, options) =>
     options.UseSqlServer(connectionString)
         // Guard first so the audit trail records the tenant the row actually lands in.
         .AddInterceptors(
             sp.GetRequiredService<ERP.Infrastructure.Auditing.TenantGuardInterceptor>(),
-            sp.GetRequiredService<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>()));
+            sp.GetRequiredService<ERP.Infrastructure.Auditing.AuditSaveChangesInterceptor>(),
+            sp.GetRequiredService<ERP.Infrastructure.Security.PermissionCacheInvalidator>()));
 
 builder.Services.AddErpInfrastructure(connectionString);
 builder.Services.AddErpCoreModule();
@@ -258,7 +269,8 @@ app.UseMiddleware<TenantMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGraphQL().RequireAuthorization();
+// GraphQL bypasses controller permissions, so it is limited to platform administrators.
+app.MapGraphQL().RequireAuthorization(policy => policy.RequireRole(ERP.Api.Security.CurrentUser.SuperAdminRoles));
 
 if (app.Environment.IsDevelopment())
 {
@@ -300,6 +312,19 @@ using (var scope = app.Services.CreateScope())
             if (failOnSqlDeploy)
                 throw;
         }
+    }
+
+    // Keep each organization's permissions and built-in roles in step with the endpoints.
+    try
+    {
+        scope.ServiceProvider.GetRequiredService<ERP.Infrastructure.Security.IRbacSeeder>()
+            .SeedAllTenantsAsync().GetAwaiter().GetResult();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Permission seeding failed");
+        if (failOnMigration)
+            throw;
     }
 }
 

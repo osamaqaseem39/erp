@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
 using ERP.Application.Core;
 using ERP.Shared.DTOs.Core;
@@ -29,6 +30,7 @@ public class CompanyController : ControllerBase
 
     /// <summary>Currency, time zone, locale and date format for the current tenant. Works even without a company.</summary>
     [HttpGet("context")]
+    [SignedInOnly("Company name, currency and formats every screen needs.")]
     public async Task<ActionResult<TenantContextDto>> Context()
     {
         Guid? companyId = Guid.TryParse(User.FindFirst(CurrentUser.CompanyIdClaim)?.Value, out var id) ? id : null;

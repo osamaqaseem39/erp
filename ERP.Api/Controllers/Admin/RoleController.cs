@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
@@ -61,6 +62,7 @@ public class RoleController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/permissions")]
+    [RequirePermission("admin.roles.assign")]
     public async Task<IActionResult> AssignPermissions(Guid id, [FromBody] AssignPermissionsDto dto)
     {
         var tenantId = GetTenantId();

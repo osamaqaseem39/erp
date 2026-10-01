@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Application.Interfaces.Finance;
@@ -9,6 +10,7 @@ namespace ERP.Api.Controllers.Finance;
 [ApiController]
 [Route("api/finance/chartofaccounts")]
 [Authorize]
+[PermissionResource("finance.chartOfAccounts")]
 public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IAccountingService _accountingService;

@@ -1,3 +1,4 @@
+using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Api.Abstractions;
@@ -10,6 +11,7 @@ namespace ERP.Api.Controllers.Reports;
 [ApiController]
 [Route("api/reports")]
 [Authorize]
+[PermissionResource("reports.reports")]
 public class ReportController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IReportService _reportService;
