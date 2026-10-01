@@ -19,7 +19,10 @@ public static class JwtHelper
         _settings = settings;
     }
 
-    public static string GenerateJwtToken(Guid userId, string email, IEnumerable<string> roles, Guid tenantId, Guid? companyId = null)
+    /// <param name="lifetime">Shorter than the configured expiry when the tenant's session timeout is shorter.</param>
+    /// <param name="sessionId">The sign-in session (refresh-token family) this token belongs to.</param>
+    public static string GenerateJwtToken(Guid userId, string email, IEnumerable<string> roles, Guid tenantId, Guid? companyId = null,
+        TimeSpan? lifetime = null, Guid? sessionId = null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_settings.SecretKey);
@@ -32,6 +35,11 @@ public static class JwtHelper
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
+
+        if (sessionId.HasValue)
+        {
+            claims.Add(new Claim(JwtRegisteredClaimNames.Sid, sessionId.Value.ToString()));
+        }
 
         if (companyId.HasValue && companyId.Value != Guid.Empty)
         {
@@ -51,7 +59,7 @@ public static class JwtHelper
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(_settings.ExpiryMinutes),
+            Expires = DateTime.UtcNow.Add(AccessTokenLifetime(lifetime)),
             Issuer = _settings.Issuer,
             Audience = _settings.Audience,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -97,5 +105,12 @@ public static class JwtHelper
     }
 
     public static int ExpiryMinutes => _settings.ExpiryMinutes;
+
+    /// <summary>The configured access-token expiry, or <paramref name="limit"/> when that is shorter.</summary>
+    public static TimeSpan AccessTokenLifetime(TimeSpan? limit = null)
+    {
+        var configured = TimeSpan.FromMinutes(_settings.ExpiryMinutes);
+        return limit.HasValue && limit.Value < configured ? limit.Value : configured;
+    }
     public static int RefreshTokenExpiryDays => _settings.RefreshTokenExpiryDays;
 }

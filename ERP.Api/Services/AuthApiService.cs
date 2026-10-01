@@ -13,6 +13,8 @@ public interface IAuthApiService
     Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
     Task<bool> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     Task<bool> VerifyEmailAsync(string token);
+    Task<CurrentSessionDto> GetCurrentSessionAsync(Guid userId, Guid tenantId, bool isSuperAdmin);
+    Task<bool> SignOutEverywhereAsync(Guid userId);
 }
 
 public class AuthApiService : IAuthApiService
@@ -79,6 +81,11 @@ public class AuthApiService : IAuthApiService
 
         return await _authService.ResetPasswordAsync(resetPasswordDto.Email, resetPasswordDto.TenantId);
     }
+
+    public Task<CurrentSessionDto> GetCurrentSessionAsync(Guid userId, Guid tenantId, bool isSuperAdmin) =>
+        _authService.GetCurrentSessionAsync(userId, tenantId, isSuperAdmin);
+
+    public Task<bool> SignOutEverywhereAsync(Guid userId) => _authService.LogoutAsync(userId);
 
     public async Task<bool> VerifyEmailAsync(string token)
     {

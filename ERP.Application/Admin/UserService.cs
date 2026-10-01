@@ -1,3 +1,5 @@
+using ERP.Application.Core.Auth;
+using ERP.Application.Core.Settings;
 using ERP.Shared.Exceptions;
 using ERP.Application.Interfaces.Admin;
 using ERP.Domain.Core;
@@ -16,15 +18,21 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IUserRoleRepository _userRoleRepository;
     private readonly ERPDbContext _context;
+    private readonly ISecurityPolicyProvider _policies;
+    private readonly ISessionStore? _sessions;
 
     public UserService(
-        IUserRepository userRepository, 
+        IUserRepository userRepository,
         IUserRoleRepository userRoleRepository,
-        ERPDbContext context)
+        ERPDbContext context,
+        ISecurityPolicyProvider? policies = null,
+        ISessionStore? sessions = null)
     {
         _userRepository = userRepository;
         _userRoleRepository = userRoleRepository;
         _context = context;
+        _policies = policies ?? new SecurityPolicyProvider(context);
+        _sessions = sessions;
     }
 
     public async Task<UserDto?> GetByIdAsync(Guid id)
@@ -49,6 +57,7 @@ public class UserService : IUserService
             throw new InvalidOperationException($"User with email {dto.Email} already exists.");
         }
 
+        (await _policies.GetAsync(_userRepository.TenantId)).EnsurePasswordAllowed(dto.Password, "password");
         var (passwordHash, passwordSalt) = PasswordHelper.HashPassword(dto.Password);
 
         // Create user entity
@@ -167,12 +176,13 @@ public class UserService : IUserService
         var user = await _userRepository.GetByIdAsync(dto.UserId);
         if (user == null) return false;
 
+        (await _policies.GetAsync(user.TenantId)).EnsurePasswordAllowed(dto.NewPassword);
         var (hash, salt) = PasswordHelper.HashPassword(dto.NewPassword);
         user.PasswordHash = hash;
         user.PasswordSalt = salt;
-        user.RefreshToken = null;
-        user.RefreshTokenExpires = null;
         await _context.SaveChangesAsync();
+        // The user signs in again everywhere with the new password.
+        if (_sessions != null) await _sessions.EndAllAsync(user.Id, SessionStore.ReasonPasswordChanged);
         return true;
     }
 

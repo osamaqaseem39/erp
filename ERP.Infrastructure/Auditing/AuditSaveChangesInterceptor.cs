@@ -25,7 +25,7 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
     /// <summary>Tables that are themselves logs or high-volume session state.</summary>
-    private static readonly HashSet<Type> ExcludedTypes = [typeof(AuditLog), typeof(SystemLog), typeof(UserSession)];
+    private static readonly HashSet<Type> ExcludedTypes = [typeof(AuditLog), typeof(SystemLog), typeof(UserSession), typeof(RefreshToken)];
 
     /// <summary>Never written to the audit trail in clear text.</summary>
     private static readonly HashSet<string> SecretProperties = new(StringComparer.OrdinalIgnoreCase)

@@ -22,7 +22,6 @@ public class CreateUserValidator : BaseValidator<CreateUserDto>
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required")
-            .MinimumLength(8).WithMessage("Password must be at least 8 characters")
             .MaximumLength(100).WithMessage("Password cannot exceed 100 characters");
 
         RuleFor(x => x.PhoneNumber)

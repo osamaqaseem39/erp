@@ -69,6 +69,8 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Infrastructure.Repositories.Core.IPermissionRepository, PermissionRepository>();
         services.AddScoped<ITenantService, TenantService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ERP.Application.Core.Settings.ISecurityPolicyProvider, ERP.Application.Core.Settings.SecurityPolicyProvider>();
+        services.AddScoped<ERP.Application.Core.Auth.ISessionStore, ERP.Application.Core.Auth.SessionStore>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISetupService, SetupService>();
         services.AddScoped<IPermissionService, PermissionService>();

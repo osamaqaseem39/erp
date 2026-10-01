@@ -143,6 +143,20 @@ public class AuthResponseDto
     public string RefreshToken { get; set; } = string.Empty;
     public DateTime ExpiresAt { get; set; }
     public UserDto User { get; set; } = null!;
+    /// <summary>Permission codes the user holds (module.resource.action). Empty for SuperAdmin, who holds all.</summary>
+    public List<string> Permissions { get; set; } = new();
+    public bool IsSuperAdmin { get; set; }
+}
+
+/// <summary>GET api/auth/me: who is signed in and what they may do.</summary>
+public class CurrentSessionDto
+{
+    public UserDto User { get; set; } = null!;
+    public List<string> Roles { get; set; } = new();
+    public List<string> Permissions { get; set; } = new();
+    public bool IsSuperAdmin { get; set; }
+    public Guid TenantId { get; set; }
+    public string TenantName { get; set; } = string.Empty;
 }
 
 public class RefreshTokenDto

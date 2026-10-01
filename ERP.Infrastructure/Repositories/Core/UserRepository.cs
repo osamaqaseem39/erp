@@ -27,6 +27,8 @@ public class UserRepository : TenantScopedRepositoryBase, IUserRepository
 
     private IQueryable<User> Users => Scoped(Context.Users);
 
+    public Guid TenantId => CurrentTenantId;
+
     public async Task<User?> GetByIdAsync(Guid id) => await Users.FirstOrDefaultAsync(u => u.Id == id);
 
     public async Task<IEnumerable<User>> GetAllAsync() =>

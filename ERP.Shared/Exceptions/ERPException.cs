@@ -33,6 +33,12 @@ public class ValidationException : ERPException
     {
         Errors = errors;
     }
+
+    /// <summary>Errors keyed by request field (camelCase), so forms can show them next to the input.</summary>
+    public IReadOnlyDictionary<string, string[]>? FieldErrors { get; private init; }
+
+    public static ValidationException ForField(string field, string message) =>
+        new(message) { FieldErrors = new Dictionary<string, string[]> { [field] = [message] } };
 }
 
 public class NotFoundException : ERPException

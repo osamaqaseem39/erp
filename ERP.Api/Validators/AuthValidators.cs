@@ -12,8 +12,7 @@ public class LoginValidator : BaseValidator<LoginDto>
             .EmailAddress().WithMessage("Email must be valid");
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Password is required")
-            .MinimumLength(6).WithMessage("Password must be at least 6 characters");
+            .NotEmpty().WithMessage("Password is required");
 
         RuleFor(x => x.TenantId)
             .NotEmpty().WithMessage("Tenant ID is required");

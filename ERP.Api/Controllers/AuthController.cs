@@ -71,6 +71,20 @@ public class AuthController : ERP.Api.Abstractions.ControllerBase
         return await HandleAsync(() => _authService.LogoutAsync(refreshTokenDto.RefreshToken));
     }
 
+    /// <summary>The signed-in user, their roles and permission codes, and their organization.</summary>
+    [HttpGet("me")]
+    [Authorize]
+    [SignedInOnly("Every signed-in user reads their own session.")]
+    public async Task<IActionResult> Me() =>
+        await HandleAsync(() => _authService.GetCurrentSessionAsync(User.RequireUserId(), HttpContext.RequireTenantId(), User.IsSuperAdmin()));
+
+    /// <summary>Ends all of the caller's sessions on every device (this one included once its access token expires).</summary>
+    [HttpPost("sign-out-everywhere")]
+    [Authorize]
+    [SignedInOnly("Everyone can end their own sessions.")]
+    public async Task<IActionResult> SignOutEverywhere() =>
+        await HandleAsync(() => _authService.SignOutEverywhereAsync(User.RequireUserId()));
+
     [HttpPost("change-password")]
     [SignedInOnly("Everyone can change their own password.")]
     [Authorize]

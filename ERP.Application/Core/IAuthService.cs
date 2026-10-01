@@ -12,4 +12,5 @@ public interface IAuthService
     Task<bool> ResetPasswordAsync(string email, Guid tenantId);
     Task<bool> CompletePasswordResetAsync(string email, string token, string newPassword);
     Task<bool> VerifyEmailAsync(string token);
+    Task<CurrentSessionDto> GetCurrentSessionAsync(Guid userId, Guid tenantId, bool isSuperAdmin);
 }

@@ -26,7 +26,8 @@ public static class ApiErrorMapper
                 Status = 400,
                 ErrorCode = ApiErrorCodes.ValidationError,
                 Message = v.Message,
-                Errors = v.Errors.Count > 0 ? new Dictionary<string, string[]> { [""] = v.Errors.ToArray() } : null,
+                Errors = v.FieldErrors?.ToDictionary(e => e.Key, e => e.Value)
+                    ?? (v.Errors.Count > 0 ? new Dictionary<string, string[]> { [""] = v.Errors.ToArray() } : null),
             },
             ERPException erp => new ApiError { Status = erp.StatusCode, ErrorCode = erp.ErrorCode, Message = erp.Message },
             UnauthorizedAccessException => new ApiError

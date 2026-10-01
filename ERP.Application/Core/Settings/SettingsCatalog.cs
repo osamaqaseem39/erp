@@ -104,7 +104,7 @@ public static class SettingsCatalog
         new("preferences.firstDayOfWeek", Preferences, "First day of the week", SettingType.Choice, "1",
             "Used by calendars and weekly reports.", Weekdays, Required: true),
 
-        // Security: stored now; enforced when Checkpoint 2 (authentication) lands.
+        // Security: enforced by sign-in, sessions and password changes (SecurityPolicy).
         new("security.sessionTimeoutMinutes", Security, "Session timeout (minutes)", SettingType.Number, "60",
             "Signed-in sessions expire after this much time.", Min: 5, Max: 1440, Required: true),
         new("security.passwordMinLength", Security, "Minimum password length", SettingType.Number, "8",

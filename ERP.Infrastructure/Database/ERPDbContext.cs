@@ -32,6 +32,7 @@ public class ERPDbContext : DbContext
     public DbSet<DocumentSequence> DocumentSequences { get; set; }
     public DbSet<Setting> Settings { get; set; }
     public DbSet<UserSession> UserSessions { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     // HRM Entities
     public DbSet<Employee> Employees { get; set; }
@@ -308,6 +309,19 @@ public class ERPDbContext : DbContext
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(e => e.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.ToTable("RefreshTokens", "Core");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TokenHash).IsRequired().HasMaxLength(64).IsUnicode(false);
+            entity.Property(e => e.RevokedReason).HasMaxLength(100);
+            entity.Property(e => e.IpAddress).HasMaxLength(64);
+            entity.Property(e => e.UserAgent).HasMaxLength(512);
+            entity.HasIndex(e => e.TokenHash).IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.SessionId });
+            entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // Configure Permission (Core schema)

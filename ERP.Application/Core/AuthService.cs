@@ -1,6 +1,9 @@
+using ERP.Application.Core.Auth;
+using ERP.Application.Core.Settings;
 using ERP.Domain.Core;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Logging;
+using ERP.Infrastructure.Security;
 using ERP.Shared.DTOs.Core;
 using ERP.Shared.Exceptions;
 using ERP.Shared.Helpers;
@@ -10,12 +13,21 @@ namespace ERP.Application.Core;
 
 public class AuthService : IAuthService
 {
+    private static readonly string[] SuperAdminRoles = ["SuperAdmin", "SUPER_ADMIN"];
+
     private readonly ERPDbContext _db;
+    private readonly ISessionStore _sessions;
+    private readonly ISecurityPolicyProvider _policies;
+    private readonly IEffectivePermissions? _permissions;
     private readonly ISystemLogWriter? _systemLog;
 
-    public AuthService(ERPDbContext db, ISystemLogWriter? systemLog = null)
+    public AuthService(ERPDbContext db, ISessionStore sessions, ISecurityPolicyProvider policies,
+        IEffectivePermissions? permissions = null, ISystemLogWriter? systemLog = null)
     {
         _db = db;
+        _sessions = sessions;
+        _policies = policies;
+        _permissions = permissions;
         _systemLog = systemLog;
     }
 
@@ -32,19 +44,28 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Invalid credentials");
         }
 
+        var policy = await _policies.GetAsync(user.TenantId);
+
         if (user.IsLocked && user.LockedUntil > DateTime.UtcNow)
         {
             await LogSecurityAsync("Warning", "Sign-in refused: account is locked", user.TenantId, user.Id, loginDto.PrimaryEmail);
             throw new UnauthorizedException("Account is locked");
         }
+        if (user.IsLocked)
+        {
+            // The lock has run out: start counting again.
+            user.IsLocked = false;
+            user.LockedUntil = null;
+            user.FailedLoginAttempts = 0;
+        }
 
         if (!PasswordHelper.VerifyPassword(loginDto.Password, user.PasswordHash, user.PasswordSalt))
         {
             user.FailedLoginAttempts++;
-            if (user.FailedLoginAttempts >= 5)
+            if (user.FailedLoginAttempts >= policy.LockoutThreshold)
             {
                 user.IsLocked = true;
-                user.LockedUntil = DateTime.UtcNow.AddMinutes(30);
+                user.LockedUntil = DateTime.UtcNow.AddMinutes(policy.LockoutMinutes);
             }
             await _db.SaveChangesAsync();
             await LogSecurityAsync("Warning",
@@ -54,9 +75,10 @@ public class AuthService : IAuthService
         }
 
         user.FailedLoginAttempts = 0;
-        user.IsLocked = false;
-        user.LockedUntil = null;
         user.LastLoginDate = DateTime.UtcNow;
+        // Tokens are now kept per session (RefreshTokens); clear the old single-token columns.
+        user.RefreshToken = null;
+        user.RefreshTokenExpires = null;
 
         if (PasswordHelper.NeedsRehash(user.PasswordSalt))
         {
@@ -65,72 +87,26 @@ public class AuthService : IAuthService
             user.PasswordSalt = salt;
         }
 
-        var refreshToken = JwtHelper.GenerateRefreshToken();
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpires = DateTime.UtcNow.AddDays(JwtHelper.RefreshTokenExpiryDays);
-
-        await _db.SaveChangesAsync();
-
-        var roles = await GetUserRoleNamesAsync(user.Id);
-        var token = JwtHelper.GenerateJwtToken(user.Id, user.PrimaryEmail ?? user.Email, roles, user.TenantId, user.CompanyId);
-
-        return new AuthResponseDto
-        {
-            Token = token,
-            RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(JwtHelper.ExpiryMinutes),
-            User = MapToUserDto(user, roles)
-        };
+        var issued = await _sessions.StartAsync(user, policy);
+        await LogSecurityAsync("Information", "Signed in", user.TenantId, user.Id, loginDto.PrimaryEmail);
+        return await ResponseAsync(user, issued.Token, issued.Row.SessionId, policy);
     }
 
     public async Task<AuthResponseDto?> RefreshTokenAsync(RefreshTokenDto refreshTokenDto)
     {
-        var user = await _db.Users
-            .FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenDto.RefreshToken);
-
-        if (user == null ||
-            user.RefreshTokenExpires == null ||
-            user.RefreshTokenExpires < DateTime.UtcNow)
-        {
-            throw new UnauthorizedException("Invalid refresh token");
-        }
-
-        var newRefreshToken = JwtHelper.GenerateRefreshToken();
-        user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpires = DateTime.UtcNow.AddDays(JwtHelper.RefreshTokenExpiryDays);
-        await _db.SaveChangesAsync();
-
-        var roles = await GetUserRoleNamesAsync(user.Id);
-        var token = JwtHelper.GenerateJwtToken(user.Id, user.PrimaryEmail ?? user.Email, roles, user.TenantId, user.CompanyId);
-
-        return new AuthResponseDto
-        {
-            Token = token,
-            RefreshToken = newRefreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(JwtHelper.ExpiryMinutes),
-            User = MapToUserDto(user, roles)
-        };
+        var rotated = await _sessions.RotateAsync(refreshTokenDto.RefreshToken);
+        return await ResponseAsync(rotated.User, rotated.Token, rotated.Row.SessionId, rotated.Policy);
     }
 
     public async Task<bool> LogoutAsync(Guid userId)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return false;
-
-        user.RefreshToken = null;
-        user.RefreshTokenExpires = null;
-        await _db.SaveChangesAsync();
+        await _sessions.EndAllAsync(userId, SessionStore.ReasonSignOutEverywhere);
         return true;
     }
 
     public async Task<bool> LogoutByRefreshTokenAsync(string refreshToken)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
-        if (user == null) return true;
-
-        user.RefreshToken = null;
-        user.RefreshTokenExpires = null;
-        await _db.SaveChangesAsync();
+        await _sessions.EndAsync(refreshToken, SessionStore.ReasonSignOut);
         return true;
     }
 
@@ -140,15 +116,59 @@ public class AuthService : IAuthService
         if (user == null) return false;
 
         if (!PasswordHelper.VerifyPassword(currentPassword, user.PasswordHash, user.PasswordSalt))
-            throw new UnauthorizedException("Current password is incorrect");
+            throw ValidationException.ForField("currentPassword", "Current password is incorrect.");
+        (await _policies.GetAsync(user.TenantId)).EnsurePasswordAllowed(newPassword);
 
         var (hash, salt) = PasswordHelper.HashPassword(newPassword);
         user.PasswordHash = hash;
         user.PasswordSalt = salt;
-        user.RefreshToken = null;
-        user.RefreshTokenExpires = null;
         await _db.SaveChangesAsync();
+        // Every session must sign in again with the new password.
+        await _sessions.EndAllAsync(user.Id, SessionStore.ReasonPasswordChanged);
+        await LogSecurityAsync("Information", "Password changed", user.TenantId, user.Id, user.PrimaryEmail);
         return true;
+    }
+
+    public async Task<CurrentSessionDto> GetCurrentSessionAsync(Guid userId, Guid tenantId, bool isSuperAdmin)
+    {
+        var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId && u.TenantId == tenantId)
+            ?? throw new UnauthorizedException("Your account is not available. Please sign in again.");
+        var roles = await GetUserRoleNamesAsync(user.Id);
+        var tenantName = await _db.Tenants.AsNoTracking().Where(t => t.Id == tenantId).Select(t => t.TenantName).FirstOrDefaultAsync();
+        return new CurrentSessionDto
+        {
+            User = MapToUserDto(user, roles),
+            Roles = roles,
+            Permissions = await PermissionsAsync(user, isSuperAdmin),
+            IsSuperAdmin = isSuperAdmin,
+            TenantId = tenantId,
+            TenantName = tenantName ?? string.Empty,
+        };
+    }
+
+    private async Task<AuthResponseDto> ResponseAsync(User user, string refreshToken, Guid sessionId, SecurityPolicy policy)
+    {
+        var roles = await GetUserRoleNamesAsync(user.Id);
+        var isSuperAdmin = roles.Any(r => SuperAdminRoles.Contains(r));
+        var lifetime = JwtHelper.AccessTokenLifetime(TimeSpan.FromMinutes(policy.SessionTimeoutMinutes));
+        var token = JwtHelper.GenerateJwtToken(user.Id, user.PrimaryEmail ?? user.Email, roles, user.TenantId, user.CompanyId, lifetime, sessionId);
+
+        return new AuthResponseDto
+        {
+            Token = token,
+            RefreshToken = refreshToken,
+            ExpiresAt = DateTime.UtcNow.Add(lifetime),
+            User = MapToUserDto(user, roles),
+            Permissions = await PermissionsAsync(user, isSuperAdmin),
+            IsSuperAdmin = isSuperAdmin,
+        };
+    }
+
+    /// <summary>Empty for SuperAdmin, who passes every check.</summary>
+    private async Task<List<string>> PermissionsAsync(User user, bool isSuperAdmin)
+    {
+        if (isSuperAdmin || _permissions == null) return new List<string>();
+        return (await _permissions.GetAsync(user.TenantId, user.Id)).Order(StringComparer.Ordinal).ToList();
     }
 
     public async Task<bool> ResetPasswordAsync(string email, Guid tenantId)
@@ -173,15 +193,15 @@ public class AuthService : IAuthService
 
         if (user == null)
             throw new UnauthorizedException("Invalid or expired reset token");
+        (await _policies.GetAsync(user.TenantId)).EnsurePasswordAllowed(newPassword);
 
         var (hash, salt) = PasswordHelper.HashPassword(newPassword);
         user.PasswordHash = hash;
         user.PasswordSalt = salt;
         user.PasswordResetToken = null;
         user.PasswordResetExpires = null;
-        user.RefreshToken = null;
-        user.RefreshTokenExpires = null;
         await _db.SaveChangesAsync();
+        await _sessions.EndAllAsync(user.Id, SessionStore.ReasonPasswordChanged);
         return true;
     }
 
