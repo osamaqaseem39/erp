@@ -22,6 +22,8 @@ public class TrainingService : ITrainingService
 
     public async Task<Guid> CreateAsync(CreateTrainingDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         if (string.IsNullOrWhiteSpace(dto.Title))
             throw new ArgumentException("Title is required.");
         if (dto.EndDate < dto.StartDate)

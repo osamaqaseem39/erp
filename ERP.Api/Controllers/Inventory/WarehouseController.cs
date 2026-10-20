@@ -40,6 +40,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(typeof(WarehouseDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
+        _ = GetTenantId(); // fail-closed: ambient tenant required for adapter scoping
         var warehouse = await _warehouseService.GetByIdAsync(id);
         if (warehouse == null)
             return NotFound();
@@ -50,6 +51,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(typeof(IEnumerable<WarehouseDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] Guid? companyId = null, [FromQuery] bool? isActive = null)
     {
+        _ = GetTenantId();
         IEnumerable<WarehouseDto> warehouses;
         
         if (isActive.HasValue && isActive.Value)
@@ -64,6 +66,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateWarehouseDto dto)
     {
+        _ = GetTenantId();
         dto.Id = id;
         var result = await _warehouseService.UpdateAsync(dto);
         return Ok(new { Success = result });
@@ -73,6 +76,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
+        _ = GetTenantId();
         var result = await _warehouseService.DeleteAsync(id);
         if (!result)
             return NotFound();
@@ -83,6 +87,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Activate(Guid id)
     {
+        _ = GetTenantId();
         var result = await _warehouseService.ActivateAsync(id);
         return Ok(new { Success = result });
     }
@@ -91,6 +96,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Deactivate(Guid id)
     {
+        _ = GetTenantId();
         var result = await _warehouseService.DeactivateAsync(id);
         return Ok(new { Success = result });
     }

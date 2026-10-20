@@ -20,10 +20,8 @@ public class PaymentService : IPaymentService
     }
 
     public async Task<PaymentDto?> GetByIdAsync(Guid id)
-    {
-        var entity = await _repository.GetByIdAsync(id);
-        return entity != null ? MapToDto(entity) : null;
-    }
+        // Untenanted overload is a footgun — fail closed.
+        => null;
 
     public async Task<PaymentDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
@@ -32,11 +30,9 @@ public class PaymentService : IPaymentService
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<PaymentDto>> GetAllAsync()
-    {
-        var entities = await _repository.GetAllAsync();
-        return entities.Select(MapToDto);
-    }
+    public Task<IEnumerable<PaymentDto>> GetAllAsync()
+        // Untenanted overload is a footgun — fail closed.
+        => Task.FromResult<IEnumerable<PaymentDto>>(Array.Empty<PaymentDto>());
 
     public async Task<IEnumerable<PaymentDto>> GetAllAsync(Guid tenantId)
     {
@@ -78,14 +74,9 @@ public class PaymentService : IPaymentService
         return id;
     }
 
-    public async Task<bool> UpdateAsync(UpdatePaymentDto dto)
-    {
-        var entity = await _repository.GetByIdAsync(dto.PaymentId ?? dto.Id);
-        if (entity == null) return false;
-
-        MapToEntity(dto, entity);
-        return await _repository.UpdateAsync(entity);
-    }
+    public Task<bool> UpdateAsync(UpdatePaymentDto dto)
+        // Untenanted overload is a footgun — fail closed; use UpdateAsync(dto, tenantId, userId).
+        => Task.FromResult(false);
 
     public async Task<bool> UpdateAsync(UpdatePaymentDto dto, Guid tenantId, Guid userId)
     {
@@ -97,8 +88,9 @@ public class PaymentService : IPaymentService
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
-        => await _repository.DeleteAsync(id);
+    public Task<bool> DeleteAsync(Guid id)
+        // Untenanted overload is a footgun — fail closed; use DeleteAsync(id, tenantId).
+        => Task.FromResult(false);
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
         => tenantId != Guid.Empty && await _repository.DeleteAsync(id, tenantId);
@@ -139,16 +131,9 @@ public class PaymentService : IPaymentService
         return (await _repository.GetByDateRangeAsync(startDate, endDate, tenantId)).Select(MapToDto);
     }
 
-    public async Task<bool> ProcessPaymentAsync(Guid id)
-    {
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null) return false;
-
-        entity.Status = "Completed";
-        entity.ProcessedDate = DateTime.UtcNow;
-        entity.ProcessedAt = DateTime.UtcNow;
-        return await _repository.UpdateAsync(entity);
-    }
+    public Task<bool> ProcessPaymentAsync(Guid id)
+        // Untenanted overload is a footgun — fail closed; use ProcessPaymentAsync(id, tenantId, userId).
+        => Task.FromResult(false);
 
     public async Task<Guid> AddPaymentAsync(CreatePaymentDto dto, Guid tenantId, Guid userId)
     {

@@ -48,6 +48,7 @@ public class InvoiceService : IInvoiceService
 
     public async Task<bool> VoidInvoiceAsync(Guid invoiceId, VoidInvoiceDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var invoice = await _repository.GetByIdAsync(invoiceId, tenantId);
         if (invoice == null) return false;
         if (string.Equals(invoice.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)

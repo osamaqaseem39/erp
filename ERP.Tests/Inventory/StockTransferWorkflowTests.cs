@@ -147,4 +147,21 @@ public class StockTransferWorkflowTests
         Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.Null(await svc.GetByIdAsync(id, Guid.NewGuid()));
     }
+
+    [Fact]
+    public async Task Empty_Tenant_Fails_Closed_On_Mutations()
+    {
+        await using var db = Db();
+        var svc = Svc(db);
+        Assert.Equal(Guid.Empty, await svc.CreateAsync(new CreateStockTransferDto
+        {
+            FromWarehouseId = FromWh,
+            ToWarehouseId = ToWh,
+            TransferDate = DateTime.UtcNow.Date,
+            Details = [new CreateStockTransferDetailDto { ItemId = Item, Quantity = 1 }]
+        }, Guid.Empty, Creator));
+        Assert.False(await svc.ApproveAsync(Guid.NewGuid(), Guid.Empty, Approver));
+        Assert.False(await svc.CompleteAsync(Guid.NewGuid(), Guid.Empty, Approver));
+        Assert.False(await svc.CancelAsync(Guid.NewGuid(), Guid.Empty, Approver));
+    }
 }

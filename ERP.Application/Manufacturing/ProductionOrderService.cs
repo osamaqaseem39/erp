@@ -76,6 +76,8 @@ public class ProductionOrderService : IProductionOrderService
 
     public async Task<ProductionOrderDto> CreateAsync(CreateProductionOrderDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var bomId = dto.BomId == Guid.Empty ? null : dto.BomId;
         var routingId = dto.RoutingId == Guid.Empty ? null : dto.RoutingId;
         var itemId = dto.ItemId;

@@ -38,6 +38,7 @@ public class StockTransferService : IStockTransferService
 
     public async Task<Guid> CreateAsync(CreateStockTransferDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.FromWarehouseId == Guid.Empty || dto.ToWarehouseId == Guid.Empty)
             return Guid.Empty;
         if (dto.FromWarehouseId == dto.ToWarehouseId)
@@ -79,6 +80,7 @@ public class StockTransferService : IStockTransferService
 
     public async Task<bool> UpdateAsync(UpdateStockTransferDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
@@ -122,6 +124,7 @@ public class StockTransferService : IStockTransferService
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
@@ -147,6 +150,7 @@ public class StockTransferService : IStockTransferService
 
     public async Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "InTransit", Transitions))
@@ -177,6 +181,7 @@ public class StockTransferService : IStockTransferService
 
     public async Task<bool> CompleteAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "Completed", Transitions))
@@ -205,6 +210,7 @@ public class StockTransferService : IStockTransferService
 
     public async Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "Cancelled", Transitions))

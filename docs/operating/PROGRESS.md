@@ -2,11 +2,11 @@
 
 Last updated: 2026-10-21  
 Integration branch: `growth`  
-Current WP: **1.2** (IN_PROGRESS)  
+Current WP: **1.3** (next)  
 
 ## Summary (written at the end)
 
-_In progress. Phase 0 exit PASS. WP 1.1 + 1.6 DONE. WP 1.2 tenant fail-closed in progress on `wp/1.2-tenant-fail-closed`._
+_In progress. Phase 0 PASS. WP 1.1/1.2/1.6 DONE. Next: 1.3 transitions / FIX-5/6._
 
 ## Work packages
 
@@ -17,7 +17,7 @@ _In progress. Phase 0 exit PASS. WP 1.1 + 1.6 DONE. WP 1.2 tenant fail-closed in
 | 0.3 | Baseline green | 0 | DONE | — | `7e45bfa` | `dotnet build` 0 err; `dotnet test` 553 passed; `frontend-new` `npm run build` ok (tsc -b + vite; no separate lint/typecheck scripts) | Initial baseline had 10 fails — fixed in 0.1 |
 | 0.4 | Legacy frontend WIP disposition | 0 | DONE | 0.1 | — | Uncommitted `frontend/` MFG/Reports/CRM left out of commits | Discard for product path; `frontend-new` already covers MFG/reports |
 | 1.1 | Kill stubs on public REST | 1 | DONE | 0.3 | *(wp/1.1)* | Wired 23 report query methods; FinanceGap post→GL | Overlaps 1.6 |
-| 1.2 | Tenant fail-closed audit | 1 | IN_PROGRESS | 1.1 | | | Branch `wp/1.2-tenant-fail-closed` |
+| 1.2 | Tenant fail-closed audit | 1 | DONE | 1.1 | *(wp/1.2)* | Empty-tenant guards on StockTransfer/PO/BOM/Reports/Brand/Location/Kit/Reservation/CycleCount/Training/Benefits; Payment untenanted overloads fail-closed; WarehouseController RequireTenantId; tests updated | Audit: [Tenant fail-closed gap audit](4d5f759b-703e-4622-b0e2-15eec1a993f0) |
 | 1.3 | Transition maps + FIX-5 / FIX-6 | 1 | TODO | 1.1 | | | |
 | 1.4 | Single stock writer | 1 | TODO | 1.1 | | | |
 | 1.5 | Settings toggles | 1 | TODO | 1.3 | | | |
