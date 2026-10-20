@@ -253,7 +253,7 @@ ChartOfAccount, AccountDefault, CostCenter, Currency, ExchangeRate, TaxCode, Tax
 | `ExpenseClaim` + lines | Employee claim; Draft → Submitted → Approved → Paid; optional ProjectId |
 
 ### Complete when
-New FY opening balances load; closed period rejects posts; cheque book + register consistent; budgets enforceable; expense claims hit GL.
+New FY opening balances load; closed period rejects posts; cheque book + register consistent; budgets enforceable; expense claims hit GL (**not yet** — approve/paid are status-only).
 
 ---
 
@@ -334,7 +334,7 @@ Advance balance + payroll recovery work; optional teams; expense claims usable f
 > **Not complete.** Full gap-fill: [REPORTS_COMPLETION_PLAN.md](./REPORTS_COMPLETION_PLAN.md).
 
 ### Already have
-Report, ReportSchedule, ReportExecution + operational sales/purchase/stock APIs + finance `/api/finance/reports/*` + schedule worker (execute only, no email) + 11 built-in catalog codes (sales-heavy). No `/reports` hub UI; PDF export not delivered.
+Report, ReportSchedule, ReportExecution + operational sales/purchase/stock APIs + finance `/api/finance/reports/*` + schedule worker (SMTP when configured) + ~90 catalog codes seeded. Hub UI in `frontend-new` (and legacy `/reports`). PDF export when `IPdfDocumentService` is registered. **23 catalog codes still throw `NotSupportedException` on generate** (must implement or hide from `/available` — see [REPORTS_COMPLETION_PLAN.md](./REPORTS_COMPLETION_PLAN.md)).
 
 ### Add — catalog / behavior (mostly queries, not entities)
 
@@ -413,9 +413,9 @@ Plus field enrichments on Customer, Vendor, Quote, SalesOrder, SalesInvoice, Ite
 - [x] Sales (dispatch, unpost, general sale, prints)
 - [x] Procurement (landed cost, 3-way match, vendor contract)
 - [x] SCM (brand, bin, reservation, kit, cycle count, WAC)
-- [x] Finance (opening, period, cheque book, budget, expense)
+- [ ] Finance — opening/period/cheque/budget APIs exist; **expense claim approve/paid ≠ GL**; **FinanceGap fund/credit/debit post ≠ GL** (WP 1.6)
 - [x] Manufacturing (routing, scrap, SO release)
 - [x] Projects (timesheet, milestone bill, expense)
 - [x] HRM (advance, team)
-- [x] Reports (unified catalog, hub UI, CSV/Excel/PDF export, schedule SMTP; favorites via localStorage)
+- [ ] Reports — hub + catalog seeded (~90); **23 codes NotSupported** on generate; favorites localStorage; staging SMTP not signed off (WP 3.1)
 - [ ] Cross-flows E2E on staging (apply SQL scripts; run smoke on staging tenant)

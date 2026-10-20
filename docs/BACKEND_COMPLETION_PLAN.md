@@ -69,7 +69,7 @@ Close the gap where Swagger advertises working APIs but services are stubs or ig
 | Work | Detail |
 |------|--------|
 | Report definition CRUD REST | ✅ `/api/reports` available/generate/schedule/history |
-| Execute / generate | ✅ Built-in codes (`SALE_*`, `STOCK_ON_HAND`, `PURCHASE_ORDER_SUMMARY`, …) return JSON payloads |
+| Execute / generate | ✅ Many built-in codes return JSON; **23 catalog codes throw `NotSupportedException`** (fail honestly — still seeded in `/available`) |
 | Financial report methods | ✅ Delegated to Finance accounting/invoice services |
 | Schedules | ✅ Metadata CRUD + `ReportScheduleWorker` polls due rows → execute → history + next run |
 
@@ -80,7 +80,7 @@ Close the gap where Swagger advertises working APIs but services are stubs or ig
 | Projects | ✅ Task + Milestone + Resource + Document services + REST under `/api/projects/{id}/tasks|milestones|resources|documents` (upload/download via `App_Data/project-docs`); flat document controller tenant-scoped |
 | Manufacturing | ✅ Work centers + production orders/runs; BOM + stock on complete in Phase 4 |
 
-**Exit:** Every route under Sales, Procurement (PO+vendor), Projects, Manufacturing, Reports either works end-to-end or is removed/`501` with a clear message.
+**Exit:** Every route under Sales, Procurement (PO+vendor), Projects, Manufacturing, Reports either works end-to-end or is removed/`501` with a clear message. **Reports exit not met** until the 23 stub codes are implemented or de-seeded from `/available`.
 
 ---
 
@@ -125,7 +125,7 @@ Work module-by-module; prefer accounting core before HRM niceties.
 7. Training — ✅ tenant CRUD + real enroll/complete via `TrainingEnrollment` (capacity, Scheduled→In Progress→Completed)
 8. Performance — ✅ tenant CRUD + Draft→Submitted→Approved→Completed (soft-delete Draft only)
 
-**Exit:** No `Task.FromResult(null/false/Empty)` stub services left in Finance accounting path or core HRM (employee/leave/attendance/payroll/benefits/training/performance/recruitment).
+**Exit:** No success-faking stubs on live Finance accounting or core HRM paths. Live journals use `AccountingService`. Known leftovers: **`JournalService.Post/Reverse` return `false`** (DI dead path); **FinanceGap post without GL**; expense claim approve/paid without GL.
 
 ---
 
@@ -303,7 +303,7 @@ P0 hygiene
 
 1. Every Swagger operation under the 12 modules either **persists/reads real data** or is **removed**.
 2. O2C and P2P happy paths work across CRM ↔ Sales ↔ Inventory ↔ Finance ↔ Procurement.
-3. No DI stub classes remain for entities that have public REST routes.
+3. No *success-faking* stubs on live paths. Known leftovers: `JournalService` post/reverse; FinanceGap post without GL; report stub catalog codes.
 4. Tenant isolation + permission attributes on all mutating endpoints.
 5. Platform supports login, refresh, logout, change/reset password, me, sessions, tenant CRUD without client-supplied connection strings.
 6. Light MFG (work center + BOM + stock move), Projects children, catalog Reports, HRM leave/attendance/simple payroll — as in the product capability map.
