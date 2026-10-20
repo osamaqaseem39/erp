@@ -31,15 +31,16 @@ The product is **complete** when all of the following are true:
 
 | Area | Reality |
 |------|---------|
-| CRM | Most mature — keep and harden |
-| Admin / auth | Wired; contract hygiene in progress |
-| Sales / POS | 3 real APIs; **lines not persisted** |
-| Inventory | Large surface; stock paths exist — verify depth |
-| Finance / HRM | Many routes; **stub services** in places |
-| Procurement | Vendor real; **PO+rest stubs** |
-| Projects / MFG / Reports | Thin headers; children / BOM / real execute missing |
-| `frontend` (old) | Template + partial ERP bindings |
-| `frontend-new` | New Vite app — bind to finished APIs as backend lands |
+| CRM | Mature — keep and harden |
+| Admin / auth | Wired; permission attributes expanding (ERP-FIX-3) |
+| Sales / POS | Real APIs; lines persist; dispatch / dual-tax / credit note paths exist |
+| Inventory / WMS | Stock via `IStockService`; putaway/pick/replenishment wired; pack/ship document layer |
+| Finance / HRM | Core services real; **FinanceGap post ≠ GL**; expense claim ≠ GL; `JournalService` post/reverse dead |
+| Procurement | Real PO/PR/GRN/PI/RFQ/return/debit/landed cost (Wave2 P2P green) |
+| Projects / MFG | Children, BOM, scrap→stock, SO release wired |
+| Reports | Catalog ~90; hub UI; **23 codes NotSupported** on generate |
+| `frontend` (old) | Maintenance only — do not expand as product path |
+| `frontend-new` | Primary UI — registry/engine coverage; residual polish in FRONTEND_NEW_COVERAGE |
 
 ---
 

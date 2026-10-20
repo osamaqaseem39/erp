@@ -2,7 +2,7 @@
 
 **Goal:** Turn the thin Reports metadata shell into a finished multi-module ERP reporting product — one catalog, real queries, hub UI, honest exports, and working schedule delivery.
 
-**Status (implemented):** Unified `ReportCatalog` (~60+ codes across Sales/Purchase/Inventory/Finance/CRM/MFG/Projects/HR/POS). Generate whitelist + ops/finance delegation. Hub UI at `/reports`. Export JSON/CSV/Excel(SpreadsheetML)/PDF. Schedule worker emails CSV via SMTP when configured. `Query` stripped from DTOs. Permissions aligned to codes. Domain `ReportFavorite` / `ReportSavedFilter` exist; hub uses localStorage until EF/DI wired. Remaining: per-document print polish, EF persistence for favorites, broader automated test matrix.
+**Status (partial):** `ReportCatalog` seeds ~90 codes; most ops/finance/module codes run; **23 catalog codes throw `NotSupportedException`** on generate (DISPATCH_ADVICE, SALE_RETURN, VENDOR_INFO, PURCHASE_REQUISITION, RFQ_SUMMARY, VENDOR_CONTRACT, STOCK_VALUATION, REORDER_ALERT, BATCH_EXPIRY, SERIAL_NUMBER_LIST, ITEM_KIT_LIST, PAYMENT_REGISTER, TAX_SUMMARY, FIXED_ASSET_REGISTER, DEPRECIATION_SCHEDULE, EXPENSE_CLAIM_SUMMARY, BANK_TRANSACTION, OPENING_BALANCE, QUOTE_LIST, ROUTING_LIST, BENEFIT_ENROLLMENT, TRAINING_SUMMARY, RECRUITMENT_PIPELINE). Hub UI exists. Export JSON/CSV/Excel/PDF when PDF service registered. Schedule SMTP when `email.*` set. `Query` stripped from DTOs. **Do not mark DoD #2 done until stub codes are implemented or removed from `/available`.**
 
 **Out of scope:** Arbitrary client SQL, NestJS `apps/reports` Hello World, taxi/lending/CMS report packs.
 
@@ -11,7 +11,7 @@
 ## Definition of done
 
 1. **Single catalog** — `/api/reports/available` lists every runnable report (sales, purchase, inventory, finance, HR, CRM, MFG, projects, POS) as whitelisted `ReportCode`s.
-2. **Execute path** — `POST /api/reports/generate` runs any catalog code via registry (no free-form SQL; `Query` not exposed to clients).
+2. **Execute path** — `POST /api/reports/generate` runs every **non-stub** catalog code via registry (no free-form SQL; `Query` not exposed to clients); stub codes are implemented or hidden from `/available`.
 3. **Hub UI** — `/reports` catalog by category → runner (filters, table, optional chart) → history → schedules.
 4. **Exports** — CSV always; Excel for tabular; PDF for statement-style + document prints (SO/SI/CN/PO/DA/voucher) where listed.
 5. **Schedules** — worker executes due rows, stores artifact/history, emails recipients via existing SMTP when configured.
@@ -310,7 +310,7 @@ Parallelism: **R2 UI** can start once A1 (sales+finance codes) lands; B modules 
 
 ## Immediate next actions
 
-1. Land Phase 0 (docs + DTO Query strip + permission naming rule).
-2. Implement Phase A1–A4 registry so finance + leftover sales ops appear in `available`.
-3. Scaffold `/reports` catalog + runner (Phase C) against the unified catalog.
-4. Then expand B modules and close D (PDF + SMTP) before marking Reports complete in depth plans.
+1. Wire or hide the **23 NotSupported** catalog codes (WP 3.1); keep `/available` honest.
+2. Refresh depth/features honesty docs when codes land (WP 0.2).
+3. Keep staging E2E / live SMTP sign-off open (Phase 5).
+4. Per-document print polish + EF favorites remain follow-ups.

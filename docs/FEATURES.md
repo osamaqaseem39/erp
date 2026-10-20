@@ -62,19 +62,20 @@ GraphQL: `CRMQueries` / `CRMMutations` registered (partial vs REST — see CRM s
 
 ---
 
-## Finance — Wired (some Stub)
+## Finance — Wired (honesty gaps)
 
 DI-registered via `AddErpFinanceModule`. Controllers under `ERP.Api/Controllers/Finance/`:
 
 | Area | Route prefix (examples) | Notes |
 |------|-------------------------|-------|
-| Accounting (CoA, journals, entries, TB/GL) | `/api/finance/accounting` | Stub service |
+| Accounting (CoA, journals, entries, TB/GL) | `/api/finance/accounting` | **Wired** via `AccountingService` |
 | Chart of accounts | `/api/finance/chartofaccounts` | Wired |
 | Currencies / exchange rates | `/api/finance/currencies`, `/api/finance/exchange-rates` | Wired |
-| Banks | `/api/finance/banks` | Stub service |
+| Banks | `/api/finance/banks` | Wired |
 | Taxes | `/api/finance/taxes` | Wired |
-| Invoices / bills / payments / journals | `/api/finance/invoices`, `bills`, `payments`, `journals` | Invoice wired; bill stub |
-| Fixed assets + depreciation | `/api/finance/fixed-assets` | Stub service |
+| Invoices / bills / payments / journals | `/api/finance/invoices`, `bills`, `payments`, `journals` | Wired; DI’d `JournalService` post/reverse is **dead** (`false`) — use AccountingService |
+| Fixed assets + depreciation | `/api/finance/fixed-assets` | Wired |
+| Finance gaps (fund/credit/debit memo, …) | `/api/finance/gaps` (etc.) | CRUD wired; **post flips status without GL** |
 | Finance reports | `/api/finance/reports` | Wired report service |
 
 CRM sales-order **Invoice** action creates a Finance invoice header (`SalesOrderService.InvoiceAsync`).
@@ -89,9 +90,9 @@ DI-registered via `AddErpHrmModule`. Routes include `/api/hrm/employees`, `depar
 
 DI-registered via `AddErpInventoryModule`. Controllers under `/api/inventory/...`. Stock level/adjust/transfer on `StockService` (tenant fail-closed via `ITenantProvider` + repository guards). Frontend under `/inventory/*` (companyId from auth session).
 
-## Procurement — Wired (Stub-heavy)
+## Procurement — Wired
 
-DI-registered via `AddErpProcurementModule`. `/api/procurement/vendors` (VendorService) plus purchase order/invoice/requisition/GRN stub services.
+DI-registered via `AddErpProcurementModule`. Real PO/PR/GRN/PI/RFQ/return/debit note/landed cost/vendor contract services (not stub-heavy).
 
 ## Manufacturing — Wired
 
@@ -101,9 +102,9 @@ DI-registered via `AddErpManufacturingModule`. Production orders (SO FKs, wareho
 
 DI-registered via `AddErpProjectsModule`. `/api/projects` plus document service.
 
-## Reports — Wired
+## Reports — Wired (partial catalog)
 
-DI-registered via `AddErpReportsModule`. `/api/reports`.
+DI-registered via `AddErpReportsModule`. `/api/reports`. Catalog ~90 codes; **23 codes `NotSupported` on generate** (must implement or hide). Hub UI in `frontend-new`.
 
 ---
 
@@ -113,8 +114,8 @@ Routes under `/apps/calendar`, `/apps/tickets`, `/apps/file-manager`, `/apps/kan
 
 ## Gaps to call out honestly
 
-1. Several Finance/HRM/Procurement services are **DI stubs** — expand business logic beyond empty/NotImplemented returns.
+1. Honesty leftovers: FinanceGap post without GL; `JournalService` post/reverse dead; report stub catalog codes; expense claim without GL.
 2. Schema dual-path (EF migrations + SQL file deploy) still needs ongoing reconciliation.
-3. Role/permission **authorization policies** are not yet enforced beyond authenticated user + JWT role claims.
-4. Integration / E2E tests are still thin (unit tests expanded for password hashing; CRM calculator remains).
+3. Role/permission **authorization policies** need ongoing audit on every mutating endpoint (ERP-FIX-3).
+4. Staging cross-flow E2E still open; local Wave2 O2C/P2P tests are green.
 5. `SETUP_GUIDE.md` still describes older manual SQL bootstrap; prefer setup API + `/setup` UI.

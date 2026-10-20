@@ -4,6 +4,13 @@ Append-only session notes for agents and humans. Do not rewrite history; add a n
 
 ---
 
+## 2026-10-21 — WP 0.2 docs honesty
+
+- Flipped BUSINESS_MODULES DI column to Yes for Finance/HRM/Inventory/Procurement/MFG/Projects.
+- Unchecked CUSTOMER_DEPTH tracker Finance + Reports; fixed §11 Already have; expense-claim GL DoD marked not yet.
+- REPORTS / BACKEND / FEATURES / PRODUCT honesty snapshots refreshed for stub report codes + FinanceGap/JournalService gaps.
+- `frontend-new/docs/FRONTEND_NEW_COVERAGE.md` notes expense/gap post without GL + report catalog honesty gap.
+
 ## 2026-10-21 — WP 0.1 / 0.3 / 0.4 done (autonomous growth)
 
 - Created integration branch `growth` and WP branch `wp/0.1-inventory-wip`.
