@@ -1361,7 +1361,16 @@ public class AccountingService : IAccountingService
         return $"{prefix}-{DateTime.UtcNow:yyMM}-{id.ToString("N")[..6]}".ToUpperInvariant();
     }
 
-    private static JournalDto MapJournal(Journal entity, IEnumerable<JournalEntry>? entries) => new()
+    private static JournalDto MapJournal(Journal entity, IEnumerable<JournalEntry>? entries)
+    {
+        var entryList = entries?.ToList();
+        var debit = entryList is { Count: > 0 }
+            ? Math.Round(entryList.Sum(e => e.Debit), 2)
+            : entity.TotalDebit;
+        var credit = entryList is { Count: > 0 }
+            ? Math.Round(entryList.Sum(e => e.Credit), 2)
+            : entity.TotalCredit;
+        return new()
     {
         Id = entity.Id,
         JournalId = entity.JournalId,
@@ -1374,8 +1383,8 @@ public class AccountingService : IAccountingService
         Description = entity.Description,
         CurrencyCode = entity.CurrencyCode,
         ExchangeRate = entity.ExchangeRate,
-        TotalDebit = entity.TotalDebit,
-        TotalCredit = entity.TotalCredit,
+        TotalDebit = debit,
+        TotalCredit = credit,
         Status = entity.Status,
         ChequeNumber = entity.ChequeNumber,
         ChequeStatus = entity.ChequeStatus,
@@ -1395,8 +1404,9 @@ public class AccountingService : IAccountingService
         ApprovedBy = entity.ApprovedBy,
         IsLocked = entity.IsLocked,
         FinancialYearId = entity.FinancialYearId,
-        JournalEntries = entries?.Select(MapEntry).ToList()
+        JournalEntries = entryList?.Select(MapEntry).ToList()
     };
+    }
 
     private static JournalEntryDto MapEntry(JournalEntry e) => new()
     {

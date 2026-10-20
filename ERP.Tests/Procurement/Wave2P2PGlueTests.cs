@@ -74,7 +74,7 @@ public class Wave2P2PGlueTests
         Assert.True(await grn.ApproveAsync(grnId, Tenant, User));
         Assert.Equal("Posted", (await grn.GetByIdAsync(grnId, Tenant))!.Status);
 
-        Assert.Equal(4m, await stock.GetStockLevelAsync(Item, Warehouse));
+        Assert.Equal(4m, await stock.GetStockLevelAsync(Item, Warehouse, Tenant));
 
         var poLines = (await poDetailRepo.GetByPurchaseOrderIdAsync(poId, Tenant)).ToList();
         Assert.Equal(4m, poLines[0].ReceivedQuantity);
@@ -88,7 +88,7 @@ public class Wave2P2PGlueTests
             Details = [new CreateGoodsReceiptNoteDetailDto { ItemId = Item, ReceivedQuantity = 6, UnitPrice = 5 }]
         }, Tenant, User);
         Assert.True(await grn.ApproveAsync(grn2, Tenant, User));
-        Assert.Equal(10m, await stock.GetStockLevelAsync(Item, Warehouse));
+        Assert.Equal(10m, await stock.GetStockLevelAsync(Item, Warehouse, Tenant));
         Assert.Equal(10m, (await poDetailRepo.GetByPurchaseOrderIdAsync(poId, Tenant)).First().ReceivedQuantity);
         Assert.Equal("Completed", (await poRepo.GetByIdAsync(poId, Tenant))!.Status);
     }

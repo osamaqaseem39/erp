@@ -37,7 +37,7 @@ When documents disagree, higher wins:
 New tables are described in `DATA_MODEL.md` (and schema SQL) **before** application code.  
 When code and docs diverge after a merge, fix the docs in the same PR or open an `ERP-FIX-n`.
 
-Related agent files: [AGENT_MASTER_PROMPT.md](./AGENT_MASTER_PROMPT.md), [memory.md](./memory.md).
+Related agent files: [AGENT_MASTER_PROMPT.md](./AGENT_MASTER_PROMPT.md), [AUTONOMOUS_GROWTH_PROMPT.md](./AUTONOMOUS_GROWTH_PROMPT.md), [GROWTH_PLAN.md](./GROWTH_PLAN.md), [PROGRESS.md](./PROGRESS.md), [memory.md](./memory.md).
 
 ---
 
@@ -50,6 +50,9 @@ Related agent files: [AGENT_MASTER_PROMPT.md](./AGENT_MASTER_PROMPT.md), [memory
 | `DATA_MODEL.md` | Table index / ER notes before code |
 | `memory.md` | Append-only running session memory |
 | `AGENT_MASTER_PROMPT.md` | Paste-once agent context |
+| `AUTONOMOUS_GROWTH_PROMPT.md` | Self-driving growth loop (paste or `/loop`) |
+| `GROWTH_PLAN.md` | Growth work packages + phase gates |
+| `PROGRESS.md` | Growth ledger between sessions |
 | Product / backend plans | Schedule and DoD |
 | `ERP-FIX-n` decisions | Numbered resolutions when rules conflict with legacy |
 

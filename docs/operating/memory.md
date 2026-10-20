@@ -4,6 +4,24 @@ Append-only session notes for agents and humans. Do not rewrite history; add a n
 
 ---
 
+## 2026-10-21 — WP 0.1 / 0.3 / 0.4 done (autonomous growth)
+
+- Created integration branch `growth` and WP branch `wp/0.1-inventory-wip`.
+- Inventory: Finance/MFG/WMS/Projects schemas are committed + DI-wired; honesty gaps are semantic (finance gap post without GL; ~20 report codes were empty-success; dead `JournalService` Post/Reverse returned true).
+- Fixed journal line totals/post: `GetEntriesByJournalIdAsync` no longer `Include`s required Account (INNER JOIN dropped lines without CoA). `MapJournal` prefers entry sums.
+- Report stub pack + unknown codes now `NotSupportedException` (no empty success).
+- `JournalService.PostAsync`/`ReverseAsync` return false.
+- Tests: tenant-aware stock level asserts; stock-transfer approve seeds stock / insufficient fails on approve; serial GraphQL update respects FIX-5 Status ignore.
+- Baseline: build 0 errors; **553/553** tests; `frontend-new` build OK.
+- Legacy `frontend/` MFG/Reports/CRM WIP **not committed** (WP 0.4) — primary UI remains `frontend-new`.
+- Added WP **1.6** (finance gap → GL) and expanded **3.1** for stub report implementation/hide; Phase 0 still needs **0.2** docs honesty.
+
+## 2026-10-21 — Autonomous growth prompt adopted
+
+- Added `docs/operating/AUTONOMOUS_GROWTH_PROMPT.md` (self-driving loop).
+- Seeded `GROWTH_PLAN.md` (WPs 0.1–6.2 + phase gates) and `PROGRESS.md` ledger (all TODO).
+- Linked from constitution docs table and `AGENT_MASTER_PROMPT.md`.
+
 ## 2026-10-20 — Operating playbook adopted
 
 - Created `docs/operating/` (constitution, rules, agent prompt, data model stub, this file).
