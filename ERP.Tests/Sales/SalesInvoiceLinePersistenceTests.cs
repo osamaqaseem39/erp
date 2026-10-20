@@ -1,3 +1,4 @@
+using ERP.Tests;
 using ERP.Application.Finance;
 using ERP.Application.Sales;
 using ERP.Domain.Sales;
@@ -20,8 +21,7 @@ public class SalesInvoiceLinePersistenceTests
         .Options);
 
     private static SalesInvoiceService Svc(ERPDbContext db) =>
-        new(new SalesInvoiceRepository(db), new SalesInvoiceLineRepository(db),
-            new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)));
+        new(new SalesInvoiceRepository(db), new SalesInvoiceLineRepository(db), new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)), new TestCoreSettings());
 
     [Fact]
     public async Task Create_PersistsLines_AndRecalculatesTotals()

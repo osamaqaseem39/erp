@@ -112,7 +112,7 @@ public class BillService : IBillService
             entity.TotalAmount = dto.TotalAmount.Value;
             entity.Balance = dto.TotalAmount.Value;
         }
-        if (!string.IsNullOrWhiteSpace(dto.Status)) entity.Status = dto.Status;
+        // ERP-FIX-5: status is NOT free-set from dto; lifecycle endpoints (Post/Pay/Void) govern it.
         if (dto.Notes != null) entity.Notes = dto.Notes;
         if (!string.IsNullOrWhiteSpace(dto.CurrencyCode)) entity.CurrencyCode = dto.CurrencyCode;
         if (dto.IsActive.HasValue) entity.IsActive = dto.IsActive.Value;

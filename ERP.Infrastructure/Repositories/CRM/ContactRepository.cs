@@ -13,22 +13,39 @@ public class ContactRepository : CrmRepositoryBase, IContactRepository
     {
     }
 
-    private IQueryable<Contact> ContactsQuery() =>
-        ApplyTenant(Context.Contacts.Include(c => c.Customer));
-
-    public async Task<Contact?> GetByIdAsync(Guid id) =>
-        await ContactsQuery().FirstOrDefaultAsync(c => c.Id == id);
-
-    public async Task<IEnumerable<Contact>> GetAllAsync() =>
-        await ContactsQuery().ToListAsync();
-
-    public async Task<IEnumerable<Contact>> GetByCustomerAsync(Guid customerId) =>
-        await ContactsQuery().Where(c => c.CustomerId == customerId).ToListAsync();
-
-    public async Task<IEnumerable<Contact>> SearchAsync(string searchTerm)
+    private IQueryable<Contact> ForTenant(Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return Context.Contacts.Where(_ => false);
+        return Context.Contacts.Where(c => c.TenantId == tenantId);
+    }
+
+    private IQueryable<Contact> DetailQuery(Guid tenantId) =>
+        ForTenant(tenantId).Include(c => c.Customer);
+
+    public async Task<Contact?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await DetailQuery(tenantId).FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task<IEnumerable<Contact>> GetAllAsync(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await DetailQuery(tenantId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Contact>> GetByCustomerAsync(Guid customerId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await DetailQuery(tenantId).Where(c => c.CustomerId == customerId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Contact>> SearchAsync(string searchTerm, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
         var term = searchTerm.Trim();
-        return await ContactsQuery().Where(c =>
+        return await DetailQuery(tenantId).Where(c =>
             c.FirstName.Contains(term) ||
             c.LastName.Contains(term) ||
             (c.Email != null && c.Email.Contains(term)) ||
@@ -37,9 +54,9 @@ public class ContactRepository : CrmRepositoryBase, IContactRepository
 
     public async Task<Guid> CreateAsync(Contact contact)
     {
-        if (TenantId.HasValue && TenantId != Guid.Empty)
-            contact.TenantId = TenantId.Value;
-
+        if (contact.TenantId == Guid.Empty) return Guid.Empty;
+        if (contact.Id == Guid.Empty) contact.Id = Guid.NewGuid();
+        if (contact.CreatedAt == default) contact.CreatedAt = DateTime.UtcNow;
         Context.Contacts.Add(contact);
         await Context.SaveChangesAsync();
         return contact.Id;
@@ -47,14 +64,16 @@ public class ContactRepository : CrmRepositoryBase, IContactRepository
 
     public async Task<bool> UpdateAsync(Contact contact)
     {
-        if (!MatchesTenant(contact)) return false;
+        if (contact.TenantId == Guid.Empty) return false;
+        contact.UpdatedAt = DateTime.UtcNow;
         Context.Contacts.Update(contact);
         return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var contact = await GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var contact = await ForTenant(tenantId).FirstOrDefaultAsync(c => c.Id == id);
         if (contact == null) return false;
         Context.Contacts.Remove(contact);
         return await Context.SaveChangesAsync() > 0;

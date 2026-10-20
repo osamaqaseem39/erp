@@ -161,6 +161,7 @@ public class ItemService : IItemService
             CategoryId = item.CategoryId.ToString(),
             CategoryName = item.Category?.CategoryName ?? string.Empty,
             ItemCategoryId = item.CategoryId,
+            BrandId = item.BrandId,
             UnitOfMeasureId = item.UnitOfMeasureId,
             UnitOfMeasureName = item.UnitOfMeasure?.UnitName ?? string.Empty,
             ItemType = item.ItemType,

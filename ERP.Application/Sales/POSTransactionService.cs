@@ -238,7 +238,7 @@ public class POSTransactionService : IPOSTransactionService
         entity.TotalAmount = dto.TotalAmount;
         entity.AmountPaid = dto.AmountPaid;
         entity.ChangeAmount = dto.AmountPaid - dto.TotalAmount;
-        entity.Status = dto.Status;
+        // ERP-FIX-5: status is NOT free-set from dto; lifecycle endpoints govern it.
         entity.Notes = dto.Notes;
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;

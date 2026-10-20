@@ -7,11 +7,17 @@ public class CustomerDto : BaseDto
     public Guid CompanyId { get; set; }
     public string CustomerCode { get; set; } = string.Empty;
     public string CustomerName { get; set; } = string.Empty;
+    public string? LocalName { get; set; }
     public string CompanyName { get; set; } = string.Empty;
     public string? ContactPerson { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
+    public string? Phone2 { get; set; }
+    public string? Cell { get; set; }
+    public string? Cell2 { get; set; }
+    public string? Fax { get; set; }
     public string? Address { get; set; }
+    public Guid? CityId { get; set; }
     public string? City { get; set; }
     public string? State { get; set; }
     public string? Country { get; set; }
@@ -23,6 +29,11 @@ public class CustomerDto : BaseDto
     public int CreditDays { get; set; }
     public decimal OutstandingBalance { get; set; }
     public string? PaymentTerms { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public string? RegistryNo { get; set; }
+    public int? Rating { get; set; }
+    public Guid? ReceivableAccountId { get; set; }
+    public Guid? PortalUserId { get; set; }
     public string? TaxId { get; set; }
     public string? TaxType { get; set; }
     public string? Ntn { get; set; }
@@ -41,11 +52,17 @@ public class CreateCustomerDto : CreateDto
     public Guid CompanyId { get; set; }
     public string CustomerCode { get; set; } = string.Empty;
     public string CustomerName { get; set; } = string.Empty;
+    public string? LocalName { get; set; }
     public string CompanyName { get; set; } = string.Empty;
     public string? ContactPerson { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
+    public string? Phone2 { get; set; }
+    public string? Cell { get; set; }
+    public string? Cell2 { get; set; }
+    public string? Fax { get; set; }
     public string? Address { get; set; }
+    public Guid? CityId { get; set; }
     public string? City { get; set; }
     public string? State { get; set; }
     public string? Country { get; set; }
@@ -57,6 +74,11 @@ public class CreateCustomerDto : CreateDto
     public int CreditDays { get; set; }
     public decimal OutstandingBalance { get; set; }
     public string? PaymentTerms { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public string? RegistryNo { get; set; }
+    public int? Rating { get; set; }
+    public Guid? ReceivableAccountId { get; set; }
+    public Guid? PortalUserId { get; set; }
     public string? TaxId { get; set; }
     public string? TaxType { get; set; }
     public string? Ntn { get; set; }
@@ -72,11 +94,17 @@ public class UpdateCustomerDto : UpdateDto
 {
     public string CustomerCode { get; set; } = string.Empty;
     public string CustomerName { get; set; } = string.Empty;
+    public string? LocalName { get; set; }
     public string CompanyName { get; set; } = string.Empty;
     public string? ContactPerson { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
+    public string? Phone2 { get; set; }
+    public string? Cell { get; set; }
+    public string? Cell2 { get; set; }
+    public string? Fax { get; set; }
     public string? Address { get; set; }
+    public Guid? CityId { get; set; }
     public string? City { get; set; }
     public string? State { get; set; }
     public string? Country { get; set; }
@@ -88,6 +116,11 @@ public class UpdateCustomerDto : UpdateDto
     public int? CreditDays { get; set; }
     public decimal OutstandingBalance { get; set; }
     public string? PaymentTerms { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public string? RegistryNo { get; set; }
+    public int? Rating { get; set; }
+    public Guid? ReceivableAccountId { get; set; }
+    public Guid? PortalUserId { get; set; }
     public string? TaxId { get; set; }
     public string? TaxType { get; set; }
     public string? Ntn { get; set; }

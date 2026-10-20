@@ -1,4 +1,6 @@
 using ERP.Application.Common;
+using ERP.Application.Core.Settings;
+using ERP.Application.CRM;
 using ERP.Application.Interfaces.Finance;
 using ERP.Application.Interfaces.Sales;
 using ERP.Domain.Sales;
@@ -20,15 +22,18 @@ public class SalesInvoiceService : ISalesInvoiceService
     private readonly ISalesInvoiceRepository _repository;
     private readonly ISalesInvoiceLineRepository _lineRepository;
     private readonly IInvoiceService _financeInvoiceService;
+    private readonly ICoreSettingsService _settings;
 
     public SalesInvoiceService(
         ISalesInvoiceRepository repository,
         ISalesInvoiceLineRepository lineRepository,
-        IInvoiceService financeInvoiceService)
+        IInvoiceService financeInvoiceService,
+        ICoreSettingsService settings)
     {
         _repository = repository;
         _lineRepository = lineRepository;
         _financeInvoiceService = financeInvoiceService;
+        _settings = settings;
     }
 
     public async Task<SalesInvoiceDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -188,6 +193,54 @@ public class SalesInvoiceService : ISalesInvoiceService
         return await _repository.VoidInvoiceAsync(invoiceId, tenantId, voidedBy);
     }
 
+    public async Task<bool> UnpostInvoiceAsync(Guid invoiceId, Guid tenantId, Guid userId)
+    {
+        var allowRaw = await _settings.GetValueAsync(SettingsCatalog.AllowUnpostKey);
+        if (!string.Equals(allowRaw, "true", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var entity = await _repository.GetByIdAsync(invoiceId, tenantId);
+        if (entity == null) return false;
+        if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Posted", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (entity.PaidAmount > 0) return false;
+
+        var arNumber = string.IsNullOrWhiteSpace(entity.InvoiceNumber)
+            ? $"AR-{invoiceId:N}"[..16]
+            : entity.InvoiceNumber;
+        var tag = $"SalesInvoice:{entity.Id}";
+        var (existing, _) = await _financeInvoiceService.SearchInvoicesAsync(new InvoiceQuery
+        {
+            TenantId = tenantId,
+            CustomerId = entity.CustomerId,
+            PageNumber = 1,
+            PageSize = 50
+        });
+        var ar = existing.FirstOrDefault(i =>
+            string.Equals(i.InvoiceNumber, arNumber, StringComparison.OrdinalIgnoreCase)
+            || (i.Notes?.Contains(tag, StringComparison.OrdinalIgnoreCase) ?? false));
+        if (ar != null
+            && !string.Equals(ar.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(ar.Status, "Voided", StringComparison.OrdinalIgnoreCase))
+        {
+            var arId = ar.InvoiceId != Guid.Empty ? ar.InvoiceId : ar.Id;
+            var reversed = await _financeInvoiceService.VoidInvoiceAsync(
+                arId,
+                new VoidInvoiceDto { InvoiceId = arId, Reason = "Sales invoice unpost", Notes = tag },
+                tenantId,
+                userId);
+            if (!reversed) return false;
+        }
+
+        entity.Status = "Draft";
+        entity.PostedAt = null;
+        entity.PostedBy = null;
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
+        await _repository.UpdateAsync(entity);
+        return true;
+    }
+
     private async Task SaveLinesAsync(
         Guid invoiceId,
         Guid tenantId,
@@ -245,7 +298,12 @@ public class SalesInvoiceService : ISalesInvoiceService
         entity.Tax1Amount = Math.Round(tax1, 2);
         entity.Tax2Amount = Math.Round(tax2, 2);
         entity.TaxAmount = entity.Tax1Amount + entity.Tax2Amount;
-        entity.TotalAmount = entity.SubTotal + entity.TaxAmount;
+        entity.TotalAmount = CrmLineCalculator.ApplyDocumentTotal(
+            entity.SubTotal + entity.TaxAmount,
+            entity.Freight,
+            entity.Overhead,
+            entity.DiscountType,
+            entity.DiscountAmount);
     }
 
     private static (decimal NetBeforeTax, decimal Tax1Amount, decimal Tax2Amount, decimal TaxTotal, decimal LineTotal)
@@ -293,6 +351,16 @@ public class SalesInvoiceService : ISalesInvoiceService
         Notes = entity.Notes,
         Terms = entity.Terms,
         SalesOrderId = entity.SalesOrderId,
+        DispatchAdviceId = entity.DispatchAdviceId,
+        ReferenceNo = entity.ReferenceNo,
+        ReferenceDate = entity.ReferenceDate,
+        CreditDays = entity.CreditDays,
+        PaymentMode = entity.PaymentMode,
+        PaymentTermId = entity.PaymentTermId,
+        Freight = entity.Freight,
+        Overhead = entity.Overhead,
+        DiscountType = entity.DiscountType,
+        DiscountAmount = entity.DiscountAmount,
         PostedAt = entity.PostedAt,
         PostedBy = entity.PostedBy,
         TenantId = entity.TenantId,
@@ -333,6 +401,16 @@ public class SalesInvoiceService : ISalesInvoiceService
         Notes = dto.Notes,
         Terms = dto.Terms,
         SalesOrderId = dto.SalesOrderId,
+        DispatchAdviceId = dto.DispatchAdviceId,
+        ReferenceNo = dto.ReferenceNo,
+        ReferenceDate = dto.ReferenceDate,
+        CreditDays = dto.CreditDays,
+        PaymentMode = dto.PaymentMode,
+        PaymentTermId = dto.PaymentTermId,
+        Freight = dto.Freight,
+        Overhead = dto.Overhead,
+        DiscountType = dto.DiscountType,
+        DiscountAmount = dto.DiscountAmount,
         CreatedBy = userId.ToString(),
         CreatedAt = DateTime.UtcNow
     };
@@ -343,12 +421,22 @@ public class SalesInvoiceService : ISalesInvoiceService
         entity.CustomerId = dto.CustomerId;
         entity.InvoiceDate = dto.InvoiceDate;
         entity.DueDate = dto.DueDate;
-        entity.Status = dto.Status;
+        // ERP-FIX-5: status is NOT free-set from dto; lifecycle endpoints (Post/Void) govern it.
         entity.SubTotal = dto.SubTotal;
         entity.TaxAmount = dto.TaxAmount;
         entity.TotalAmount = dto.TotalAmount;
         entity.Notes = dto.Notes;
         entity.Terms = dto.Terms;
+        entity.DispatchAdviceId = dto.DispatchAdviceId;
+        entity.ReferenceNo = dto.ReferenceNo;
+        entity.ReferenceDate = dto.ReferenceDate;
+        entity.CreditDays = dto.CreditDays;
+        entity.PaymentMode = dto.PaymentMode;
+        entity.PaymentTermId = dto.PaymentTermId;
+        entity.Freight = dto.Freight;
+        entity.Overhead = dto.Overhead;
+        entity.DiscountType = dto.DiscountType;
+        entity.DiscountAmount = dto.DiscountAmount;
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
     }

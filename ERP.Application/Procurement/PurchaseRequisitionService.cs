@@ -1,3 +1,4 @@
+using ERP.Application.Common;
 using ERP.Application.Interfaces.Procurement;
 using ERP.Domain.Procurement;
 using ERP.Infrastructure.Interfaces.Procurement;
@@ -8,6 +9,17 @@ namespace ERP.Application.Procurement;
 
 public class PurchaseRequisitionService : IPurchaseRequisitionService
 {
+    private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> Transitions =
+        new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Draft"]     = new[] { "Submitted", "Approved", "Rejected", "Cancelled" },
+            ["Submitted"] = new[] { "Approved", "Rejected", "Cancelled" },
+            ["Approved"]  = Array.Empty<string>(),
+            ["Rejected"]  = Array.Empty<string>(),
+            ["Cancelled"] = Array.Empty<string>(),
+            ["ConvertedToPO"] = Array.Empty<string>()
+        };
+
     private readonly IPurchaseRequisitionRepository _repository;
     private readonly IPurchaseRequisitionDetailRepository _detailRepository;
 
@@ -44,7 +56,8 @@ public class PurchaseRequisitionService : IPurchaseRequisitionService
             DepartmentId = dto.DepartmentId,
             RequestDate = dto.RequestDate ?? DateTime.UtcNow,
             RequiredByDate = dto.RequiredDate ?? DateTime.UtcNow.AddDays(14),
-            Status = string.IsNullOrWhiteSpace(dto.Status) ? "Draft" : dto.Status,
+            // ERP-FIX-5: always start Draft regardless of client input
+            Status = "Draft",
             Remarks = dto.Remarks ?? dto.Notes ?? dto.Justification ?? string.Empty,
             CreatedBy = userId.ToString(),
             CreatedAt = DateTime.UtcNow
@@ -69,7 +82,7 @@ public class PurchaseRequisitionService : IPurchaseRequisitionService
         if (dto.DepartmentId.HasValue) entity.DepartmentId = dto.DepartmentId;
         if (dto.RequestDate.HasValue) entity.RequestDate = dto.RequestDate.Value;
         if (dto.RequiredDate.HasValue) entity.RequiredByDate = dto.RequiredDate.Value;
-        if (!string.IsNullOrWhiteSpace(dto.Status)) entity.Status = dto.Status;
+        // ERP-FIX-5: status is NOT free-set from dto; Approve/Reject lifecycle endpoints govern it.
         if (dto.Remarks != null || dto.Notes != null || dto.Justification != null)
             entity.Remarks = dto.Remarks ?? dto.Notes ?? dto.Justification ?? entity.Remarks;
         entity.UpdatedBy = userId.ToString();
@@ -100,11 +113,13 @@ public class PurchaseRequisitionService : IPurchaseRequisitionService
 
     public async Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (userId == Guid.Empty) return false;
         var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
-        if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(entity.Status, "Submitted", StringComparison.OrdinalIgnoreCase))
-            return false;
+        // ERP-FIX-5: use canonical transition table
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Approved", Transitions)) return false;
+        // ERP-FIX-6: creator cannot approve their own requisition
+        if (DocumentWorkflow.IsSameActor(entity.CreatedBy, userId)) return false;
         entity.Status = "Approved";
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
@@ -113,9 +128,11 @@ public class PurchaseRequisitionService : IPurchaseRequisitionService
 
     public async Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (userId == Guid.Empty) return false;
         var entity = await _repository.GetByIdAsync(id, tenantId);
-        if (entity == null || string.Equals(entity.Status, "ConvertedToPO", StringComparison.OrdinalIgnoreCase))
-            return false;
+        if (entity == null) return false;
+        // ERP-FIX-5: use canonical transition table
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Rejected", Transitions)) return false;
         entity.Status = "Rejected";
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;

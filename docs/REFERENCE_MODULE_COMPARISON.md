@@ -519,6 +519,12 @@ Document / operational / analytical reports under **Sale Reports**. Ours: Report
 6x. ~~ReportService built-in operational reports tenant fail-closed~~ ✅
 6y. ~~OperationalReportService + Quote/SO scoped + CN/DN account defaults fail-closed~~ ✅
 6z. ~~Leave AddLeaveRequest GraphQL/REST tenant args + Payroll fail-closed~~ ✅
+6aa. ~~ApplyTenantFilter / MatchesTenant fail-closed foundation~~ ✅
+6ab. ~~Contact tenant fail-closed + Activate/Deactivate~~ ✅
+6ac. ~~CRM pipeline (Lead/Opp/Campaign/Activity/Quote/SO) explicit tenant~~ ✅
+6ad. ~~POS session Open→Closed DocumentWorkflow + FIX-5~~ ✅
+6ae. ~~FIX-5 trade docs (SI/AR/Bill/Payment/POSTxn) + PR DocumentWorkflow/FIX-6~~ ✅
+6af. ~~Project Update Status FIX-5; P6 continuous closed~~ ✅
 7. Packaging Sale pipeline (Query → Pre-Cost → Quotation approve → CSO specs) — ONLY if product wants flexible-packaging Sale
 8. Lending module — ONLY if explicitly in scope (use BlocksERP)
 ```

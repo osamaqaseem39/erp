@@ -18,6 +18,9 @@ public static class SequenceCatalog
         new("crm.opportunity", "Opportunities", "OP"),
         new("crm.quote", "Quotes", "QT"),
         new("crm.salesOrder", "Sales orders", "SO"),
+        new("crm.saleEnquiry", "Sale enquiries", "SE"),
+        new("crm.salePreCost", "Sale pre-costs", "PC"),
+        new("sales.dispatchAdvice", "Dispatch advices", "DA"),
         new("crm.customer", "Customers (created from leads)", "CU", 5, "Never"),
     ];
 

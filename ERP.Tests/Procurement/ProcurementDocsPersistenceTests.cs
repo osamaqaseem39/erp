@@ -38,7 +38,8 @@ public class ProcurementDocsPersistenceTests
         Assert.NotNull(loaded);
         Assert.Single(loaded!.Details!);
         Assert.Equal(30m, loaded.TotalAmount);
-        Assert.True(await svc.ApproveAsync(id, Tenant, User));
+        // FIX-6: creator (User) cannot approve their own PR; Approver is a different actor
+        Assert.True(await svc.ApproveAsync(id, Tenant, Approver));
         Assert.Equal("Approved", (await svc.GetByIdAsync(id, Tenant))!.Status);
     }
 
@@ -75,10 +76,7 @@ public class ProcurementDocsPersistenceTests
     {
         await using var db = Db();
         var bills = new BillService(new BillRepository(db));
-        var svc = new PurchaseInvoiceService(
-            new PurchaseInvoiceRepository(db),
-            new PurchaseInvoiceDetailRepository(db),
-            bills);
+        var svc = ERP.Tests.TestHelpers.ProcurementTestServices.CreatePurchaseInvoiceService(db, bills);
         var id = await svc.CreateAsync(new CreatePurchaseInvoiceDto
         {
             VendorId = Vendor,

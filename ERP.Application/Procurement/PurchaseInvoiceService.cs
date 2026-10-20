@@ -1,4 +1,5 @@
 using ERP.Application.Common;
+using ERP.Application.Core.Settings;
 using ERP.Application.Interfaces.Finance;
 using ERP.Application.Interfaces.Procurement;
 using ERP.Domain.Procurement;
@@ -6,6 +7,7 @@ using ERP.Infrastructure.Interfaces.Procurement;
 using ERP.Infrastructure.Repositories.Procurement;
 using ERP.Shared.DTOs.Finance;
 using ERP.Shared.DTOs.Procurement;
+using ERP.Shared.Exceptions;
 
 namespace ERP.Application.Procurement;
 
@@ -22,15 +24,24 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
     private readonly IPurchaseInvoiceRepository _repository;
     private readonly IPurchaseInvoiceDetailRepository _detailRepository;
     private readonly IBillService _billService;
+    private readonly IPurchaseOrderDetailRepository _poDetailRepository;
+    private readonly IGoodsReceiptNoteRepository _grnRepository;
+    private readonly ICoreSettingsService _settings;
 
     public PurchaseInvoiceService(
         IPurchaseInvoiceRepository repository,
         IPurchaseInvoiceDetailRepository detailRepository,
-        IBillService billService)
+        IBillService billService,
+        IPurchaseOrderDetailRepository poDetailRepository,
+        IGoodsReceiptNoteRepository grnRepository,
+        ICoreSettingsService settings)
     {
         _repository = repository;
         _detailRepository = detailRepository;
         _billService = billService;
+        _poDetailRepository = poDetailRepository;
+        _grnRepository = grnRepository;
+        _settings = settings;
     }
 
     public async Task<PurchaseInvoiceDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -123,6 +134,8 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
         // ERP-FIX-6: creator cannot final-approve
         if (DocumentWorkflow.IsSameActor(entity.CreatedBy, userId))
             return false;
+
+        await EnforceThreeWayMatchAsync(entity, tenantId);
 
         var subTotal = Math.Round(entity.TotalAmount - entity.TaxAmount, 2);
         await _billService.CreateAsync(new CreateBillDto
@@ -237,6 +250,76 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
         entity.TaxAmount = Math.Round(tax, 2);
         entity.TotalAmount = Math.Round(net, 2);
         entity.NetPayable = entity.TotalAmount;
+    }
+
+    private async Task EnforceThreeWayMatchAsync(PurchaseInvoice entity, Guid tenantId)
+    {
+        var enabledRaw = await _settings.GetValueAsync(SettingsCatalog.ThreeWayMatchKey);
+        if (!bool.TryParse(enabledRaw, out var enabled) || !enabled)
+            return;
+        if (!entity.POId.HasValue || entity.POId == Guid.Empty)
+            throw new ConflictException("Three-way match requires a linked purchase order on the invoice.");
+
+        var toleranceRaw = await _settings.GetValueAsync(SettingsCatalog.ThreeWayMatchToleranceKey);
+        if (!decimal.TryParse(toleranceRaw, out var tolerancePercent))
+            tolerancePercent = 2m;
+
+        var piLines = (await _detailRepository.GetByInvoiceIdAsync(entity.Id, tenantId)).ToList();
+        var poLines = (await _poDetailRepository.GetByPurchaseOrderIdAsync(entity.POId.Value, tenantId)).ToList();
+        var grns = (await _grnRepository.GetByPurchaseOrderAsync(entity.POId.Value, tenantId)).ToList();
+        var grnQtyByItem = grns
+            .SelectMany(g => g.Details)
+            .GroupBy(d => d.ItemId)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.QuantityReceived));
+
+        var variances = new List<ThreeWayMatchVarianceDto>();
+        foreach (var line in piLines)
+        {
+            var po = poLines.FirstOrDefault(p => p.ItemId == line.ItemId);
+            if (po == null)
+            {
+                variances.Add(new ThreeWayMatchVarianceDto
+                {
+                    ItemId = line.ItemId,
+                    InvoiceQty = line.Quantity,
+                    InvoicePrice = line.UnitPrice,
+                    Message = "No matching PO line for invoice item."
+                });
+                continue;
+            }
+
+            grnQtyByItem.TryGetValue(line.ItemId, out var grnQty);
+            var qtyOk = WithinTolerance(line.Quantity, po.QuantityOrdered, tolerancePercent)
+                        && WithinTolerance(line.Quantity, grnQty, tolerancePercent);
+            var priceOk = WithinTolerance(line.UnitPrice, po.UnitPrice, tolerancePercent);
+            if (qtyOk && priceOk) continue;
+
+            variances.Add(new ThreeWayMatchVarianceDto
+            {
+                ItemId = line.ItemId,
+                InvoiceQty = line.Quantity,
+                PoQty = po.QuantityOrdered,
+                GrnQty = grnQty,
+                InvoicePrice = line.UnitPrice,
+                PoPrice = po.UnitPrice,
+                Message = $"Qty/price variance exceeds {tolerancePercent}% tolerance."
+            });
+        }
+
+        if (variances.Count > 0)
+        {
+            var summary = string.Join("; ", variances.Select(v =>
+                $"Item {v.ItemId}: PI qty {v.InvoiceQty} @ {v.InvoicePrice}, PO qty {v.PoQty} @ {v.PoPrice}, GRN qty {v.GrnQty}"));
+            throw new ConflictException($"Three-way match failed: {summary}");
+        }
+    }
+
+    private static bool WithinTolerance(decimal actual, decimal expected, decimal tolerancePercent)
+    {
+        if (expected == 0) return actual == 0;
+        var diff = Math.Abs(actual - expected);
+        var pct = diff / Math.Abs(expected) * 100m;
+        return pct <= tolerancePercent;
     }
 
     private static bool IsImmutable(string status) =>

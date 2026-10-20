@@ -54,7 +54,7 @@ public class OpportunityWorkflowTests
             Title = "Deal",
             Amount = 1000,
             Status = "Won" // ignored — always Open
-        });
+        }, Tenant, User);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class OpportunityWorkflowTests
         var svc = Svc(db);
         var id = await CreateOpenAsync(svc);
 
-        var dto = await svc.GetByIdAsync(id);
+        var dto = await svc.GetByIdAsync(id, Tenant);
         Assert.NotNull(dto);
         Assert.Equal("Open", dto!.Status);
         Assert.False(string.IsNullOrWhiteSpace(dto.OpportunityCode));
@@ -79,11 +79,11 @@ public class OpportunityWorkflowTests
 
         Assert.Equal(Guid.Empty, await svc.ConvertToQuoteAsync(id, Tenant, User));
         Assert.True(await svc.MarkWonAsync(id, Tenant, User));
-        Assert.Equal("Won", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Won", (await svc.GetByIdAsync(id, Tenant))!.Status);
 
         var quoteId = await svc.ConvertToQuoteAsync(id, Tenant, User);
         Assert.NotEqual(Guid.Empty, quoteId);
-        Assert.Equal("Converted", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Converted", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.MarkWonAsync(id, Tenant, User));
     }
 
@@ -100,13 +100,13 @@ public class OpportunityWorkflowTests
             Title = "Updated",
             Amount = 2000,
             Status = "Won"
-        }));
-        Assert.Equal("Open", (await svc.GetByIdAsync(id))!.Status);
-        Assert.Equal("Updated", (await svc.GetByIdAsync(id))!.Title);
+        }, Tenant, User));
+        Assert.Equal("Open", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.Equal("Updated", (await svc.GetByIdAsync(id, Tenant))!.Title);
 
         Assert.True(await svc.MarkLostAsync(id, Tenant, User, "no budget"));
-        Assert.Equal("Lost", (await svc.GetByIdAsync(id))!.Status);
-        Assert.False(await svc.UpdateAsync(new UpdateOpportunityDto { Id = id, Title = "Nope" }));
+        Assert.Equal("Lost", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.False(await svc.UpdateAsync(new UpdateOpportunityDto { Id = id, Title = "Nope" }, Tenant, User));
         Assert.Equal(Guid.Empty, await svc.ConvertToQuoteAsync(id, Tenant, User));
     }
 
@@ -118,10 +118,10 @@ public class OpportunityWorkflowTests
         var id = await CreateOpenAsync(svc);
 
         Assert.False(await svc.MarkWonAsync(id, OtherTenant, User));
-        Assert.Equal("Open", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Open", (await svc.GetByIdAsync(id, Tenant))!.Status);
 
         Assert.True(await svc.CancelAsync(id, Tenant, User));
-        Assert.Equal("Cancelled", (await svc.GetByIdAsync(id))!.Status);
-        Assert.False(await svc.DeleteAsync(id));
+        Assert.Equal("Cancelled", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.False(await svc.DeleteAsync(id, Tenant));
     }
 }

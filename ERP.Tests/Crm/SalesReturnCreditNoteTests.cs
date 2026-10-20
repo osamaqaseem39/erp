@@ -37,7 +37,8 @@ public class SalesReturnCreditNoteTests
         var sales = new SalesInvoiceService(
             new SalesInvoiceRepository(db),
             new SalesInvoiceLineRepository(db),
-            finance);
+            finance,
+            new TestCoreSettings());
         var credit = new SalesCreditNoteService(
             new SalesCreditNoteRepository(db),
             new SalesCreditNoteLineRepository(db),

@@ -9,6 +9,7 @@ public class QuoteLine : BaseEntity
     public string ItemName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal Quantity { get; set; }
+    public decimal PackQty { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal LineTotal { get; set; }

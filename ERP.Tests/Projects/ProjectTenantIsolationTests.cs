@@ -199,5 +199,34 @@ public class ProjectTenantIsolationTests
         Assert.Empty(await milestones.GetAllAsync(Guid.Empty));
         Assert.Empty(await resources.GetAllAsync(Guid.Empty));
     }
+
+    [Fact]
+    public async Task Update_Ignores_Status_Start_Transitions()
+    {
+        await using var db = Db();
+        var svc = new ProjectService(new ProjectRepository(db));
+        var created = await svc.CreateAsync(new CreateProjectDto
+        {
+            ProjectCode = "P-W",
+            ProjectName = "Workflow",
+            Priority = "Medium",
+            Status = "Completed"
+        }, TenantA, UserA);
+
+        Assert.Equal("Planning", (await svc.GetByIdAsync(created.ProjectId, TenantA))!.Status);
+
+        Assert.True(await svc.UpdateAsync(new UpdateProjectDto
+        {
+            Id = created.ProjectId,
+            ProjectCode = "P-W",
+            ProjectName = "Workflow",
+            Priority = "High",
+            Status = "Completed"
+        }, TenantA, UserA));
+        Assert.Equal("Planning", (await svc.GetByIdAsync(created.ProjectId, TenantA))!.Status);
+
+        Assert.True(await svc.StartAsync(created.ProjectId, TenantA, UserA));
+        Assert.Equal("In Progress", (await svc.GetByIdAsync(created.ProjectId, TenantA))!.Status);
+    }
 }
 

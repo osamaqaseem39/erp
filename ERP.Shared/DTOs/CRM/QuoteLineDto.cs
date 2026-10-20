@@ -11,6 +11,7 @@ public class QuoteLineDto
     public string? ItemCode { get; set; }
     public string? Description { get; set; }
     public decimal Quantity { get; set; }
+    public decimal PackQty { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
@@ -25,6 +26,7 @@ public class CreateQuoteLineDto
     public Guid ItemId { get; set; }
     public string? Description { get; set; }
     public decimal Quantity { get; set; }
+    public decimal PackQty { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal? DiscountPercent { get; set; }
     public decimal? TaxRate { get; set; }

@@ -4,7 +4,9 @@ using ERP.Api.Security;
 using ERP.Api.Security.Permissions;
 using ERP.Application.Interfaces.Finance;
 using ERP.Application.Interfaces.Reports;
+using ERP.Application.Manufacturing;
 using ERP.Shared.DTOs.Finance;
+using ERP.Shared.DTOs.Manufacturing;
 using ERP.Shared.DTOs.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,14 +25,17 @@ public class OperationalReportsController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IOperationalReportService _reports;
     private readonly IInvoiceService _invoices;
+    private readonly IManufacturingReleaseService _mfgRelease;
 
     public OperationalReportsController(
         IOperationalReportService reports,
         IInvoiceService invoices,
+        IManufacturingReleaseService mfgRelease,
         ILogger<OperationalReportsController> logger) : base(logger)
     {
         _reports = reports;
         _invoices = invoices;
+        _mfgRelease = mfgRelease;
     }
 
     [HttpGet("sales/pending-orders")]
@@ -99,4 +104,17 @@ public class OperationalReportsController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(typeof(StockBalanceReportDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> StockBalances([FromQuery] Guid? warehouseId = null) =>
         Ok(await _reports.GetStockBalanceReportAsync(HttpContext.RequireTenantId(), warehouseId));
+
+    [HttpGet("sales/order-schedule")]
+    [RequirePermission("reports.saleOrderSchedule.view")]
+    [ProducesResponseType(typeof(SalesOrderScheduleReportDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> SalesOrderSchedule(
+        [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null) =>
+        Ok(await _reports.GetSalesOrderScheduleAsync(HttpContext.RequireTenantId(), fromDate, toDate));
+
+    [HttpGet("sales/pending-for-production")]
+    [RequirePermission("reports.pendingSoProduction.view")]
+    [ProducesResponseType(typeof(IEnumerable<PendingSalesOrderForProductionDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> PendingSalesOrdersForProduction() =>
+        Ok(await _mfgRelease.GetPendingSalesOrdersAsync(HttpContext.RequireTenantId()));
 }

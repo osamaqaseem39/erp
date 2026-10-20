@@ -28,10 +28,7 @@ public class PurchaseReturnDebitNoteTests
     {
         var stock = new StockService(new StockBalanceRepository(db));
         var bills = new BillService(new BillRepository(db));
-        var pi = new PurchaseInvoiceService(
-            new PurchaseInvoiceRepository(db),
-            new PurchaseInvoiceDetailRepository(db),
-            bills);
+        var pi = ERP.Tests.TestHelpers.ProcurementTestServices.CreatePurchaseInvoiceService(db, bills);
         var debit = new PurchaseDebitNoteService(
             new PurchaseDebitNoteRepository(db),
             new PurchaseDebitNoteLineRepository(db),

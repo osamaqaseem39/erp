@@ -42,23 +42,28 @@ public class SalesOrderService : ISalesOrderService
         _stockService = stockService;
     }
 
-    public async Task<SalesOrderDto?> GetByIdAsync(Guid id)
+    public async Task<SalesOrderDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<SalesOrderDto>> GetAllAsync()
+    public async Task<IEnumerable<SalesOrderDto>> GetAllAsync(Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> CreateAsync(CreateSalesOrderDto dto)
+    public async Task<Guid> CreateAsync(CreateSalesOrderDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
         // ERP-FIX-5: always start Draft
         entity.Status = "Draft";
+        entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
         if (string.IsNullOrWhiteSpace(entity.OrderNumber))
         {
             entity.OrderNumber = await _numbers.NextAsync("crm.salesOrder");
@@ -67,13 +72,14 @@ public class SalesOrderService : ISalesOrderService
 
         ApplyLineTotals(entity, dto.SalesOrderLines);
         var orderId = await _repository.CreateAsync(entity);
-        await SaveLinesAsync(orderId, entity.TenantId, dto.SalesOrderLines);
+        await SaveLinesAsync(orderId, tenantId, dto.SalesOrderLines);
         return orderId;
     }
 
-    public async Task<bool> UpdateAsync(UpdateSalesOrderDto dto)
+    public async Task<bool> UpdateAsync(UpdateSalesOrderDto dto, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
             return false;
@@ -82,38 +88,43 @@ public class SalesOrderService : ISalesOrderService
         MapToEntity(dto, entity);
         // ERP-FIX-5: status only via approve/reject/ship/invoice
         entity.Status = previousStatus;
+        entity.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         ApplyLineTotals(entity, dto.SalesOrderLines);
-        await _lineRepository.DeleteBySalesOrderIdAsync(entity.Id);
-        await SaveLinesAsync(entity.Id, entity.TenantId, dto.SalesOrderLines);
+        await _lineRepository.DeleteBySalesOrderIdAsync(entity.Id, tenantId);
+        await SaveLinesAsync(entity.Id, tenantId, dto.SalesOrderLines);
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        await _lineRepository.DeleteBySalesOrderIdAsync(id);
-        return await _repository.DeleteAsync(id);
+        await _lineRepository.DeleteBySalesOrderIdAsync(id, tenantId);
+        return await _repository.DeleteAsync(id, tenantId);
     }
 
-    public async Task<IEnumerable<SalesOrderDto>> GetByCustomerAsync(Guid customerId)
+    public async Task<IEnumerable<SalesOrderDto>> GetByCustomerAsync(Guid customerId, Guid tenantId)
     {
-        var entities = await _repository.GetByCustomerAsync(customerId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByCustomerAsync(customerId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<SalesOrderDto>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<SalesOrderDto>> GetByStatusAsync(string status, Guid tenantId)
     {
-        var entities = await _repository.GetByStatusAsync(status);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByStatusAsync(status, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<SalesOrderDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<SalesOrderDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        var entities = await _repository.GetByDateRangeAsync(startDate, endDate);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByDateRangeAsync(startDate, endDate, tenantId);
         return entities.Select(MapToDto);
     }
 
@@ -156,7 +167,7 @@ public class SalesOrderService : ISalesOrderService
 
         var lines = entity.SalesOrderLines?.Count > 0
             ? entity.SalesOrderLines
-            : (await _lineRepository.GetBySalesOrderIdAsync(id)).ToList();
+            : (await _lineRepository.GetBySalesOrderIdAsync(id, tenantId)).ToList();
 
         var stockLines = lines
             .Where(l => l.ItemId.HasValue && l.ItemId != Guid.Empty && l.Quantity > 0)
@@ -217,9 +228,7 @@ public class SalesOrderService : ISalesOrderService
     private async Task<SalesOrder?> GetScopedAsync(Guid id, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null || entity.TenantId != tenantId) return null;
-        return entity;
+        return await _repository.GetByIdAsync(id, tenantId);
     }
 
     private async Task SaveLinesAsync(Guid salesOrderId, Guid tenantId, IEnumerable<CreateSalesOrderLineDto> lines)
@@ -247,7 +256,8 @@ public class SalesOrderService : ISalesOrderService
         entity.Tax1Amount = totals.Tax1Amount;
         entity.Tax2Amount = totals.Tax2Amount;
         entity.TaxAmount = totals.TaxAmount;
-        entity.TotalAmount = totals.TotalAmount;
+        entity.TotalAmount = CrmLineCalculator.ApplyDocumentTotal(
+            totals.TotalAmount, entity.Freight, entity.Overhead, entity.DiscountType, entity.DiscountAmount);
     }
 
     private static SalesOrderDto MapToDto(SalesOrder entity) => new()
@@ -279,6 +289,15 @@ public class SalesOrderService : ISalesOrderService
         CreatedBy = entity.CreatedBy,
         UpdatedBy = entity.UpdatedBy,
         IsActive = entity.IsActive,
+        ReferenceNo = entity.ReferenceNo,
+        ReferenceDate = entity.ReferenceDate,
+        CreditDays = entity.CreditDays,
+        PaymentMode = entity.PaymentMode,
+        PaymentTermId = entity.PaymentTermId,
+        Freight = entity.Freight,
+        Overhead = entity.Overhead,
+        DiscountType = entity.DiscountType,
+        DiscountAmount = entity.DiscountAmount,
         SalesOrderLines = entity.SalesOrderLines.Select(CrmLineMapper.ToDto).ToList()
     };
 
@@ -299,6 +318,15 @@ public class SalesOrderService : ISalesOrderService
         Currency = dto.Currency,
         Notes = dto.Notes,
         Terms = dto.Terms,
+        ReferenceNo = dto.ReferenceNo,
+        ReferenceDate = dto.ReferenceDate,
+        CreditDays = dto.CreditDays,
+        PaymentMode = dto.PaymentMode,
+        PaymentTermId = dto.PaymentTermId,
+        Freight = dto.Freight,
+        Overhead = dto.Overhead,
+        DiscountType = dto.DiscountType,
+        DiscountAmount = dto.DiscountAmount,
         CreatedBy = dto.CreatedBy
     };
 
@@ -314,6 +342,15 @@ public class SalesOrderService : ISalesOrderService
         if (!string.IsNullOrEmpty(dto.Currency)) entity.Currency = dto.Currency;
         entity.Notes = dto.Notes ?? entity.Notes;
         entity.Terms = dto.Terms ?? entity.Terms;
+        entity.ReferenceNo = dto.ReferenceNo ?? entity.ReferenceNo;
+        entity.ReferenceDate = dto.ReferenceDate ?? entity.ReferenceDate;
+        if (dto.CreditDays.HasValue) entity.CreditDays = dto.CreditDays.Value;
+        entity.PaymentMode = dto.PaymentMode ?? entity.PaymentMode;
+        entity.PaymentTermId = dto.PaymentTermId ?? entity.PaymentTermId;
+        if (dto.Freight.HasValue) entity.Freight = dto.Freight.Value;
+        if (dto.Overhead.HasValue) entity.Overhead = dto.Overhead.Value;
+        entity.DiscountType = dto.DiscountType ?? entity.DiscountType;
+        if (dto.DiscountAmount.HasValue) entity.DiscountAmount = dto.DiscountAmount.Value;
         entity.UpdatedBy = dto.UpdatedBy;
         entity.UpdatedAt = DateTime.UtcNow;
     }

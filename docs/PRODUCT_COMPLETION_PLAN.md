@@ -171,10 +171,10 @@ Backend phase mapping (detail in [BACKEND_COMPLETION_PLAN.md](./BACKEND_COMPLETI
 
 ## Backlog after “complete” (v1.1+)
 
-- 2FA (TOTP), billing/subscriptions, email schedule worker
-- RFQ full cycle, fixed-asset depreciation runs
-- HRM recruitment/performance/training/benefits
-- MFG routing & capacity
+**Customer depth (whole product):** [CUSTOMER_DEPTH_PLAN.md](./CUSTOMER_DEPTH_PLAN.md) — geo/branch/terms, dispatch, reservations, bins/kits/cycle count, landed cost, 3-way match, packaging Sale, routing/scrap, timesheets, advances, opening balances, period close, cheque book, expense claims, SMTP/PDF/report permissions.
+
+Also deferred / adjacent:
+- Billing/subscriptions (SaaS marketplace)
 - GraphQL parity, Nest/Zallo migration, DB-per-tenant
 - Mobile / customer portal
 

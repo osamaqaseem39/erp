@@ -53,8 +53,7 @@ public class SalesOrderWorkflowTests
             Task.FromResult((Enumerable.Empty<InvoiceDto>(), 0));
         public Task<Guid> AddInvoiceLineAsync(InvoiceLineCreateDto dto, Guid invoiceId, Guid tenantId, Guid userId) =>
             Task.FromResult(Guid.Empty);
-        public Task<Guid> UpdateInvoiceLineAsync(InvoiceLineUpdateDto dto, Guid tenantId, Guid userId) =>
-            Task.FromResult(Guid.Empty);
+        public Task<Guid> UpdateInvoiceLineAsync(InvoiceLineUpdateDto dto, Guid tenantId, Guid userId) => Task.FromResult(Guid.Empty);
         public Task<bool> DeleteInvoiceLineAsync(Guid invoiceLineId, Guid tenantId) => Task.FromResult(false);
         public Task<IEnumerable<InvoiceLineDto>> GetInvoiceLinesByInvoiceIdAsync(Guid invoiceId, Guid tenantId) =>
             Task.FromResult(Enumerable.Empty<InvoiceLineDto>());
@@ -117,7 +116,7 @@ public class SalesOrderWorkflowTests
             [
                 new CreateSalesOrderLineDto { ItemId = Item, Quantity = qty, UnitPrice = 10, TaxRate = 0 }
             ]
-        });
+        }, Tenant, Creator);
     }
 
     [Fact]
@@ -127,11 +126,11 @@ public class SalesOrderWorkflowTests
         var svc = Svc(db);
         var id = await CreateDraftAsync(svc);
 
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.ApproveAsync(id, Tenant, Creator));
         Assert.True(await svc.ApproveAsync(id, Tenant, Approver));
-        Assert.Equal("Approved", (await svc.GetByIdAsync(id))!.Status);
-        Assert.NotNull((await svc.GetByIdAsync(id))!.ApprovedDate);
+        Assert.Equal("Approved", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.NotNull((await svc.GetByIdAsync(id, Tenant))!.ApprovedDate);
     }
 
     [Fact]
@@ -142,7 +141,7 @@ public class SalesOrderWorkflowTests
         var id = await CreateDraftAsync(svc);
 
         Assert.True(await svc.RejectAsync(id, Tenant, Approver));
-        Assert.Equal("Cancelled", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Cancelled", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.ShipAsync(id, Tenant, Approver));
         Assert.False(await svc.ApproveAsync(id, Tenant, Approver));
     }
@@ -163,12 +162,12 @@ public class SalesOrderWorkflowTests
             [
                 new CreateSalesOrderLineDto { ItemId = Item, Quantity = 1, UnitPrice = 5 }
             ]
-        }));
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
+        }, Tenant, Creator));
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
 
         Assert.True(await svc.ApproveAsync(id, Tenant, Approver));
-        Assert.False(await svc.UpdateAsync(new UpdateSalesOrderDto { Id = id, Notes = "nope", SalesOrderLines = [] }));
-        Assert.False(await svc.DeleteAsync(id));
+        Assert.False(await svc.UpdateAsync(new UpdateSalesOrderDto { Id = id, Notes = "nope", SalesOrderLines = [] }, Tenant, Creator));
+        Assert.False(await svc.DeleteAsync(id, Tenant));
     }
 
     [Fact]
@@ -195,7 +194,7 @@ public class SalesOrderWorkflowTests
         Assert.Equal(7m, await new StockService(new StockBalanceRepository(db), tenant: new FixedTenant()).GetStockLevelAsync(Item, Warehouse));
         Assert.False(await svc.RejectAsync(id, Tenant, Approver)); // shipped cannot cancel
         Assert.True(await svc.InvoiceAsync(id, Tenant, Approver));
-        Assert.Equal("Invoiced", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Invoiced", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.True(await svc.InvoiceAsync(id, Tenant, Approver)); // idempotent
     }
 
@@ -206,6 +205,6 @@ public class SalesOrderWorkflowTests
         var svc = Svc(db);
         var id = await CreateDraftAsync(svc);
         Assert.False(await svc.ApproveAsync(id, Guid.NewGuid(), Approver));
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
     }
 }

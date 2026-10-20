@@ -15,4 +15,5 @@ public interface IOperationalReportService
     Task<CreditNoteReportDto> GetCreditNoteReportAsync(Guid tenantId, DateTime fromDate, DateTime toDate);
     Task<PurchaseInvoiceSummaryReportDto> GetPurchaseInvoiceSummaryAsync(Guid tenantId, DateTime fromDate, DateTime toDate);
     Task<StockBalanceReportDto> GetStockBalanceReportAsync(Guid tenantId, Guid? warehouseId = null);
+    Task<SalesOrderScheduleReportDto> GetSalesOrderScheduleAsync(Guid tenantId, DateTime? fromDate = null, DateTime? toDate = null);
 }

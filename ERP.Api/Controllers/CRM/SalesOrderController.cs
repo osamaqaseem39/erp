@@ -41,35 +41,35 @@ public class SalesOrderController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(typeof(SalesOrderDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
-        return await HandleAsync(() => _service.GetByIdAsync(id));
+        return await HandleAsync(() => _service.GetByIdAsync(id, GetTenantId()));
     }
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<SalesOrderDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll()
     {
-        return await HandleAsync(() => _service.GetAllAsync());
+        return await HandleAsync(() => _service.GetAllAsync(GetTenantId()));
     }
 
     [HttpGet("customer/{customerId}")]
     [ProducesResponseType(typeof(IEnumerable<SalesOrderDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByCustomer(Guid customerId)
     {
-        return await HandleAsync(() => _service.GetByCustomerAsync(customerId));
+        return await HandleAsync(() => _service.GetByCustomerAsync(customerId, GetTenantId()));
     }
 
     [HttpGet("status/{status}")]
     [ProducesResponseType(typeof(IEnumerable<SalesOrderDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByStatus(string status)
     {
-        return await HandleAsync(() => _service.GetByStatusAsync(status));
+        return await HandleAsync(() => _service.GetByStatusAsync(status, GetTenantId()));
     }
 
     [HttpGet("period")]
     [ProducesResponseType(typeof(IEnumerable<SalesOrderDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByDateRange(DateTime startDate, DateTime endDate)
     {
-        return await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate));
+        return await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate, GetTenantId()));
     }
 
     [HttpPost]
@@ -82,7 +82,7 @@ public class SalesOrderController : ERP.Api.Abstractions.ControllerBase
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
-        return await HandleAsync(() => _service.CreateAsync(dto));
+        return await HandleAsync(() => _service.CreateAsync(dto, GetTenantId(), GetUserId()));
     }
 
     [HttpPut("{id}")]
@@ -96,14 +96,14 @@ public class SalesOrderController : ERP.Api.Abstractions.ControllerBase
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
         }
 
-        return await HandleAsync(() => _service.UpdateAsync(dto));
+        return await HandleAsync(() => _service.UpdateAsync(dto, GetTenantId(), GetUserId()));
     }
 
     [HttpDelete("{id}")]
     [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        return await HandleAsync(() => _service.DeleteAsync(id));
+        return await HandleAsync(() => _service.DeleteAsync(id, GetTenantId()));
     }
 
     [HttpPost("{id}/approve")]

@@ -4,11 +4,13 @@ namespace ERP.Application.Interfaces.CRM;
 
 public interface IContactService
 {
-    Task<ContactDto?> GetByIdAsync(Guid id);
-    Task<IEnumerable<ContactDto>> GetAllAsync();
-    Task<Guid> CreateAsync(CreateContactDto dto);
-    Task<bool> UpdateAsync(UpdateContactDto dto);
-    Task<bool> DeleteAsync(Guid id);
-    Task<IEnumerable<ContactDto>> GetByCustomerAsync(Guid customerId);
-    Task<IEnumerable<ContactDto>> SearchAsync(string searchTerm);
+    Task<ContactDto?> GetByIdAsync(Guid id, Guid tenantId);
+    Task<IEnumerable<ContactDto>> GetAllAsync(Guid tenantId);
+    Task<Guid> CreateAsync(CreateContactDto dto, Guid tenantId, Guid userId);
+    Task<bool> UpdateAsync(UpdateContactDto dto, Guid tenantId, Guid userId);
+    Task<bool> DeleteAsync(Guid id, Guid tenantId);
+    Task<bool> ActivateAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> DeactivateAsync(Guid id, Guid tenantId, Guid userId);
+    Task<IEnumerable<ContactDto>> GetByCustomerAsync(Guid customerId, Guid tenantId);
+    Task<IEnumerable<ContactDto>> SearchAsync(string searchTerm, Guid tenantId);
 }

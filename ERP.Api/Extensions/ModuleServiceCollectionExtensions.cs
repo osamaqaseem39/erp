@@ -59,6 +59,10 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Core.ICompanyProfileService, ERP.Application.Core.CompanyProfileService>();
         services.AddScoped<ERP.Infrastructure.Repositories.Core.IFiscalYearRepository, ERP.Infrastructure.Repositories.Core.FiscalYearRepository>();
         services.AddScoped<ERP.Application.Interfaces.Core.IFiscalYearService, ERP.Application.Core.FiscalYearService>();
+        services.AddScoped<ERP.Infrastructure.Repositories.Core.ICoreMasterRepository, ERP.Infrastructure.Repositories.Core.CoreMasterRepository>();
+        services.AddScoped<ERP.Application.Core.ICoreMasterService, ERP.Application.Core.CoreMasterService>();
+        services.AddScoped<ERP.Application.Core.ITenantEmailSender, ERP.Application.Core.SmtpTenantEmailSender>();
+        services.AddScoped<ERP.Application.Core.IPdfDocumentService, ERP.Application.Core.SimplePdfDocumentService>();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<ERP.Application.Core.ICoreDashboardService, ERP.Application.Core.CoreDashboardService>();
         services.AddScoped<ERP.Infrastructure.Numbering.IDocumentNumberService>(sp => new ERP.Infrastructure.Numbering.DocumentNumberService(
@@ -77,7 +81,7 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ERP.Application.Core.Settings.ISecurityPolicyProvider, ERP.Application.Core.Settings.SecurityPolicyProvider>();
         services.AddScoped<ERP.Application.Core.Auth.ISessionStore, ERP.Application.Core.Auth.SessionStore>();
-        services.AddScoped<ERP.Application.Core.Auth.IPasswordResetNotifier, LoggingPasswordResetNotifier>();
+        services.AddScoped<ERP.Application.Core.Auth.IPasswordResetNotifier, ERP.Api.Services.SmtpPasswordResetNotifier>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ISetupService, SetupService>();
         services.AddScoped<IPermissionService, PermissionService>();
@@ -118,6 +122,8 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<IPOSTransactionRepository, POSTransactionRepository>();
         services.AddScoped<IPOSTransactionLineRepository, POSTransactionLineRepository>();
         services.AddScoped<ISalesInvoiceService, SalesInvoiceService>();
+        services.AddScoped<ERP.Infrastructure.Repositories.Sales.IDispatchAdviceRepository, ERP.Infrastructure.Repositories.Sales.DispatchAdviceRepository>();
+        services.AddScoped<IDispatchAdviceService, DispatchAdviceService>();
         services.AddScoped<ISalesCreditNoteService, SalesCreditNoteService>();
         services.AddScoped<IPOSSessionService, POSSessionService>();
         services.AddScoped<IPOSTransactionService, POSTransactionService>();
@@ -150,6 +156,11 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ISalesTerritoryRepository, SalesTerritoryRepository>();
         services.AddScoped<IReturnOrderRepository, ReturnOrderRepository>();
         services.AddScoped<ISalesmanRepository, SalesmanRepository>();
+        services.AddScoped<ERP.Infrastructure.Repositories.CRM.IPouchTypeRepository, ERP.Infrastructure.Repositories.CRM.PouchTypeRepository>();
+        services.AddScoped<ERP.Infrastructure.Repositories.CRM.IProductionProcessRepository, ERP.Infrastructure.Repositories.CRM.ProductionProcessRepository>();
+        services.AddScoped<ERP.Infrastructure.Repositories.CRM.IFOHTypeRepository, ERP.Infrastructure.Repositories.CRM.FOHTypeRepository>();
+        services.AddScoped<ERP.Infrastructure.Repositories.CRM.ISaleEnquiryRepository, ERP.Infrastructure.Repositories.CRM.SaleEnquiryRepository>();
+        services.AddScoped<ERP.Infrastructure.Repositories.CRM.ISalePreCostRepository, ERP.Infrastructure.Repositories.CRM.SalePreCostRepository>();
 
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IContactService, ContactService>();
@@ -164,6 +175,11 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ISalesTerritoryService, SalesTerritoryService>();
         services.AddScoped<IReturnOrderService, ReturnOrderService>();
         services.AddScoped<ISalesmanService, SalesmanService>();
+        services.AddScoped<IPouchTypeService, PouchTypeService>();
+        services.AddScoped<IProductionProcessService, ProductionProcessService>();
+        services.AddScoped<IFOHTypeService, FOHTypeService>();
+        services.AddScoped<ISaleEnquiryService, SaleEnquiryService>();
+        services.AddScoped<ISalePreCostService, SalePreCostService>();
 
         services.AddScoped<CreateCustomerValidator>();
         services.AddScoped<UpdateCustomerValidator>();
@@ -231,6 +247,11 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Infrastructure.Repositories.Finance.ICostCenterRepository, CostCenterRepository>();
         services.AddScoped<ERP.Application.Interfaces.Finance.ICostCenterService, CostCenterService>();
         services.AddScoped<ERP.Application.Interfaces.Finance.IAccountDefaultService, AccountDefaultService>();
+        services.AddScoped<ERP.Application.Finance.IBudgetEnforcementService, ERP.Application.Finance.BudgetEnforcementService>();
+        services.AddScoped<ERP.Application.Finance.IOpeningBalanceService, ERP.Application.Finance.OpeningBalanceService>();
+        services.AddScoped<ERP.Application.Finance.IAccountingPeriodService, ERP.Application.Finance.AccountingPeriodService>();
+        services.AddScoped<ERP.Application.Finance.IChequeBookService, ERP.Application.Finance.ChequeBookService>();
+        services.AddScoped<ERP.Application.Finance.IExpenseClaimService, ERP.Application.Finance.ExpenseClaimService>();
         services.AddScoped<CreateTaxCodeValidator>();
         services.AddScoped<UpdateTaxCodeValidator>();
         return services;
@@ -280,6 +301,16 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.SCM.Interfaces.IItemVariantService, ERP.Application.SCM.Services.ItemVariantService>();
         services.AddScoped<ERP.Application.SCM.Interfaces.IItemPricingService, ERP.Application.SCM.Services.ItemPricingService>();
         services.AddScoped<ERP.Application.SCM.Interfaces.IInventoryValuationMethodService, ERP.Application.SCM.Services.InventoryValuationMethodService>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IBrandRepository, ERP.Infrastructure.Repositories.SCM.BrandRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IWarehouseLocationRepository, ERP.Infrastructure.Repositories.SCM.WarehouseLocationRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IStockReservationRepository, ERP.Infrastructure.Repositories.SCM.StockReservationRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IItemKitRepository, ERP.Infrastructure.Repositories.SCM.ItemKitRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.ICycleCountRepository, ERP.Infrastructure.Repositories.SCM.CycleCountRepository>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IBrandService, ERP.Application.Inventory.BrandService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IWarehouseLocationService, ERP.Application.Inventory.WarehouseLocationService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IStockReservationService, ERP.Application.Inventory.StockReservationService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IItemKitService, ERP.Application.Inventory.ItemKitService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.ICycleCountService, ERP.Application.Inventory.CycleCountService>();
         return services;
     }
 
@@ -323,6 +354,8 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.HRM.IBenefitsService, BenefitsService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.ILeaveRequestService, LeaveRequestService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.IDepartmentService, DepartmentService>();
+        services.AddScoped<ERP.Application.HRM.IEmployeeAdvanceService, ERP.Application.HRM.EmployeeAdvanceService>();
+        services.AddScoped<ERP.Application.HRM.ITeamService, ERP.Application.HRM.TeamService>();
         return services;
     }
 
@@ -355,6 +388,10 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.Procurement.IRequestForQuotationService, RequestForQuotationService>();
         services.AddScoped<ERP.Application.Interfaces.Procurement.IPurchaseReturnService, PurchaseReturnService>();
         services.AddScoped<ERP.Application.Interfaces.Procurement.IPurchaseDebitNoteService, PurchaseDebitNoteService>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.Procurement.ILandedCostVoucherRepository, ERP.Infrastructure.Repositories.Procurement.LandedCostVoucherRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.Procurement.IVendorContractRepository, ERP.Infrastructure.Repositories.Procurement.VendorContractRepository>();
+        services.AddScoped<ERP.Application.Interfaces.Procurement.ILandedCostVoucherService, ERP.Application.Procurement.LandedCostVoucherService>();
+        services.AddScoped<ERP.Application.Interfaces.Procurement.IVendorContractService, ERP.Application.Procurement.VendorContractService>();
         services.AddScoped<CreatePurchaseDebitNoteValidator>();
         services.AddScoped<UpdatePurchaseDebitNoteValidator>();
         return services;
@@ -371,6 +408,9 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.Manufacturing.IWorkCenterService, WorkCenterService>();
         services.AddScoped<ERP.Application.Interfaces.Manufacturing.IProductionRunService, ProductionRunService>();
         services.AddScoped<ERP.Application.Interfaces.Manufacturing.IBillOfMaterialService, BillOfMaterialService>();
+        services.AddScoped<ERP.Application.Manufacturing.IRoutingService, ERP.Application.Manufacturing.RoutingService>();
+        services.AddScoped<ERP.Application.Manufacturing.IProductionScrapService, ERP.Application.Manufacturing.ProductionScrapService>();
+        services.AddScoped<ERP.Application.Manufacturing.IManufacturingReleaseService, ERP.Application.Manufacturing.ManufacturingReleaseService>();
         return services;
     }
 
@@ -394,6 +434,8 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.Projects.IProjectMilestoneService, ProjectMilestoneService>();
         services.AddScoped<ERP.Application.Interfaces.Projects.IProjectResourceService, ProjectResourceService>();
         services.AddScoped<ERP.Application.Interfaces.Projects.IProjectDocumentService, ProjectDocumentService>();
+        services.AddScoped<ERP.Application.Projects.IProjectTimesheetService, ERP.Application.Projects.ProjectTimesheetService>();
+        services.AddScoped<ERP.Application.Projects.IProjectMilestoneBillingService, ERP.Application.Projects.ProjectMilestoneBillingService>();
         return services;
     }
 

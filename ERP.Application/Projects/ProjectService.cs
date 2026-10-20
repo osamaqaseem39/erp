@@ -94,7 +94,7 @@ public class ProjectService : IProjectService
         project.EndDate = dto.EndDate;
         project.ActualStartDate = dto.ActualStartDate;
         project.ActualEndDate = dto.ActualEndDate;
-        project.Status = dto.Status;
+        // ERP-FIX-5: status only via Start/Complete/Pause/Cancel
         project.Priority = dto.Priority;
         project.Budget = dto.Budget ?? project.Budget;
         project.ActualCost = dto.ActualCost ?? project.ActualCost;

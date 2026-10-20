@@ -26,7 +26,8 @@ public class Wave2SalesInvoiceArGlueTests
         var sales = new SalesInvoiceService(
             new SalesInvoiceRepository(db),
             new SalesInvoiceLineRepository(db),
-            finance);
+            finance,
+            new TestCoreSettings());
 
         var id = await sales.CreateAsync(new CreateSalesInvoiceDto
         {
@@ -77,7 +78,8 @@ public class Wave2SalesInvoiceArGlueTests
         var sales = new SalesInvoiceService(
             new SalesInvoiceRepository(db),
             new SalesInvoiceLineRepository(db),
-            finance);
+            finance,
+            new TestCoreSettings());
 
         var id = await sales.CreateAsync(new CreateSalesInvoiceDto
         {
@@ -124,7 +126,8 @@ public class Wave2SalesInvoiceArGlueTests
         var sales = new SalesInvoiceService(
             new SalesInvoiceRepository(db),
             new SalesInvoiceLineRepository(db),
-            finance);
+            finance,
+            new TestCoreSettings());
 
         var id = await sales.CreateAsync(new CreateSalesInvoiceDto
         {

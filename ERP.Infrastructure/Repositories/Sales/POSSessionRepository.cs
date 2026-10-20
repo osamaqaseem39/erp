@@ -14,21 +14,27 @@ public class POSSessionRepository : IPOSSessionRepository
         _context = context;
     }
 
+    private IQueryable<POSSession> ForTenant(Guid tenantId)
+        => tenantId == Guid.Empty
+            ? _context.POSSessions.Where(_ => false)
+            : _context.POSSessions.Where(ps => ps.TenantId == tenantId);
+
     public async Task<POSSession?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        return await _context.POSSessions
-            .FirstOrDefaultAsync(ps => ps.Id == id && ps.TenantId == tenantId);
+        if (tenantId == Guid.Empty) return null;
+        return await ForTenant(tenantId).FirstOrDefaultAsync(ps => ps.Id == id);
     }
 
     public async Task<IEnumerable<POSSession>> GetAllAsync(Guid tenantId)
     {
-        return await _context.POSSessions
-            .Where(ps => ps.TenantId == tenantId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId).ToListAsync();
     }
 
     public async Task<POSSession> AddAsync(POSSession entity)
     {
+        if (entity.TenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.", nameof(entity));
         _context.POSSessions.Add(entity);
         await _context.SaveChangesAsync();
         return entity;
@@ -43,27 +49,22 @@ public class POSSessionRepository : IPOSSessionRepository
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
         var entity = await GetByIdAsync(id, tenantId);
-        if (entity != null)
-        {
-            _context.POSSessions.Remove(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-        return false;
+        if (entity == null) return false;
+        _context.POSSessions.Remove(entity);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<IEnumerable<POSSession>> GetByCashierAsync(Guid cashierId, Guid tenantId)
     {
-        return await _context.POSSessions
-            .Where(ps => ps.CashierId == cashierId && ps.TenantId == tenantId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId).Where(ps => ps.CashierId == cashierId).ToListAsync();
     }
 
     public async Task<IEnumerable<POSSession>> GetByStatusAsync(string status, Guid tenantId)
     {
-        return await _context.POSSessions
-            .Where(ps => ps.Status == status && ps.TenantId == tenantId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId).Where(ps => ps.Status == status).ToListAsync();
     }
 
     public async Task<bool> CloseSessionAsync(Guid sessionId, decimal closingBalance, string? notes, Guid tenantId, Guid userId)

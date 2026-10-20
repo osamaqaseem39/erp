@@ -280,7 +280,8 @@ P0 hygiene
   → ~~P6 ReportService built-in operational reports tenant fail-closed~~ ✅
   → ~~P6 OperationalReportService + Quote/SO scoped + CN/DN account defaults fail-closed~~ ✅
   → ~~P6 Leave AddLeaveRequest GraphQL/REST tenant args + Payroll fail-closed~~ ✅
-  → P6 continuous (remaining stubs / GraphQL parity)
+  → ~~P6 continuous closeout: tenant helper + Contact + CRM pipeline + POS session + FIX-5 trade docs + Project Status~~ ✅
+  → P6 continuous closed (backend v1 DoD tenant/FIX-5)
 ```
 
 ---
@@ -294,6 +295,7 @@ P0 hygiene
 | DB-per-tenant | Deferred post-v1 |
 | GraphQL parity | After REST services are real |
 | SaaS billing, full BI | v1.1 backlog in product plan |
+| **Customer depth** (dispatch, geo, packaging, landed cost, routing, …) | [CUSTOMER_DEPTH_PLAN.md](./CUSTOMER_DEPTH_PLAN.md) — whole-product depth map |
 
 ---
 

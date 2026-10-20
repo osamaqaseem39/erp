@@ -10,6 +10,7 @@ public class ProductionOrder : BaseEntity
     public string OrderNumber { get; set; } = string.Empty;
     public Guid? ItemId { get; set; }
     public Guid? BomId { get; set; }
+    public Guid? RoutingId { get; set; }
     public Guid? WorkCenterId { get; set; }
     public decimal Quantity { get; set; }
     public DateTime? StartDate { get; set; }
@@ -27,6 +28,7 @@ public class ProductionOrder : BaseEntity
     // Navigation properties
     public Item? Item { get; set; }
     public BillOfMaterial? BillOfMaterial { get; set; }
+    public Routing? Routing { get; set; }
     public ICollection<ProductionOrderLine> ProductionOrderLines { get; set; } = new List<ProductionOrderLine>();
     public ICollection<ProductionRun> ProductionRuns { get; set; } = new List<ProductionRun>();
 }

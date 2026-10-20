@@ -9,6 +9,7 @@ public class ProductionOrderDto : BaseDto
     public string OrderNumber { get; set; } = string.Empty;
     public Guid? ItemId { get; set; }
     public Guid? BomId { get; set; }
+    public Guid? RoutingId { get; set; }
     public Guid? WorkCenterId { get; set; }
     public decimal Quantity { get; set; }
     public DateTime? StartDate { get; set; }
@@ -32,6 +33,7 @@ public class CreateProductionOrderDto : CreateDto
     public string? OrderNumber { get; set; }
     public Guid? ItemId { get; set; }
     public Guid? BomId { get; set; }
+    public Guid? RoutingId { get; set; }
     public Guid? WorkCenterId { get; set; }
     public decimal? Quantity { get; set; }
     public DateTime? StartDate { get; set; }
@@ -49,6 +51,7 @@ public class UpdateProductionOrderDto : UpdateDto
     public string? OrderNumber { get; set; }
     public Guid? ItemId { get; set; }
     public Guid? BomId { get; set; }
+    public Guid? RoutingId { get; set; }
     public Guid? WorkCenterId { get; set; }
     public decimal? Quantity { get; set; }
     public DateTime? StartDate { get; set; }

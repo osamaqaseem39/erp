@@ -13,5 +13,6 @@ public interface ISalesInvoiceService
     Task<IEnumerable<SalesInvoiceDto>> GetByStatusAsync(string status, Guid tenantId);
     Task<bool> PostInvoiceAsync(Guid invoiceId, Guid tenantId, Guid postedBy);
     Task<bool> VoidInvoiceAsync(Guid invoiceId, Guid tenantId, Guid voidedBy);
+    Task<bool> UnpostInvoiceAsync(Guid invoiceId, Guid tenantId, Guid userId);
 }
 

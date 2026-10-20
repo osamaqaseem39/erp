@@ -46,101 +46,163 @@ public class CRMMutations
 
     public async Task<Guid> CreateContact(
         [Service] IContactService contactService,
-        CreateContactDto input)
-    {
-        return await contactService.CreateAsync(input);
-    }
+        CreateContactDto input,
+        Guid tenantId,
+        Guid userId)
+        => await contactService.CreateAsync(input, tenantId, userId);
 
     public async Task<bool> UpdateContact(
         [Service] IContactService contactService,
-        UpdateContactDto input)
-    {
-        return await contactService.UpdateAsync(input);
-    }
+        UpdateContactDto input,
+        Guid tenantId,
+        Guid userId)
+        => await contactService.UpdateAsync(input, tenantId, userId);
 
     public async Task<bool> DeleteContact(
         [Service] IContactService contactService,
-        Guid contactId)
-    {
-        return await contactService.DeleteAsync(contactId);
-    }
+        Guid contactId,
+        Guid tenantId)
+        => await contactService.DeleteAsync(contactId, tenantId);
+
+    public async Task<bool> ActivateContact(
+        [Service] IContactService contactService,
+        Guid contactId,
+        Guid tenantId,
+        Guid userId)
+        => await contactService.ActivateAsync(contactId, tenantId, userId);
+
+    public async Task<bool> DeactivateContact(
+        [Service] IContactService contactService,
+        Guid contactId,
+        Guid tenantId,
+        Guid userId)
+        => await contactService.DeactivateAsync(contactId, tenantId, userId);
 
     public async Task<Guid> CreateLead(
         [Service] ILeadService leadService,
-        CreateLeadDto input)
+        CreateLeadDto input,
+        Guid tenantId,
+        Guid userId)
     {
-        return await leadService.CreateAsync(input);
+        return await leadService.CreateAsync(input, tenantId, userId);
     }
 
     public async Task<bool> UpdateLead(
         [Service] ILeadService leadService,
-        UpdateLeadDto input)
-        => await leadService.UpdateAsync(input);
+        UpdateLeadDto input,
+        Guid tenantId,
+        Guid userId)
+        => await leadService.UpdateAsync(input, tenantId, userId);
 
     public async Task<bool> DeleteLead(
         [Service] ILeadService leadService,
-        Guid leadId)
-        => await leadService.DeleteAsync(leadId);
+        Guid leadId,
+        Guid tenantId)
+        => await leadService.DeleteAsync(leadId, tenantId);
 
     public async Task<Guid> CreateOpportunity(
         [Service] IOpportunityService opportunityService,
-        CreateOpportunityDto input)
-        => await opportunityService.CreateAsync(input);
+        CreateOpportunityDto input,
+        Guid tenantId,
+        Guid userId)
+        => await opportunityService.CreateAsync(input, tenantId, userId);
 
     public async Task<bool> UpdateOpportunity(
         [Service] IOpportunityService opportunityService,
-        UpdateOpportunityDto input)
-        => await opportunityService.UpdateAsync(input);
+        UpdateOpportunityDto input,
+        Guid tenantId,
+        Guid userId)
+        => await opportunityService.UpdateAsync(input, tenantId, userId);
 
     public async Task<bool> DeleteOpportunity(
         [Service] IOpportunityService opportunityService,
-        Guid opportunityId)
-        => await opportunityService.DeleteAsync(opportunityId);
+        Guid opportunityId,
+        Guid tenantId)
+        => await opportunityService.DeleteAsync(opportunityId, tenantId);
 
     public async Task<Guid> CreateQuote(
         [Service] IQuoteService quoteService,
-        CreateQuoteDto input)
-        => await quoteService.CreateAsync(input);
+        CreateQuoteDto input,
+        Guid tenantId,
+        Guid userId)
+        => await quoteService.CreateAsync(input, tenantId, userId);
 
     public async Task<bool> UpdateQuote(
         [Service] IQuoteService quoteService,
-        UpdateQuoteDto input)
-        => await quoteService.UpdateAsync(input);
+        UpdateQuoteDto input,
+        Guid tenantId,
+        Guid userId)
+        => await quoteService.UpdateAsync(input, tenantId, userId);
 
     public async Task<bool> DeleteQuote(
         [Service] IQuoteService quoteService,
-        Guid quoteId)
-        => await quoteService.DeleteAsync(quoteId);
+        Guid quoteId,
+        Guid tenantId)
+        => await quoteService.DeleteAsync(quoteId, tenantId);
 
     public async Task<Guid> CreateSalesOrder(
         [Service] ISalesOrderService salesOrderService,
-        CreateSalesOrderDto input)
-        => await salesOrderService.CreateAsync(input);
+        CreateSalesOrderDto input,
+        Guid tenantId,
+        Guid userId)
+        => await salesOrderService.CreateAsync(input, tenantId, userId);
 
     public async Task<bool> UpdateSalesOrder(
         [Service] ISalesOrderService salesOrderService,
-        UpdateSalesOrderDto input)
-        => await salesOrderService.UpdateAsync(input);
+        UpdateSalesOrderDto input,
+        Guid tenantId,
+        Guid userId)
+        => await salesOrderService.UpdateAsync(input, tenantId, userId);
 
     public async Task<bool> DeleteSalesOrder(
         [Service] ISalesOrderService salesOrderService,
-        Guid salesOrderId)
-        => await salesOrderService.DeleteAsync(salesOrderId);
+        Guid salesOrderId,
+        Guid tenantId)
+        => await salesOrderService.DeleteAsync(salesOrderId, tenantId);
 
     public async Task<Guid> CreateActivity(
         [Service] IActivityService activityService,
-        CreateActivityDto input)
-        => await activityService.CreateAsync(input);
+        CreateActivityDto input,
+        Guid tenantId,
+        Guid userId)
+        => await activityService.CreateAsync(input, tenantId, userId);
 
     public async Task<bool> UpdateActivity(
         [Service] IActivityService activityService,
-        UpdateActivityDto input)
-        => await activityService.UpdateAsync(input);
+        UpdateActivityDto input,
+        Guid tenantId,
+        Guid userId)
+        => await activityService.UpdateAsync(input, tenantId, userId);
 
     public async Task<bool> DeleteActivity(
         [Service] IActivityService activityService,
-        Guid activityId)
-        => await activityService.DeleteAsync(activityId);
+        Guid activityId,
+        Guid tenantId)
+        => await activityService.DeleteAsync(activityId, tenantId);
+
+    public async Task<Guid> CreateCampaign(
+        [Service] ICampaignService campaignService,
+        CreateCampaignDto input,
+        Guid tenantId,
+        Guid userId)
+    {
+        return await campaignService.CreateAsync(input, tenantId, userId);
+    }
+
+    public async Task<bool> UpdateCampaign(
+        [Service] ICampaignService campaignService,
+        UpdateCampaignDto input,
+        Guid tenantId,
+        Guid userId)
+    {
+        return await campaignService.UpdateAsync(input, tenantId, userId);
+    }
+
+    public async Task<bool> DeleteCampaign(
+        [Service] ICampaignService campaignService,
+        Guid campaignId,
+        Guid tenantId)
+        => await campaignService.DeleteAsync(campaignId, tenantId);
 
     public async Task<Guid> ConvertLeadToCustomer(
         [Service] ILeadService leadService,
@@ -310,25 +372,6 @@ public class CRMMutations
     {
         return await activityService.RescheduleAsync(activityId, newDate, tenantId, userId);
     }
-
-    public async Task<Guid> CreateCampaign(
-        [Service] ICampaignService campaignService,
-        CreateCampaignDto input)
-    {
-        return await campaignService.CreateAsync(input);
-    }
-
-    public async Task<bool> UpdateCampaign(
-        [Service] ICampaignService campaignService,
-        UpdateCampaignDto input)
-    {
-        return await campaignService.UpdateAsync(input);
-    }
-
-    public async Task<bool> DeleteCampaign(
-        [Service] ICampaignService campaignService,
-        Guid campaignId)
-        => await campaignService.DeleteAsync(campaignId);
 
     public async Task<bool> LaunchCampaign(
         [Service] ICampaignService campaignService,

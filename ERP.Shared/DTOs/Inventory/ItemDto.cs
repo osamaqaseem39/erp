@@ -9,6 +9,7 @@ namespace ERP.Shared.DTOs.Inventory
         public string ItemName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public Guid ItemCategoryId { get; set; }
+        public Guid? BrandId { get; set; }
         public string ItemCategoryName { get; set; } = string.Empty;
         public string CategoryId { get; set; } = string.Empty;
         public string CategoryName { get; set; } = string.Empty;

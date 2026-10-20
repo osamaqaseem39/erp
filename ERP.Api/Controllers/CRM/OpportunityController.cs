@@ -38,32 +38,32 @@ public class OpportunityController : ERP.Api.Abstractions.ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(OpportunityDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id) =>
-        await HandleAsync(() => _service.GetByIdAsync(id));
+        await HandleAsync(() => _service.GetByIdAsync(id, GetTenantId()));
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<OpportunityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll() =>
-        await HandleAsync(() => _service.GetAllAsync());
+        await HandleAsync(() => _service.GetAllAsync(GetTenantId()));
 
     [HttpGet("customer/{customerId}")]
     [ProducesResponseType(typeof(IEnumerable<OpportunityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByCustomer(Guid customerId) =>
-        await HandleAsync(() => _service.GetByCustomerAsync(customerId));
+        await HandleAsync(() => _service.GetByCustomerAsync(customerId, GetTenantId()));
 
     [HttpGet("status/{status}")]
     [ProducesResponseType(typeof(IEnumerable<OpportunityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByStatus(string status) =>
-        await HandleAsync(() => _service.GetByStatusAsync(status));
+        await HandleAsync(() => _service.GetByStatusAsync(status, GetTenantId()));
 
     [HttpGet("assigned/{assignedTo}")]
     [ProducesResponseType(typeof(IEnumerable<OpportunityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByAssignedTo(Guid assignedTo) =>
-        await HandleAsync(() => _service.GetByAssignedToAsync(assignedTo));
+        await HandleAsync(() => _service.GetByAssignedToAsync(assignedTo, GetTenantId()));
 
     [HttpGet("stage/{stage}")]
     [ProducesResponseType(typeof(IEnumerable<OpportunityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByStage(string stage) =>
-        await HandleAsync(() => _service.GetByStageAsync(stage));
+        await HandleAsync(() => _service.GetByStageAsync(stage, GetTenantId()));
 
     [HttpPost]
     [ProducesResponseType(OpenApiResponseTypes.Created)]
@@ -73,7 +73,7 @@ public class OpportunityController : ERP.Api.Abstractions.ControllerBase
         if (!validationResult.IsValid)
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
 
-        return await HandleAsync(() => _service.CreateAsync(dto));
+        return await HandleAsync(() => _service.CreateAsync(dto, GetTenantId(), GetUserId()));
     }
 
     [HttpPut("{id}")]
@@ -85,13 +85,13 @@ public class OpportunityController : ERP.Api.Abstractions.ControllerBase
         if (!validationResult.IsValid)
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
 
-        return await HandleAsync(() => _service.UpdateAsync(dto));
+        return await HandleAsync(() => _service.UpdateAsync(dto, GetTenantId(), GetUserId()));
     }
 
     [HttpDelete("{id}")]
     [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id) =>
-        await HandleAsync(() => _service.DeleteAsync(id));
+        await HandleAsync(() => _service.DeleteAsync(id, GetTenantId()));
 
     [HttpPost("{id}/win")]
     [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]

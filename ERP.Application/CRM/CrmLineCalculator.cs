@@ -45,4 +45,21 @@ public static class CrmLineCalculator
 
     public static string GenerateNumber(string prefix)
         => $"{prefix}-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N}"[..20].ToUpperInvariant();
+
+    /// <summary>Apply header freight, overhead, and discount on line net+tax total.</summary>
+    public static decimal ApplyDocumentTotal(
+        decimal lineNetPlusTax,
+        decimal freight,
+        decimal overhead,
+        string? discountType,
+        decimal discountAmount)
+    {
+        var total = lineNetPlusTax + freight + overhead;
+        if (discountAmount <= 0) return Math.Round(total, 2);
+        if (string.Equals(discountType, "Percent", StringComparison.OrdinalIgnoreCase))
+            total -= Math.Round(lineNetPlusTax * discountAmount / 100m, 2);
+        else
+            total -= discountAmount;
+        return Math.Max(0, Math.Round(total, 2));
+    }
 }

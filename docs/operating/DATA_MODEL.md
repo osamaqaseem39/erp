@@ -55,6 +55,54 @@ See also [DATABASE.md](../DATABASE.md).
 | 2026-10-20 | Performance review workflow | HRM | `PerformanceReviews`: Draft → Submitted → Approved → Completed; soft-delete Draft only | **Implemented** (no schema change; existing table) |
 | 2026-10-20 | Recruitment workflows | HRM | JobOpening Open→Closed/Filled; Application Applied→Shortlisted→Interviewed→Hired/Rejected; Interview Scheduled→Completed/Cancelled | **Implemented** (no schema change; existing tables) |
 | 2026-10-20 | `Core.Users` TOTP 2FA columns | Platform | TwoFactorEnabled/Secret/PendingSecret + login challenge hash/expiry | **Implemented** (apply `20261020_Auth_TwoFactorTotp.sql`) |
+| 2026-10-20 | Customer depth tables | All modules | See [CUSTOMER_DEPTH_PLAN.md](../CUSTOMER_DEPTH_PLAN.md); SQL `20261020_CustomerDepth_*.sql` | **Implemented** (apply scripts) |
+
+### Customer depth — Core
+
+| Table | Purpose | Status |
+|-------|---------|--------|
+| `Core.Countries` | Geo master | **Implemented** |
+| `Core.Cities` | City FK Country | **Implemented** |
+| `Core.Branches` | Company branch/site | **Implemented** |
+| `Core.PaymentTerms` | Payment terms (days) | **Implemented** |
+
+### Customer depth — CRM / Sales / Packaging
+
+| Table | Purpose | Status |
+|-------|---------|--------|
+| `CRM.PouchTypes` / `ProductionProcesses` / `FOHTypes` | Packaging setup masters | Implemented |
+| `CRM.SaleEnquiries` + lines | Packaging enquiry | Implemented |
+| `CRM.SalePreCosts` + lines | Pre-costing | Implemented |
+| Enrich Customer / Quote / SalesOrder columns | Party + commercial fields | Implemented |
+| `dbo.DispatchAdvices` + lines | Delivery challan | Implemented |
+| Enrich SalesInvoice columns | Commercial parity | Implemented |
+
+### Customer depth — Procurement / SCM
+
+| Table | Purpose | Status |
+|-------|---------|--------|
+| `Procurement.LandedCostVouchers` + lines | Landed cost | **Implemented** |
+| `Procurement.VendorContracts` | Vendor price contracts | **Implemented** |
+| Enrich Vendor columns | Party parity | **Implemented** |
+| `Inventory.Brands` | Item brand | **Implemented** |
+| `Inventory.WarehouseLocations` | Bins | **Implemented** |
+| `Inventory.StockReservations` (+ rows) | Soft allocate | **Implemented** |
+| `Inventory.ItemKits` + components | Retail kits | **Implemented** |
+| `Inventory.CycleCounts` + lines | Cycle count | **Implemented** |
+
+### Customer depth — Finance / MFG / Projects / HRM
+
+| Table | Purpose | Status |
+|-------|---------|--------|
+| `Finance.OpeningBalances` + lines | FY opening | **Implemented** |
+| `Finance.AccountingPeriods` | Period close | **Implemented** |
+| `Finance.ChequeBooks` + `ChequeLeaves` | Cheque stock | **Implemented** |
+| `Finance.ExpenseClaims` + lines | Expense claims | **Implemented** |
+| `Manufacturing.Routings` + steps | Routing | **Implemented** |
+| `Manufacturing.ProductionScraps` | Scrap/QC | **Implemented** |
+| `Projects.ProjectTimesheets` + lines | Timesheets | **Implemented** |
+| `HRM.EmployeeAdvances` | Employee advance | **Implemented** |
+| `HRM.Teams` | Team master | **Implemented** |
 
 ### `HRM.Benefits` (shape)
 

@@ -4,11 +4,11 @@ namespace ERP.Infrastructure.Interfaces.CRM;
 
 public interface ICampaignRepository
 {
-    Task<Campaign?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Campaign>> GetAllAsync();
-    Task<IEnumerable<Campaign>> GetByStatusAsync(string status);
-    Task<IEnumerable<Campaign>> GetByTypeAsync(string campaignType);
+    Task<Campaign?> GetByIdAsync(Guid id, Guid tenantId);
+    Task<IEnumerable<Campaign>> GetAllAsync(Guid tenantId);
+    Task<IEnumerable<Campaign>> GetByStatusAsync(string status, Guid tenantId);
+    Task<IEnumerable<Campaign>> GetByTypeAsync(string campaignType, Guid tenantId);
     Task<Guid> CreateAsync(Campaign campaign);
     Task<bool> UpdateAsync(Campaign campaign);
-    Task<bool> DeleteAsync(Guid id);
+    Task<bool> DeleteAsync(Guid id, Guid tenantId);
 }

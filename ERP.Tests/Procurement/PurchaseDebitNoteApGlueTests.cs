@@ -34,10 +34,7 @@ public class PurchaseDebitNoteApGlueTests
             new ApplicationChartOfAccountRepositoryAdapter(db),
             db);
         var stock = withStock ? new StockService(new StockBalanceRepository(db)) : null;
-        var pi = new PurchaseInvoiceService(
-            new PurchaseInvoiceRepository(db),
-            new PurchaseInvoiceDetailRepository(db),
-            bills);
+        var pi = ERP.Tests.TestHelpers.ProcurementTestServices.CreatePurchaseInvoiceService(db, bills);
         var debit = new PurchaseDebitNoteService(
             new PurchaseDebitNoteRepository(db),
             new PurchaseDebitNoteLineRepository(db),

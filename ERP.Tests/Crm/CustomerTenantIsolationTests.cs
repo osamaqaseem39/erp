@@ -6,6 +6,8 @@ using ERP.Shared.Abstractions;
 using ERP.Shared.DTOs.CRM;
 using Microsoft.EntityFrameworkCore;
 
+using ERP.Tests;
+
 namespace ERP.Tests.Crm;
 
 public class CustomerTenantIsolationTests
@@ -18,7 +20,7 @@ public class CustomerTenantIsolationTests
         .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
 
     private static CustomerService Svc(ERPDbContext db) =>
-        new(new CustomerRepository(db, new FixedTenant(TenantA)));
+        new(new CustomerRepository(db, new FixedTenant(TenantA)), new TestCoreSettings());
 
     [Fact]
     public async Task Create_Stamps_Tenant_And_Forces_Active()

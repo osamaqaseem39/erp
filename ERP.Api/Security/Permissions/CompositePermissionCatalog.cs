@@ -32,8 +32,14 @@ public static class ReportPermissionCatalog
         Def("reports.purchaseSummary", "view", "Purchase summary report"),
         Def("reports.profitAndLoss", "view", "Profit and loss report"),
         Def("reports.trialBalance", "view", "Trial balance report"),
+        Def("reports.balanceSheet", "view", "Balance sheet report"),
+        Def("reports.arAging", "view", "AR aging report"),
+        Def("reports.apAging", "view", "AP aging report"),
+        Def("reports.saleOrderSchedule", "view", "Sale order schedule report"),
+        Def("reports.pendingSoProduction", "view", "Pending SO for production report"),
         Def("reports.operational", "view", "Operational sales/purchase/stock reports"),
         Def("reports.operational", "create", "Run operational reports"),
+        Def("reports.print", "view", "Document PDF prints (SO/SI/PO/DA/vouchers)"),
     ];
 
     private static PermissionDefinition Def(string resource, string action, string description) =>

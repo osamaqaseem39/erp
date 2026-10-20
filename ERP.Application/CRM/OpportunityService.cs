@@ -30,23 +30,28 @@ public class OpportunityService : IOpportunityService
         _numbers = numbers;
     }
 
-    public async Task<OpportunityDto?> GetByIdAsync(Guid id)
+    public async Task<OpportunityDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<OpportunityDto>> GetAllAsync()
+    public async Task<IEnumerable<OpportunityDto>> GetAllAsync(Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> CreateAsync(CreateOpportunityDto dto)
+    public async Task<Guid> CreateAsync(CreateOpportunityDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
         // ERP-FIX-5: always start Open
         entity.Status = "Open";
+        entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
         if (string.IsNullOrWhiteSpace(entity.OpportunityCode))
             entity.OpportunityCode = await _numbers.NextAsync("crm.opportunity");
         if (string.IsNullOrWhiteSpace(entity.OpportunityName))
@@ -54,9 +59,10 @@ public class OpportunityService : IOpportunityService
         return await _repository.CreateAsync(entity);
     }
 
-    public async Task<bool> UpdateAsync(UpdateOpportunityDto dto)
+    public async Task<bool> UpdateAsync(UpdateOpportunityDto dto, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
         if (!IsOpen(entity.Status)) return false;
 
@@ -64,38 +70,44 @@ public class OpportunityService : IOpportunityService
         MapToEntity(dto, entity);
         // ERP-FIX-5: status only via win/lose/cancel/convert
         entity.Status = previousStatus;
+        entity.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!IsOpen(entity.Status)) return false;
-        return await _repository.DeleteAsync(id);
+        return await _repository.DeleteAsync(id, tenantId);
     }
 
-    public async Task<IEnumerable<OpportunityDto>> GetByCustomerAsync(Guid customerId)
+    public async Task<IEnumerable<OpportunityDto>> GetByCustomerAsync(Guid customerId, Guid tenantId)
     {
-        var entities = await _repository.GetByCustomerAsync(customerId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByCustomerAsync(customerId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<OpportunityDto>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<OpportunityDto>> GetByStatusAsync(string status, Guid tenantId)
     {
-        var entities = await _repository.GetByStatusAsync(status);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByStatusAsync(status, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<OpportunityDto>> GetByAssignedToAsync(Guid assignedTo)
+    public async Task<IEnumerable<OpportunityDto>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId)
     {
-        var entities = await _repository.GetByAssignedToAsync(assignedTo);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByAssignedToAsync(assignedTo, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<OpportunityDto>> GetByStageAsync(string stage)
+    public async Task<IEnumerable<OpportunityDto>> GetByStageAsync(string stage, Guid tenantId)
     {
-        var entities = await _repository.GetByStageAsync(stage);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByStageAsync(stage, tenantId);
         return entities.Select(MapToDto);
     }
 
@@ -183,9 +195,10 @@ public class OpportunityService : IOpportunityService
         return quoteId;
     }
 
-    public async Task<bool> UpdateStageAsync(Guid id, string stage, decimal probability)
+    public async Task<bool> UpdateStageAsync(Guid id, string stage, decimal probability, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!IsOpen(entity.Status)) return false;
 
@@ -197,9 +210,7 @@ public class OpportunityService : IOpportunityService
     private async Task<Opportunity?> GetScopedAsync(Guid id, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null || entity.TenantId != tenantId) return null;
-        return entity;
+        return await _repository.GetByIdAsync(id, tenantId);
     }
 
     private static bool IsOpen(string? status) =>

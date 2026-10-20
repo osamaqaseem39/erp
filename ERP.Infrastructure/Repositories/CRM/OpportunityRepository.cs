@@ -13,38 +13,70 @@ public class OpportunityRepository : CrmRepositoryBase, IOpportunityRepository
     {
     }
 
-    private IQueryable<Opportunity> OpportunitiesQuery() =>
-        ApplyTenant(Context.Opportunities
-            .Include(o => o.Customer)
-            .Include(o => o.Activities));
-
-    public async Task<Opportunity?> GetByIdAsync(Guid id) =>
-        await OpportunitiesQuery().FirstOrDefaultAsync(o => o.Id == id);
-
-    public async Task<IEnumerable<Opportunity>> GetAllAsync() =>
-        await OpportunitiesQuery().ToListAsync();
-
-    public async Task<IEnumerable<Opportunity>> GetByCustomerAsync(Guid customerId) =>
-        await OpportunitiesQuery().Where(o => o.CustomerId == customerId).ToListAsync();
-
-    public async Task<IEnumerable<Opportunity>> GetByStatusAsync(string status) =>
-        await OpportunitiesQuery().Where(o => o.Status == status).ToListAsync();
-
-    public async Task<IEnumerable<Opportunity>> GetByStageAsync(string stage) =>
-        await OpportunitiesQuery().Where(o => o.Stage == stage).ToListAsync();
-
-    public async Task<IEnumerable<Opportunity>> GetByAssignedToAsync(Guid assignedTo) =>
-        await OpportunitiesQuery().Where(o => o.AssignedTo == assignedTo || o.AssignedToUserId == assignedTo).ToListAsync();
-
-    public async Task<bool> ExistsAsync(Guid id) =>
-        await OpportunitiesQuery().AnyAsync(o => o.Id == id);
-
-    public async Task<Opportunity?> GetByCodeAsync(string code) =>
-        await OpportunitiesQuery().FirstOrDefaultAsync(o => o.OpportunityCode == code);
-
-    public async Task<bool> IsCodeUniqueAsync(string code, Guid? excludeId = null)
+    private IQueryable<Opportunity> ForTenant(Guid tenantId)
     {
-        var query = OpportunitiesQuery().Where(o => o.OpportunityCode == code);
+        if (tenantId == Guid.Empty)
+            return Context.Opportunities.Where(_ => false);
+        return Context.Opportunities
+            .Include(o => o.Customer)
+            .Include(o => o.Activities)
+            .Where(o => o.TenantId == tenantId);
+    }
+
+    public async Task<Opportunity?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await ForTenant(tenantId).FirstOrDefaultAsync(o => o.Id == id);
+    }
+
+    public async Task<IEnumerable<Opportunity>> GetAllAsync(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Opportunity>> GetByCustomerAsync(Guid customerId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId).Where(o => o.CustomerId == customerId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Opportunity>> GetByStatusAsync(string status, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId).Where(o => o.Status == status).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Opportunity>> GetByStageAsync(string stage, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId).Where(o => o.Stage == stage).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Opportunity>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await ForTenant(tenantId)
+            .Where(o => o.AssignedTo == assignedTo || o.AssignedToUserId == assignedTo)
+            .ToListAsync();
+    }
+
+    public async Task<bool> ExistsAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return false;
+        return await ForTenant(tenantId).AnyAsync(o => o.Id == id);
+    }
+
+    public async Task<Opportunity?> GetByCodeAsync(string code, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await ForTenant(tenantId).FirstOrDefaultAsync(o => o.OpportunityCode == code);
+    }
+
+    public async Task<bool> IsCodeUniqueAsync(string code, Guid tenantId, Guid? excludeId = null)
+    {
+        if (tenantId == Guid.Empty) return false;
+        var query = ForTenant(tenantId).Where(o => o.OpportunityCode == code);
         if (excludeId.HasValue)
             query = query.Where(o => o.Id != excludeId.Value);
         return !await query.AnyAsync();
@@ -52,9 +84,9 @@ public class OpportunityRepository : CrmRepositoryBase, IOpportunityRepository
 
     public async Task<Guid> CreateAsync(Opportunity opportunity)
     {
-        if (TenantId.HasValue && TenantId != Guid.Empty)
-            opportunity.TenantId = TenantId.Value;
-
+        if (opportunity.TenantId == Guid.Empty) return Guid.Empty;
+        if (opportunity.Id == Guid.Empty) opportunity.Id = Guid.NewGuid();
+        if (opportunity.CreatedAt == default) opportunity.CreatedAt = DateTime.UtcNow;
         Context.Opportunities.Add(opportunity);
         await Context.SaveChangesAsync();
         return opportunity.Id;
@@ -62,14 +94,16 @@ public class OpportunityRepository : CrmRepositoryBase, IOpportunityRepository
 
     public async Task<bool> UpdateAsync(Opportunity opportunity)
     {
-        if (!MatchesTenant(opportunity)) return false;
+        if (opportunity.TenantId == Guid.Empty) return false;
+        opportunity.UpdatedAt = DateTime.UtcNow;
         Context.Opportunities.Update(opportunity);
         return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var opportunity = await GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var opportunity = await ForTenant(tenantId).FirstOrDefaultAsync(o => o.Id == id);
         if (opportunity == null) return false;
         Context.Opportunities.Remove(opportunity);
         return await Context.SaveChangesAsync() > 0;

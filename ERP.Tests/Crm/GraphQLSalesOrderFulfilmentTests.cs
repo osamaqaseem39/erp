@@ -139,13 +139,13 @@ public class GraphQLSalesOrderFulfilmentTests
             [
                 new CreateSalesOrderLineDto { ItemId = Item, Quantity = 3, UnitPrice = 10, TaxRate = 0 }
             ]
-        });
+        }, Tenant, Creator);
 
         Assert.False(await mutations.ShipSalesOrder(svc, id, Tenant, Approver));
         Assert.True(await mutations.ApproveSalesOrder(svc, id, Tenant, Approver));
         Assert.True(await mutations.ShipSalesOrder(svc, id, Tenant, Approver));
-        Assert.Equal("Shipped", (await queries.GetSalesOrder(svc, id))!.Status);
+        Assert.Equal("Shipped", (await queries.GetSalesOrder(svc, id, Tenant))!.Status);
         Assert.True(await mutations.InvoiceSalesOrder(svc, id, Tenant, Approver));
-        Assert.Equal("Invoiced", (await queries.GetSalesOrder(svc, id))!.Status);
+        Assert.Equal("Invoiced", (await queries.GetSalesOrder(svc, id, Tenant))!.Status);
     }
 }

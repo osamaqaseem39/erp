@@ -21,6 +21,9 @@ public abstract class CrmRepositoryBase
     protected IQueryable<T> ApplyTenant<T>(IQueryable<T> query) where T : BaseEntity
         => query.ApplyTenantFilter(TenantId);
 
+    /// <summary>Fail-closed: empty/missing ambient tenant never matches.</summary>
     protected bool MatchesTenant(BaseEntity entity)
-        => !TenantId.HasValue || TenantId == Guid.Empty || entity.TenantId == TenantId;
+        => TenantId.HasValue
+           && TenantId.Value != Guid.Empty
+           && entity.TenantId == TenantId.Value;
 }

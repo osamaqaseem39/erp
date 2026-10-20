@@ -13,12 +13,17 @@ public class ActivityRepository : CrmRepositoryBase, IActivityRepository
     {
     }
 
-    // Avoid Include on required AssignedToUser — missing User rows become INNER JOINs and hide activities.
-    private IQueryable<Activity> ActivitiesQuery() =>
-        ApplyTenant(Context.Activities
+    private IQueryable<Activity> ForTenant(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty)
+            return Context.Activities.Where(_ => false);
+        // Avoid Include on required AssignedToUser — missing User rows become INNER JOINs and hide activities.
+        return Context.Activities
             .Include(a => a.Customer)
             .Include(a => a.Lead)
-            .Include(a => a.Opportunity));
+            .Include(a => a.Opportunity)
+            .Where(a => a.TenantId == tenantId);
+    }
 
     private async Task LoadAssigneeAsync(Activity? entity)
     {
@@ -32,25 +37,27 @@ public class ActivityRepository : CrmRepositoryBase, IActivityRepository
             await Context.Entry(entity).Reference(a => a.AssignedToUser).LoadAsync();
     }
 
-    public async Task<Activity?> GetByIdAsync(Guid id)
+    public async Task<Activity?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await ActivitiesQuery().FirstOrDefaultAsync(a => a.Id == id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await ForTenant(tenantId).FirstOrDefaultAsync(a => a.Id == id);
         await LoadAssigneeAsync(entity);
         return entity;
     }
 
-    public async Task<IEnumerable<Activity>> GetAllAsync()
+    public async Task<IEnumerable<Activity>> GetAllAsync(Guid tenantId)
     {
-        var list = await ActivitiesQuery().ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId).ToListAsync();
         await LoadAssigneesAsync(list);
         return list;
     }
 
     public async Task<Guid> CreateAsync(Activity activity)
     {
-        if (TenantId.HasValue && TenantId != Guid.Empty)
-            activity.TenantId = TenantId.Value;
-
+        if (activity.TenantId == Guid.Empty) return Guid.Empty;
+        if (activity.Id == Guid.Empty) activity.Id = Guid.NewGuid();
+        if (activity.CreatedAt == default) activity.CreatedAt = DateTime.UtcNow;
         Context.Activities.Add(activity);
         await Context.SaveChangesAsync();
         return activity.Id;
@@ -58,67 +65,81 @@ public class ActivityRepository : CrmRepositoryBase, IActivityRepository
 
     public async Task<bool> UpdateAsync(Activity activity)
     {
-        if (!MatchesTenant(activity)) return false;
+        if (activity.TenantId == Guid.Empty) return false;
+        activity.UpdatedAt = DateTime.UtcNow;
         Context.Activities.Update(activity);
         return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var activity = await GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var activity = await ForTenant(tenantId).FirstOrDefaultAsync(a => a.Id == id);
         if (activity == null) return false;
         Context.Activities.Remove(activity);
         return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> ExistsAsync(Guid id) =>
-        await ActivitiesQuery().AnyAsync(a => a.Id == id);
-
-    public async Task<IEnumerable<Activity>> GetByCustomerAsync(Guid customerId)
+    public async Task<bool> ExistsAsync(Guid id, Guid tenantId)
     {
-        var list = await ActivitiesQuery().Where(a => a.CustomerId == customerId).ToListAsync();
+        if (tenantId == Guid.Empty) return false;
+        return await ForTenant(tenantId).AnyAsync(a => a.Id == id);
+    }
+
+    public async Task<IEnumerable<Activity>> GetByCustomerAsync(Guid customerId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId).Where(a => a.CustomerId == customerId).ToListAsync();
         await LoadAssigneesAsync(list);
         return list;
     }
 
-    public async Task<IEnumerable<Activity>> GetByLeadAsync(Guid leadId)
+    public async Task<IEnumerable<Activity>> GetByLeadAsync(Guid leadId, Guid tenantId)
     {
-        var list = await ActivitiesQuery().Where(a => a.LeadId == leadId).ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId).Where(a => a.LeadId == leadId).ToListAsync();
         await LoadAssigneesAsync(list);
         return list;
     }
 
-    public async Task<IEnumerable<Activity>> GetByOpportunityAsync(Guid opportunityId)
+    public async Task<IEnumerable<Activity>> GetByOpportunityAsync(Guid opportunityId, Guid tenantId)
     {
-        var list = await ActivitiesQuery().Where(a => a.OpportunityId == opportunityId).ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId).Where(a => a.OpportunityId == opportunityId).ToListAsync();
         await LoadAssigneesAsync(list);
         return list;
     }
 
-    public async Task<IEnumerable<Activity>> GetByAssignedToAsync(Guid assignedTo)
+    public async Task<IEnumerable<Activity>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId)
     {
-        var list = await ActivitiesQuery().Where(a => a.AssignedToUserId == assignedTo).ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId).Where(a => a.AssignedToUserId == assignedTo).ToListAsync();
         await LoadAssigneesAsync(list);
         return list;
     }
 
-    public async Task<IEnumerable<Activity>> GetByTypeAsync(string activityType)
+    public async Task<IEnumerable<Activity>> GetByTypeAsync(string activityType, Guid tenantId)
     {
-        var list = await ActivitiesQuery().Where(a => a.ActivityType == activityType).ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId).Where(a => a.ActivityType == activityType).ToListAsync();
         await LoadAssigneesAsync(list);
         return list;
     }
 
-    public async Task<IEnumerable<Activity>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<Activity>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        var list = await ActivitiesQuery().Where(a => a.StartDate >= startDate && a.StartDate <= endDate).ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId)
+            .Where(a => a.StartDate >= startDate && a.StartDate <= endDate)
+            .ToListAsync();
         await LoadAssigneesAsync(list);
         return list;
     }
 
-    public async Task<IEnumerable<Activity>> GetByEntityAsync(string entityType, Guid entityId)
+    public async Task<IEnumerable<Activity>> GetByEntityAsync(string entityType, Guid entityId, Guid tenantId)
     {
-        var list = await ActivitiesQuery()
+        if (tenantId == Guid.Empty) return [];
+        var list = await ForTenant(tenantId)
             .Where(a => a.RelatedEntityType == entityType && a.RelatedEntityId == entityId)
             .ToListAsync();
         await LoadAssigneesAsync(list);

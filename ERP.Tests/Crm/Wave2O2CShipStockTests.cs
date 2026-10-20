@@ -135,11 +135,11 @@ public class Wave2O2CShipStockTests
             [
                 new CreateSalesOrderLineDto { ItemId = Item, Quantity = 3, UnitPrice = 10, TaxRate = 0 }
             ]
-        });
+        }, Tenant, creator);
         Assert.True(await svc.ApproveAsync(orderId, Tenant, approver));
 
         Assert.True(await svc.ShipAsync(orderId, Tenant, approver));
-        Assert.Equal("Shipped", (await svc.GetByIdAsync(orderId))!.Status);
+        Assert.Equal("Shipped", (await svc.GetByIdAsync(orderId, Tenant))!.Status);
         Assert.Equal(5m, await stock.GetStockLevelAsync(Item, Warehouse));
         Assert.False(await svc.ShipAsync(orderId, Tenant, approver));
     }
@@ -148,7 +148,7 @@ public class Wave2O2CShipStockTests
     public async Task Ship_Fails_WhenInsufficientStock()
     {
         await using var db = Db();
-        var stock = new StockService(new StockBalanceRepository(db));
+        var stock = new StockService(new StockBalanceRepository(db), tenant: new FixedTenant());
         var svc = CreateService(db, stock);
 
         var creator = Guid.NewGuid();
@@ -164,10 +164,10 @@ public class Wave2O2CShipStockTests
             [
                 new CreateSalesOrderLineDto { ItemId = Item, Quantity = 2, UnitPrice = 10 }
             ]
-        });
+        }, Tenant, creator);
         Assert.True(await svc.ApproveAsync(orderId, Tenant, approver));
 
         Assert.False(await svc.ShipAsync(orderId, Tenant, approver));
-        Assert.Equal("Approved", (await svc.GetByIdAsync(orderId))!.Status);
+        Assert.Equal("Approved", (await svc.GetByIdAsync(orderId, Tenant))!.Status);
     }
 }

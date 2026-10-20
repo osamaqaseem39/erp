@@ -35,23 +35,28 @@ public class LeadService : ILeadService
         _numbers = numbers;
     }
 
-    public async Task<LeadDto?> GetByIdAsync(Guid id)
+    public async Task<LeadDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<LeadDto>> GetAllAsync()
+    public async Task<IEnumerable<LeadDto>> GetAllAsync(Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> CreateAsync(CreateLeadDto dto)
+    public async Task<Guid> CreateAsync(CreateLeadDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
         // ERP-FIX-5: always start New
         entity.Status = "New";
+        entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
         if (string.IsNullOrWhiteSpace(entity.LeadCode))
             entity.LeadCode = await _numbers.NextAsync("crm.lead");
         if (string.IsNullOrWhiteSpace(entity.LeadSource) && !string.IsNullOrWhiteSpace(entity.Source))
@@ -62,9 +67,10 @@ public class LeadService : ILeadService
         return await _repository.CreateAsync(entity);
     }
 
-    public async Task<bool> UpdateAsync(UpdateLeadDto dto)
+    public async Task<bool> UpdateAsync(UpdateLeadDto dto, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
         if (!IsEditable(entity.Status)) return false;
 
@@ -72,39 +78,45 @@ public class LeadService : ILeadService
         MapToEntity(dto, entity);
         // ERP-FIX-5: status only via qualify/lose/convert
         entity.Status = previousStatus;
+        entity.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(StatusOf(entity), "New", StringComparison.OrdinalIgnoreCase))
             return false;
-        return await _repository.DeleteAsync(id);
+        return await _repository.DeleteAsync(id, tenantId);
     }
 
-    public async Task<IEnumerable<LeadDto>> GetBySourceAsync(string source)
+    public async Task<IEnumerable<LeadDto>> GetBySourceAsync(string source, Guid tenantId)
     {
-        var entities = await _repository.GetBySourceAsync(source);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetBySourceAsync(source, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<LeadDto>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<LeadDto>> GetByStatusAsync(string status, Guid tenantId)
     {
-        var entities = await _repository.GetByStatusAsync(status);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByStatusAsync(status, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<LeadDto>> GetByAssignedToAsync(Guid assignedTo)
+    public async Task<IEnumerable<LeadDto>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId)
     {
-        var entities = await _repository.GetByAssignedToAsync(assignedTo);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByAssignedToAsync(assignedTo, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<LeadDto>> SearchAsync(string searchTerm)
+    public async Task<IEnumerable<LeadDto>> SearchAsync(string searchTerm, Guid tenantId)
     {
-        var entities = await _repository.SearchAsync(searchTerm);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.SearchAsync(searchTerm, tenantId);
         return entities.Select(MapToDto);
     }
 
@@ -219,9 +231,7 @@ public class LeadService : ILeadService
     private async Task<Lead?> GetScopedAsync(Guid id, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null || entity.TenantId != tenantId) return null;
-        return entity;
+        return await _repository.GetByIdAsync(id, tenantId);
     }
 
     private static bool IsEditable(string? status)

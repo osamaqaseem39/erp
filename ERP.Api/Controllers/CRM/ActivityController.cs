@@ -38,47 +38,47 @@ public class ActivityController : ERP.Api.Abstractions.ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ActivityDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id) =>
-        await HandleAsync(() => _service.GetByIdAsync(id));
+        await HandleAsync(() => _service.GetByIdAsync(id, GetTenantId()));
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll() =>
-        await HandleAsync(() => _service.GetAllAsync());
+        await HandleAsync(() => _service.GetAllAsync(GetTenantId()));
 
     [HttpGet("customer/{customerId}")]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByCustomer(Guid customerId) =>
-        await HandleAsync(() => _service.GetByCustomerAsync(customerId));
+        await HandleAsync(() => _service.GetByCustomerAsync(customerId, GetTenantId()));
 
     [HttpGet("lead/{leadId}")]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByLead(Guid leadId) =>
-        await HandleAsync(() => _service.GetByLeadAsync(leadId));
+        await HandleAsync(() => _service.GetByLeadAsync(leadId, GetTenantId()));
 
     [HttpGet("opportunity/{opportunityId}")]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByOpportunity(Guid opportunityId) =>
-        await HandleAsync(() => _service.GetByOpportunityAsync(opportunityId));
+        await HandleAsync(() => _service.GetByOpportunityAsync(opportunityId, GetTenantId()));
 
     [HttpGet("related/{entityType}/{entityId}")]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByRelatedEntity(string entityType, Guid entityId) =>
-        await HandleAsync(() => _service.GetByEntityAsync(entityType, entityId));
+        await HandleAsync(() => _service.GetByEntityAsync(entityType, entityId, GetTenantId()));
 
     [HttpGet("assigned/{assignedTo}")]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByAssignedTo(Guid assignedTo) =>
-        await HandleAsync(() => _service.GetByAssignedToAsync(assignedTo));
+        await HandleAsync(() => _service.GetByAssignedToAsync(assignedTo, GetTenantId()));
 
     [HttpGet("type/{activityType}")]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByType(string activityType) =>
-        await HandleAsync(() => _service.GetByTypeAsync(activityType));
+        await HandleAsync(() => _service.GetByTypeAsync(activityType, GetTenantId()));
 
     [HttpGet("period")]
     [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByDateRange(DateTime startDate, DateTime endDate) =>
-        await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate));
+        await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate, GetTenantId()));
 
     [HttpPost]
     [ProducesResponseType(OpenApiResponseTypes.Created)]
@@ -88,7 +88,7 @@ public class ActivityController : ERP.Api.Abstractions.ControllerBase
         if (!validationResult.IsValid)
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
 
-        return await HandleAsync(() => _service.CreateAsync(dto));
+        return await HandleAsync(() => _service.CreateAsync(dto, GetTenantId(), GetUserId()));
     }
 
     [HttpPut("{id}")]
@@ -100,13 +100,13 @@ public class ActivityController : ERP.Api.Abstractions.ControllerBase
         if (!validationResult.IsValid)
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
 
-        return await HandleAsync(() => _service.UpdateAsync(dto));
+        return await HandleAsync(() => _service.UpdateAsync(dto, GetTenantId(), GetUserId()));
     }
 
     [HttpDelete("{id}")]
     [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id) =>
-        await HandleAsync(() => _service.DeleteAsync(id));
+        await HandleAsync(() => _service.DeleteAsync(id, GetTenantId()));
 
     [HttpPost("{id}/complete")]
     [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]

@@ -13,24 +13,31 @@ public class SalesOrderLineRepository : CrmRepositoryBase, ISalesOrderLineReposi
     {
     }
 
-    public async Task<IEnumerable<SalesOrderLine>> GetBySalesOrderIdAsync(Guid salesOrderId) =>
-        await ApplyTenant(Context.SalesOrderLines.Where(l => l.SalesOrderId == salesOrderId)).ToListAsync();
+    public async Task<IEnumerable<SalesOrderLine>> GetBySalesOrderIdAsync(Guid salesOrderId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await Context.SalesOrderLines
+            .Where(l => l.SalesOrderId == salesOrderId && l.TenantId == tenantId)
+            .ToListAsync();
+    }
 
     public async Task<Guid> CreateAsync(SalesOrderLine line)
     {
-        if (TenantId.HasValue && TenantId != Guid.Empty)
-            line.TenantId = TenantId.Value;
-
+        if (line.TenantId == Guid.Empty) return Guid.Empty;
+        if (line.Id == Guid.Empty) line.Id = Guid.NewGuid();
+        if (line.CreatedAt == default) line.CreatedAt = DateTime.UtcNow;
         Context.SalesOrderLines.Add(line);
         await Context.SaveChangesAsync();
         return line.Id;
     }
 
-    public async Task<bool> DeleteBySalesOrderIdAsync(Guid salesOrderId)
+    public async Task<bool> DeleteBySalesOrderIdAsync(Guid salesOrderId, Guid tenantId)
     {
-        var lines = await ApplyTenant(Context.SalesOrderLines.Where(l => l.SalesOrderId == salesOrderId)).ToListAsync();
+        if (tenantId == Guid.Empty) return false;
+        var lines = await Context.SalesOrderLines
+            .Where(l => l.SalesOrderId == salesOrderId && l.TenantId == tenantId)
+            .ToListAsync();
         if (lines.Count == 0) return true;
-
         Context.SalesOrderLines.RemoveRange(lines);
         return await Context.SaveChangesAsync() > 0;
     }

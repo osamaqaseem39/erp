@@ -72,17 +72,21 @@ public class LeadConversionTests
 
         public FakeLeadRepository(Lead lead) => _leads = new() { [lead.Id] = lead };
 
-        public Task<Lead?> GetByIdAsync(Guid id) =>
-            Task.FromResult(_leads.TryGetValue(id, out var lead) ? lead : null);
+        public Task<Lead?> GetByIdAsync(Guid id, Guid tenantId)
+        {
+            if (tenantId == Guid.Empty) return Task.FromResult<Lead?>(null);
+            return Task.FromResult(_leads.TryGetValue(id, out var lead) && lead.TenantId == tenantId ? lead : null);
+        }
 
-        public Task<IEnumerable<Lead>> GetAllAsync() => Task.FromResult<IEnumerable<Lead>>(_leads.Values);
-        public Task<IEnumerable<Lead>> GetBySourceAsync(string source) => GetAllAsync();
-        public Task<IEnumerable<Lead>> GetByStatusAsync(string status) => GetAllAsync();
-        public Task<IEnumerable<Lead>> GetByAssignedToAsync(Guid assignedTo) => GetAllAsync();
-        public Task<IEnumerable<Lead>> SearchAsync(string searchTerm) => GetAllAsync();
+        public Task<IEnumerable<Lead>> GetAllAsync(Guid tenantId) =>
+            Task.FromResult<IEnumerable<Lead>>(tenantId == Guid.Empty ? [] : _leads.Values.Where(l => l.TenantId == tenantId));
+        public Task<IEnumerable<Lead>> GetBySourceAsync(string source, Guid tenantId) => GetAllAsync(tenantId);
+        public Task<IEnumerable<Lead>> GetByStatusAsync(string status, Guid tenantId) => GetAllAsync(tenantId);
+        public Task<IEnumerable<Lead>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId) => GetAllAsync(tenantId);
+        public Task<IEnumerable<Lead>> SearchAsync(string searchTerm, Guid tenantId) => GetAllAsync(tenantId);
         public Task<Guid> CreateAsync(Lead lead) => throw new NotImplementedException();
         public Task<bool> UpdateAsync(Lead lead) => Task.FromResult(true);
-        public Task<bool> DeleteAsync(Guid id) => Task.FromResult(true);
+        public Task<bool> DeleteAsync(Guid id, Guid tenantId) => Task.FromResult(true);
     }
 
     private sealed class FakeCustomerRepository : ICustomerRepository
@@ -124,17 +128,17 @@ public class LeadConversionTests
             return Task.FromResult(opportunity.Id);
         }
 
-        public Task<Opportunity?> GetByIdAsync(Guid id) => Task.FromResult<Opportunity?>(null);
-        public Task<IEnumerable<Opportunity>> GetAllAsync() => Task.FromResult(Enumerable.Empty<Opportunity>());
-        public Task<bool> ExistsAsync(Guid id) => Task.FromResult(false);
-        public Task<Opportunity?> GetByCodeAsync(string code) => Task.FromResult<Opportunity?>(null);
-        public Task<bool> IsCodeUniqueAsync(string code, Guid? excludeId = null) => Task.FromResult(true);
-        public Task<IEnumerable<Opportunity>> GetByCustomerAsync(Guid customerId) => Task.FromResult(Enumerable.Empty<Opportunity>());
-        public Task<IEnumerable<Opportunity>> GetByStatusAsync(string status) => Task.FromResult(Enumerable.Empty<Opportunity>());
-        public Task<IEnumerable<Opportunity>> GetByAssignedToAsync(Guid assignedTo) => Task.FromResult(Enumerable.Empty<Opportunity>());
-        public Task<IEnumerable<Opportunity>> GetByStageAsync(string stage) => Task.FromResult(Enumerable.Empty<Opportunity>());
+        public Task<Opportunity?> GetByIdAsync(Guid id, Guid tenantId) => Task.FromResult<Opportunity?>(null);
+        public Task<IEnumerable<Opportunity>> GetAllAsync(Guid tenantId) => Task.FromResult(Enumerable.Empty<Opportunity>());
+        public Task<bool> ExistsAsync(Guid id, Guid tenantId) => Task.FromResult(false);
+        public Task<Opportunity?> GetByCodeAsync(string code, Guid tenantId) => Task.FromResult<Opportunity?>(null);
+        public Task<bool> IsCodeUniqueAsync(string code, Guid tenantId, Guid? excludeId = null) => Task.FromResult(true);
+        public Task<IEnumerable<Opportunity>> GetByCustomerAsync(Guid customerId, Guid tenantId) => Task.FromResult(Enumerable.Empty<Opportunity>());
+        public Task<IEnumerable<Opportunity>> GetByStatusAsync(string status, Guid tenantId) => Task.FromResult(Enumerable.Empty<Opportunity>());
+        public Task<IEnumerable<Opportunity>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId) => Task.FromResult(Enumerable.Empty<Opportunity>());
+        public Task<IEnumerable<Opportunity>> GetByStageAsync(string stage, Guid tenantId) => Task.FromResult(Enumerable.Empty<Opportunity>());
         public Task<bool> UpdateAsync(Opportunity opportunity) => Task.FromResult(true);
-        public Task<bool> DeleteAsync(Guid id) => Task.FromResult(true);
+        public Task<bool> DeleteAsync(Guid id, Guid tenantId) => Task.FromResult(true);
     }
 
     private sealed class FakeNumbers : ERP.Infrastructure.Numbering.IDocumentNumberService

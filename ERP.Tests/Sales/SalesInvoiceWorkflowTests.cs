@@ -1,3 +1,4 @@
+using ERP.Tests;
 using ERP.Application.Finance;
 using ERP.Application.Sales;
 using ERP.Infrastructure.Database;
@@ -18,8 +19,7 @@ public class SalesInvoiceWorkflowTests
         .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
 
     private static SalesInvoiceService Service(ERPDbContext db) =>
-        new(new SalesInvoiceRepository(db), new SalesInvoiceLineRepository(db),
-            new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)));
+        new(new SalesInvoiceRepository(db), new SalesInvoiceLineRepository(db), new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)), new TestCoreSettings());
 
     private static async Task<Guid> CreateDraft(SalesInvoiceService sales) =>
         await sales.CreateAsync(new CreateSalesInvoiceDto

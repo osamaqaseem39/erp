@@ -26,7 +26,7 @@ public class PartyHardenTests
         await using var db = Db();
         var tenant = new FixedTenant();
         var salesmen = new SalesmanService(new SalesmanRepository(db, tenant));
-        var customers = new CustomerService(new CustomerRepository(db, tenant));
+        var customers = new CustomerService(new CustomerRepository(db, tenant), new TestCoreSettings());
 
         var user = Guid.NewGuid();
         var smId = await salesmen.CreateAsync(new CreateSalesmanDto
@@ -76,7 +76,7 @@ public class PartyHardenTests
     public async Task Customer_Keeps_Legacy_TaxId_Synced_From_Ntn()
     {
         await using var db = Db();
-        var customers = new CustomerService(new CustomerRepository(db, new FixedTenant()));
+        var customers = new CustomerService(new CustomerRepository(db, new FixedTenant()), new TestCoreSettings());
         var id = await customers.CreateAsync(new CreateCustomerDto
         {
             CustomerCode = "C-2",

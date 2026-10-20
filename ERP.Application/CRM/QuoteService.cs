@@ -40,35 +40,41 @@ public class QuoteService : IQuoteService
         _numbers = numbers;
     }
 
-    public async Task<QuoteDto?> GetByIdAsync(Guid id)
+    public async Task<QuoteDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<QuoteDto>> GetAllAsync()
+    public async Task<IEnumerable<QuoteDto>> GetAllAsync(Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> CreateAsync(CreateQuoteDto dto)
+    public async Task<Guid> CreateAsync(CreateQuoteDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
         // ERP-FIX-5: always start Draft
         entity.Status = "Draft";
+        entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
         if (string.IsNullOrWhiteSpace(entity.QuoteNumber))
             entity.QuoteNumber = await _numbers.NextAsync("crm.quote");
 
         ApplyLineTotals(entity, dto.QuoteLines);
         var quoteId = await _repository.CreateAsync(entity);
-        await SaveLinesAsync(quoteId, entity.TenantId, dto.QuoteLines);
+        await SaveLinesAsync(quoteId, tenantId, dto.QuoteLines);
         return quoteId;
     }
 
-    public async Task<bool> UpdateAsync(UpdateQuoteDto dto)
+    public async Task<bool> UpdateAsync(UpdateQuoteDto dto, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
             return false;
@@ -77,38 +83,43 @@ public class QuoteService : IQuoteService
         MapToEntity(dto, entity);
         // ERP-FIX-5: status only via send/approve/reject/convert
         entity.Status = previousStatus;
+        entity.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         ApplyLineTotals(entity, dto.QuoteLines);
-        await _lineRepository.DeleteByQuoteIdAsync(entity.Id);
-        await SaveLinesAsync(entity.Id, entity.TenantId, dto.QuoteLines);
+        await _lineRepository.DeleteByQuoteIdAsync(entity.Id, tenantId);
+        await SaveLinesAsync(entity.Id, tenantId, dto.QuoteLines);
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        await _lineRepository.DeleteByQuoteIdAsync(id);
-        return await _repository.DeleteAsync(id);
+        await _lineRepository.DeleteByQuoteIdAsync(id, tenantId);
+        return await _repository.DeleteAsync(id, tenantId);
     }
 
-    public async Task<IEnumerable<QuoteDto>> GetByCustomerAsync(Guid customerId)
+    public async Task<IEnumerable<QuoteDto>> GetByCustomerAsync(Guid customerId, Guid tenantId)
     {
-        var entities = await _repository.GetByCustomerAsync(customerId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByCustomerAsync(customerId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<QuoteDto>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<QuoteDto>> GetByStatusAsync(string status, Guid tenantId)
     {
-        var entities = await _repository.GetByStatusAsync(status);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByStatusAsync(status, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<QuoteDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<QuoteDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        var entities = await _repository.GetByDateRangeAsync(startDate, endDate);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByDateRangeAsync(startDate, endDate, tenantId);
         return entities.Select(MapToDto);
     }
 
@@ -164,7 +175,7 @@ public class QuoteService : IQuoteService
 
         var lines = quote.QuoteLines.Any()
             ? quote.QuoteLines
-            : (await _lineRepository.GetByQuoteIdAsync(id)).ToList();
+            : (await _lineRepository.GetByQuoteIdAsync(id, tenantId)).ToList();
 
         var orderNumber = await _numbers.NextAsync("crm.salesOrder");
         var salesOrder = new SalesOrder
@@ -218,9 +229,7 @@ public class QuoteService : IQuoteService
     private async Task<Quote?> GetScopedAsync(Guid id, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null || entity.TenantId != tenantId) return null;
-        return entity;
+        return await _repository.GetByIdAsync(id, tenantId);
     }
 
     private async Task SaveLinesAsync(Guid quoteId, Guid tenantId, IEnumerable<CreateQuoteLineDto> lines)
@@ -242,7 +251,8 @@ public class QuoteService : IQuoteService
 
         entity.SubTotal = totals.SubTotal;
         entity.TaxAmount = totals.TaxAmount;
-        entity.TotalAmount = totals.TotalAmount;
+        entity.TotalAmount = CrmLineCalculator.ApplyDocumentTotal(
+            totals.TotalAmount, entity.Freight, entity.Overhead, entity.DiscountType, entity.DiscountAmount);
     }
 
     private static QuoteDto MapToDto(Quote entity) => new()
@@ -270,6 +280,15 @@ public class QuoteService : IQuoteService
         CreatedBy = entity.CreatedBy,
         UpdatedBy = entity.UpdatedBy,
         IsActive = entity.IsActive,
+        ReferenceNo = entity.ReferenceNo,
+        ReferenceDate = entity.ReferenceDate,
+        CreditDays = entity.CreditDays,
+        PaymentMode = entity.PaymentMode,
+        PaymentTermId = entity.PaymentTermId,
+        Freight = entity.Freight,
+        Overhead = entity.Overhead,
+        DiscountType = entity.DiscountType,
+        DiscountAmount = entity.DiscountAmount,
         QuoteLines = entity.QuoteLines.Select(CrmLineMapper.ToDto).ToList()
     };
 
@@ -291,6 +310,15 @@ public class QuoteService : IQuoteService
         Notes = dto.Notes,
         Terms = dto.Terms,
         AssignedToUserId = dto.AssignedToUserId,
+        ReferenceNo = dto.ReferenceNo,
+        ReferenceDate = dto.ReferenceDate,
+        CreditDays = dto.CreditDays,
+        PaymentMode = dto.PaymentMode,
+        PaymentTermId = dto.PaymentTermId,
+        Freight = dto.Freight,
+        Overhead = dto.Overhead,
+        DiscountType = dto.DiscountType,
+        DiscountAmount = dto.DiscountAmount,
         CreatedBy = dto.CreatedBy
     };
 
@@ -308,6 +336,15 @@ public class QuoteService : IQuoteService
         entity.Notes = dto.Notes;
         entity.Terms = dto.Terms;
         entity.AssignedToUserId = dto.AssignedToUserId;
+        entity.ReferenceNo = dto.ReferenceNo;
+        entity.ReferenceDate = dto.ReferenceDate;
+        if (dto.CreditDays.HasValue) entity.CreditDays = dto.CreditDays.Value;
+        entity.PaymentMode = dto.PaymentMode;
+        entity.PaymentTermId = dto.PaymentTermId;
+        if (dto.Freight.HasValue) entity.Freight = dto.Freight.Value;
+        if (dto.Overhead.HasValue) entity.Overhead = dto.Overhead.Value;
+        entity.DiscountType = dto.DiscountType;
+        if (dto.DiscountAmount.HasValue) entity.DiscountAmount = dto.DiscountAmount.Value;
         entity.UpdatedBy = dto.UpdatedBy;
         entity.UpdatedAt = DateTime.UtcNow;
     }

@@ -60,7 +60,7 @@ public class QuoteWorkflowTests
             [
                 new CreateQuoteLineDto { ItemId = Item, Quantity = 2, UnitPrice = 25, TaxRate = 0 }
             ]
-        });
+        }, Tenant, Creator);
     }
 
     [Fact]
@@ -70,10 +70,10 @@ public class QuoteWorkflowTests
         var svc = Svc(db);
         var id = await CreateDraftAsync(svc);
 
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.ApproveAsync(id, Tenant, Creator));
         Assert.True(await svc.ApproveAsync(id, Tenant, Approver));
-        Assert.Equal("Accepted", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Accepted", (await svc.GetByIdAsync(id, Tenant))!.Status);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class QuoteWorkflowTests
         var id = await CreateDraftAsync(svc);
 
         Assert.True(await svc.RejectAsync(id, Tenant, Approver));
-        Assert.Equal("Rejected", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Rejected", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.Equal(Guid.Empty, await svc.ConvertToSalesOrderAsync(id, Tenant, Approver));
         Assert.False(await svc.SendQuoteAsync(id, Tenant, Approver));
     }
@@ -105,12 +105,12 @@ public class QuoteWorkflowTests
             [
                 new CreateQuoteLineDto { ItemId = Item, Quantity = 1, UnitPrice = 10 }
             ]
-        }));
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
+        }, Tenant, Creator));
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
 
         Assert.True(await svc.SendQuoteAsync(id, Tenant, Approver));
-        Assert.False(await svc.UpdateAsync(new UpdateQuoteDto { Id = id, Notes = "nope", QuoteLines = [] }));
-        Assert.False(await svc.DeleteAsync(id));
+        Assert.False(await svc.UpdateAsync(new UpdateQuoteDto { Id = id, Notes = "nope", QuoteLines = [] }, Tenant, Approver));
+        Assert.False(await svc.DeleteAsync(id, Tenant));
     }
 
     [Fact]
@@ -122,13 +122,13 @@ public class QuoteWorkflowTests
 
         Assert.Equal(Guid.Empty, await svc.ConvertToSalesOrderAsync(id, Tenant, Approver)); // not accepted
         Assert.True(await svc.SendQuoteAsync(id, Tenant, Approver));
-        Assert.Equal("Sent", (await svc.GetByIdAsync(id))!.Status);
-        Assert.NotNull((await svc.GetByIdAsync(id))!.SentDate);
+        Assert.Equal("Sent", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.NotNull((await svc.GetByIdAsync(id, Tenant))!.SentDate);
 
         Assert.True(await svc.ApproveAsync(id, Tenant, Approver));
         var soId = await svc.ConvertToSalesOrderAsync(id, Tenant, Approver);
         Assert.NotEqual(Guid.Empty, soId);
-        Assert.Equal("Converted", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Converted", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.RejectAsync(id, Tenant, Approver));
     }
 
@@ -139,6 +139,6 @@ public class QuoteWorkflowTests
         var svc = Svc(db);
         var id = await CreateDraftAsync(svc);
         Assert.False(await svc.ApproveAsync(id, Guid.NewGuid(), Approver));
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
     }
 }

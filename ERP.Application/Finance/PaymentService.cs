@@ -422,7 +422,7 @@ public class PaymentService : IPaymentService
         if (dto.BankAccountId.HasValue) entity.BankAccountId = dto.BankAccountId;
         if (dto.RelatedInvoiceId.HasValue) entity.RelatedInvoiceId = dto.RelatedInvoiceId;
         if (dto.RelatedBillId.HasValue) entity.RelatedBillId = dto.RelatedBillId;
-        if (!string.IsNullOrWhiteSpace(dto.Status)) entity.Status = dto.Status;
+        // ERP-FIX-5: status is NOT free-set from dto; lifecycle endpoints govern it.
         entity.Reference = dto.Reference ?? entity.Reference;
         entity.ReferenceNumber = dto.ReferenceNumber ?? entity.ReferenceNumber;
         entity.Notes = dto.Notes ?? entity.Notes;

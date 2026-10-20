@@ -364,4 +364,50 @@ public class OperationalReportService : IOperationalReportService
             TotalQuantity = Math.Round(lines.Sum(l => l.CurrentQuantity), 4)
         };
     }
+
+    public async Task<SalesOrderScheduleReportDto> GetSalesOrderScheduleAsync(
+        Guid tenantId, DateTime? fromDate = null, DateTime? toDate = null)
+    {
+        if (tenantId == Guid.Empty)
+            return new SalesOrderScheduleReportDto { FromDate = fromDate, ToDate = toDate, Lines = [], LineCount = 0 };
+
+        var rangeStart = fromDate?.Date;
+        var rangeEnd = toDate?.Date;
+        var q =
+            from o in _db.SalesOrders.AsNoTracking()
+            join l in _db.SalesOrderLines.AsNoTracking() on o.Id equals l.SalesOrderId
+            join c in _db.Customers.AsNoTracking() on o.CustomerId equals c.Id into cj
+            from c in cj.DefaultIfEmpty()
+            join i in _db.Items.AsNoTracking() on l.ItemId equals i.Id into ij
+            from i in ij.DefaultIfEmpty()
+            where o.TenantId == tenantId
+                  && o.Status != "Cancelled"
+                  && (!rangeStart.HasValue || (o.RequiredDate ?? o.OrderDate) >= rangeStart.Value)
+                  && (!rangeEnd.HasValue || (o.RequiredDate ?? o.OrderDate) <= rangeEnd.Value)
+            orderby o.RequiredDate ?? o.OrderDate, o.OrderNumber
+            select new SalesOrderScheduleLineDto
+            {
+                SalesOrderId = o.Id,
+                SalesOrderLineId = l.Id,
+                OrderNumber = string.IsNullOrWhiteSpace(o.SalesOrderNumber) ? o.OrderNumber : o.SalesOrderNumber,
+                OrderDate = o.OrderDate,
+                RequiredDate = o.RequiredDate,
+                CustomerId = o.CustomerId,
+                CustomerName = c != null ? (c.CompanyName ?? c.CustomerName) : null,
+                ItemId = l.ItemId,
+                ItemCode = i != null ? i.ItemCode : null,
+                ItemName = i != null ? i.ItemName : l.Description,
+                Quantity = l.Quantity,
+                Status = o.Status
+            };
+
+        var lines = await q.ToListAsync();
+        return new SalesOrderScheduleReportDto
+        {
+            FromDate = rangeStart,
+            ToDate = rangeEnd,
+            Lines = lines,
+            LineCount = lines.Count
+        };
+    }
 }

@@ -14,8 +14,17 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
             CompanyId = entity.CompanyId,
             VendorCode = entity.VendorCode,
             VendorName = entity.VendorName,
+            LocalName = entity.LocalName,
             ContactPerson = entity.ContactPerson,
             PhoneNumber = entity.PhoneNumber,
+            Phone2 = entity.Phone2,
+            Cell = entity.Cell,
+            Cell2 = entity.Cell2,
+            Fax = entity.Fax,
+            CityId = entity.CityId,
+            PaymentTermId = entity.PaymentTermId,
+            PayableAccountId = entity.PayableAccountId,
+            Rating = entity.Rating,
             Email = entity.Email,
             AddressLine1 = entity.AddressLine1,
             AddressLine2 = entity.AddressLine2,
@@ -48,8 +57,17 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
             CompanyId = dto.CompanyId,
             VendorCode = dto.VendorCode,
             VendorName = dto.VendorName,
+            LocalName = dto.LocalName,
             ContactPerson = dto.ContactPerson,
             PhoneNumber = dto.PhoneNumber,
+            Phone2 = dto.Phone2,
+            Cell = dto.Cell,
+            Cell2 = dto.Cell2,
+            Fax = dto.Fax,
+            CityId = dto.CityId,
+            PaymentTermId = dto.PaymentTermId,
+            PayableAccountId = dto.PayableAccountId,
+            Rating = dto.Rating,
             Email = dto.Email,
             AddressLine1 = dto.AddressLine1,
             AddressLine2 = dto.AddressLine2,
@@ -82,8 +100,17 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
             CompanyId = dto.CompanyId,
             VendorCode = dto.VendorCode,
             VendorName = dto.VendorName,
+            LocalName = dto.LocalName,
             ContactPerson = dto.ContactPerson,
             PhoneNumber = dto.PhoneNumber,
+            Phone2 = dto.Phone2,
+            Cell = dto.Cell,
+            Cell2 = dto.Cell2,
+            Fax = dto.Fax,
+            CityId = dto.CityId,
+            PaymentTermId = dto.PaymentTermId,
+            PayableAccountId = dto.PayableAccountId,
+            Rating = dto.Rating,
             Email = dto.Email,
             AddressLine1 = dto.AddressLine1,
             AddressLine2 = dto.AddressLine2,
@@ -108,8 +135,17 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
     {
         if (dto.VendorCode != null) existingVendor.VendorCode = dto.VendorCode;
         if (dto.VendorName != null) existingVendor.VendorName = dto.VendorName;
+        if (dto.LocalName != null) existingVendor.LocalName = dto.LocalName;
         if (dto.ContactPerson != null) existingVendor.ContactPerson = dto.ContactPerson;
         if (dto.PhoneNumber != null) existingVendor.PhoneNumber = dto.PhoneNumber;
+        if (dto.Phone2 != null) existingVendor.Phone2 = dto.Phone2;
+        if (dto.Cell != null) existingVendor.Cell = dto.Cell;
+        if (dto.Cell2 != null) existingVendor.Cell2 = dto.Cell2;
+        if (dto.Fax != null) existingVendor.Fax = dto.Fax;
+        if (dto.CityId.HasValue) existingVendor.CityId = dto.CityId;
+        if (dto.PaymentTermId.HasValue) existingVendor.PaymentTermId = dto.PaymentTermId;
+        if (dto.PayableAccountId.HasValue) existingVendor.PayableAccountId = dto.PayableAccountId;
+        if (dto.Rating.HasValue) existingVendor.Rating = dto.Rating;
         if (dto.Email != null) existingVendor.Email = dto.Email;
         if (dto.AddressLine1 != null) existingVendor.AddressLine1 = dto.AddressLine1;
         if (dto.AddressLine2 != null) existingVendor.AddressLine2 = dto.AddressLine2;

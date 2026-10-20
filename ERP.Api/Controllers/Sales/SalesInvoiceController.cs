@@ -115,6 +115,18 @@ public class SalesInvoiceController : ERP.Api.Abstractions.ControllerBase
         return Ok(new MessageResponse { Message = "Sales invoice voided successfully" });
     }
 
+    [HttpPost("{id}/unpost")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> UnpostInvoice(Guid id)
+    {
+        var tenantId = GetTenantIdFromContext();
+        var userId = GetUserIdFromContext();
+        var result = await _service.UnpostInvoiceAsync(id, tenantId, userId);
+        if (!result)
+            return NotFound();
+        return Ok(new MessageResponse { Message = "Sales invoice unposted successfully" });
+    }
+
     private Guid GetTenantIdFromContext() => HttpContext.RequireTenantId();
 
     private Guid GetUserIdFromContext() => User.RequireUserId();

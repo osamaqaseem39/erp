@@ -1,3 +1,4 @@
+using ERP.Application.Core.Settings;
 using ERP.Application.Interfaces.Finance;
 using ERP.Domain.Finance;
 using ERP.Infrastructure.Database;
@@ -8,8 +9,18 @@ namespace ERP.Application.Finance;
 public class ApplicationJournalRepositoryAdapter : IJournalRepository
 {
     private readonly ERPDbContext _db;
+    private readonly ICoreSettingsService? _settings;
+    private readonly IBudgetEnforcementService? _budgetEnforcement;
 
-    public ApplicationJournalRepositoryAdapter(ERPDbContext db) => _db = db;
+    public ApplicationJournalRepositoryAdapter(
+        ERPDbContext db,
+        ICoreSettingsService? settings = null,
+        IBudgetEnforcementService? budgetEnforcement = null)
+    {
+        _db = db;
+        _settings = settings;
+        _budgetEnforcement = budgetEnforcement;
+    }
 
     public async Task<Journal?> GetByIdAsync(Guid journalId, Guid tenantId)
     {
@@ -120,6 +131,30 @@ public class ApplicationJournalRepositoryAdapter : IJournalRepository
         else return false;
 
         if (!await IsJournalBalancedAsync(journal.JournalId, tenantId)) return false;
+
+        if (_settings != null)
+        {
+            var requirePeriodRaw = await _settings.GetValueAsync(SettingsCatalog.RequireOpenPeriodKey);
+            if (bool.TryParse(requirePeriodRaw, out var requirePeriod) && requirePeriod)
+            {
+                var d = journal.JournalDate.Date;
+                var hasPeriods = await _db.AccountingPeriods.AnyAsync(p => p.TenantId == tenantId && p.IsActive);
+                if (hasPeriods)
+                {
+                    var inOpen = await _db.AccountingPeriods.AnyAsync(p =>
+                        p.TenantId == tenantId
+                        && p.IsActive
+                        && p.Status == "Open"
+                        && p.StartDate <= d
+                        && p.EndDate >= d);
+                    if (!inOpen) return false;
+                }
+            }
+        }
+
+        if (_budgetEnforcement != null
+            && await _budgetEnforcement.WouldExceedBudgetAsync(tenantId, journal.JournalId))
+            return false;
 
         // When the tenant has Active fiscal years, journal date must fall in one.
         var hasActiveFy = await _db.FiscalYears.AnyAsync(f =>

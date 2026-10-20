@@ -66,8 +66,21 @@ public static class SettingsCatalog
     public const string Security = "security";
     public const string Email = "email";
     public const string Finance = "finance";
+    public const string Crm = "crm";
+    public const string Inventory = "inventory";
+    public const string Procurement = "procurement";
+    public const string Sales = "sales";
 
-    public static readonly IReadOnlyList<string> Categories = [Preferences, Security, Email, Finance];
+    public static readonly IReadOnlyList<string> Categories =
+        [Preferences, Security, Email, Finance, Crm, Inventory, Procurement, Sales];
+
+    public const string RequireSalesmanOnCustomerKey = "crm.requireSalesmanOnCustomer";
+    public const string RequireBinKey = "inventory.requireBin";
+    public const string ThreeWayMatchKey = "procurement.threeWayMatch";
+    public const string ThreeWayMatchToleranceKey = "procurement.threeWayMatchTolerancePercent";
+    public const string AllowUnpostKey = "sales.allowUnpost";
+    public const string EnforceBudgetKey = "finance.enforceBudget";
+    public const string RequireOpenPeriodKey = "finance.requireOpenPeriod";
 
     private static readonly SettingOption[] DateFormats =
     [
@@ -141,6 +154,22 @@ public static class SettingsCatalog
             "Remembered after creating a cash/bank voucher; used when the next voucher omits CashOrBankAccountId.", Max: 36),
         new(LastCostCenterIdKey, Finance, "Last cost center", SettingType.Text, null,
             "Remembered from the first offset line with a cost center on a cash/bank voucher.", Max: 36),
+        new(EnforceBudgetKey, Finance, "Enforce budget on post", SettingType.Boolean, "false",
+            "When true, journal/PO amounts over budget are blocked."),
+        new(RequireOpenPeriodKey, Finance, "Require open accounting period", SettingType.Boolean, "true",
+            "When true, posts are blocked into closed accounting periods."),
+
+        // Customer-depth feature toggles
+        new(RequireSalesmanOnCustomerKey, Crm, "Require salesman on customer", SettingType.Boolean, "false",
+            "When true, customer create/update must include SalesmanId."),
+        new(RequireBinKey, Inventory, "Require warehouse bin", SettingType.Boolean, "false",
+            "When true, stock moves must include WarehouseLocationId."),
+        new(ThreeWayMatchKey, Procurement, "Three-way match on PI approve", SettingType.Boolean, "true",
+            "When true, purchase invoice approve requires PO+GRN qty/price within tolerance."),
+        new(ThreeWayMatchToleranceKey, Procurement, "Three-way match tolerance %", SettingType.Number, "2",
+            "Allowed variance percent between PO, GRN and PI.", Min: 0, Max: 100),
+        new(AllowUnpostKey, Sales, "Allow sales invoice unpost", SettingType.Boolean, "false",
+            "When true, posted SI/CN may reopen to Draft if unpaid and period open; otherwise void-only."),
     ];
 
     /// <summary>Settings key for last typed-voucher cash/bank CoA.</summary>

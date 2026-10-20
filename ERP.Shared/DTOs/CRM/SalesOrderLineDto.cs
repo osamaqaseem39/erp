@@ -11,6 +11,7 @@ public class SalesOrderLineDto
     public string? ItemCode { get; set; }
     public string? Description { get; set; }
     public decimal Quantity { get; set; }
+    public decimal PackQty { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
@@ -30,6 +31,7 @@ public class CreateSalesOrderLineDto
     public Guid ItemId { get; set; }
     public string? Description { get; set; }
     public decimal Quantity { get; set; }
+    public decimal PackQty { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal? DiscountPercent { get; set; }
     /// <summary>Legacy alias for Tax1Rate.</summary>

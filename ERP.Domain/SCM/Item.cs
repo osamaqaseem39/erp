@@ -10,6 +10,7 @@ public class Item : BaseEntity
     public string ItemName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public Guid CategoryId { get; set; }
+    public Guid? BrandId { get; set; }
     public Guid UnitOfMeasureId { get; set; }
     public string ItemType { get; set; } = string.Empty; // Raw, Finished, Service, Consumable
     public string? HSNCode { get; set; }
@@ -25,6 +26,7 @@ public class Item : BaseEntity
     // Navigation properties
     public virtual Company Company { get; set; } = null!;
     public virtual ItemCategory Category { get; set; } = null!;
+    public virtual Brand? Brand { get; set; }
     public virtual UnitOfMeasure UnitOfMeasure { get; set; } = null!;
     public virtual Warehouse? DefaultWarehouse { get; set; }
     public virtual ICollection<StockLedger> StockLedgers { get; set; } = new List<StockLedger>();

@@ -22,6 +22,30 @@ public class PendingSalesOrderReportDto
     public decimal TotalValue { get; set; }
 }
 
+public class SalesOrderScheduleLineDto
+{
+    public Guid SalesOrderId { get; set; }
+    public Guid? SalesOrderLineId { get; set; }
+    public string OrderNumber { get; set; } = string.Empty;
+    public DateTime OrderDate { get; set; }
+    public DateTime? RequiredDate { get; set; }
+    public Guid? CustomerId { get; set; }
+    public string? CustomerName { get; set; }
+    public Guid? ItemId { get; set; }
+    public string? ItemCode { get; set; }
+    public string? ItemName { get; set; }
+    public decimal Quantity { get; set; }
+    public string Status { get; set; } = string.Empty;
+}
+
+public class SalesOrderScheduleReportDto
+{
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+    public List<SalesOrderScheduleLineDto> Lines { get; set; } = new();
+    public int LineCount { get; set; }
+}
+
 public class SalesInvoiceSummaryLineDto
 {
     public Guid InvoiceId { get; set; }

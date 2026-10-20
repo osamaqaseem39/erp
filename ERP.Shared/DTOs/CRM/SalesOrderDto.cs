@@ -26,6 +26,15 @@ public class SalesOrderDto : BaseDto
     public string? BillingAddress { get; set; }
     public string? Notes { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public string? ReferenceNo { get; set; }
+    public DateTime? ReferenceDate { get; set; }
+    public int CreditDays { get; set; }
+    public string? PaymentMode { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public decimal Freight { get; set; }
+    public decimal Overhead { get; set; }
+    public string? DiscountType { get; set; }
+    public decimal DiscountAmount { get; set; }
     public new bool IsActive { get; set; } = true;
     
     // Navigation properties
@@ -55,6 +64,15 @@ public class CreateSalesOrderDto : CreateDto
     public string? BillingAddress { get; set; }
     public string? Notes { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public string? ReferenceNo { get; set; }
+    public DateTime? ReferenceDate { get; set; }
+    public int CreditDays { get; set; }
+    public string? PaymentMode { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public decimal Freight { get; set; }
+    public decimal Overhead { get; set; }
+    public string? DiscountType { get; set; }
+    public decimal DiscountAmount { get; set; }
     public List<CreateSalesOrderLineDto> SalesOrderLines { get; set; } = new();
 }
 
@@ -77,5 +95,14 @@ public class UpdateSalesOrderDto : UpdateDto
     public string? BillingAddress { get; set; }
     public string? Notes { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public string? ReferenceNo { get; set; }
+    public DateTime? ReferenceDate { get; set; }
+    public int? CreditDays { get; set; }
+    public string? PaymentMode { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public decimal? Freight { get; set; }
+    public decimal? Overhead { get; set; }
+    public string? DiscountType { get; set; }
+    public decimal? DiscountAmount { get; set; }
     public List<CreateSalesOrderLineDto> SalesOrderLines { get; set; } = new();
 }

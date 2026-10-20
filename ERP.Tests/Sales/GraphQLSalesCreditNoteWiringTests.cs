@@ -1,3 +1,4 @@
+using ERP.Tests;
 using ERP.Api.GraphQL.Sales;
 using ERP.Application.Finance;
 using ERP.Application.Sales;
@@ -29,7 +30,8 @@ public class GraphQLSalesCreditNoteWiringTests
         new(
             new SalesInvoiceRepository(db),
             new SalesInvoiceLineRepository(db),
-            new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)));
+            new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)),
+            new TestCoreSettings());
 
     [Fact]
     public async Task GraphQL_Create_List_Post_Void_CreditNote()

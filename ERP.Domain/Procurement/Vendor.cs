@@ -7,12 +7,18 @@ public class Vendor : BaseEntity
     public Guid CompanyId { get; set; }
     public string VendorCode { get; set; } = string.Empty;
     public string VendorName { get; set; } = string.Empty;
+    public string? LocalName { get; set; }
     public string ContactPerson { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
+    public string? Phone2 { get; set; }
+    public string? Cell { get; set; }
+    public string? Cell2 { get; set; }
+    public string? Fax { get; set; }
     public string Email { get; set; } = string.Empty;
     public string AddressLine1 { get; set; } = string.Empty;
     public string AddressLine2 { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
+    public Guid? CityId { get; set; }
     public string State { get; set; } = string.Empty;
     public string Country { get; set; } = string.Empty;
     public string PostalCode { get; set; } = string.Empty;
@@ -22,6 +28,9 @@ public class Vendor : BaseEntity
     public string? Strn { get; set; }
     public string? Cnic { get; set; }
     public string PaymentTerms { get; set; } = string.Empty; // Net 30, Net 60, etc.
+    public Guid? PaymentTermId { get; set; }
+    public Guid? PayableAccountId { get; set; }
+    public int? Rating { get; set; }
     public decimal CreditLimit { get; set; } = 0;
     public int CreditDays { get; set; }
     

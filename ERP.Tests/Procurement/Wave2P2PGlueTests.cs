@@ -98,10 +98,7 @@ public class Wave2P2PGlueTests
     {
         await using var db = Db();
         var bills = new BillService(new BillRepository(db));
-        var pi = new PurchaseInvoiceService(
-            new PurchaseInvoiceRepository(db),
-            new PurchaseInvoiceDetailRepository(db),
-            bills);
+        var pi = ERP.Tests.TestHelpers.ProcurementTestServices.CreatePurchaseInvoiceService(db, bills);
         var creator = Guid.NewGuid();
         var approver = Guid.NewGuid();
 
@@ -130,10 +127,7 @@ public class Wave2P2PGlueTests
     {
         await using var db = Db();
         var bills = new BillService(new BillRepository(db));
-        var pi = new PurchaseInvoiceService(
-            new PurchaseInvoiceRepository(db),
-            new PurchaseInvoiceDetailRepository(db),
-            bills);
+        var pi = ERP.Tests.TestHelpers.ProcurementTestServices.CreatePurchaseInvoiceService(db, bills);
         var creator = Guid.NewGuid();
         var approver = Guid.NewGuid();
 

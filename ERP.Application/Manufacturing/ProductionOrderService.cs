@@ -79,6 +79,7 @@ public class ProductionOrderService : IProductionOrderService
             ProductionOrderNumber = dto.ProductionOrderNumber ?? string.Empty,
             ItemId = dto.ItemId,
             BomId = dto.BomId == Guid.Empty ? null : dto.BomId,
+            RoutingId = dto.RoutingId == Guid.Empty ? null : dto.RoutingId,
             Quantity = dto.Quantity ?? 0m,
             WorkCenterId = dto.WorkCenterId,
             PlannedStartDate = dto.PlannedStartDate,
@@ -105,6 +106,7 @@ public class ProductionOrderService : IProductionOrderService
         productionOrder.OrderNumber = dto.OrderNumber ?? productionOrder.OrderNumber;
         productionOrder.ItemId = dto.ItemId ?? productionOrder.ItemId;
         productionOrder.BomId = dto.BomId ?? productionOrder.BomId;
+        productionOrder.RoutingId = dto.RoutingId ?? productionOrder.RoutingId;
         productionOrder.Quantity = dto.Quantity ?? productionOrder.Quantity;
         productionOrder.WorkCenterId = dto.WorkCenterId ?? productionOrder.WorkCenterId;
         productionOrder.PlannedStartDate = dto.PlannedStartDate ?? productionOrder.PlannedStartDate;
@@ -256,6 +258,7 @@ public class ProductionOrderService : IProductionOrderService
             ProductionOrderNumber = productionOrder.ProductionOrderNumber,
             ItemId = productionOrder.ItemId,
             BomId = productionOrder.BomId,
+            RoutingId = productionOrder.RoutingId,
             Quantity = productionOrder.Quantity,
             CompletedQuantity = productionOrder.CompletedQuantity,
             WorkCenterId = productionOrder.WorkCenterId,

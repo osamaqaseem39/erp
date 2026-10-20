@@ -33,7 +33,7 @@ public class CampaignWorkflowTests
             CampaignType = "Email",
             Status = "Active", // ignored — always Draft
             StartDate = DateTime.UtcNow.Date
-        });
+        }, Tenant, User);
 
     [Fact]
     public async Task Create_Always_Draft_And_Launch_Pause_Complete()
@@ -42,22 +42,22 @@ public class CampaignWorkflowTests
         var svc = Svc(db);
         var id = await CreateDraftAsync(svc);
 
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.PauseAsync(id, Tenant, User));
         Assert.False(await svc.CompleteAsync(id, Tenant, User));
 
         Assert.True(await svc.LaunchAsync(id, Tenant, User));
-        Assert.Equal("Active", (await svc.GetByIdAsync(id))!.Status);
-        Assert.NotNull((await svc.GetByIdAsync(id))!.LaunchDate);
+        Assert.Equal("Active", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.NotNull((await svc.GetByIdAsync(id, Tenant))!.LaunchDate);
 
         Assert.True(await svc.PauseAsync(id, Tenant, User));
-        Assert.Equal("Paused", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Paused", (await svc.GetByIdAsync(id, Tenant))!.Status);
 
         Assert.True(await svc.LaunchAsync(id, Tenant, User));
         Assert.True(await svc.CompleteAsync(id, Tenant, User));
-        Assert.Equal("Completed", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Completed", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.LaunchAsync(id, Tenant, User));
-        Assert.False(await svc.DeleteAsync(id));
+        Assert.False(await svc.DeleteAsync(id, Tenant));
     }
 
     [Fact]
@@ -72,13 +72,13 @@ public class CampaignWorkflowTests
             Id = id,
             CampaignName = "Renamed",
             Status = "Completed"
-        }));
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
-        Assert.Equal("Renamed", (await svc.GetByIdAsync(id))!.CampaignName);
+        }, Tenant, User));
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.Equal("Renamed", (await svc.GetByIdAsync(id, Tenant))!.CampaignName);
 
         Assert.True(await svc.CancelAsync(id, Tenant, User));
-        Assert.Equal("Cancelled", (await svc.GetByIdAsync(id))!.Status);
-        Assert.False(await svc.UpdateAsync(new UpdateCampaignDto { Id = id, CampaignName = "Nope" }));
+        Assert.Equal("Cancelled", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.False(await svc.UpdateAsync(new UpdateCampaignDto { Id = id, CampaignName = "Nope" }, Tenant, User));
         Assert.False(await svc.LaunchAsync(id, Tenant, User));
     }
 
@@ -90,7 +90,7 @@ public class CampaignWorkflowTests
         var id = await CreateDraftAsync(svc);
 
         Assert.False(await svc.LaunchAsync(id, OtherTenant, User));
-        Assert.Equal("Draft", (await svc.GetByIdAsync(id))!.Status);
-        Assert.True(await svc.DeleteAsync(id));
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.True(await svc.DeleteAsync(id, Tenant));
     }
 }

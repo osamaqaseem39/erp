@@ -251,7 +251,7 @@ public class InvoiceService : IInvoiceService
             bill.TotalAmount = dto.TotalAmount.Value;
             bill.Balance = Math.Max(0, Math.Round(bill.TotalAmount - paid, 2));
         }
-        if (!string.IsNullOrWhiteSpace(dto.Status)) bill.Status = dto.Status;
+        // ERP-FIX-5: status only via PostBill / payment lifecycle — never free-set on Update
         if (dto.Notes != null) bill.Notes = dto.Notes;
         if (!string.IsNullOrWhiteSpace(dto.CurrencyCode)) bill.CurrencyCode = dto.CurrencyCode;
         if (dto.IsActive.HasValue) bill.IsActive = dto.IsActive.Value;
@@ -727,7 +727,7 @@ public class InvoiceService : IInvoiceService
             TaxTotal = dto.TaxAmount ?? 0m,
             TotalAmount = total,
             Balance = total,
-            Status = dto.Status ?? "Draft",
+            Status = "Draft",
             SalesOrderId = dto.SalesOrderId,
             IsLocked = dto.IsLocked ?? false,
             CreatedBy = userId.ToString(),
@@ -742,7 +742,7 @@ public class InvoiceService : IInvoiceService
         entity.InvoiceDate = dto.InvoiceDate ?? entity.InvoiceDate;
         entity.DueDate = dto.DueDate ?? entity.DueDate;
         entity.CurrencyCode = dto.CurrencyCode ?? entity.CurrencyCode;
-        entity.Status = dto.Status ?? entity.Status;
+        // ERP-FIX-5: status is NOT free-set from dto; lifecycle endpoints govern it.
         if (dto.SalesOrderId.HasValue) entity.SalesOrderId = dto.SalesOrderId.Value;
         entity.IsLocked = dto.IsLocked ?? entity.IsLocked;
         entity.UpdatedBy = userId.ToString();

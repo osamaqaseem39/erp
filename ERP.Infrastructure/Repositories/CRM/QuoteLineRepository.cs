@@ -13,24 +13,31 @@ public class QuoteLineRepository : CrmRepositoryBase, IQuoteLineRepository
     {
     }
 
-    public async Task<IEnumerable<QuoteLine>> GetByQuoteIdAsync(Guid quoteId) =>
-        await ApplyTenant(Context.QuoteLines.Where(l => l.QuoteId == quoteId)).ToListAsync();
+    public async Task<IEnumerable<QuoteLine>> GetByQuoteIdAsync(Guid quoteId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await Context.QuoteLines
+            .Where(l => l.QuoteId == quoteId && l.TenantId == tenantId)
+            .ToListAsync();
+    }
 
     public async Task<Guid> CreateAsync(QuoteLine line)
     {
-        if (TenantId.HasValue && TenantId != Guid.Empty)
-            line.TenantId = TenantId.Value;
-
+        if (line.TenantId == Guid.Empty) return Guid.Empty;
+        if (line.Id == Guid.Empty) line.Id = Guid.NewGuid();
+        if (line.CreatedAt == default) line.CreatedAt = DateTime.UtcNow;
         Context.QuoteLines.Add(line);
         await Context.SaveChangesAsync();
         return line.Id;
     }
 
-    public async Task<bool> DeleteByQuoteIdAsync(Guid quoteId)
+    public async Task<bool> DeleteByQuoteIdAsync(Guid quoteId, Guid tenantId)
     {
-        var lines = await ApplyTenant(Context.QuoteLines.Where(l => l.QuoteId == quoteId)).ToListAsync();
+        if (tenantId == Guid.Empty) return false;
+        var lines = await Context.QuoteLines
+            .Where(l => l.QuoteId == quoteId && l.TenantId == tenantId)
+            .ToListAsync();
         if (lines.Count == 0) return true;
-
         Context.QuoteLines.RemoveRange(lines);
         return await Context.SaveChangesAsync() > 0;
     }

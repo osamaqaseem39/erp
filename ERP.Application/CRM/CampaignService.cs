@@ -25,29 +25,35 @@ public class CampaignService : ICampaignService
         _repository = repository;
     }
 
-    public async Task<CampaignDto?> GetByIdAsync(Guid id)
+    public async Task<CampaignDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<CampaignDto>> GetAllAsync()
+    public async Task<IEnumerable<CampaignDto>> GetAllAsync(Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> CreateAsync(CreateCampaignDto dto)
+    public async Task<Guid> CreateAsync(CreateCampaignDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
         // ERP-FIX-5: always start Draft
         entity.Status = "Draft";
+        entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
         return await _repository.CreateAsync(entity);
     }
 
-    public async Task<bool> UpdateAsync(UpdateCampaignDto dto)
+    public async Task<bool> UpdateAsync(UpdateCampaignDto dto, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
             return false;
@@ -56,33 +62,38 @@ public class CampaignService : ICampaignService
         MapToEntity(dto, entity);
         // ERP-FIX-5: status only via launch/pause/complete/cancel
         entity.Status = previousStatus;
+        entity.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
             return false;
-        return await _repository.DeleteAsync(id);
+        return await _repository.DeleteAsync(id, tenantId);
     }
 
-    public async Task<IEnumerable<CampaignDto>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<CampaignDto>> GetByStatusAsync(string status, Guid tenantId)
     {
-        var entities = await _repository.GetByStatusAsync(status);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByStatusAsync(status, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<CampaignDto>> GetByTypeAsync(string campaignType)
+    public async Task<IEnumerable<CampaignDto>> GetByTypeAsync(string campaignType, Guid tenantId)
     {
-        var entities = await _repository.GetByTypeAsync(campaignType);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByTypeAsync(campaignType, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<CampaignDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<CampaignDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities
             .Where(c => c.StartDate >= startDate && c.StartDate <= endDate)
             .Select(MapToDto);
@@ -146,9 +157,7 @@ public class CampaignService : ICampaignService
     private async Task<Campaign?> GetScopedAsync(Guid id, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null || entity.TenantId != tenantId) return null;
-        return entity;
+        return await _repository.GetByIdAsync(id, tenantId);
     }
 
     private static CampaignDto MapToDto(Campaign entity)

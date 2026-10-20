@@ -67,7 +67,7 @@ public class CustomerDeleteTests
         context.Customers.Add(customer);
         context.SaveChanges();
         var repository = new CustomerRepository(context, new FixedTenantProvider(Tenant));
-        return (new CustomerService(repository), context, customer.Id);
+        return (new CustomerService(repository, new TestCoreSettings()), context, customer.Id);
     }
 
     private sealed class FixedTenantProvider(Guid tenantId) : ITenantProvider

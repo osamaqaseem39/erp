@@ -8,10 +8,19 @@ public class VendorDto : BaseDto
     public string? CompanyName { get; set; }
     public string VendorCode { get; set; } = string.Empty;
     public string VendorName { get; set; } = string.Empty;
+    public string? LocalName { get; set; }
     public string? VendorType { get; set; }
     public string? Phone { get; set; }
     public string? Address { get; set; }
     public string? Status { get; set; } = "Active";
+    public string? Phone2 { get; set; }
+    public string? Cell { get; set; }
+    public string? Cell2 { get; set; }
+    public string? Fax { get; set; }
+    public Guid? CityId { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public Guid? PayableAccountId { get; set; }
+    public int? Rating { get; set; }
     public List<VendorBankAccountDto>? BankAccounts { get; set; }
     public string? ContactPerson { get; set; }
     public string? Email { get; set; }
@@ -42,12 +51,21 @@ public class CreateVendorDto : CreateDto
 {
     public string VendorCode { get; set; } = string.Empty;
     public string VendorName { get; set; } = string.Empty;
+    public string? LocalName { get; set; }
     public string? VendorType { get; set; }
     public string? Phone { get; set; }
     public string? Address { get; set; }
     public string? ContactPerson { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
+    public string? Phone2 { get; set; }
+    public string? Cell { get; set; }
+    public string? Cell2 { get; set; }
+    public string? Fax { get; set; }
+    public Guid? CityId { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public Guid? PayableAccountId { get; set; }
+    public int? Rating { get; set; }
     public string? AddressLine1 { get; set; }
     public string? AddressLine2 { get; set; }
     public string? City { get; set; }
@@ -74,12 +92,21 @@ public class UpdateVendorDto : UpdateDto
 {
     public string? VendorCode { get; set; }
     public string? VendorName { get; set; }
+    public string? LocalName { get; set; }
     public string? VendorType { get; set; }
     public string? Phone { get; set; }
     public string? Address { get; set; }
     public string? ContactPerson { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
+    public string? Phone2 { get; set; }
+    public string? Cell { get; set; }
+    public string? Cell2 { get; set; }
+    public string? Fax { get; set; }
+    public Guid? CityId { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public Guid? PayableAccountId { get; set; }
+    public int? Rating { get; set; }
     public string? AddressLine1 { get; set; }
     public string? AddressLine2 { get; set; }
     public string? City { get; set; }

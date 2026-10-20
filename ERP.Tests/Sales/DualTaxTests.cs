@@ -119,7 +119,8 @@ public class DualTaxTests
         var svc = new SalesInvoiceService(
             new SalesInvoiceRepository(db),
             new SalesInvoiceLineRepository(db),
-            new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)));
+            new InvoiceService(new ApplicationInvoiceRepositoryAdapter(db)),
+            new TestCoreSettings());
 
         var id = await svc.CreateAsync(new CreateSalesInvoiceDto
         {
@@ -192,9 +193,9 @@ public class DualTaxTests
                     Tax2Rate = 5
                 }
             ]
-        });
+        }, Tenant, User);
 
-        var loaded = await svc.GetByIdAsync(id);
+        var loaded = await svc.GetByIdAsync(id, Tenant);
         Assert.NotNull(loaded);
         Assert.Equal(900m, loaded!.SubTotal);
         Assert.Equal(90m, loaded.Tax1Amount);

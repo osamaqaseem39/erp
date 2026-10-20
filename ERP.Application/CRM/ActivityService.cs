@@ -23,29 +23,35 @@ public class ActivityService : IActivityService
         _repository = repository;
     }
 
-    public async Task<ActivityDto?> GetByIdAsync(Guid id)
+    public async Task<ActivityDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetAllAsync()
+    public async Task<IEnumerable<ActivityDto>> GetAllAsync(Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> CreateAsync(CreateActivityDto dto)
+    public async Task<Guid> CreateAsync(CreateActivityDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
         // ERP-FIX-5: always start Open
         entity.Status = "Open";
+        entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
         return await _repository.CreateAsync(entity);
     }
 
-    public async Task<bool> UpdateAsync(UpdateActivityDto dto)
+    public async Task<bool> UpdateAsync(UpdateActivityDto dto, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
         if (!IsOpen(entity.Status)) return false;
 
@@ -53,56 +59,65 @@ public class ActivityService : IActivityService
         MapToEntity(dto, entity);
         // ERP-FIX-5: status only via complete/cancel
         entity.Status = previousStatus;
+        entity.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!IsOpen(entity.Status)) return false;
-        return await _repository.DeleteAsync(id);
+        return await _repository.DeleteAsync(id, tenantId);
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetByCustomerAsync(Guid customerId)
+    public async Task<IEnumerable<ActivityDto>> GetByCustomerAsync(Guid customerId, Guid tenantId)
     {
-        var entities = await _repository.GetByCustomerAsync(customerId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByCustomerAsync(customerId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetByLeadAsync(Guid leadId)
+    public async Task<IEnumerable<ActivityDto>> GetByLeadAsync(Guid leadId, Guid tenantId)
     {
-        var entities = await _repository.GetByLeadAsync(leadId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByLeadAsync(leadId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetByOpportunityAsync(Guid opportunityId)
+    public async Task<IEnumerable<ActivityDto>> GetByOpportunityAsync(Guid opportunityId, Guid tenantId)
     {
-        var entities = await _repository.GetByOpportunityAsync(opportunityId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByOpportunityAsync(opportunityId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetByEntityAsync(string entityType, Guid entityId)
+    public async Task<IEnumerable<ActivityDto>> GetByEntityAsync(string entityType, Guid entityId, Guid tenantId)
     {
-        var entities = await _repository.GetByEntityAsync(entityType, entityId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByEntityAsync(entityType, entityId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetByAssignedToAsync(Guid assignedTo)
+    public async Task<IEnumerable<ActivityDto>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId)
     {
-        var entities = await _repository.GetByAssignedToAsync(assignedTo);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByAssignedToAsync(assignedTo, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetByTypeAsync(string activityType)
+    public async Task<IEnumerable<ActivityDto>> GetByTypeAsync(string activityType, Guid tenantId)
     {
-        var entities = await _repository.GetByTypeAsync(activityType);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByTypeAsync(activityType, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ActivityDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<ActivityDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        var entities = await _repository.GetByDateRangeAsync(startDate, endDate);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByDateRangeAsync(startDate, endDate, tenantId);
         return entities.Select(MapToDto);
     }
 
@@ -148,9 +163,7 @@ public class ActivityService : IActivityService
     private async Task<Activity?> GetScopedAsync(Guid id, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null || entity.TenantId != tenantId) return null;
-        return entity;
+        return await _repository.GetByIdAsync(id, tenantId);
     }
 
     private static bool IsOpen(string? status) =>

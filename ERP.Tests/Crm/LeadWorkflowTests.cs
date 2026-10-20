@@ -52,7 +52,7 @@ public class LeadWorkflowTests
             CompanyName = "Acme",
             Email = "a@acme.test",
             Status = "Converted" // ignored — always New
-        });
+        }, Tenant, User);
 
     [Fact]
     public async Task Create_Always_New_And_Convert_Requires_Qualified()
@@ -61,15 +61,15 @@ public class LeadWorkflowTests
         var svc = Svc(db);
         var id = await CreateNewAsync(svc);
 
-        Assert.Equal("New", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("New", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.Equal(Guid.Empty, await svc.ConvertToOpportunityAsync(id, Tenant, User));
 
         Assert.True(await svc.QualifyAsync(id, Tenant, User));
-        Assert.Equal("Qualified", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Qualified", (await svc.GetByIdAsync(id, Tenant))!.Status);
 
         var oppId = await svc.ConvertToOpportunityAsync(id, Tenant, User);
         Assert.NotEqual(Guid.Empty, oppId);
-        Assert.Equal("Converted", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Converted", (await svc.GetByIdAsync(id, Tenant))!.Status);
     }
 
     [Fact]
@@ -84,15 +84,15 @@ public class LeadWorkflowTests
             Id = id,
             CompanyName = "Acme2",
             Status = "Qualified"
-        }));
-        Assert.Equal("New", (await svc.GetByIdAsync(id))!.Status);
-        Assert.Equal("Acme2", (await svc.GetByIdAsync(id))!.CompanyName);
+        }, Tenant, User));
+        Assert.Equal("New", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.Equal("Acme2", (await svc.GetByIdAsync(id, Tenant))!.CompanyName);
 
         Assert.True(await svc.MarkLostAsync(id, Tenant, User));
-        Assert.Equal("Lost", (await svc.GetByIdAsync(id))!.Status);
-        Assert.False(await svc.UpdateAsync(new UpdateLeadDto { Id = id, CompanyName = "Nope" }));
+        Assert.Equal("Lost", (await svc.GetByIdAsync(id, Tenant))!.Status);
+        Assert.False(await svc.UpdateAsync(new UpdateLeadDto { Id = id, CompanyName = "Nope" }, Tenant, User));
         Assert.False(await svc.QualifyAsync(id, Tenant, User));
-        Assert.False(await svc.DeleteAsync(id));
+        Assert.False(await svc.DeleteAsync(id, Tenant));
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class LeadWorkflowTests
 
         var customerId = await svc.ConvertToCustomerAsync(id, Tenant, User);
         Assert.NotEqual(Guid.Empty, customerId);
-        Assert.Equal("Converted", (await svc.GetByIdAsync(id))!.Status);
+        Assert.Equal("Converted", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.Equal(Guid.Empty, await svc.ConvertToOpportunityAsync(id, Tenant, User));
     }
 }

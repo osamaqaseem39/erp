@@ -19,6 +19,16 @@ public class SalesInvoice : BaseEntity
     public string? Notes { get; set; }
     public string? Terms { get; set; }
     public Guid? SalesOrderId { get; set; }
+    public Guid? DispatchAdviceId { get; set; }
+    public string? ReferenceNo { get; set; }
+    public DateTime? ReferenceDate { get; set; }
+    public int CreditDays { get; set; }
+    public string? PaymentMode { get; set; }
+    public Guid? PaymentTermId { get; set; }
+    public decimal Freight { get; set; }
+    public decimal Overhead { get; set; }
+    public string? DiscountType { get; set; }
+    public decimal DiscountAmount { get; set; }
     public DateTime? PostedAt { get; set; }
     public Guid? PostedBy { get; set; }
 }
