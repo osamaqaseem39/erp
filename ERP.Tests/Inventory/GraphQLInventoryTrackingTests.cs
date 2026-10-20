@@ -94,8 +94,12 @@ public class GraphQLInventoryTrackingTests
         Assert.NotEqual(Guid.Empty, serial.Id);
         Assert.Equal("SN-001", (await queries.GetSerialNumber(serials, serial.Id, Tenant))!.SerialNumber);
 
+        // ERP-FIX-5: Status is not free-set on Update (stock movements own transitions).
         serial.Status = "Reserved";
-        Assert.Equal("Reserved", (await mutations.UpdateSerialNumber(serials, serial, Tenant, User)).Status);
+        serial.Location = "A-1";
+        var updatedSerial = await mutations.UpdateSerialNumber(serials, serial, Tenant, User);
+        Assert.Equal("Available", updatedSerial.Status);
+        Assert.Equal("A-1", updatedSerial.Location);
 
         var batch = await mutations.AddBatchNumber(batches, new BatchNumberDto
         {

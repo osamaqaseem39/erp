@@ -48,27 +48,13 @@ public class JournalService : IJournalService
         return await _repository.DeleteAsync(id);
     }
 
-    public async Task<bool> PostAsync(Guid id)
-    {
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null) return false;
+    public Task<bool> PostAsync(Guid id)
+        // Dead path: live posting is AccountingService / ApplicationJournalRepositoryAdapter.
+        // Never return empty success from this stub.
+        => Task.FromResult(false);
 
-        // Note: Status and PostedDate properties don't exist in the current JournalEntry domain entity
-        // This would need to be implemented in the domain entity first
-        await _repository.UpdateAsync(entity);
-        return true;
-    }
-
-    public async Task<bool> ReverseAsync(Guid id)
-    {
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null) return false;
-
-        // Note: Status and ReversedDate properties don't exist in the current JournalEntry domain entity
-        // This would need to be implemented in the domain entity first
-        await _repository.UpdateAsync(entity);
-        return true;
-    }
+    public Task<bool> ReverseAsync(Guid id)
+        => Task.FromResult(false);
 
     public async Task<IEnumerable<JournalEntryDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
     {

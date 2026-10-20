@@ -13,6 +13,7 @@ Operating law (must follow):
 3. Append notable outcomes to docs/operating/memory.md (do not erase prior entries).
 4. New tables: document in docs/operating/DATA_MODEL.md + schema SQL before application code.
 5. Schedule/DoD: docs/PRODUCT_COMPLETION_PLAN.md and docs/BACKEND_COMPLETION_PLAN.md — they do not override rules.md.
+6. Long autonomous growth runs: docs/operating/AUTONOMOUS_GROWTH_PROMPT.md + GROWTH_PLAN.md + PROGRESS.md.
 
 Stack (do not change without an ERP-FIX):
 - .NET 9 modular monolith: ERP.Api, ERP.Application, ERP.Domain, ERP.Infrastructure, ERP.Shared, ERP.Tests

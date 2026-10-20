@@ -64,6 +64,7 @@ public class StockTransferWorkflowTests
     public async Task Create_Always_Draft_And_Creator_Cannot_Approve()
     {
         await using var db = Db();
+        await SeedStockAsync(db, qty: 10);
         var svc = Svc(db);
         var id = await CreateDraftAsync(svc);
 
@@ -123,16 +124,17 @@ public class StockTransferWorkflowTests
     }
 
     [Fact]
-    public async Task Complete_Fails_When_Insufficient_Stock()
+    public async Task Approve_Fails_When_Insufficient_Stock()
     {
         await using var db = Db();
         await SeedStockAsync(db, qty: 2);
         var svc = Svc(db);
         var id = await CreateDraftAsync(svc, qty: 5);
 
-        Assert.True(await svc.ApproveAsync(id, Tenant, Approver));
+        // Approve issues source stock; insufficient qty must fail before InTransit.
+        Assert.False(await svc.ApproveAsync(id, Tenant, Approver));
+        Assert.Equal("Draft", (await svc.GetByIdAsync(id, Tenant))!.Status);
         Assert.False(await svc.CompleteAsync(id, Tenant, Approver));
-        Assert.Equal("InTransit", (await svc.GetByIdAsync(id, Tenant))!.Status);
     }
 
     [Fact]

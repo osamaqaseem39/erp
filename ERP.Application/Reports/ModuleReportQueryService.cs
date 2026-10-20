@@ -56,15 +56,17 @@ public sealed class ModuleReportQueryService : IModuleReportQueryService
             "POS_SESSION_SUMMARY" => PosSessionAsync(tenantId, from, to),
             "POS_TENDER_SUMMARY" => PosTenderAsync(tenantId, from, to),
             "POS_ITEM_SALES" => PosItemSalesAsync(tenantId, from, to),
-            // Standard default pack (stubs until dedicated query methods land)
+            // Explicit unimplemented pack — fail honestly (no empty-success JSON).
             "DISPATCH_ADVICE" or "SALE_RETURN" or "VENDOR_INFO" or "PURCHASE_REQUISITION"
                 or "RFQ_SUMMARY" or "VENDOR_CONTRACT" or "STOCK_VALUATION" or "REORDER_ALERT"
                 or "BATCH_EXPIRY" or "SERIAL_NUMBER_LIST" or "ITEM_KIT_LIST" or "PAYMENT_REGISTER"
                 or "TAX_SUMMARY" or "FIXED_ASSET_REGISTER" or "DEPRECIATION_SCHEDULE"
                 or "EXPENSE_CLAIM_SUMMARY" or "BANK_TRANSACTION" or "OPENING_BALANCE"
                 or "QUOTE_LIST" or "ROUTING_LIST" or "BENEFIT_ENROLLMENT" or "TRAINING_SUMMARY"
-                or "RECRUITMENT_PIPELINE" => Task.FromResult(Empty(code)),
-            _ => Task.FromResult<object>(Empty(code))
+                or "RECRUITMENT_PIPELINE" => throw new NotSupportedException(
+                    $"Report '{code}' is registered but not implemented yet."),
+            _ => throw new NotSupportedException(
+                $"Unknown or unimplemented report code '{code}'.")
         };
     }
 

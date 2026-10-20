@@ -270,10 +270,9 @@ public class ApplicationJournalRepositoryAdapter : IJournalRepository
 
     public async Task<IEnumerable<JournalEntry>> GetEntriesByJournalIdAsync(Guid journalId, Guid tenantId)
     {
-        var q = _db.JournalEntries
-            .Include(e => e.Account)
-            .Include(e => e.CostCenter)
-            .Where(e => e.JournalId == journalId);
+        // Do not Include required Account/CostCenter navigations here: missing masters
+        // become INNER JOINs and drop lines (totals/balance falsely read as zero).
+        var q = _db.JournalEntries.AsNoTracking().Where(e => e.JournalId == journalId);
         if (tenantId != Guid.Empty) q = q.Where(e => e.TenantId == tenantId);
         return await q.ToListAsync();
     }

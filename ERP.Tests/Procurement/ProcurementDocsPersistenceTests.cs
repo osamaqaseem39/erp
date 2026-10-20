@@ -68,7 +68,7 @@ public class ProcurementDocsPersistenceTests
         Assert.Equal(33m, loaded.Details![0].TotalAmount);
         Assert.True(await svc.ApproveAsync(id, Tenant, User));
         Assert.Equal("Posted", (await svc.GetByIdAsync(id, Tenant))!.Status);
-        Assert.Equal(3m, await stock.GetStockLevelAsync(Item, Warehouse));
+        Assert.Equal(3m, await stock.GetStockLevelAsync(Item, Warehouse, Tenant));
     }
 
     [Fact]
