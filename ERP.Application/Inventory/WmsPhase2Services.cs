@@ -42,6 +42,7 @@ public class ReplenishmentTaskService : IReplenishmentTaskService
 
     public async Task<Guid> CreateAsync(CreateReplenishmentTaskDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.WarehouseId == Guid.Empty || dto.Lines.Count == 0) return Guid.Empty;
         var bulk = await PreferLocationAsync(dto.WarehouseId, tenantId, "Bulk");
         var pick = await PreferLocationAsync(dto.WarehouseId, tenantId, "Pick");
@@ -195,6 +196,7 @@ public class PackOrderService : IPackOrderService
 
     public async Task<Guid> CreateAsync(CreatePackOrderDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.WarehouseId == Guid.Empty || dto.Lines.Count == 0) return Guid.Empty;
         var id = Guid.NewGuid();
         var entity = new PackOrder
@@ -343,6 +345,7 @@ public class ShipmentService : IShipmentService
 
     public async Task<Guid> CreateAsync(CreateShipmentDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.WarehouseId == Guid.Empty || dto.Lines.Count == 0) return Guid.Empty;
         var id = Guid.NewGuid();
         var entity = new Shipment
