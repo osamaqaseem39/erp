@@ -1,90 +1,136 @@
-using ERP.Application.Interfaces;
 using ERP.Shared.DTOs.HRM;
 using ERP.Shared.DTOs;
-using ERP.Infrastructure.Repositories;
+using ERP.Shared.Exceptions;
 using ERP.Infrastructure.Interfaces.HRM;
+using ERP.Infrastructure.Database;
 using ERP.Domain.HRM;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Application.HRM;
 
 public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _repository;
+    private readonly ERPDbContext _db;
 
-    public EmployeeService(IEmployeeRepository repository)
+    public EmployeeService(IEmployeeRepository repository, ERPDbContext db)
     {
         _repository = repository;
+        _db = db;
     }
 
-    public async Task<EmployeeDto> AddEmployeeAsync(CreateEmployeeDto dto)
+    public async Task<EmployeeDto> AddEmployeeAsync(CreateEmployeeDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new InvalidOperationException("Tenant is required.");
+
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
+        entity.CreatedBy = string.IsNullOrWhiteSpace(dto.CreatedBy) ? userId.ToString() : dto.CreatedBy;
         var createdEntity = await _repository.AddAsync(entity);
         return MapToDto(createdEntity);
     }
 
-    public async Task<EmployeeDto> UpdateEmployeeAsync(UpdateEmployeeDto dto)
+    public async Task<EmployeeDto> UpdateEmployeeAsync(UpdateEmployeeDto dto, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty)
+            throw new InvalidOperationException("Tenant is required.");
+
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) throw new KeyNotFoundException($"Employee with ID '{dto.Id}' not found.");
 
         MapToEntity(dto, entity);
+        entity.UpdatedBy = string.IsNullOrWhiteSpace(dto.UpdatedBy) ? userId.ToString() : dto.UpdatedBy;
         await _repository.UpdateAsync(entity);
         return MapToDto(entity);
     }
 
-    public async Task DeleteEmployeeAsync(Guid employeeId)
+    public async Task DeleteEmployeeAsync(Guid employeeId, Guid tenantId)
     {
-        await _repository.DeleteAsync(employeeId);
+        if (tenantId == Guid.Empty)
+            throw new InvalidOperationException("Tenant is required.");
+
+        var entity = await _repository.GetByIdAsync(employeeId, tenantId);
+        if (entity == null)
+            throw new KeyNotFoundException($"Employee with ID '{employeeId}' not found.");
+
+        var linked = await _db.Users.AsNoTracking()
+            .Where(u => u.EmployeeId == employeeId && u.TenantId == tenantId)
+            .Select(u => u.PrimaryEmail)
+            .FirstOrDefaultAsync();
+        if (linked != null)
+            throw new ConflictException(
+                $"Cannot delete this employee while linked to user {linked}. Unlink the user first.");
+
+        await _repository.DeleteAsync(employeeId, tenantId);
     }
 
-    public async Task<EmployeeDto> GetEmployeeByIdAsync(Guid employeeId)
+    public async Task<EmployeeDto> GetEmployeeByIdAsync(Guid employeeId, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(employeeId);
+        if (tenantId == Guid.Empty)
+            throw new KeyNotFoundException($"Employee with ID '{employeeId}' not found.");
+
+        var entity = await _repository.GetByIdAsync(employeeId, tenantId);
         if (entity == null) throw new KeyNotFoundException($"Employee with ID '{employeeId}' not found.");
         return MapToDto(entity);
     }
 
-    public async Task<PagedResult<EmployeeListDto>> GetEmployeesAsync(EmployeeQuery filter)
+    public async Task<PagedResult<EmployeeListDto>> GetEmployeesAsync(EmployeeQuery filter, Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
-        var filteredEntities = entities.Where(e => 
-            (string.IsNullOrEmpty(filter.SearchTerm) || 
+        if (tenantId == Guid.Empty)
+        {
+            return new PagedResult<EmployeeListDto>
+            {
+                Items = [],
+                TotalCount = 0,
+                PageNumber = filter.PageNumber,
+                PageSize = filter.PageSize
+            };
+        }
+
+        var entities = await _repository.GetAllAsync(tenantId);
+        var filteredEntities = entities.Where(e =>
+            (string.IsNullOrEmpty(filter.SearchTerm) ||
              e.FirstName.Contains(filter.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
              e.LastName.Contains(filter.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
              e.EmployeeCode.Contains(filter.SearchTerm, StringComparison.OrdinalIgnoreCase)) &&
             (filter.DepartmentId == null || e.DepartmentId == filter.DepartmentId) &&
+            (filter.CompanyId == null || e.CompanyId == filter.CompanyId) &&
             (filter.Status == null || e.Status == filter.Status) &&
             !e.IsDeleted
         );
 
         var totalCount = filteredEntities.Count();
+        var pageNumber = filter.PageNumber > 0 ? filter.PageNumber : Math.Max(1, filter.Page);
+        var pageSize = filter.PageSize > 0 ? filter.PageSize : 50;
         var pagedEntities = filteredEntities
-            .Skip((filter.PageNumber - 1) * filter.PageSize)
-            .Take(filter.PageSize)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToList();
-
-        var employeeListDtos = pagedEntities.Select(MapToEmployeeListDto).ToList();
 
         return new PagedResult<EmployeeListDto>
         {
-            Items = employeeListDtos,
+            Items = pagedEntities.Select(MapToEmployeeListDto).ToList(),
             TotalCount = totalCount,
-            PageNumber = filter.PageNumber,
-            PageSize = filter.PageSize
+            PageNumber = pageNumber,
+            PageSize = pageSize
         };
     }
 
-    public async Task<EmployeeDto> GetEmployeeByCodeAsync(string employeeCode)
+    public async Task<EmployeeDto> GetEmployeeByCodeAsync(string employeeCode, Guid tenantId)
     {
-        var entity = await _repository.GetByCodeAsync(employeeCode);
+        if (tenantId == Guid.Empty)
+            throw new KeyNotFoundException($"Employee with code '{employeeCode}' not found.");
+
+        var entity = await _repository.GetByCodeAsync(employeeCode, tenantId);
         if (entity == null) throw new KeyNotFoundException($"Employee with code '{employeeCode}' not found.");
         return MapToDto(entity);
     }
 
-    public async Task<bool> IsEmployeeCodeUniqueAsync(string employeeCode, Guid? excludeEmployeeId = null)
+    public async Task<bool> IsEmployeeCodeUniqueAsync(string employeeCode, Guid tenantId, Guid? excludeEmployeeId = null)
     {
-        var entity = await _repository.GetByCodeAsync(employeeCode);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByCodeAsync(employeeCode, tenantId);
         return entity == null || (excludeEmployeeId != null && entity.Id == excludeEmployeeId);
     }
 

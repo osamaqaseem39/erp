@@ -31,6 +31,7 @@ public class ItemPricingService : IItemPricingService
     {
         var mapper = new ItemPricingMapper();
         var entity = mapper.ToEntity(dto);
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         entity.TenantId = tenantId;
         entity.CreatedBy = createdBy;
         
@@ -40,12 +41,21 @@ public class ItemPricingService : IItemPricingService
 
     public async Task<ItemPricingDto> UpdateAsync(ItemPricingDto dto, Guid tenantId, string updatedBy)
     {
+        var existing = await _repository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Item pricing '{dto.Id}' not found.");
+
+        existing.ItemId = dto.ItemId;
+        existing.PriceListName = dto.PriceListName;
+        existing.UnitPrice = dto.UnitPrice;
+        existing.MinQuantity = dto.MinQuantity;
+        existing.MaxQuantity = dto.MaxQuantity;
+        existing.ValidFrom = dto.ValidFrom;
+        existing.ValidTo = dto.ValidTo;
+        existing.IsActive = dto.IsActive;
+        existing.UpdatedBy = updatedBy;
+
         var mapper = new ItemPricingMapper();
-        var entity = mapper.ToEntity(dto);
-        entity.TenantId = tenantId;
-        entity.UpdatedBy = updatedBy;
-        
-        var updated = await _repository.UpdateAsync(entity);
+        var updated = await _repository.UpdateAsync(existing);
         return mapper.ToDto(updated);
     }
 

@@ -1,3 +1,4 @@
+using ERP.Application.CRM;
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
 using HotChocolate;
@@ -10,31 +11,31 @@ public class CRMQueries
     // Customer Queries
     public async Task<CustomerDto?> GetCustomer(
         [Service] ICustomerService customerService,
-        Guid customerId)
+        Guid customerId,
+        Guid tenantId)
     {
-        return await customerService.GetByIdAsync(customerId);
+        return await customerService.GetByIdAsync(customerId, tenantId);
     }
 
     public async Task<IEnumerable<CustomerDto>> GetCustomers(
         [Service] ICustomerService customerService,
+        Guid tenantId,
         string? status = null,
         string? industry = null)
     {
-        var customers = await customerService.GetAllAsync();
-        
         if (!string.IsNullOrEmpty(status))
-            customers = customers.Where(c => c.Status == status);
+            return await customerService.GetByStatusAsync(status, tenantId);
         if (!string.IsNullOrEmpty(industry))
-            customers = customers.Where(c => c.Industry == industry);
-            
-        return customers;
+            return await customerService.GetByIndustryAsync(industry, tenantId);
+        return await customerService.GetAllAsync(tenantId);
     }
 
     public async Task<IEnumerable<CustomerDto>> SearchCustomers(
         [Service] ICustomerService customerService,
-        string searchTerm)
+        string searchTerm,
+        Guid tenantId)
     {
-        return await customerService.SearchAsync(searchTerm);
+        return await customerService.SearchAsync(searchTerm, tenantId);
     }
 
     // Contact Queries
@@ -362,4 +363,54 @@ public class CRMQueries
     {
         return await campaignService.GetByDateRangeAsync(startDate, endDate);
     }
+
+    // Return Order Queries
+    public async Task<ReturnOrderDto?> GetReturnOrder(
+        [Service] IReturnOrderService returnOrderService,
+        Guid returnOrderId,
+        Guid tenantId)
+        => await returnOrderService.GetByIdAsync(returnOrderId, tenantId);
+
+    public async Task<IEnumerable<ReturnOrderDto>> GetReturnOrders(
+        [Service] IReturnOrderService returnOrderService,
+        Guid tenantId,
+        string? status = null)
+    {
+        var orders = await returnOrderService.GetAllAsync(tenantId);
+        if (string.IsNullOrEmpty(status)) return orders;
+        return orders.Where(r => string.Equals(r.Status, status, StringComparison.OrdinalIgnoreCase));
+    }
+
+    // Extended CRM masters
+    public async Task<SalesmanDto?> GetSalesman(
+        [Service] ISalesmanService service, Guid salesmanId, Guid tenantId)
+        => await service.GetByIdAsync(salesmanId, tenantId);
+
+    public async Task<IEnumerable<SalesmanDto>> GetSalesmen(
+        [Service] ISalesmanService service, Guid tenantId)
+        => await service.GetAllAsync(tenantId);
+
+    public async Task<CustomerGroupDto?> GetCustomerGroup(
+        [Service] ICustomerGroupService service, Guid groupId, Guid tenantId)
+        => await service.GetByIdAsync(groupId, tenantId);
+
+    public async Task<IEnumerable<CustomerGroupDto>> GetCustomerGroups(
+        [Service] ICustomerGroupService service, Guid tenantId)
+        => await service.GetAllAsync(tenantId);
+
+    public async Task<PriceListDto?> GetPriceList(
+        [Service] IPriceListService service, Guid priceListId, Guid tenantId)
+        => await service.GetByIdAsync(priceListId, tenantId);
+
+    public async Task<IEnumerable<PriceListDto>> GetPriceLists(
+        [Service] IPriceListService service, Guid tenantId)
+        => await service.GetAllAsync(tenantId);
+
+    public async Task<SalesTerritoryDto?> GetSalesTerritory(
+        [Service] ISalesTerritoryService service, Guid territoryId, Guid tenantId)
+        => await service.GetByIdAsync(territoryId, tenantId);
+
+    public async Task<IEnumerable<SalesTerritoryDto>> GetSalesTerritories(
+        [Service] ISalesTerritoryService service, Guid tenantId)
+        => await service.GetAllAsync(tenantId);
 }

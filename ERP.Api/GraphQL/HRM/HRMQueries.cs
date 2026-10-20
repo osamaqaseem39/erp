@@ -10,77 +10,121 @@ public class HRMQueries
     // Payroll Queries
     public async Task<PayrollDto?> GetPayroll(
         [Service] IPayrollService service,
-        Guid payrollId)
+        Guid payrollId,
+        Guid tenantId)
     {
-        return await service.GetByIdAsync(payrollId);
+        return await service.GetByIdAsync(payrollId, tenantId);
     }
 
     public async Task<IEnumerable<PayrollDto>> GetPayrolls(
         [Service] IPayrollService service,
+        Guid tenantId,
         Guid? employeeId = null,
         DateTime? startDate = null,
         DateTime? endDate = null)
     {
         if (employeeId.HasValue)
-            return await service.GetByEmployeeAsync(employeeId.Value);
+            return await service.GetByEmployeeAsync(employeeId.Value, tenantId);
         if (startDate.HasValue && endDate.HasValue)
-            return await service.GetByPeriodAsync(startDate.Value, endDate.Value);
-        return await service.GetAllAsync();
+            return await service.GetByPeriodAsync(startDate.Value, endDate.Value, tenantId);
+        return await service.GetAllAsync(tenantId);
     }
 
     // Leave Queries
     public async Task<LeaveRequestDto?> GetLeaveRequest(
         [Service] ILeaveService service,
-        Guid leaveRequestId)
+        Guid leaveRequestId,
+        Guid tenantId)
     {
-        return await service.GetLeaveRequestByIdAsync(leaveRequestId);
+        return await service.GetLeaveRequestByIdAsync(leaveRequestId, tenantId);
     }
 
     public async Task<IEnumerable<LeaveRequestDto>> GetLeaveRequests(
         [Service] ILeaveService service,
+        Guid tenantId,
         Guid? employeeId = null)
     {
         if (employeeId.HasValue)
-            return await service.GetLeaveRequestsByEmployeeAsync(employeeId.Value);
-        return await service.GetPendingLeaveRequestsAsync();
+            return await service.GetLeaveRequestsByEmployeeAsync(employeeId.Value, tenantId);
+        return await service.GetPendingLeaveRequestsAsync(tenantId);
     }
 
     // Time Tracking Queries
     public async Task<TimeEntryDto?> GetTimeEntry(
         [Service] ITimeTrackingService service,
-        Guid timeEntryId)
+        Guid timeEntryId,
+        Guid tenantId)
     {
-        return await service.GetByIdAsync(timeEntryId);
+        return await service.GetByIdAsync(timeEntryId, tenantId);
     }
 
     public async Task<IEnumerable<TimeEntryDto>> GetTimeEntries(
         [Service] ITimeTrackingService service,
+        Guid tenantId,
         Guid? employeeId = null,
         DateTime? startDate = null,
         DateTime? endDate = null)
     {
         if (employeeId.HasValue)
-            return await service.GetByEmployeeAsync(employeeId.Value);
+            return await service.GetByEmployeeAsync(employeeId.Value, tenantId);
         if (startDate.HasValue && endDate.HasValue)
-            return await service.GetByDateRangeAsync(startDate.Value, endDate.Value);
-        return await service.GetAllAsync();
+            return await service.GetByDateRangeAsync(startDate.Value, endDate.Value, tenantId);
+        return await service.GetAllAsync(tenantId);
+    }
+
+    public async Task<decimal> GetTimeEntryTotalHours(
+        [Service] ITimeTrackingService service,
+        Guid employeeId,
+        DateTime startDate,
+        DateTime endDate,
+        Guid tenantId)
+        => await service.GetTotalHoursAsync(employeeId, startDate, endDate, tenantId);
+
+    // Attendance Queries
+    public async Task<IEnumerable<AttendanceRecordDto>> GetEmployeeAttendance(
+        [Service] IAttendanceService service,
+        Guid employeeId,
+        Guid tenantId,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
+    {
+        var from = fromDate ?? DateTime.UtcNow.Date.AddDays(-30);
+        var to = toDate ?? DateTime.UtcNow.Date;
+        return await service.GetEmployeeAttendanceAsync(employeeId, tenantId, from, to);
+    }
+
+    public async Task<AttendanceSummaryDto> GetAttendanceSummary(
+        [Service] IAttendanceService service,
+        Guid employeeId,
+        Guid tenantId,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
+    {
+        var from = fromDate ?? DateTime.UtcNow.Date.AddDays(-30);
+        var to = toDate ?? DateTime.UtcNow.Date;
+        return await service.GetAttendanceSummaryAsync(employeeId, tenantId, from, to);
     }
 
     // Performance Queries
     public async Task<PerformanceReviewDto?> GetPerformanceReview(
         [Service] IPerformanceService service,
-        Guid reviewId)
+        Guid reviewId,
+        Guid tenantId)
     {
-        return await service.GetByIdAsync(reviewId);
+        return await service.GetByIdAsync(reviewId, tenantId);
     }
 
     public async Task<IEnumerable<PerformanceReviewDto>> GetPerformanceReviews(
         [Service] IPerformanceService service,
-        Guid? employeeId = null)
+        Guid tenantId,
+        Guid? employeeId = null,
+        Guid? reviewerId = null)
     {
         if (employeeId.HasValue)
-            return await service.GetByEmployeeAsync(employeeId.Value);
-        return await service.GetAllAsync();
+            return await service.GetByEmployeeAsync(employeeId.Value, tenantId);
+        if (reviewerId.HasValue)
+            return await service.GetByReviewerAsync(reviewerId.Value, tenantId);
+        return await service.GetAllAsync(tenantId);
     }
 
     // Recruitment Queries
@@ -153,21 +197,23 @@ public class HRMQueries
     // Training Queries
     public async Task<TrainingDto?> GetTraining(
         [Service] ITrainingService service,
-        Guid trainingId)
+        Guid trainingId,
+        Guid tenantId)
     {
-        return await service.GetByIdAsync(trainingId);
+        return await service.GetByIdAsync(trainingId, tenantId);
     }
 
     public async Task<IEnumerable<TrainingDto>> GetTrainings(
         [Service] ITrainingService service,
+        Guid tenantId,
         Guid? employeeId = null,
         string? status = null)
     {
         if (employeeId.HasValue)
-            return await service.GetByEmployeeAsync(employeeId.Value);
+            return await service.GetByEmployeeAsync(employeeId.Value, tenantId);
         if (!string.IsNullOrEmpty(status))
-            return await service.GetByStatusAsync(status);
-        return await service.GetAllAsync();
+            return await service.GetByStatusAsync(status, tenantId);
+        return await service.GetAllAsync(tenantId);
     }
 
     // Department Queries
@@ -184,7 +230,7 @@ public class HRMQueries
         Guid tenantId,
         Guid? parentDepartmentId = null)
     {
-        return await service.GetAllAsync(tenantId, parentDepartmentId);
+        return await service.GetAllAsync(tenantId, parentDepartmentId: parentDepartmentId);
     }
 
     // Benefits Queries

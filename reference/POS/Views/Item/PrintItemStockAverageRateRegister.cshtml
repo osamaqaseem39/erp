@@ -1,0 +1,496 @@
+﻿<div id="CssData">
+
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            @@page {
+                size: A4;
+                margin-left: -50px;
+            }
+
+            @@page:first {
+                size: A4;
+                margin-top: -40px;
+                margin-left: -50px;
+                margin-bottom: 10px;
+            }
+
+            .mainTable {
+                width: 97.5% !important;
+                margin-left: 16px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .CustomersDetail {
+                padding-left: 316px !important;
+            }
+
+            .customerHeadingTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            #myTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+        }
+
+        #printable-content table {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        #printable-content .heading {
+            border-width: 0px;
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        .mainTable {
+            width: 94.5%;
+            /*margin-top: -25px;*/
+            margin-bottom: 1px;
+            margin-left: 10px;
+            padding-right: 19px !important;
+        }
+
+            .mainTable td {
+                border-left: 1px solid black;
+                border-bottom: 1px solid black;
+            }
+
+        .borderRight {
+            border-right: 1px solid black;
+        }
+
+        .mainTable th {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        .mainTable th {
+            padding: 3px;
+        }
+
+        .mainTable td {
+            padding: 3px;
+        }
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }*/
+    </style>
+</div>
+
+<!-- widget content -->
+@model POS.Models.clsInvoice
+<div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-home fa-fw "></i>
+                Report
+                <span>
+                    >
+                    Items Stock Average Rate Register
+                </span>
+            </h1>
+        </div>
+    </div>
+    <section>
+        <div class="panel">
+            <div class="panel-heading">
+                @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @id = "downloadForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                {
+                    <span class="header"> Items Stock Average Rate Register Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                    <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                    <input type="hidden" name="FileName" id="FileName" value="ItemStockAverageRateRegister" />
+                    <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                        Print
+                    </button>
+                    <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                }
+            </div>
+            <div class="panel-body">
+                <div id="HtmlData">
+                    <div id="printable-content" class="panel rpt" style=" float: left;width: 800px; font-family: Arial, Helvetica, sans-serif;">
+                        <table style="padding: 30px;padding-top:0px" id="myTable">
+                            <tr>
+                                <th style="font-weight: bold; font-size: 12px; text-align: right;font-weight:normal" colspan="12"><strong>Print Date:&nbsp;</strong>@*<span class="LocalDate"></span>*@@Convert.ToDateTime(DateTime.Now).ToString("dd/MM/yyyy hh:mm tt")</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: bold; font-size: 20px; text-align: center; padding-bottom: 5px;padding-top:15px" colspan="6">@System.Web.HttpContext.Current.Application["BusinessName"]</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: normal; font-size: 14px; text-align: center; padding-bottom: 5px;" colspan="6">@System.Web.HttpContext.Current.Application["BusinessAddress"]</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: bold; font-size: 18px; text-align: center;" colspan="6">Items Stock Average Rate Register Report</th>
+                            </tr>
+                            @if (Model.InvoicesList.Count != 0)
+                            {
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 14px; text-align: center;" colspan="6"><strong><span style="font-size: 12px">From Date:&nbsp;</span></strong>@Convert.ToDateTime(Model.InvoicesList[0].FromDate).ToString("dd/MM/yyyy") &nbsp;&nbsp;<strong><span style="font-size: 12px">To Date:&nbsp;</span></strong> @Convert.ToDateTime(Model.InvoicesList[0].ToDate).ToString("dd/MM/yyyy")</th>
+                                </tr>
+                            }
+                            <thead>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding-bottom: 10px" colspan="12">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="12">
+                                        @{
+                                            decimal grandInQty1 = 0;
+                                            decimal grandOutQty1 = 0;
+                                            decimal grandBalance = 0;
+                                            decimal grandAverageRate = 0;
+                                            decimal grandValue = 0;
+                                            decimal grandRate = 0;
+                                        }
+                                        @if (Model.InvoicesList.Count != 0)
+                                        {
+                                            for (int i = 0; i < Model.InvoicesList2.Count; i++)
+                                            {
+                                                decimal itemId = Convert.ToDecimal(Model.InvoicesList2[i].ItemID);
+                                                int j = 0;
+                                                decimal balance = 0;
+                                                decimal value = 0;
+                                                string marginTop = "";
+                                                if (i == 0)
+                                                {
+                                                    marginTop = "-15px";
+                                                }
+                                                else
+                                                {
+                                                    marginTop = "-45px";
+                                                }
+                                                if (Model.InvoicesList.Where(x => x.ItemID == itemId).Count() != 0)
+                                                {
+                                                   
+                                                    <table class="mainTable" style="margin-top: @marginTop">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;border-bottom:1px solid black" colspan="12">&nbsp;</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tr>
+                                                            <th style="text-align: center; border: 1px solid black !important; border-bottom: 0px !important; font-size: 14px; padding-bottom: 5px;" colspan="11">
+                                                                @Model.InvoicesList2[i].ItemName
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left; border-bottom: 0px !important; font-size: 13px; border-right: 1px solid black; padding-bottom: 5px; font-weight: normal" colspan="11">
+                                                                <div>
+                                                                    <span style="margin-left: 106px">
+                                                                        Category : <b>@Model.InvoicesList2[i].CategoryName</b>
+                                                                    </span>
+
+                                                                    <span style="margin-left: 106px">
+                                                                        Brand : <b>@Model.InvoicesList2[i].BrandName</b>
+                                                                    </span>
+                                                                    <span style="margin-left: 106px">
+                                                                        UOM : <b>@Model.InvoicesList2[i].UnitName</b>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="pull-right" style="margin-top:5px">
+                                                                    @if (Model.InvoicesList2[i].PreviousStock1 == Convert.ToInt32(Model.InvoicesList2[i].PreviousStock1))
+                                                                    {
+                                                                        <span style=""> Previous Stock :<b>@Math.Round(Convert.ToDecimal(Model.InvoicesList2[i].PreviousStock1), 0)</b></span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span style=""> Previous Stock :<b>@Math.Round(Convert.ToDecimal(Model.InvoicesList2[i].PreviousStock1), 2)</b></span>
+                                                                    }
+                                                                    <span style="margin-left: 70px">
+                                                                        Previous Average Value : <b>@Model.InvoicesList2[i].AverageValue1</b>
+                                                                    </span>
+                                                                    @{
+                                                                    decimal previousAverageRate = 0;
+                                                                    if (Convert.ToDecimal(Model.InvoicesList2[i].PreviousStock1) != 0)
+                                                                    {
+                                                                        previousAverageRate = Math.Round(Convert.ToDecimal(Model.InvoicesList2[i].AverageValue1) / Convert.ToDecimal(Model.InvoicesList2[i].PreviousStock1),2);
+                                                                    }
+                                                                    }
+                                                                    <span style="margin-left: 70px">
+                                                                        Prev. Avg. Rate : <b>@previousAverageRate</b>
+                                                                    </span>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr class="mainTr">
+                                                            <th style="text-align: center; width: 35px;font-size:11px">Sr#</th>
+                                                            <th style="text-align: center; width: 70px;font-size: 11px; ">Date</th>
+                                                            <th style="text-align: center; width: 100px; font-size: 11px; ">Invoice No.</th>
+                                                            <th style="text-align: center; width: 50px; font-size: 11px; ">Ref<br />No.</th>
+                                                            <th style="text-align: left; font-size: 11px">Account</th>
+                                                            <th style="text-align: right; width: 50px; font-size: 11px; ">In<br />Qty</th>
+                                                            <th style="text-align: right; width: 50px; font-size: 11px; ">Out<br />Qty</th>
+                                                            <th style="text-align: right; width: 50px; font-size: 11px; ">Balance</th>
+                                                            <th style="text-align: right; width: 50px; font-size: 11px; ">Average<br />Rate</th>
+                                                            <th style="text-align: right; width: 50px; font-size: 11px; ">Value</th>
+                                                            <th class="borderRight" style="text-align: right; width: 50px; font-size: 11px; ">Rate</th>
+                                                        </tr>
+                                                        <tbody>
+                                                            @{
+                                                                    decimal totalInQty1 = 0;
+                                                                    decimal totalOutQty1 = 0;
+                                                                    decimal totalBalance = 0;
+                                                                    decimal totalAverageRate = 0;
+                                                                    decimal totalValue = 0;
+                                                                    decimal totalRate = 0;
+                                                                    decimal rate = 0;
+                                                            }
+                                                            @foreach (clsInvoice s in Model.InvoicesList.Where(x => x.ItemID == itemId))
+                                                            {
+                                                                if (Convert.ToDecimal(s.InQty) == 0 && Convert.ToDecimal(s.OutQty)==0){
+                                                                        j = j;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        j++;
+                                                                        decimal previousBalance = Convert.ToDecimal(Model.InvoicesList2[i].PreviousStock1);
+                                                                        decimal previousValue = Convert.ToDecimal(Model.InvoicesList2[i].AverageValue1);
+                                                                        if (j == 1)
+                                                                        {
+                                                                            balance = previousBalance + Convert.ToDecimal(s.InQty) - Convert.ToDecimal(s.OutQty);
+                                                                            value = previousValue + (Convert.ToDecimal(s.AvgRate) * Convert.ToDecimal(s.InQty)) - (Convert.ToDecimal(s.AvgRate) * Convert.ToDecimal(s.OutQty));
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            balance = balance + Convert.ToDecimal(s.InQty) - Convert.ToDecimal(s.OutQty);
+                                                                            value = value + (Convert.ToDecimal(s.AvgRate) * Convert.ToDecimal(s.InQty)) - (Convert.ToDecimal(s.AvgRate) * Convert.ToDecimal(s.OutQty));
+                                                                        }
+                                                                        rate = 0;
+                                                                        if (balance != 0)
+                                                                        {
+                                                                            rate = value / balance;
+                                                                        }
+                                                                        totalInQty1 += Convert.ToDecimal(s.InQty);
+                                                                        totalOutQty1 += Convert.ToDecimal(s.OutQty);
+                                                                        totalBalance += Convert.ToDecimal(balance);
+                                                                        totalAverageRate += Convert.ToDecimal(s.AvgRate);
+                                                                        totalValue += Convert.ToDecimal(value);
+                                                                        totalRate += Convert.ToDecimal(rate);
+
+                                                                        grandInQty1 += Convert.ToDecimal(s.InQty);
+                                                                        grandOutQty1 += Convert.ToDecimal(s.OutQty);
+
+                                                                        grandAverageRate += Convert.ToDecimal(s.AvgRate);
+                                                                        grandRate += Convert.ToDecimal(rate);
+                                                                        <tr class="mainTr">
+                                                                            <td style="text-align: center; font-size: 11px">@(j)</td>
+                                                                            <td style="text-align: center; font-size: 11px">@Convert.ToDateTime(s.RecordDate).ToString("dd-MM-yy")</td>
+                                                                            <td style="text-align: center; font-size: 11px">@s.ComputerNo</td>
+                                                                            <td style="text-align: center; font-size: 11px">@s.RefrenceNo</td>
+                                                                            <td style="text-align: left; font-size: 11px">@s.DetailName</td>
+                                                                            @if (s.InQty == Convert.ToInt32(s.InQty))
+                                                                            {
+                                                                                <td style="text-align: right; font-size: 11px">@Math.Round(Convert.ToDecimal(s.InQty), 0)</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td style="text-align: right; font-size: 11px">@Math.Round(Convert.ToDecimal(s.InQty), 2)</td>
+                                                                            }
+                                                                            @if (s.OutQty == Convert.ToInt32(s.OutQty))
+                                                                            {
+                                                                                <td style="text-align: right; font-size: 11px">@Math.Round(Convert.ToDecimal(s.OutQty), 0)</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td style="text-align: right; font-size: 11px">@Math.Round(Convert.ToDecimal(s.OutQty), 2)</td>
+                                                                            }
+                                                                            @if (balance == Convert.ToInt32(balance))
+                                                                            {
+                                                                                <td style="text-align: right; font-size: 11px">@Math.Round(Convert.ToDecimal(balance), 0)</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td style="text-align: right; font-size: 11px">@Math.Round(Convert.ToDecimal(balance), 2)</td>
+                                                                            }
+                                                                            <td style="text-align: right; font-size: 11px">@Convert.ToDecimal(s.AvgRate).ToString("#,##0.00")</td>
+                                                                            <td style="text-align: right; font-size: 11px">@Convert.ToDecimal(value).ToString("#,##0.00")</td>
+                                                                            <td class="borderRight" style="text-align: right; font-size: 11px; ">@Convert.ToDecimal(rate).ToString("#,##0.00")</td>
+                                                                        </tr>
+                                                                }
+                                                            }
+                                                            <tr class="mainTr">
+                                                                <td class="tdd" style="text-align: right; border: 1px solid #fff; font-weight: bold; font-size: 11px" colspan="5">Total: </td>
+                                                                @if (totalInQty1 == Convert.ToInt32(totalInQty1))
+                                                                {
+                                                                    <td style="text-align: right; font-weight: bold; font-size: 11px">@Math.Round(Convert.ToDecimal(totalInQty1), 0)</td>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td style="text-align: right; font-weight: bold; font-size: 11px">@Math.Round(Convert.ToDecimal(totalInQty1), 2)</td>
+                                                                }
+                                                                @if (totalOutQty1 == Convert.ToInt32(totalOutQty1))
+                                                                {
+                                                                    <td style="text-align: right; font-weight: bold; font-size: 11px">@Math.Round(Convert.ToDecimal(totalOutQty1), 0)</td>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td style="text-align: right; font-weight: bold; font-size: 11px">@Math.Round(Convert.ToDecimal(totalOutQty1), 2)</td>
+                                                                }
+                                                                @if (totalBalance == Convert.ToInt32(totalBalance))
+                                                                {
+                                                                    <td style="text-align: right; font-weight: bold; font-size: 11px">@Math.Round(Convert.ToDecimal(balance), 0)</td>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td style="text-align: right; font-weight: bold; font-size: 11px">@Math.Round(Convert.ToDecimal(balance), 2)</td>
+                                                                }
+                                                                <td style="text-align: right; font-weight: bold; font-size: 11px; "></td>
+                                                                <td style="text-align: right; font-weight: bold; font-size: 11px">@Convert.ToDecimal(value).ToString("#,##0.00")</td>
+                                                                <td class="borderRight" style="text-align: right; font-weight: bold; font-size: 11px">@Convert.ToDecimal(rate).ToString("#,##0.00")</td>
+                                                            </tr>
+                                                            @{grandBalance += Convert.ToDecimal(balance);
+                                                            grandValue += Convert.ToDecimal(value);
+                                                            }
+                                                        </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    </table>
+                                                    <br />
+                                                    <br />
+                                                }
+                                            }
+                                            <table class="mainTable" style="margin-top:-45px">
+                                                <tr class="mainTr">
+                                                    <td class="tdd" style="text-align: right; border: 1px solid #fff; font-weight: bold; font-size: 11px;" colspan="5">Grand Total: </td>
+                                                    <td style="text-align: right; font-weight: bold; border-top: 1px solid black; font-size: 11px; width: 50px;">@Convert.ToDecimal(grandInQty1).ToString("#,##0.00")</td>
+                                                    <td style="text-align: right; font-weight: bold; border-top: 1px solid black; font-size: 11px; width: 50px;">@Convert.ToDecimal(grandOutQty1).ToString("#,##0.00")</td>
+                                                    <td style="text-align: right; font-weight: bold; border-top: 1px solid black; font-size: 11px; width: 50px; border-right: 1px solid black;">@Convert.ToDecimal(grandBalance).ToString("#,##0.00")</td>
+                                                    <td style="text-align: right; font-weight: bold; border-top: 1px solid black; font-size: 11px; width: 50px; border: 1px solid #fff;"></td>
+                                                    <td style="text-align: right; font-weight: bold; border-top: 1px solid black; font-size: 11px; width: 50px; border-right: 1px solid black;">@Convert.ToDecimal(grandValue).ToString("#,##0.00")</td>
+                                                    <td class="borderRight" style="text-align: right; font-weight: bold; font-size: 11px; width: 50px; border: 1px solid #fff;  "></td>
+                                                </tr>
+                                            </table>
+                                        }
+                                        else
+                                        {
+                                            <table class="mainTable" style="margin-top:5px">
+                                                <tr class="mainTr">
+                                                    <th style="text-align: center; width: 35px;font-size:11px">Sr#</th>
+                                                    <th style="text-align: center; width: 70px;font-size: 11px; ">Date</th>
+                                                    <th style="text-align: center; width: 100px; font-size: 11px; ">Invoice No.</th>
+                                                    <th style="text-align: center; width: 50px; font-size: 11px; ">Ref<br />No.</th>
+                                                    <th style="text-align: left; font-size: 11px">Account</th>
+                                                    <th style="text-align: right; width: 50px; font-size: 11px; ">In<br />Qty</th>
+                                                    <th style="text-align: right; width: 50px; font-size: 11px; ">Out<br />Qty</th>
+                                                    <th style="text-align: right; width: 50px; font-size: 11px; ">Balance</th>
+                                                    <th style="text-align: right; width: 50px; font-size: 11px; ">Average<br />Rate</th>
+                                                    <th style="text-align: right; width: 50px; font-size: 11px; ">Value</th>
+                                                    <th class="borderRight" style="text-align: right; width: 50px; font-size: 11px; ">Rate</th>
+                                                </tr>
+                                                <tbody>
+                                                    <tr class="mainTr">
+                                                        <td class="borderRight" colspan="11" style="text-align:center;padding:10px">No Record Found.</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END MAIN CONTENT -->
+@section pagespecific {
+    <script src="~/Scripts/CustomJs/ResponsivePrintScreen.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+        })
+        $('#downloadForm').on("submit", function () {
+            $("table").each(function () {
+                $(this).css("border-collapse", "collapse");
+                $('.mainTable').css("width", "99.8%");
+                $('.mainTable').css("margin-top", "-15px");
+                $('.tdd').css("border-right", "1px solid black");
+                var cssData = $('#CssData').html();
+                var htmlData = $('#HtmlData').html();
+                $('#DocumentName').val(cssData + htmlData);
+            })
+            $("table").each(function () {
+                $(this).css("border-collapse", "separate");
+                $('.mainTable').css("width", "100%");
+                $('.mainTable').css("margin-top", "-25px");
+                $('.tdd').css("border-right", "0px");
+            })
+        })
+        function PrintElem(elem) {
+            var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+            mywindow.document.write('<html><head><title></title>');
+            mywindow.document.write('</head><body>');
+            //mywindow.document.write('<h1></h1>');
+            mywindow.document.write(document.getElementById(elem).innerHTML);
+            mywindow.document.write('</body></html>');
+
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            mywindow.print();
+            mywindow.close();
+
+            return true;
+        }
+        $('.report_body tr td').each(function () {
+            if (parseFloat($(this).html()) > 0) {
+                $(this).html(ReplaceNumberWithCommas($(this).html()));
+            }
+        });
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+    </script>
+}

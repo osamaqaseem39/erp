@@ -5,11 +5,11 @@ namespace ERP.Application.Interfaces;
 
 public interface IEmployeeService
 {
-    Task<EmployeeDto> AddEmployeeAsync(CreateEmployeeDto dto);
-    Task<EmployeeDto> UpdateEmployeeAsync(UpdateEmployeeDto dto);
-    Task DeleteEmployeeAsync(Guid employeeId);
-    Task<EmployeeDto> GetEmployeeByIdAsync(Guid employeeId);
-    Task<PagedResult<EmployeeListDto>> GetEmployeesAsync(EmployeeQuery filter);
-    Task<EmployeeDto> GetEmployeeByCodeAsync(string employeeCode);
-    Task<bool> IsEmployeeCodeUniqueAsync(string employeeCode, Guid? excludeEmployeeId = null);
+    Task<EmployeeDto> AddEmployeeAsync(CreateEmployeeDto dto, Guid tenantId, Guid userId);
+    Task<EmployeeDto> UpdateEmployeeAsync(UpdateEmployeeDto dto, Guid tenantId, Guid userId);
+    Task DeleteEmployeeAsync(Guid employeeId, Guid tenantId);
+    Task<EmployeeDto> GetEmployeeByIdAsync(Guid employeeId, Guid tenantId);
+    Task<PagedResult<EmployeeListDto>> GetEmployeesAsync(EmployeeQuery filter, Guid tenantId);
+    Task<EmployeeDto> GetEmployeeByCodeAsync(string employeeCode, Guid tenantId);
+    Task<bool> IsEmployeeCodeUniqueAsync(string employeeCode, Guid tenantId, Guid? excludeEmployeeId = null);
 }

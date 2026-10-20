@@ -1,0 +1,654 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+@model POS.Models.clsVoucher
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="ChequeReceivedListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Cheque Received List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="chequeReceivedListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="DocumentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Attach Documents</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="documentsDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Cheque Received </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("insertupdatechequereceived", "cheque", FormMethod.Post, new { id = "chequeReceivedForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (User.Save == 1)
+                                        {
+                                            <td style="width: 42%; padding-bottom: 5px; padding-left: 3px;text-align: right;" id="addTd">
+                                                <a title="Add New First Level" id="btnAddChequeReceived" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/plus2.png" style="width: 45px; height: 45px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveChequeReceived" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintChequeReceived" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="listTd">
+                                                <a title="Third Levels List" id="btnChequeReceivedList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#ChequeReceivedListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshChequeReceived" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 43%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitChequeReceived" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveChequeReceived" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintChequeReceived" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 41%; padding-bottom: 5px;text-align: right;" id="listTd">
+                                                <a title="Third Levels List" id="btnChequeReceivedList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#ChequeReceivedListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshChequeReceived" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitChequeReceived" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                    </tr>
+                                </table>
+                                <div class="row" style="">
+                                    <div class="col col-4">
+                                        <label>Cheque No.</label>
+                                        <label class="input">
+                                            <input type="hidden" id="ChequeInfoId" value="0" />
+                                            <i class="icon-prepend fa fa-briefcase"></i>
+                                            <input type="text" name="ChequeNo" id="ChequeNo" placeholder="Cheque No." />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Bank</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-briefcase"></i>
+                                            <input type="text" name="Bank" id="Bank" placeholder="Bank" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Received From</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.PaidToDetailCode, ViewBag.AllDetailCode as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+
+                                </div>
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col col-4">
+                                        <label>Cheque Date</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-calendar"></i>
+                                            <input type="date" name="ChequeDate" id="ChequeDate" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Due Date</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-calendar"></i>
+                                            <input type="date" name="DueDate" id="DueDate" min="@ViewBag.FromDate" max="@ViewBag.ToDate" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-2">
+                                        <label>Cheque Type</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="ChequeType" name="ChequeType">
+                                                <option value="Cash">Cash</option>
+                                                <option value="Cross">Cross</option>
+                                                <option value="TT">TT</option>
+                                                <option value="DD">DD</option>
+                                                <option value="TC">TC</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="col col-2">
+                                        <label>Amount</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                            <input type="text" name="Amount" id="Amount" placeholder="Amount" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col col-4">
+                                        <label>Received By</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" name="ReceivedBy" id="ReceivedBy" placeholder="Received By" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Paid By</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" name="PaidBy" id="PaidBy" placeholder="Paid By" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-md-4">
+                                        <label>Remarks</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" name="Remarks" id="Remarks" placeholder="Remarks" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row deleteRow" style="margin-top:10px" hidden>
+                                    <section class="col col-md-3"></section>
+                                    <section class="col col-md-9">
+                                        <table class="pull-right footer-nav" style="">
+                                            <tr>
+                                                <td></td>
+                                                <td>
+                                                    <a title="Delete Third Level" id="btnDeleteChequeReceived" href="javascript:void(0)" class="btn btn-danger" style="width:75px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                                        Delete
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </section>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#PaidToDetailCode').select2();
+            $('#PaidToDetailCode').val(null).trigger('change');
+
+            $('#chequeReceivedForm').validate({
+                ignore: [],
+                // Rules for form validation
+                rules: {
+                    ChequeNo: {
+                        required: true
+                    },
+                    Bank: {
+                        required: true
+                    },
+                    PaidToDetailCode: {
+                        required: true
+                    },
+                    ChequeDate: {
+                        required: true
+                    },
+                    DueDate: {
+                        required: true
+                    },
+                    ChequeType: {
+                        required: true
+                    },
+                    Amount: {
+                        required: true
+                    },
+                },
+
+                // Messages for form validation
+                messages: {
+                    ChequeNo: {
+                        required: 'Cheque No. is required.'
+                    },
+                    Bank: {
+                        required: 'Bank is required.'
+                    },
+                    PaidToDetailCode: {
+                        required: 'Received From is required.'
+                    },
+                    ChequeDate: {
+                        required: 'Cheque Date is required.'
+                    },
+                    DueDate: {
+                        required: 'Due Date is required.'
+                    },
+                    ChequeType: {
+                        required: 'Cheque Type is required.'
+                    },
+                    Amount: {
+                        required: 'Amount is required.'
+                    },
+                },
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+            ClearFormFields();
+        })
+        $('#btnAddChequeReceived').click(function () {
+            $('#PaidToDetailCode').select().enable(true);
+            $('#PaidToDetailCode').val(null).trigger('change');
+            $('#ChequeNo').prop("disabled", false);
+            $('#Bank').prop("disabled", false);
+            $('#ChequeDate').prop("disabled", false);
+            $('#DueDate').prop("disabled", false);
+            $('#ChequeType').prop("disabled", false);
+            $('#Amount').prop("disabled", false);
+            $('#ReceivedBy').prop("disabled", false);
+            $('#PaidBy').prop("disabled", false);
+            $('#Remarks').prop("disabled", false);
+            GetTodayDate();
+            $('#ChequeNo').val('');
+            $('#Bank').val('');
+            $('#ChequeType').val('');
+            $('#Amount').val('');
+            $('#ReceivedBy').val('');
+            $('#PaidBy').val('');
+            $('#Remarks').val('');
+            $('#ChequeInfoId').val(0);
+            $('#documentTd').attr("hidden", "hidden");
+            $('#btnSaveChequeReceived').prop('disabled', false);
+            $('#btnSaveAndPrintChequeReceived').prop('disabled', false);
+            $('#saveTd').removeAttr("hidden");
+            $('#saveAndPrintTd').removeAttr("hidden");
+            $('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '44%', 'text-align': 'right' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'right' });
+            $('.deleteRow').attr("hidden", "hidden");
+        })
+        $('#btnRefreshChequeReceived').click(function () {
+            location.reload();
+        })
+        $('#btnChequeReceivedList').click(function () {
+            $('#chequeReceivedListDiv').load('@Url.Action("chequereceivedlist", "cheque")')
+        })
+        $('#btnAttachDocument').click(function () {
+            var chequeInfoId = $('#ChequeInfoId').val();
+            $('#documentsDiv').load('@Url.Action("attachdocument", "documents")?type=Cheque&id=' + chequeInfoId + '');
+        })
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        function ClearFormFields() {
+            $('#PaidToDetailCode').select().enable(false);
+            $('#PaidToDetailCode').val(null).trigger('change');
+            $('#ChequeNo').prop("disabled", true);
+            $('#Bank').prop("disabled", true);
+            $('#ChequeDate').prop("disabled", true);
+            $('#DueDate').prop("disabled", true);
+            $('#ChequeType').prop("disabled", true);
+            $('#Amount').prop("disabled", true);
+            $('#ReceivedBy').prop("disabled", true);
+            $('#PaidBy').prop("disabled", true);
+            $('#Remarks').prop("disabled", true);
+            GetTodayDate();
+            $('#ChequeNo').val('');
+            $('#Bank').val('');
+            $('#ChequeType').val('');
+            $('#Amount').val('');
+            $('#ReceivedBy').val('');
+            $('#PaidBy').val('');
+            $('#Remarks').val('');
+            $('#ChequeInfoId').val(0);
+            $('#documentTd').attr("hidden", "hidden");
+            $('#btnSaveChequeReceived').prop('disabled', true);
+            $('#btnSaveAndPrintChequeReceived').prop('disabled', true);
+            $('#addTd').removeAttr("hidden");
+            $('#saveTd').attr("hidden", "hidden");
+            $('#saveAndPrintTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            if ($('#CanSave').val() == 0) {
+                $('#listTd').css({ 'width': '44%', 'text-align': 'right' });
+                $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+                $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            }
+        }
+        $('#chequeReceivedForm').on('submit', function (e) {
+            if (!$("#chequeReceivedForm").valid()) {
+                return false;
+            }
+            var val = $(this).find("button:focus").attr("title");
+            var print = 0;
+            if (val.trim() == "Save") {
+                print = 0;
+            }
+            else {
+                print = 1;
+            }
+            $('#btnSaveChequeReceived').prop('disabled', true);
+            $('#btnSaveAndPrintChequeReceived').prop('disabled', true);
+            var chequeInfoId = $('#ChequeInfoId').val();
+            var chequeNo = $('#ChequeNo').val();
+            var bank = $('#Bank').val();
+            var paidToDetailCode = $('#PaidToDetailCode').val();
+            var chequeDate = $('#ChequeDate').val();
+            var dueDate = $('#DueDate').val();
+            var chequeType = $('#ChequeType').val();
+            var amount = $('#Amount').val();
+            var receivedBy = $('#ReceivedBy').val();
+            var paidBy = $('#PaidBy').val();
+            var remarks = $('#Remarks').val();
+            var formData =
+            {
+                ChequeInfoId: chequeInfoId,
+                ChequeBookDId: 0,
+                CDetailCode: paidToDetailCode,
+                ChequeNo: chequeNo,
+                DDetailCode: 0,
+                ChequeDate: chequeDate,
+                DueDate: dueDate,
+                ChequeType: chequeType,
+                Amount: amount,
+                ReceivedBy: receivedBy,
+                PaidBy: paidBy,
+                Remarks: remarks,
+                DetailName: bank
+            }
+            var url = $('#chequeReceivedForm')[0].action;
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'formData': formData }),
+                success: function (data) {
+                    if (data.status == true) {
+                        if (print == 1) {
+                            window.location.href = "/cheque/chequereceivereport/" + data.chequeInfoId;
+                        }
+                        else {
+                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                ' <strong>Success! </strong>' +
+                                                'Cheque Received Succesfully.' +
+                                            '</div>');
+                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert").slideUp(500);
+                                $('.alertDiv').html('');
+                            });
+                            ClearFormFields();
+                        }
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSaveChequeReceived').prop('disabled', false);
+                        $('#btnSaveAndPrintChequeReceived').prop('disabled', false);
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        $('#btnDeleteChequeReceived').click(function () {
+            var chequeInfoId = $('#ChequeInfoId').val();
+            DeleteChequeReceived(chequeInfoId);
+        })
+        function DeleteChequeReceived(id) {
+            var a = $.confirm({
+                title: 'Delete Cheque Received',
+                content: 'Are you sure u want to delete this cheque received?',
+                type: 'white',
+                buttons: {
+                    ok: {
+                        text: "Yes",
+                        btnClass: 'btnConfirm',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: '/cheque/deletechequereceived/' + id,
+                                type: "POST",
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        location.reload();
+                                    }
+                                    else {
+                                        alert(data.message);
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-default',
+                        keys: ['esc'],
+                        action: function () {
+                            a.close();
+                        }
+                    },
+                }
+            });
+        }
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#ChequeDate').val(today);
+            $('#DueDate').val(today);
+        }
+        $("#Amount").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#ChequeNo").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        function NumberPostiveNegativeWithDecimal(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 127) &&
+                (charCode != 8) &&
+                (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function NumberPostive(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 8) && (charCode != 127) && (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+    </script>
+}

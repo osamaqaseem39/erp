@@ -7,7 +7,7 @@ using InfraWarehouseRepository = ERP.Infrastructure.Repositories.SCM.IWarehouseR
 namespace ERP.Application.SCM.Adapters;
 
 /// <summary>
-/// Forwards the Application-layer warehouse contract to the stored-procedure repository (same shape).
+/// Forwards the Application-layer warehouse contract to the EF warehouse repository (same shape).
 /// </summary>
 public class ApplicationWarehouseRepositoryAdapter : IWarehouseRepository
 {
@@ -27,7 +27,7 @@ public class ApplicationWarehouseRepositoryAdapter : IWarehouseRepository
 }
 
 /// <summary>
-/// Implements the Application-layer item contract against EF Core.
+/// Implements the Application-layer item contract against EF Core (tenant fail-closed).
 /// </summary>
 public class ApplicationItemRepositoryAdapter : IItemRepository
 {
@@ -36,16 +36,31 @@ public class ApplicationItemRepositoryAdapter : IItemRepository
     public ApplicationItemRepositoryAdapter(ERPDbContext db) => _db = db;
 
     private IQueryable<Item> ForTenant(Guid tenantId)
-        => _db.Items.Where(i => tenantId == Guid.Empty || i.TenantId == tenantId);
+        => tenantId == Guid.Empty
+            ? _db.Items.Where(_ => false)
+            : _db.Items.Where(i => i.TenantId == tenantId);
 
     public Task<Item?> GetByIdAsync(Guid id, Guid tenantId)
         => ForTenant(tenantId).FirstOrDefaultAsync(i => i.Id == id);
 
     public async Task<IEnumerable<Item>> GetAllAsync(Guid tenantId, Guid companyId)
-        => await ForTenant(tenantId).Where(i => i.CompanyId == companyId).ToListAsync();
+    {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<Item>();
+
+        var q = ForTenant(tenantId);
+        if (companyId != Guid.Empty)
+            q = q.Where(i => i.CompanyId == companyId);
+        return await q.ToListAsync();
+    }
 
     public async Task<IEnumerable<Item>> GetByCategoryAsync(Guid categoryId, Guid tenantId)
-        => await ForTenant(tenantId).Where(i => i.CategoryId == categoryId).ToListAsync();
+    {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<Item>();
+
+        return await ForTenant(tenantId).Where(i => i.CategoryId == categoryId).ToListAsync();
+    }
 
     public async Task<Item> AddAsync(Item item)
     {
@@ -64,6 +79,9 @@ public class ApplicationItemRepositoryAdapter : IItemRepository
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return false;
+
         var item = await GetByIdAsync(id, tenantId);
         if (item == null) return false;
         _db.Items.Remove(item);
@@ -72,15 +90,28 @@ public class ApplicationItemRepositoryAdapter : IItemRepository
     }
 
     public Task<bool> ExistsAsync(Guid id, Guid tenantId)
-        => ForTenant(tenantId).AnyAsync(i => i.Id == id);
+        => tenantId == Guid.Empty
+            ? Task.FromResult(false)
+            : ForTenant(tenantId).AnyAsync(i => i.Id == id);
 
     public Task<bool> CodeExistsAsync(string code, Guid tenantId, Guid companyId, Guid? excludeId = null)
-        => ForTenant(tenantId).AnyAsync(i => i.CompanyId == companyId && i.ItemCode == code
+    {
+        if (tenantId == Guid.Empty || string.IsNullOrWhiteSpace(code))
+            return Task.FromResult(false);
+
+        return ForTenant(tenantId).AnyAsync(i => i.CompanyId == companyId && i.ItemCode == code
             && (!excludeId.HasValue || i.Id != excludeId.Value));
+    }
 
     public async Task<IEnumerable<Item>> GetLowStockItemsAsync(Guid tenantId, Guid companyId)
-        => await ForTenant(tenantId)
-            .Where(i => i.CompanyId == companyId && i.ReorderLevel > 0
-                && (_db.StockBalances.Where(b => b.ItemId == i.Id).Sum(b => (decimal?)b.CurrentQuantity) ?? 0) <= i.ReorderLevel)
-            .ToListAsync();
+    {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<Item>();
+
+        var q = ForTenant(tenantId).Where(i => i.ReorderLevel > 0
+            && (_db.StockBalances.Where(b => b.ItemId == i.Id).Sum(b => (decimal?)b.CurrentQuantity) ?? 0) <= i.ReorderLevel);
+        if (companyId != Guid.Empty)
+            q = q.Where(i => i.CompanyId == companyId);
+        return await q.ToListAsync();
+    }
 }

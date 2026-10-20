@@ -28,7 +28,7 @@ public class LeadConversionTests
         var opportunityRepo = new FakeOpportunityRepository();
         var service = new LeadService(leadRepo, customerRepo, opportunityRepo, new FakeNumbers());
 
-        var opportunityId = await service.ConvertToOpportunityAsync(leadId);
+        var opportunityId = await service.ConvertToOpportunityAsync(leadId, tenantId, Guid.NewGuid());
 
         Assert.NotEqual(Guid.Empty, opportunityId);
         Assert.Equal("Converted", lead.Status);
@@ -58,7 +58,7 @@ public class LeadConversionTests
         var opportunityRepo = new FakeOpportunityRepository();
         var service = new LeadService(leadRepo, customerRepo, opportunityRepo, new FakeNumbers());
 
-        var customerId = await service.ConvertToCustomerAsync(leadId);
+        var customerId = await service.ConvertToCustomerAsync(leadId, tenantId, Guid.NewGuid());
 
         Assert.NotEqual(Guid.Empty, customerId);
         Assert.Equal("Converted", lead.Status);
@@ -96,17 +96,21 @@ public class LeadConversionTests
             return Task.FromResult(customer.Id);
         }
 
-        public Task<Customer?> GetByIdAsync(Guid id) => Task.FromResult<Customer?>(null);
-        public Task<IEnumerable<Customer>> GetAllAsync() => Task.FromResult(Enumerable.Empty<Customer>());
-        public Task<ERP.Shared.DTOs.PagedResult<Customer>> GetPagedAsync(ERP.Shared.DTOs.CRM.CustomerPagedQuery query, CancellationToken cancellationToken = default)
+        public Task<Customer?> GetByIdAsync(Guid id, Guid tenantId) => Task.FromResult<Customer?>(null);
+        public Task<IEnumerable<Customer>> GetAllAsync(Guid tenantId) => Task.FromResult(Enumerable.Empty<Customer>());
+        public Task<ERP.Shared.DTOs.PagedResult<Customer>> GetPagedAsync(
+            ERP.Shared.DTOs.CRM.CustomerPagedQuery query, Guid tenantId, CancellationToken cancellationToken = default)
             => Task.FromResult(new ERP.Shared.DTOs.PagedResult<Customer>());
-        public Task<IReadOnlyDictionary<string, int>> GetDependentCountsAsync(Guid id, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyDictionary<string, int>> GetDependentCountsAsync(
+            Guid id, Guid tenantId, CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyDictionary<string, int>>(new Dictionary<string, int>());
-        public Task<IEnumerable<Customer>> GetByStatusAsync(string status) => Task.FromResult(Enumerable.Empty<Customer>());
-        public Task<IEnumerable<Customer>> GetByIndustryAsync(string industry) => Task.FromResult(Enumerable.Empty<Customer>());
-        public Task<Customer?> GetByCodeAsync(string customerCode) => Task.FromResult<Customer?>(null);
+        public Task<IEnumerable<Customer>> GetByStatusAsync(string status, Guid tenantId)
+            => Task.FromResult(Enumerable.Empty<Customer>());
+        public Task<IEnumerable<Customer>> GetByIndustryAsync(string industry, Guid tenantId)
+            => Task.FromResult(Enumerable.Empty<Customer>());
+        public Task<Customer?> GetByCodeAsync(string customerCode, Guid tenantId) => Task.FromResult<Customer?>(null);
         public Task<bool> UpdateAsync(Customer customer) => Task.FromResult(true);
-        public Task<bool> DeleteAsync(Guid id) => Task.FromResult(true);
+        public Task<bool> DeleteAsync(Guid id, Guid tenantId) => Task.FromResult(true);
     }
 
     private sealed class FakeOpportunityRepository : IOpportunityRepository

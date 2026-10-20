@@ -1,9 +1,9 @@
+using ERP.Api.OpenApi;
+using ERP.Application.Interfaces.Core;
+using ERP.Shared.DTOs.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using ERP.Api.Abstractions;
-using ERP.Application.Interfaces.Core;
-using ERP.Shared.DTOs.Core;
 
 namespace ERP.Api.Controllers;
 
@@ -23,6 +23,7 @@ public class SetupController : ERP.Api.Abstractions.ControllerBase
 
     [HttpGet("super-admin/exists")]
     [AllowAnonymous]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> CheckSuperAdminExists()
     {
         return await HandleAsync(async () =>
@@ -34,6 +35,9 @@ public class SetupController : ERP.Api.Abstractions.ControllerBase
 
     [HttpPost("super-admin")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(SuperAdminSetupResponseDto), OpenApiResponseTypes.Ok)]
+    [ProducesBadRequest]
+    [ProducesConflict]
     public async Task<IActionResult> SetupSuperAdmin([FromBody] SuperAdminSetupDto dto)
     {
         return await HandleAsync(async () =>

@@ -13,61 +13,47 @@ public class ProductionOrderRepository : IProductionOrderRepository
         _context = context;
     }
 
-    public async Task<ProductionOrder?> GetByIdAsync(Guid id)
-    {
-        return await _context.ProductionOrders
+    private IQueryable<ProductionOrder> Query(Guid tenantId) =>
+        _context.ProductionOrders
             .Include(po => po.Item)
             .Include(po => po.ProductionOrderLines)
             .Include(po => po.ProductionRuns)
-            .FirstOrDefaultAsync(po => po.Id == id);
+            .Where(po => po.TenantId == tenantId);
+
+    public async Task<ProductionOrder?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(po => po.Id == id);
     }
 
-    public async Task<IEnumerable<ProductionOrder>> GetAllAsync()
+    public async Task<IEnumerable<ProductionOrder>> GetAllAsync(Guid tenantId)
     {
-        return await _context.ProductionOrders
-            .Include(po => po.Item)
-            .Include(po => po.ProductionOrderLines)
-            .Include(po => po.ProductionRuns)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionOrder>();
+        return await Query(tenantId).ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductionOrder>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<ProductionOrder>> GetByStatusAsync(string status, Guid tenantId)
     {
-        return await _context.ProductionOrders
-            .Include(po => po.Item)
-            .Include(po => po.ProductionOrderLines)
-            .Include(po => po.ProductionRuns)
-            .Where(po => po.Status == status)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionOrder>();
+        return await Query(tenantId).Where(po => po.Status == status).ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductionOrder>> GetByItemAsync(Guid itemId)
+    public async Task<IEnumerable<ProductionOrder>> GetByItemAsync(Guid itemId, Guid tenantId)
     {
-        return await _context.ProductionOrders
-            .Include(po => po.Item)
-            .Include(po => po.ProductionOrderLines)
-            .Include(po => po.ProductionRuns)
-            .Where(po => po.ItemId == itemId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionOrder>();
+        return await Query(tenantId).Where(po => po.ItemId == itemId).ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductionOrder>> GetByWorkCenterAsync(Guid workCenterId)
+    public async Task<IEnumerable<ProductionOrder>> GetByWorkCenterAsync(Guid workCenterId, Guid tenantId)
     {
-        return await _context.ProductionOrders
-            .Include(po => po.Item)
-            .Include(po => po.ProductionOrderLines)
-            .Include(po => po.ProductionRuns)
-            .Where(po => po.WorkCenterId == workCenterId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionOrder>();
+        return await Query(tenantId).Where(po => po.WorkCenterId == workCenterId).ToListAsync();
     }
 
-    public async Task<ProductionOrder?> GetByNumberAsync(string productionOrderNumber)
+    public async Task<ProductionOrder?> GetByNumberAsync(string productionOrderNumber, Guid tenantId)
     {
-        return await _context.ProductionOrders
-            .Include(po => po.Item)
-            .Include(po => po.ProductionOrderLines)
-            .Include(po => po.ProductionRuns)
-            .FirstOrDefaultAsync(po => po.ProductionOrderNumber == productionOrderNumber);
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(po => po.ProductionOrderNumber == productionOrderNumber);
     }
 
     public async Task<Guid> CreateAsync(ProductionOrder productionOrder)
@@ -84,9 +70,9 @@ public class ProductionOrderRepository : IProductionOrderRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var productionOrder = await _context.ProductionOrders.FindAsync(id);
+        var productionOrder = await GetByIdAsync(id, tenantId);
         if (productionOrder == null) return false;
 
         _context.ProductionOrders.Remove(productionOrder);

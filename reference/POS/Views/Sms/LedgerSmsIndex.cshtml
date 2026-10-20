@@ -1,0 +1,400 @@
+﻿<div id="CssData">
+
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            @@page {
+                size: A4;
+                margin-top: -30px;
+                margin-left: -45px;
+                page-break-after: always;
+            }
+
+            .mainTable {
+                width: 97.5% !important;
+                margin-left: 16px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .CustomersDetail {
+                padding-left: 316px !important;
+            }
+
+            .customerHeadingTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+        }
+
+        #printable-content table {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        #printable-content .heading {
+            border-width: 0px;
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        .mainTable {
+            /*margin-top: -25px;*/
+            margin-bottom: 1px;
+            margin-left: 10px;
+            padding-right: 19px !important;
+        }
+
+            .mainTable td {
+                border-left: 1px solid black;
+                border-bottom: 1px solid black;
+            }
+
+        .borderRight {
+            border-right: 1px solid black;
+        }
+
+        .mainTable th {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        .mainTable th {
+            padding: 3px;
+        }
+
+        .mainTable td {
+            padding: 3px;
+        }
+
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }*/
+    </style>
+</div>
+
+<!-- widget content -->
+@model POS.Models.clsAccountDetail
+<div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-home fa-fw "></i>
+                Report
+                <span>
+                    >
+                    Ledger Sms
+                </span>
+            </h1>
+        </div>
+    </div>
+    <section>
+        <div class="panel" style="border: 1px solid #bdbdbd">
+            <div class="panel-heading" style="border: 1px solid #bdbdbd">
+                @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @id = "downloadForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                {
+                    <div class="row">
+                        <section class="col col-md-4">
+                            <label>Select Account</label>
+                            <div id="DetailCodeDiv">
+                                @Html.DropDownListFor(m => m.DetailCode, ViewBag.Customers as SelectList, new { @id = "DetailCode", @style = "width:100%" })
+                            </div>
+                        </section>
+                        <section class="col col-md-3">
+                            <label>From</label>
+                            <label class="input">
+                                <i class="icon-prepend fa fa-calendar"></i>
+                                <input type="date" id="FromDate" name="FromDate" required />
+                            </label>
+                        </section>
+                        <section class="col col-md-3">
+                            <label>To</label>
+                            <label class="input">
+                                <i class="icon-prepend fa fa-calendar"></i>
+                                <input type="date" id="ToDate" name="ToDate" required />
+                            </label>
+                        </section>
+                        <section class="col col-md-2">
+                            <table class="pull-right" style="margin-top:25px">
+                                <tr>
+                                    <td style="padding-left:7px">
+                                        <button type="button" id="btnSearch" class="btn btn-primary" style="height: 25px; font-size: 13px; margin-bottom: 8px; color: white; line-height: 5px;padding-left:5px;padding-right:5px">
+                                            Search
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button" id="btnRefresh" class="btn btn-default" style="height: 27px; font-size: 13px; margin-left: 5px; margin-bottom: 8px; color: #000; line-height: 3px; padding-left: 5px; padding-right: 5px">
+                                            Refresh
+                                        </button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </section>
+                    </div>
+                    <div class="row" style="">
+                        <section class="col col-md-12">
+                            <center>
+                                <table class="" style="">
+                                    <tr>
+                                        <td style="">
+                                            <label class="checkbox pull-left" style="">
+                                                <input id="PartyCheckbox" type="checkbox" name="PartyCheckbox" checked><i></i>
+                                                <span style="font-size:11px;">To Party</span>
+                                            </label>
+                                        </td>
+                                        <td style=" padding-left: 7px">
+                                            <label class="checkbox pull-left" style="">
+                                                <input id="ManagementCheckbox" type="checkbox" name="ManagementCheckbox" checked><i></i>
+                                                <span style="font-size:11px">To Management</span>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </center>
+
+                        </section>
+                                </div>
+                    <div class="row" style="margin-top:-20px">
+                        <section class="col col-md-12">
+                            <center>
+                                <table class="" style="">
+                                    <tr>
+                                        <td style="">
+                                            <button type="button" id="btnLedgerSms" class="btn btn-success" style=" font-size: 14px; margin-bottom: 8px; color: white; padding: 3px;">
+                                                &nbsp;&nbsp;&nbsp;Send Ledger&nbsp;&nbsp;&nbsp;
+                                            </button>
+                                        </td>
+                                        <td style=" padding-left: 7px">
+                                            <button type="button" id="btnOutstandingSms" class="btn btn-warning" style=" font-size: 14px; margin-bottom: 8px; color: white; padding: 3px">
+                                                &nbsp;&nbsp;&nbsp;Send Outstanding Balance&nbsp;&nbsp;&nbsp;
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </center>
+                            
+                        </section>
+                    </div>
+                }
+            </div>
+            <div class="panel-body">
+                <div id="HtmlData">
+                    <div id="printable-content" class="panel rpt" style=" float: left; width: 100%; font-family: Arial, Helvetica, sans-serif;">
+                        <div id="MyReport">
+                            <center><h1 style="font-size:16px;font-weight:bold;padding:10px">No record found.</h1></center>
+                        </div>
+                        @*<table style="padding: 5px" class="heading">
+                            <tr>
+                                <th style="font-weight: bold; font-size: 18px; text-align: center;" colspan="6">
+                                No record found.
+                                </th>
+                            </tr>
+                            <tbody class="report_body"></tbody>
+                        </table>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END MAIN CONTENT -->
+@section pagespecific {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#DetailCode').select2();
+            $('#DetailCode').val(null).trigger('change');
+            GetTodayBetweenDate();
+            $('#btnLedgerSms').prop('disabled', true);
+            $('#btnOutstandingSms').prop('disabled', true);
+        })
+        $('#PartyCheckbox').click(function () {
+            if ($(this).is(':checked')) {
+            }
+            else {
+                if (!($('#ManagementCheckbox').is(':checked'))) {
+                    $('#ManagementCheckbox').click();
+                }
+            }
+        })
+        $('#ManagementCheckbox').click(function () {
+            if ($(this).is(':checked')) {
+            }
+            else {
+                if (!($('#PartyCheckbox').is(':checked'))) {
+                    $('#PartyCheckbox').click();
+                }
+            }
+        })
+        $('#btnSearch').click(function () {
+            var customerId = $('#DetailCode').val();
+            if (customerId == 0 || customerId == null)
+            {
+                alert("Please select an Account first.");
+                return false;
+            }
+            var fromDate = $('#FromDate').val();
+            var toDate = $('#ToDate').val();
+            $('#btnSearch').html("Searching..");
+            $('#MyReport').load('@Url.Action("GetLedgerSmsReport", "sms")?detailCode=' + customerId + '&fromDate=' + fromDate + '&toDate=' + toDate + '');
+            $('#btnLedgerSms').prop('disabled', false);
+            $('#btnOutstandingSms').prop('disabled', false);
+            //$.ajax({
+            //    type: "POST",
+            //    url: "/sms/GetLedgerSms/",
+            //    dataType: 'json',
+            //    data: {
+            //        'typeCheckbox': typeCheckbox, 'type': type, 'customerCheckbox': customerCheckbox, 'customerId': customerId,
+            //        'invoiceNoCheckbox': invoiceNoCheckbox, 'invoiceNo': invoiceNo,
+            //        'referenceCheckbox': referenceCheckbox, 'refNo': refNo,
+            //        'dateCheckbox': dateCheckbox,
+            //        'fromDate': fromDate, 'toDate': toDate
+            //    },
+            //    success: function (response) {
+            //        $('.SelectAllCheckbox').prop("checked", false);
+            //        getItems();
+            //        //$('#btnSearch').prop("disabled", true);
+            //    }
+            //})
+        })
+        $('#btnLedgerSms').click(function () {
+            var customerId = $('#DetailCode').val();
+            var fromDate = $('#FromDate').val();
+            var toDate = $('#ToDate').val();
+            var toParty = 0;
+            var toManage = 0;
+             
+            if ($("#PartyCheckbox").is(':checked')) {
+                toParty = 1;
+            }
+            if ($("#ManagementCheckbox").is(':checked')) {
+                toManage = 1;
+            }
+            $('#btnLedgerSms').prop('disabled', true);
+            $('#btnOutstandingSms').prop('disabled', true);
+            $('#btnLedgerSms').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Sending...&nbsp;");
+            $.ajax({
+                type: "POST",
+                url: "/sms/SendLedgerSmsPost/",
+                dataType: 'json',
+                data: {
+                    'detailCode': customerId, 'fromDate': fromDate, 'toDate': toDate, 'toParty': toParty, 'toManage': toManage
+                },
+                success: function (response) {
+                    if (response.status == true)
+                    {
+                        alert("Message sent successfully.");
+                        location.reload();
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                    //$('.SelectAllCheckbox').prop("checked", false);
+                    //getItems();
+                    //$('#btnSearch').prop("disabled", true);
+                }
+            })
+        })
+        $('#btnOutstandingSms').click(function () {
+            var customerId = $('#DetailCode').val();
+            var fromDate = $('#FromDate').val();
+            var toDate = $('#ToDate').val();
+            var toParty = 0;
+            var toManage = 0;
+
+            if ($("#PartyCheckbox").is(':checked')) {
+                toParty = 1;
+            }
+            if ($("#ManagementCheckbox").is(':checked')) {
+                toManage = 1;
+            }
+            $('#btnLedgerSms').prop('disabled', true);
+            $('#btnOutstandingSms').prop('disabled', true);
+            $('#btnOutstandingSms').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Sending...&nbsp;");
+            $.ajax({
+                type: "POST",
+                url: "/sms/SendOutstandingSmsPost/",
+                dataType: 'json',
+                data: {
+                    'detailCode': customerId, 'fromDate': fromDate, 'toDate': toDate, 'toParty': toParty, 'toManage': toManage
+                },
+                success: function (response) {
+                    if (response.status == true) {
+                        alert("Message sent successfully.");
+                        location.reload();
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                    //$('.SelectAllCheckbox').prop("checked", false);
+                    //getItems();
+                    //$('#btnSearch').prop("disabled", true);
+                }
+            })
+        })
+        $('#btnRefresh').click(function () {
+            location.reload();
+        })
+        $('.report_body tr td').each(function () {
+            if (parseFloat($(this).html()) > 0) {
+                $(this).html(ReplaceNumberWithCommas($(this).html()));
+            }
+        });
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+        function GetTodayBetweenDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            var today2 = yyyy + '-' + mm + '-01';
+            $('#FromDate').val(today2);
+            $('#ToDate').val(today);
+        }
+    </script>
+}

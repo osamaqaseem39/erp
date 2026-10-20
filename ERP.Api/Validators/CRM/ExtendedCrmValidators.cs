@@ -3,6 +3,27 @@ using FluentValidation;
 
 namespace ERP.Api.Validators.CRM;
 
+public class CreateSalesmanValidator : BaseValidator<CreateSalesmanDto>
+{
+    public CreateSalesmanValidator()
+    {
+        RuleFor(x => x.FullName).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.SalesmanCode).MaximumLength(50).When(x => !string.IsNullOrEmpty(x.SalesmanCode));
+        RuleFor(x => x.Email).EmailAddress().When(x => !string.IsNullOrEmpty(x.Email));
+        RuleFor(x => x.Cnic).MaximumLength(20).When(x => !string.IsNullOrEmpty(x.Cnic));
+    }
+}
+
+public class UpdateSalesmanValidator : BaseValidator<UpdateSalesmanDto>
+{
+    public UpdateSalesmanValidator()
+    {
+        RuleFor(x => x.FullName).MaximumLength(200).When(x => !string.IsNullOrEmpty(x.FullName));
+        RuleFor(x => x.SalesmanCode).MaximumLength(50).When(x => !string.IsNullOrEmpty(x.SalesmanCode));
+        RuleFor(x => x.Email).EmailAddress().When(x => !string.IsNullOrEmpty(x.Email));
+    }
+}
+
 public class CreateCustomerGroupValidator : BaseValidator<CreateCustomerGroupDto>
 {
     public CreateCustomerGroupValidator()

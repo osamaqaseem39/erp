@@ -71,7 +71,7 @@ public class FixedAssetRepository : IFixedAssetRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var fixedAsset = await _context.FixedAssets.FindAsync(id);
+        var fixedAsset = await _context.FixedAssets.FirstOrDefaultAsync(f => f.AssetId == id);
         if (fixedAsset == null) return false;
 
         _context.FixedAssets.Remove(fixedAsset);

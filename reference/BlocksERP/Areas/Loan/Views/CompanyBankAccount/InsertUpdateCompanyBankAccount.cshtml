@@ -1,0 +1,318 @@
+﻿
+@model BlocksERP.Models.clsCompanyBankAccount
+<div class="mySelect" style="overflow: hidden;margin-top: -20px;padding: 0px">
+    @using (Html.BeginForm("InsertUpdateCompanyBankAccount", "CompanyBankAccount", FormMethod.Post, new { area = "Loan", id = "popupForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+        <fieldset style="padding:1.25rem">
+            <div class="row">
+
+
+                <div class="col-md-12" style="margin-top:15px">
+                    <input type="hidden" id="AccountId" name="AccountId" value="@Model.AccountId" />
+                    <input type="hidden" id="HiddenBankId" name="HiddenBankId" value="@Model.BankId" />
+                    <input type="hidden" id="HiddenBankName" name="HiddenBankName" value="@Model.BankName" />
+
+                    <label class="form-label">Account Number (*)</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fal fa-info"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(a => a.AccountNumber, new { @placeholder = "", @class = "form-control num", autocomplete = "off" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top:15px">
+                <div class="col-md-12">
+                    <table class="" style="width: 100%;">
+                        <tr>
+                            <td style="width: 80%;">
+                                <label class="form-label">Select Bank (*)</label>
+                                <div class="input-group">
+                                    @Html.DropDownListFor(model => model.BankId, Enumerable.Empty<SelectListItem>(), new { @class = "num" })
+                                </div>
+
+                            </td>
+                            <td style="width: 2%;margin-left: -5px;padding-top:8.7px;">
+                                <a href="/loan/bank/bankindex" target="_blank" class="btn btn-primary" style="margin-top:15px;color:#fff;padding:8px;margin-left: -4px;background-color:#aaaaaa !important;border-color:#aaaaaa !important;" title="Add New Event">
+                                    <i class="fal fa-plus" style="margin-left:2px"></i>
+                                </a>
+                            </td>
+
+                        </tr>
+
+
+                    </table>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top:15px">
+                <div class="col-md-12">
+                    <label class="form-label">Account Name </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fal fa-info"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(a => a.HolderName, new { @placeholder = "", @class = "form-control num", autocomplete = "off" })
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top:15px">
+                <div class="col-md-12">
+                    <label class="form-label">Description </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fal fa-info"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(a => a.Description, new { @placeholder = "", @class = "form-control num", autocomplete = "off" })
+                    </div>
+                </div>
+            </div>
+
+
+            @if (Model != null && Model.BankId > 0)
+            {
+                <div class="row" style="margin-top:20px">
+
+                    <section class="col col-md-12">
+                        <label class="form-label " style="margin-top: -7px;position:absolute;right:15px;">
+                            @if (Model.StatusString.ToLower() == "active")
+                            {
+                                <input id="Status" type="checkbox" name="Status" checked /><i></i>
+                            }
+                            else
+                            {
+                                <input id="Status" type="checkbox" name="Status" /><i></i>
+                            }
+                            Active
+                        </label>
+                    </section>
+                </div>
+            }
+
+
+        </fieldset>
+        <footer class="modal-footer" style="margin-top:11px;background-color:#F9F9F9;border-top:1px solid #ddd">
+            @if (Model.DeleteRoleId > 0)
+            {
+                <button type="button" class="btn btn-danger pull-left btnDeleteRecord">Delete</button>
+            }
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            @if (Model.AccountId > 0)
+            {
+                if (Model.UpdateRoleId > 0)
+                {
+                    <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Update</button>
+                }
+            }
+            else
+            {
+                <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Save</button>
+            }
+        </footer>
+    }
+</div>
+@Scripts.Render("~/script/smartadmin")
+@Scripts.Render("/script/jqueryvalidator")
+<script type="text/javascript">
+
+
+
+    $(document).ready(function () {
+
+        //////////--------COUNTRY DROPDOWN----------------///////////////
+            var pageSize1 = 20;
+            var optionListUrl1 = '@Url.Action("GetBankList", "Combolist", new { area = "" })';
+            $('#BankId').select2({
+                ajax: {
+                    delay: 150,
+                    url: optionListUrl1,
+                    dataType: 'json',
+
+                    data: function (params) {
+                        params.page = params.page || 1;
+                        return {
+                            searchTerm: params.term,
+                            pageSize: pageSize1,
+                            pageNumber: params.page
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.Results,
+                            pagination: {
+                                more: (params.page * pageSize1) < data.Total
+                            }
+                        };
+                    }
+                },
+                placeholder: "",
+                minimumInputLength: 0,
+                allowClear: true,
+                dropdownParent: $(".mySelect")
+            });
+
+
+        if ($('#AccountId').val() > 0) {
+
+
+            if ($('#BankId').find("option[value='" + $('#HiddenBankId').val() + "']").length) {
+                $('#BankId').val($('#HiddenBankId').val()).trigger('change');
+            } else {
+                // Create a DOM Option and pre-select by default
+                var newOption = new Option($('#HiddenBankName').val(), $('#HiddenBankId').val(), true, true);
+                // Append it to the select
+                $('#BankId').append(newOption).trigger('change');
+            }
+        }
+        else {
+
+            $('#BankId').val(null).trigger("change");
+
+        }
+        //////////-------- COUNTRY DROPDOWN ENDS HERE ----------------///////////////
+
+        //========== VALIDATION ==========\\
+        var $checkoutForm = $('#popupForm').validate({
+
+            rules: {
+                AccountNumber: {
+                    required: true
+                },
+                BankId: {
+                    required: true
+                },
+            },
+            messages: {
+                AccountNumber: {
+                    required: 'Account Number is required.'
+                },
+                BankId: {
+                    required: 'Bank selection is required.'
+                },
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+                if (element.val() == '' || element.val() == null) {
+                    element.parents('td').siblings('td').find('.btn').css("margin-top", "-8px");
+                }
+            }
+        });
+    })
+    $(".num").keyup(function (event) {
+        if (event.keyCode == 13) {
+            textboxes = $(".num");
+            currentBoxNumber = textboxes.index(this);
+            if (currentBoxNumber == 2) {
+                $('#btn_Save').focus();
+                $('#btn_Save').click();
+            }
+            else {
+                nextBox = textboxes[currentBoxNumber + 1];
+                nextBox.focus();
+                nextBox.select();
+            }
+            event.preventDefault();
+            return false;
+        }
+    });
+    //========== FORM SUBMISSION ==========\\
+    $('#popupForm').on('submit', function (e) {
+        e.preventDefault();
+        if (!$("#popupForm").valid()) {
+            return false;
+        }
+        $('#btn_Save').attr('disabled', 'disabled');
+        $('#btn_Save').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+
+        var AccountId = $('#AccountId').val();
+        var AccountNumber = $('#AccountNumber').val();
+        var BankId = $('#BankId').val();
+        var HolderName = $('#HolderName').val();
+        var Description = $('#Description').val();
+
+        var statusString = '';
+        if ($('#Status').is(":checked")) {
+            statusString = "Active";
+        }
+        else {
+            statusString = "Inactive";
+        }
+        var st =
+        {
+            AccountId: AccountId,
+            AccountNumber: AccountNumber,
+            BankId: BankId,
+            HolderName: HolderName,
+            Description: Description,
+            StatusString: statusString,
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Loan/CompanyBankAccount/insertupdateCompanyBankAccount/",
+            data: st,
+            dataType: 'json',
+            success: function (data) {
+
+                if ($('#AccountId').val() > 0) {
+                    $('#btn_Save').html("Update");
+                }
+                else {
+                    $('#btn_Save').html("Save");
+                }
+
+                $('#btn_Save').prop('disabled', false);
+                if (data.status) {
+
+                    toastr.success("Record Saved Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                    $('.close').click();
+                    oTable.ajax.reload(null, false);
+
+                }
+                else {
+                    toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                }
+            }
+        }
+        )
+    })
+
+    //========== FORM SUBMISSION ENDS HERE ==========\\
+
+    //
+
+    $(document).on("click", '.select2-selection__clear', function () {
+        $(this).parents("div").find('select').val(null).trigger("change");
+    })
+</script>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+</script>
+

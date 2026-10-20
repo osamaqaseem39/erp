@@ -12,6 +12,6 @@ public interface IProductionOrderService
     Task<ProductionOrderDto> UpdateAsync(UpdateProductionOrderDto dto, Guid tenantId, Guid userId);
     Task<bool> DeleteAsync(Guid id, Guid tenantId);
     Task<ProductionOrderDto> StartAsync(Guid id, Guid tenantId, Guid userId);
-    Task<ProductionOrderDto> CompleteAsync(Guid id, Guid tenantId, Guid userId);
+    Task<ProductionOrderDto> CompleteAsync(Guid id, CompleteProductionOrderDto dto, Guid tenantId, Guid userId);
     Task<ProductionOrderDto> CancelAsync(Guid id, string reason, Guid tenantId, Guid userId);
 }

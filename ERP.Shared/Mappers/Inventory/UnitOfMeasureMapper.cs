@@ -10,6 +10,7 @@ public static class UnitOfMeasureMapper
         return new UnitOfMeasureDto
         {
             Id = entity.Id,
+            TenantId = entity.TenantId,
             Code = entity.UnitCode,
             Name = entity.UnitName,
             Description = entity.Description,
@@ -18,6 +19,8 @@ public static class UnitOfMeasureMapper
             IsActive = entity.IsActive,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
+            CreatedBy = entity.CreatedBy,
+            UpdatedBy = entity.UpdatedBy,
             BaseUnitName = entity.BaseUnit?.UnitName
         };
     }

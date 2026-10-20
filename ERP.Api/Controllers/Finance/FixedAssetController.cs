@@ -1,4 +1,5 @@
 using ERP.Api.Security;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Finance;
 using ERP.Shared.DTOs.Finance;
@@ -11,6 +12,10 @@ namespace ERP.Api.Controllers.Finance;
 [ApiController]
 [Route("api/finance/fixed-assets")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IFixedAssetService _service;
@@ -29,6 +34,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(FixedAssetDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -37,14 +43,16 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Search([FromQuery] FixedAssetQuery query)
     {
-        var tenantId = GetTenantId();
-        var result = await _service.SearchAssetsAsync(query);
-        return Ok(result);
+        query.TenantId = GetTenantId();
+        var (assets, totalCount) = await _service.SearchAssetsAsync(query);
+        return Ok(new { Assets = assets, TotalCount = totalCount, query.PageNumber, query.PageSize });
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateFixedAssetDto dto)
     {
         var validationResult = await _createValidator.ValidateAsync(dto);
@@ -58,6 +66,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateFixedAssetDto dto)
     {
         dto.AssetId = id;
@@ -72,6 +81,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();
@@ -80,6 +90,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/dispose")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> DisposeAsset(Guid id, [FromBody] DisposeAssetDto dto)
     {
         var tenantId = GetTenantId();
@@ -89,6 +100,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/undo-disposal")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> UndoDisposal(Guid id)
     {
         var tenantId = GetTenantId();
@@ -98,6 +110,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("depreciation/run")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> RunDepreciation([FromBody] DepreciationRunDto dto)
     {
         var tenantId = GetTenantId();
@@ -107,6 +120,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}/depreciation")]
+    [ProducesResponseType(typeof(IEnumerable<DepreciationEntryDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetDepreciationEntries(Guid id)
     {
         var tenantId = GetTenantId();
@@ -115,6 +129,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("depreciation/period")]
+    [ProducesResponseType(typeof(IEnumerable<DepreciationEntryDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetDepreciationEntriesByPeriod([FromQuery] DateTime periodStart, [FromQuery] DateTime periodEnd)
     {
         var tenantId = GetTenantId();
@@ -123,6 +138,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("depreciation/post")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> PostDepreciationForPeriod([FromBody] PostDepreciationDto dto)
     {
         var tenantId = GetTenantId();
@@ -132,6 +148,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("depreciation/methods")]
+    [ProducesResponseType(typeof(IEnumerable<string>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAvailableDepreciationMethods()
     {
         var result = await _service.GetAvailableDepreciationMethodsAsync();
@@ -139,6 +156,7 @@ public class FixedAssetController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/calculate-depreciation")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> CalculateDepreciation(Guid id, [FromBody] CalculateDepreciationDto dto)
     {
         var tenantId = GetTenantId();

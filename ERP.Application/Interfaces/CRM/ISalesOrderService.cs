@@ -12,7 +12,8 @@ public interface ISalesOrderService
     Task<IEnumerable<SalesOrderDto>> GetByCustomerAsync(Guid customerId);
     Task<IEnumerable<SalesOrderDto>> GetByStatusAsync(string status);
     Task<IEnumerable<SalesOrderDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
-    Task<bool> ApproveAsync(Guid id);
-    Task<bool> ShipAsync(Guid id);
-    Task<bool> InvoiceAsync(Guid id);
+    Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> ShipAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> InvoiceAsync(Guid id, Guid tenantId, Guid userId);
 }

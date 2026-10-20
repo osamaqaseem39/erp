@@ -1,0 +1,494 @@
+﻿<style>
+    .Acenter {
+        text-align: center;
+    }
+
+    .Aright {
+        text-align: right;
+    }
+</style>
+@model POS.Models.clsInvoice
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="widget-body">
+        <div class="well smart-form" style="border: 1px solid #bdbdbd; background-color: #F7F7F7;padding:10px">
+            <div class="row">
+                <div class="col col-md-12">
+                    <table class="" style="">
+                        <tr>
+                            <td style="width: 200px; padding-right: 3px; padding-left: 7px" id="">
+                                <label class="checkbox pull-left" style="margin-top:2px">
+                                    <input id="AllAccountCheckbox" type="checkbox" name="AllAccountCheckbox"><i></i>
+                                    <span style="font-size: 11px">All Accounts</span>
+                                </label>
+                            </td>
+                            <td style="width: 70%; padding-left: 3px; " id="">
+                                <label class="select">
+                                    <i class="append fa fa-caret-down"></i>
+                                    @Html.DropDownListFor(model => model.DetailCode, ViewBag.AllDetailCode as SelectList, new { @disabled = "disabled", id = "SearchAllDetailCode" })
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="col col-md-6">
+                    <table class="" style="">
+                        <tr>
+                            <td style="width: 300px; padding-right: 3px; padding-left: 7px" id="">
+                                <label class="checkbox pull-left" style="margin-top:2px">
+                                    <input id="voucherNoCheckbox" type="checkbox" name="voucherNoCheckbox"><i></i>
+                                    <span style="font-size:11px">Voucher No.</span>
+                                </label>
+                            </td>
+                            <td style=" width:60%;padding-left: 3px; " id="">
+                                <label class="input">
+                                    <input type="text" id="SearchVoucherNo" value="" style="width:100%" disabled />
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col col-md-6">
+                    <table class="" style="">
+                        <tr>
+                            <td style="width: 300px; padding-right: 3px; padding-left: 7px" id="">
+                                <label class="checkbox pull-left" style="margin-top:2px">
+                                    <input id="ReferenceNoCheckbox" type="checkbox" name="ReferenceNoCheckbox"><i></i>
+                                    <span style="font-size:11px">Ref No.</span>
+                                </label>
+                            </td>
+                            <td style=" width:60%;padding-left: 3px; " id="">
+                                <label class="input">
+                                    <input type="text" id="SearchReferenceNo" value="" style="width:100%" disabled />
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="col col-md-3">
+                    <table class="" style="">
+                        <tr>
+                            <td style="width: 80px; padding-right: 3px; padding-left: 7px" id="">
+                                <label class="checkbox pull-left" style="margin-top:2px">
+                                    <input id="DateCheckbox" type="checkbox" name="DateCheckbox" checked /><i></i>
+                                    <span style="font-size:11px">&nbsp;</span>
+                                </label>
+                            </td>
+                            <td style="width: 85%; padding-right: 3px; padding-left: 0px" id="">
+
+                                <label style="font-size:13px">Date</label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col col-md-5">
+                </div>
+                <div class="col col-md-4">
+                </div>
+            </div>
+            <div class="row" style="margin-top:10px;padding-left:40px" id="DatesRow">
+                <div class="col col-md-4">
+                    <table class="" style="">
+                        <tr>
+                            <td style="width: 10%; padding-right: 3px; padding-left: 7px" id=""></td>
+                            <td style="width: 90%; padding-right: 3px; padding-left: 7px" id="">
+                                <label>From</label>
+                                <label class="input">
+                                    <i class="icon-prepend fa fa-user"></i>
+                                    <input type="date" name="SearchFromDate" id="SearchFromDate" autocomplete="off" required />
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col col-md-4">
+                    <label>To</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-user"></i>
+                        <input type="date" name="SearchToDate" id="SearchToDate" autocomplete="off" required />
+                    </label>
+                </div>
+
+            </div>
+            <div class="row" style="margin-top:10px">
+                <table class="pull-right" style="margin-right:14px">
+                    <tr>
+                        <td style="padding-left:7px">
+                            <button type="button" id="btnSearchMain" class="btn btn-primary" style="width: 65px; height: 25px; font-size: 13px; margin-bottom: 8px; color: white; line-height: 5px;">
+                                Search
+                            </button>
+                        </td>
+                        @*<td>
+                            <button type="button" id="btnRefresh" class="btn btn-default" style="width: 65px; height: 27px; font-size: 13px; margin-left: 5px; margin-bottom: 8px; color: #000; line-height: 3px;">
+                                Refresh
+                            </button>
+                        </td>*@
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <table id="myTableLedgerVoucher" class="table table-striped table-bordered table-hover" width="100%">
+            <thead>
+                <tr>
+                    <th data-hide=""></th>
+                    <th data-class="expand"><i class="fa fa-fw fa-hashtag text-muted"></i>No.</th>
+                    <th data-hide="phone"><i class="fa fa-calendar text-muted"></i> Date</th>
+                    <th data-hide="phone"><i class="fa fa-info text-muted"></i> Remarks</th>
+                    <th data-hide="phone,tablet"> Reference No.</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    @*</div>
+
+                    </div>
+                </article>
+            </div>
+        </section>*@
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#SearchAllDetailCode').select2({
+            dropdownParent: $("#LedgerVoucherListModal")
+        });
+        $('#SearchAllDetailCode').val(null).trigger('change');
+        GetTodayDateSearch();
+        
+        $(document).on('click', '.selectBtn', function (e) {
+            e.preventDefault();
+            var voucherNo = $(this).attr("data-value");
+            $.ajax({
+                type: "POST",
+                url: "/journalVoucher/GetLedgerVoucherById/" + voucherNo,
+                dataType: 'json',
+                success: function (response) {
+                    $('#DisableOrNot').val(1);
+
+                    $('#LineDetailCode').select().enable(true);
+                    $('#TaxID').prop("disable",false)
+                    $('#Date').prop("disabled", false);
+                    $('#ReferenceNo').prop("disabled", false);
+                    $('#Remarks').prop("disabled", false);
+                    $('#DefaultVoucher').prop("disabled", false);
+                    $('#TaxCheckbox').prop("disabled", false);
+                    $('#TaxCheckbox').prop("checked", false);
+                    $('#LineRemarks').prop("disabled", false);
+                    $('#ChequeNo').prop("disabled", false);
+                    $('#LineDebit').prop("disabled", false);
+                    $('#LineCredit').prop("disabled", false);
+                    $('#taxRow').attr("hidden", "hidden");
+                    $('#PreviousBalance').html("0.00");
+                    $('#voucherNoSection').removeAttr("hidden");
+                    $('#IsNewOrEdit').val("Edit");
+                    $('#VoucherNo').val(response.data.VoucherNo);
+                    $('#VoucherNoSpan').html(response.data.VoucherNo);
+                    $('#Date').val(getDate(response.data.VoucherDate));
+                    $('#ReferenceNo').val(response.data.RefrenceNo);
+                    $('#Remarks').val(response.data.Remarks);
+                    $('#LineDetailCode').val(null).trigger('change');
+                    $('#TaxID').val(null).trigger('change');
+                    $('#TaxRate').val('');
+                    $('#TaxValue').html('0.00');
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html('0.00');
+                    $('.StatusSection').removeAttr("hidden");
+                    $('.TotalDebitRow').removeAttr("hidden");
+                    $('.TotalCreditRow').removeAttr("hidden");
+                    var vtable = $('#voucherDetailTable').DataTable();
+                    vtable.clear().draw(); 
+                    $('#btnSaveLedgerVoucher').prop('disabled', false);
+                    $('#btnSaveAndPrintLedgerVoucher').prop('disabled', false);
+                    if ($('#CanChange').val() == 1) {
+                        $('#saveTd').removeAttr("hidden");
+                        $('#documentTd').removeAttr("hidden");
+                        $('#saveAndPrintTd').removeAttr("hidden");
+                        $('#listTd').css({ 'width': '3%', 'text-align': 'left' });
+                    }
+                    else {
+                        $('#saveTd').attr("hidden", "hidden");
+                        $('#documentTd').attr("hidden", "hidden");
+                        $('#saveAndPrintTd').attr("hidden", "hidden");
+                        if ($('#CanSave').val() == 0) {
+                            $('#listTd').css({ 'width': '41%', 'text-align': 'right' });
+                        }
+                        else {
+                            $('#listTd').css({ 'width': '3%', 'text-align': 'left' });
+                        }
+                    }
+
+
+                    if ($('#CanSave').val() == 0) {
+                        $('#saveTd').css({ 'width': '41%', 'text-align': 'right' });
+                        $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'right' });
+                    }
+                    else {
+                        $('#addTd').removeAttr("hidden");
+                        $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+                        $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'right' });
+                    }
+
+
+                    if ($('#CanDelete').val() == 1) {
+                        $('.deleteRow').removeAttr("hidden");
+                    }
+                    getVoucherDetail(voucherNo);
+                }
+            })
+        })
+        function getVoucherDetail(voucherNo) {
+            $.ajax({
+                type: "POST",
+                url: "/journalVoucher/GetLedgerVoucherDetailById/" + voucherNo,
+                dataType: 'json',
+                success: function (response) {
+                    var vtable = $('#voucherDetailTable').DataTable();
+                    vtable.clear().draw();
+                    for (var key in response.data) {
+                        vtable.row.add([
+                       "<a href='javascript:void(0);' class='btn btn-success editRowBtn' title='Edit' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-edit'></i></a>",
+                    "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtn' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                        "<span><input type='hidden' class='LineDetailCode01' value=" + response.data[key].LineDetailCode + " />" + response.data[key].DetailName + "</span>",
+                        "<span><input type='hidden' class='LineRemarks01' value=" + response.data[key].LineRemarks + " />" + response.data[key].LineRemarks + "</span>",
+                        "<span style='text-align:right' class='pull-right'><input type='hidden' class='LineDebit01' value=" + response.data[key].LineDebit + " />" + ReplaceNumberWithCommas(parseFloat(response.data[key].LineDebit).toFixed(2)) + "</span>",
+                        "<span style='text-align:right' class='pull-right'><input type='hidden' class='LineCredit01' value=" + response.data[key].LineCredit + " />" + ReplaceNumberWithCommas(parseFloat(response.data[key].LineCredit).toFixed(2)) + "</span>",
+                        "<span><input type='hidden' class='LineCheque01' value=" + response.data[key].ChequeNo + " />" + response.data[key].ChequeNo + "</span>",
+                        "<span><input type='hidden' class='TaxId01' value=" + response.data[key].TaxID + " />" + response.data[key].TaxName + "</span>",
+                        "<span class='pull-right'><input type='hidden' class='TaxRate01' value=" + response.data[key].TaxRate + " />" + response.data[key].TaxRate + "</span>",
+                        "<span class='pull-right'><input type='hidden' class='TaxValue01' value=" + response.data[key].TaxValue + " />" + response.data[key].TaxValue + "</span>",
+                        "<span class='pull-right'><input type='hidden' class='NetDebit01' value=" + response.data[key].NetDebit + " />" + ReplaceNumberWithCommas(parseFloat(response.data[key].NetDebit).toFixed(2)) + "</span>",
+                        "<span class='pull-right'><input type='hidden' class='NetCredit01' value=" + response.data[key].NetCredit + " />" + ReplaceNumberWithCommas(parseFloat(response.data[key].NetCredit).toFixed(2)) + "</span>",
+                        ]).draw(false);
+                    }
+                    getGrandTotal();
+                }
+            })
+        }
+        
+    });
+    $('#AllAccountCheckbox').change(function () {
+        if ($(this).is(":checked")) {
+            $('#SearchAllDetailCode').prop("disabled", false);
+        }
+        else {
+            $('#SearchAllDetailCode').prop("disabled", true);
+            $('#SearchAllDetailCode').val(null).trigger('change');
+        }
+    })
+    $('#voucherNoCheckbox').change(function () {
+        if ($(this).is(":checked")) {
+            $('#SearchVoucherNo').prop("disabled", false);
+        }
+        else {
+            $('#SearchVoucherNo').prop("disabled", true);
+            $('#SearchVoucherNo').val('');
+        }
+    })
+    $('#ReferenceNoCheckbox').change(function () {
+        if ($(this).is(":checked")) {
+            $('#SearchReferenceNo').prop("disabled", false);
+        }
+        else {
+            $('#SearchReferenceNo').prop("disabled", true);
+            $('#SearchReferenceNo').val('');
+        }
+    })
+    $('#DateCheckbox').change(function () {
+        if ($(this).is(":checked")) {
+            $('#DatesRow').removeAttr("hidden");
+        }
+        else {
+            $('#DatesRow').attr("hidden", "hidden");
+        }
+    })
+    //     
+    //  
+    $('#btnSearchMain').click(function () {
+        var detailAccountCheckbox = $('#AllAccountCheckbox').is(":checked");
+        var detailAccountId = $('#SearchAllDetailCode').val();
+
+        var voucherNoCheckbox = $('#voucherNoCheckbox').is(":checked");
+        var voucherNo = $('#SearchVoucherNo').val();
+
+        var referenceNoCheckbox = $('#ReferenceNoCheckbox').is(":checked");
+        var referenceNo = $('#SearchReferenceNo').val();
+
+        var dateCheckbox = $('#DateCheckbox').is(":checked");
+        var fromDate = $('#SearchFromDate').val();
+        var toDate = $('#SearchToDate').val();
+        $('#btnSearchMain').prop("disabled", true);
+        $.ajax({
+            type: "POST",
+            url: "/journalvoucher/SetSessionsForCashList/",
+            dataType: 'json',
+            data: {
+                'detailCheckbox': detailAccountCheckbox,
+                'detailAccountId': detailAccountId, 'dateCheckbox': dateCheckbox, 'fromDate': fromDate,
+                'toDate': toDate, 'voucherNoCheckbox': voucherNoCheckbox, 'voucherNo': voucherNo,
+                'referenceNoCheckbox': referenceNoCheckbox, 'referenceNo': referenceNo,
+            },
+            success: function (response) {
+                getVouchers();
+
+            }
+        })
+    })
+    function getVouchers() {
+        var responsiveHelper_dt_basic = undefined;
+        var responsiveHelper_datatable_fixed_column = undefined;
+        var responsiveHelper_datatable_col_reorder = undefined;
+        var responsiveHelper_datatable_tabletools = undefined;
+
+        var breakpointDefinition = {
+            desktop: 1920,
+            tablet: 1024,
+            phone: 380
+        };
+
+        $('#myTableLedgerVoucher').dataTable({
+            "sDom": '<"top">rt<"bottom"lp i><"clear">',
+            "autoWidth": true,
+            "preDrawCallback": function () {
+                if (!responsiveHelper_dt_basic) {
+                    responsiveHelper_dt_basic = new ResponsiveDatatablesHelper($('#myTableLedgerVoucher'), breakpointDefinition);
+                }
+            },
+            "rowCallback": function (nRow) {
+                responsiveHelper_dt_basic.createExpandIcon(nRow);
+            },
+            "drawCallback": function (oSettings) {
+                responsiveHelper_dt_basic.respond();
+            },
+            "bLengthChange": true,
+            "processing": true,
+            "bDestroy": true,
+            "serverSide": true,
+            //"scrollX": true,
+            "ajax": {
+                "url": "/journalVoucher/GetAllLedgerVouchers",
+                "type": "POST",
+                "datatype": "json",
+                error: function (xhr, httpStatusMessage, customErrorMessage) {
+                    if (xhr.status === 410) {
+                        window.location.href = customErrorMessage;
+                    }
+                }
+            },
+            "columns": [
+                {
+                    "data": "VoucherNo", "width": "20px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        if ($('#CanChange').val() == 1 || $('#CanDelete').val() == 1) {
+                            return '<a href="javascript:void(0);"  data-toggle="modal" data-target="#LedgerVoucherListModal" class="btn btn-primary selectBtn" data-value="' + data + '"  title="Select" style=" text-align: center; height: 25px;width:25px; font-size: 12px;line-height:0px;color:#fff !important;background-color:#428bca !important;border-color:#357ebd !important;border-radius:2px "><i class="fa fa-edit" style="margin-left:-6px;"></i></a>';
+                        }
+                        else {
+                            return '';
+                        }
+                    }
+                },
+                    { "data": "VoucherNo", "name": "VoucherNo", "width": "20%", "autoWidth": true, "orderable": true, "class": "Acenter" },
+                     {
+                         "data": "VoucherDate", "class": "Acenter", "width": "15%", "orderable": false, 'render': function (date) {
+                             if (date != null) {
+                                 var date = new Date(parseInt(date.substr(6)));
+                                 var day = date.getDate();
+                                 var month = date.getMonth() + 1;
+                                 if (parseFloat(day) < 10) {
+                                     day = "0" + day;
+                                 }
+                                 if (parseFloat(month) < 10) {
+                                     month = "0" + month;
+                                 }
+                                 return day + "-" + month + "-" + date.getFullYear();
+                             }
+                             else {
+                                 return "";
+                             }
+                         }
+                     },
+                     { "data": "Remarks", "name": "Remarks", "width": "26%", "orderable": true, "autoWidth": true },
+                     { "data": "RefrenceNo", "name": "RefrenceNo", "width": "120px", "orderable": true, "autoWidth": true },
+
+            ]
+        });
+        $('#btnSearchMain').prop("disabled", false);
+    }
+    function GetTodayDateSearch() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm + '-' + dd;
+        var dt = new Date(today);
+        dt.setDate(dt.getDate() - 7);
+        var dd2 = dt.getDate();
+        var mm2 = dt.getMonth() + 1; //January is 0!
+
+        var yyyy2 = dt.getFullYear();
+        if (dd2 < 10) {
+            dd2 = '0' + dd2;
+        }
+        if (mm2 < 10) {
+            mm2 = '0' + mm2;
+        }
+        var today2 = yyyy2 + '-' + mm2 + '-' + dd2;
+        $('#SearchFromDate').val(today2);
+        $('#SearchToDate').val(today);
+    }
+    function NumberPostiveWithDecimal(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            charCode != 8 && charCode != 127 &&
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+            (charCode < 48 || charCode > 57))
+            evt.preventDefault();
+        return true;
+    }
+    function NumberPostiveNegativeWithDecimal(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+            (charCode < 48 || charCode > 57))
+            evt.preventDefault();
+        return true;
+    }
+    function getDate(date) {
+        var newdate = new Date(parseInt(date.substr(6)));
+        var day = newdate.getDate();
+        var month = newdate.getMonth() + 1;
+        if (digits_count(day) == 1 || digits_count(day) == 0) {
+            day = "0" + day;
+        }
+        if (digits_count(month) == 1 || digits_count(month) == 0) {
+            month = "0" + month;
+        }
+        var year = newdate.getFullYear();
+        var today = year + '-' + month + '-' + (day);
+        if (year == 1900) {
+            return null;
+        }
+        else {
+            return today;
+        }
+    }
+    function digits_count(n) {
+        var count = 0;
+        if (n > 1)
+            ++count;
+        while (n / 10 >= 1) {
+            n /= 10;
+            ++count;
+        }
+        return count;
+    }
+</script>

@@ -9,41 +9,24 @@ public class PurchaseRequisitionDetailRepository : IPurchaseRequisitionDetailRep
 {
     private readonly ERPDbContext _context;
 
-    public PurchaseRequisitionDetailRepository(ERPDbContext context)
-    {
-        _context = context;
-    }
+    public PurchaseRequisitionDetailRepository(ERPDbContext context) => _context = context;
 
-    public async Task<PurchaseRequisitionDetail?> GetByIdAsync(int id)
-    {
-        return await _context.PurchaseRequisitionDetails.FindAsync(id);
-    }
+    public async Task<IEnumerable<PurchaseRequisitionDetail>> GetByRequisitionIdAsync(Guid prId, Guid tenantId) =>
+        await _context.PurchaseRequisitionDetails.Where(d => d.PRId == prId && d.TenantId == tenantId).ToListAsync();
 
-    public async Task<IEnumerable<PurchaseRequisitionDetail>> GetAllAsync()
+    public async Task<Guid> CreateAsync(PurchaseRequisitionDetail detail)
     {
-        return await _context.PurchaseRequisitionDetails.ToListAsync();
-    }
-
-    public async Task<PurchaseRequisitionDetail> AddAsync(PurchaseRequisitionDetail entity)
-    {
-        _context.PurchaseRequisitionDetails.Add(entity);
+        _context.PurchaseRequisitionDetails.Add(detail);
         await _context.SaveChangesAsync();
-        return entity;
+        return detail.Id;
     }
 
-    public async Task UpdateAsync(PurchaseRequisitionDetail entity)
+    public async Task<bool> DeleteByRequisitionIdAsync(Guid prId, Guid tenantId)
     {
-        _context.PurchaseRequisitionDetails.Update(entity);
+        var rows = await _context.PurchaseRequisitionDetails.Where(d => d.PRId == prId && d.TenantId == tenantId).ToListAsync();
+        if (rows.Count == 0) return true;
+        _context.PurchaseRequisitionDetails.RemoveRange(rows);
         await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.PurchaseRequisitionDetails.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        return true;
     }
 }

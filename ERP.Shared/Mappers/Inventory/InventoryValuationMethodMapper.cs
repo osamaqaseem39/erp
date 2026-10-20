@@ -23,7 +23,7 @@ public static class InventoryValuationMethodMapper
     {
         return new InventoryValuationMethod
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             MethodName = dto.MethodName,
             MethodCode = dto.MethodCode,
             Description = dto.Description,

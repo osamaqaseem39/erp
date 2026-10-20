@@ -8,7 +8,15 @@ public class CreateUserDto : CreateDto
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    /// <summary>Optional login name; defaults to email when omitted.</summary>
+    public string? Username { get; set; }
     public string? Phone { get; set; }
+    public string? SecondaryPhone { get; set; }
+    public string? MobilePhone { get; set; }
+    public string? AddressLine1 { get; set; }
+    public string? City { get; set; }
+    public string? ProfilePicture { get; set; }
+    public Guid? EmployeeId { get; set; }
     public Guid? CompanyId { get; set; }
     public bool IsActive { get; set; } = true;
     public List<Guid> RoleIds { get; set; } = new();

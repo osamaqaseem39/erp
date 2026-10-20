@@ -1,0 +1,568 @@
+﻿<style>
+    div.myDiv .deleteImage {
+        position: absolute;
+        display: none;
+        top: 0%;
+        right: 6%;
+        /*left: 72%;*/
+    }
+
+    .toggle-password {
+        float: right;
+        margin-left: -22px;
+        margin-top: 13px;
+        position: relative;
+        z-index: 2;
+        cursor: pointer;
+    }
+</style>
+@model BlocksERP.Models.clsUser
+<div class="mySelect" style="overflow: hidden;margin-top: -20px;padding: 0px">
+    @using (Html.BeginForm("InsertUserType", "UserType", FormMethod.Post, new { id = "popupForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+        <fieldset style="padding:1.25rem">
+            <div class="row">
+                <div class="col-md-4" style="margin-top:15px">
+                    <div class="myDiv">
+
+                        @{
+                            string imgSrc = "/Content/dummy.png";
+                            //if (Model.ImagePath != null)
+
+                            //{
+                            //    var base64 = Convert.ToBase64String(Model.ImagePath);
+                            //imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+                            //}
+                        }
+
+
+
+
+                        @*<div class="row ImageDisplayRow" style="margin-top:10px">
+                                <section class="col col-md-3"></section>
+                                <section class="col col-md-6 col-lg-6 col-sm-12 col-xs-12 myDiv">
+                                    <img id="DocumentImage" style="border-radius:10px" />
+                                    <a href="javascript:void(0)" data-value="0" style="background-color:#C82333;font-size:14px;border-radius:50%;font-weight:bold;padding:5px;color:#fff;padding-left:9px;padding-right:9px" class="deleteImage DeleteImage">X</a>
+                                </section>
+                                <section class="col col-md-3"></section>
+                            </div>*@
+
+
+
+
+
+                        <img id="DocumentImage" src="@imgSrc" style="border:1px solid #A2A2A2;border-radius:10px;margin-top: 0px;height: 160px;width:100%;" />
+
+
+
+                        <a href="javascript:void(0)" data-value="0" style="background-color:#C82333;font-size:14px;border-radius:50%;font-weight:bold;padding:5px;color:#fff;padding-left:9px;padding-right:9px" class="deleteImage DeleteImage">X</a>
+                    </div>
+                </div>
+                <div class="col col-md-8 row" style="padding:0px;margin:0px">
+                    <div class="col-md-6" style="margin-top:15px">
+                        <label class="form-label">First Name</label>
+                        <input type="hidden" id="UserId" name="UserId" value="@Model.UserId" />
+                        <input type="hidden" id="HiddenImagePath" name="HiddenImagePath" value="@Model.ImagePath" />
+                        <input type="hidden" id="HiddenDocumentId" name="HiddenDocumentId" value="@Model.DocumentId" />
+
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-envelope"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.Email, new { @placeholder = "", @class = "form-control num", autocomplete = "off" })
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="margin-top:15px">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-asterisk"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.Password, new { @type = "password", @placeholder = "Password", @class = "form-control num", autocomplete = "off" })
+                            <span data-toggle="#Password" id="eyeIcon" class="fal fa-fw fa-eye field-icon toggle-password" style="cursor:pointer"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="margin-top:10px">
+                        <label class="form-label">Phone No.</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-phone"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.PhoneNumber, new { @placeholder = "", @maxlength = "20", @class = "form-control num", autocomplete = "off" })
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="margin-top: 10px" hidden>
+                        <label class="form-label">Type</label>
+                        <div>
+                            <select class="custom-select num" id="Type" name="Type">
+                                <option value="Admin" selected>Admin</option>
+                                <option value="User">User</option>
+                                <option value="Investor">Investor</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="row" style="margin-top:15px">
+                <div class="col-md-12" style="margin-top: 15px">
+                    <label class="form-label">Profile Picture</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input num" id="PictureAttachment">
+                        <label class="custom-file-label" id="PictureAttachmentLabel" for="PictureAttachment">Choose file...</label>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model != null && Model.UserId > 0)
+            {
+                <div class="row" style="margin-top:15px">
+
+
+                    <section class="col-md-6">
+                        <label class="form-label">Status</label>
+                        <div>
+                            <select class="custom-select num" id="Status" name="Status">
+                                <option value="Active" selected>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="col-md-6">
+                        <label class="form-label" style="margin-top: -7px;position:absolute;right:15px;">
+                            <input id="IsChangePassword" type="checkbox" name="IsChangePassword" /><i></i>
+                            Change Password Also
+                        </label>
+                    </section>
+                </div>
+            }
+
+
+
+        </fieldset>
+        <footer class="modal-footer" style="margin-top:11px;background-color:#F9F9F9;border-top:1px solid #ddd">
+            @if (Model.DeleteRoleId > 0)
+            {
+                <button type="button" class="btn btn-danger pull-left btnDeleteRecord">Delete</button>
+            }
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            @if (Model.UserId > 0)
+            {
+                if (Model.UpdateRoleId > 0)
+                {
+                    <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Update</button>
+
+                }
+            }
+            else
+            {
+                <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Save</button>
+            }
+        </footer>
+    }
+</div>
+<script src="~/Scripts/app.bundle.js"></script>
+<script type="text/javascript">
+    $(document).keypress(function (e) {
+        var keyCode = (e.keyCode ? e.keyCode : e.which);
+        if (keyCode == '13') {
+            e.preventDefault();
+        }
+    });
+    $(document).on('keydown', function (event) {
+        if (event.ctrlKey && event.keyCode === 13) {
+            $('#btn_Save').click();
+        }
+    })
+    $(".num").keyup(function (event) {
+        if (event.keyCode == 13) {
+            textboxes = $(".num");
+            currentBoxNumber = textboxes.index(this);
+            if (currentBoxNumber == 9) {
+                $('#btn_Save').focus();
+                $('#btn_Save').click();
+            }
+            else {
+                nextBox = textboxes[currentBoxNumber + 1];
+                nextBox.focus();
+                nextBox.select();
+            }
+            //if (textboxes[currentBoxNumber + 1] != null) {
+            //    nextBox = textboxes[currentBoxNumber + 1];
+            //    nextBox.focus();
+            //    nextBox.select();
+            //}
+            event.preventDefault();
+            return false;
+        }
+    });
+
+    $('#PictureAttachment').change(function (e) {
+        var ext = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+        var size = document.getElementById('PictureAttachment').files[0].size;
+        var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
+        if ($.inArray(ext, ['jpeg', 'jpg', 'png']) == -1) {
+            $("#DocumentImage").prop("src", "/Content/dummy.png");
+            alert('Error! File type allowed : jpeg, jpg, png');
+            $('#PictureAttachment').val('');
+            $('#PictureAttachmentLabel').text('Choose file...');
+        }
+        else if (size > (5000 * 1024)) {
+            $("#DocumentImage").prop("src", "/Content/dummy.png");
+            alert('Error! Maximum File size must be 5 mb');
+            $('#PictureAttachment').val('');
+            $('#PictureAttachmentLabel').text('Choose file...');
+        }
+        else {
+
+            //Get count of selected files
+            var countFiles = $(this)[0].files.length;
+            var imgPath = $(this)[0].value;
+            $('#PictureAttachmentLabel').text(filename);
+            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+            if (typeof (FileReader) != "undefined") {
+
+                //loop for each file selected for uploaded.
+                for (var i = 0; i < countFiles; i++) {
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#DocumentImage").prop("src", e.target.result);
+                    }
+                    //image_holder.show();
+                    reader.readAsDataURL($(this)[0].files[i]);
+                }
+
+            }
+            else {
+                alert("This browser does not support FileReader.");
+            }
+        }
+    });
+    $(document).on("mouseenter", ".myDiv", function () {
+        var attr = $('#DocumentImage').attr("src");
+        if (attr.trim() == "/Content/dummy.png") {
+
+        }
+        else {
+            $('.deleteImage').css("display", "block");
+        }
+    }).on("mouseleave", ".myDiv", function () {
+        $('.deleteImage').css("display", "none");
+    })
+    $(document).off('click', '.deleteImage').on('click', '.deleteImage', function () {
+        var id = $('#HiddenDocumentId').val();
+        DeleteImage(id);
+    });
+    function DeleteImage(id) {
+        var a = $.confirm({
+            title: 'Delete Image',
+            content: 'Are you sure you want to delete this Image?',
+            type: 'white',
+            buttons: {
+                ok: {
+                    text: "Yes",
+                    btnClass: 'btnConfirm',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '/Documents/DeleteDocument/' + id,
+                            type: "POST",
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.status == true) {
+                                    $('#PictureAttachment').val('');
+                                    $('#HiddenDocumentId').val(0);
+                                    $("#DocumentImage").prop("src", "/Content/dummy.png");
+                                    $('#PictureAttachmentLabel').text('Choose file...');
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: "No",
+                    btnClass: 'btn-default',
+                    keys: ['esc'],
+                    action: function () {
+                        a.close();
+                    }
+                },
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        if ($('#UserId').val() > 0) {
+            //$('#Gender').val($('#HiddenGender').val()).trigger("change");
+
+            if ($('#HiddenImagePath').val() != '' && $('#HiddenImagePath').val() != null) {
+                $("#DocumentImage").prop("height", "150");
+                $("#DocumentImage").prop("width", "150");
+                $("#DocumentImage").prop("src", $('#HiddenImagePath').val());
+            }
+
+            if ($('#UserTypeId').find("option[value='" + $('#HiddenUserTypeId').val() + "']").length) {
+                $('#UserTypeId').val($('#HiddenUserTypeId').val()).trigger('change');
+            } else {
+                // Create a DOM Option and pre-select by default
+                var newOption = new Option($('#HiddenTypeName').val(), $('#HiddenUserTypeId').val(), true, true);
+                // Append it to the select
+                $('#UserTypeId').append(newOption).trigger('change');
+            }
+
+            $('#Type').val('@Model.Type');
+            $('#Status').val('@Model.Status');
+
+        }
+        else {
+            $('#Type').val('Admin');
+            $('#Status').val('Active');
+        }
+
+        var $checkoutForm = $('#popupForm').validate({
+            rules: {
+                Email: {
+                    required: true,
+                    email: true,
+                },
+                //Password: {
+                //    required: true,
+                //    minlength: '4'
+
+                //},
+            },
+            messages: {
+                Email: {
+                    required: 'Email is required.',
+                    email: 'Please enter a valid email address.',
+                    //required: 'Email is required.'
+                },
+                //Password: {
+                //    required: 'Password is required.',
+                //    minlength:'Pwd minimum length is 4.'
+                //},
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+                if (element.val() == '' || element.val() == null) {
+                    element.parents('td').siblings('td').find('.btn').css("margin-top", "-8px");
+                }
+            }
+
+        });
+    })
+
+
+    $('#popupForm').on('submit', function (e) {
+        e.preventDefault();
+
+        if (!$("#popupForm").valid()) {
+            return false;
+        }
+
+        var isChangePassword = 0;
+        if ($('#IsChangePassword').is(":checked")) {
+            isChangePassword = 1;
+        }
+        else {
+            isChangePassword = 0;
+        }
+
+        var labelId = $('#UserId').val();
+        if (labelId == "" || labelId == null || labelId == "0") {
+            if ($('#Password').val() == "" || $('#Password').val() == null) {
+                alert("Enter the User Password")
+            } else {
+                SaveUser();
+            }
+        } else {
+            if (isChangePassword == 1) {
+                if ($('#Password').val() == "" || $('#Password').val() == null) {
+                    alert("Enter the User Password")
+                } else {
+                    SaveUser();
+                }
+            } else {
+                SaveUser();
+            }
+        }
+    })
+
+    function SaveUser() {
+
+        $('#btn_Save').attr('disabled', 'disabled');
+        $('#btn_Save').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+
+
+        var labelId = $('#UserId').val();
+        var Email = $('#Email').val();
+        var PhoneNumber = $('#PhoneNumber').val();
+        var Type = "Admin"; // $('#Type').val();
+        var Status = $('#Status').val();
+        var Password = $('#Password').val();
+
+        var isChangePassword = 0;
+        if ($('#IsChangePassword').is(":checked")) {
+            isChangePassword = 1;
+        }
+        else {
+            isChangePassword = 0;
+        }
+
+
+        var st =
+        {
+            UserId: labelId,
+            Email: Email,
+            PhoneNumber: PhoneNumber,
+            Type: Type,
+            Status: Status,
+            IsChangePassword: isChangePassword,
+            Password: Password,
+
+        }
+        //var branchData = JSON.stringify(getBranchData());
+        $.ajax({
+            type: "POST",
+            url: "/users/users/insertupdateuser/",
+            data: { 'user': st },
+            dataType: 'json',
+            success: function (data) {
+                if (data.status) {
+                    var extension = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+                    if (extension != '') {
+                        var typeId = data.id;
+                        var documentType = "User";
+                        var documentId = 0;
+                        var extension = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+                        var document = {
+                            DocumentId: documentId,
+                            DocumentType: documentType,
+                            TypeId: typeId,
+                            DocumentExtension: extension,
+                            Remarks: 'ProfilePicture'
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: '/documents/AttachDocumentsForPost/',
+                            dataType: 'json',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify({ 'doc': document }),
+                            success: function (data) {
+                                if (data.status == true) {
+                                    var bannerImage = $("#PictureAttachment").val();
+                                    var file = $('#PictureAttachment').get(0).files;
+                                    var documentFile = file[0];
+                                    var extension = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+                                    var documentIdWithDocumentTypeWithExtension = data.documentId + "_" + data.documentType + "_" + data.typeId + "_" + extension;
+                                    var formData = new FormData();
+                                    formData.append(file.name, documentFile);
+                                    formData.append("DocumentName", $("#PictureAttachment").text());
+
+                                    var xhr = new XMLHttpRequest();
+                                    var url = '/documents/UploadDocument/' + documentIdWithDocumentTypeWithExtension;
+                                    xhr.open('POST', url, true);
+
+                                    xhr.onload = function (e) {
+                                        var response = $.parseJSON(e.target.response);
+                                        if ($('#UserId').val() > 0) {
+                                            $('#btn_Save').html("Update");
+                                        }
+                                        else {
+                                            $('#btn_Save').html("Save");
+                                        }
+                                        $('#btn_Save').prop('disabled', false);
+                                        if (data.status) {
+                                            toastr.success("User Saved Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                                            $('.close').click();
+                                            oTable.ajax.reload(null, false);
+                                            location.reload();
+                                        }
+                                        else {
+                                            toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                                        }
+                                    };
+                                    xhr.send(formData);  // multipart/form-data
+                                }
+                                else {
+                                    alert("Error! Please try again.");
+                                }
+                            }
+                        })
+                    }
+                    else {
+                        if ($('#UserId').val() > 0) {
+                            $('#btn_Save').html("Update");
+                        }
+                        else {
+                            $('#btn_Save').html("Save");
+                        }
+                        $('#btn_Save').prop('disabled', false);
+                        if (data.status) {
+                            toastr.success("User Saved Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                            $('.close').click();
+                            oTable.ajax.reload(null, false);
+                            location.reload();
+                        }
+                        else {
+                            toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                        }
+                    }
+                }
+                else {
+                    if ($('#UserId').val() > 0) {
+                        $('#btn_Save').html("Update");
+                    }
+                    else {
+                        $('#btn_Save').html("Save");
+                    }
+                    location.reload();
+                    $('#btn_Save').prop('disabled', false);
+                    toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                }
+            }
+        })
+    }
+
+    //$("#PhoneNumber,#Contact2").on('keypress', function (event) {
+    //    NumberPostive(event, this);
+    //});
+
+    //$('#PhoneNumber,#Contact2').on('input', function () {
+    //    this.value = this.value
+    //        .replace(/[^\d]/g, '')             // numbers and decimals only
+    //        .replace(/(^[\d]{10})[\d]/g, '$1')   // not more than 6 digits at the beginning
+
+    //});
+
+      $('#eyeIcon').on('click', function () {
+            if ($(this).hasClass('fa-eye-slash')) {
+                $(this).removeClass('fa-eye-slash');
+            }
+            else {
+                $(this).addClass('fa-eye-slash');
+            }
+            var input = $("#Password");
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+      });
+    $(document).on("click", '.select2-selection__clear', function () {
+        $(this).parents("div").find('select').val(null).trigger("change");
+    })
+</script>

@@ -9,41 +9,24 @@ public class GoodsReceiptNoteDetailRepository : IGoodsReceiptNoteDetailRepositor
 {
     private readonly ERPDbContext _context;
 
-    public GoodsReceiptNoteDetailRepository(ERPDbContext context)
-    {
-        _context = context;
-    }
+    public GoodsReceiptNoteDetailRepository(ERPDbContext context) => _context = context;
 
-    public async Task<GoodsReceiptNoteDetail?> GetByIdAsync(int id)
-    {
-        return await _context.GoodsReceiptNoteDetails.FindAsync(id);
-    }
+    public async Task<IEnumerable<GoodsReceiptNoteDetail>> GetByGrnIdAsync(Guid grnId, Guid tenantId) =>
+        await _context.GoodsReceiptNoteDetails.Where(d => d.GRNId == grnId && d.TenantId == tenantId).ToListAsync();
 
-    public async Task<IEnumerable<GoodsReceiptNoteDetail>> GetAllAsync()
+    public async Task<Guid> CreateAsync(GoodsReceiptNoteDetail detail)
     {
-        return await _context.GoodsReceiptNoteDetails.ToListAsync();
-    }
-
-    public async Task<GoodsReceiptNoteDetail> AddAsync(GoodsReceiptNoteDetail entity)
-    {
-        _context.GoodsReceiptNoteDetails.Add(entity);
+        _context.GoodsReceiptNoteDetails.Add(detail);
         await _context.SaveChangesAsync();
-        return entity;
+        return detail.Id;
     }
 
-    public async Task UpdateAsync(GoodsReceiptNoteDetail entity)
+    public async Task<bool> DeleteByGrnIdAsync(Guid grnId, Guid tenantId)
     {
-        _context.GoodsReceiptNoteDetails.Update(entity);
+        var rows = await _context.GoodsReceiptNoteDetails.Where(d => d.GRNId == grnId && d.TenantId == tenantId).ToListAsync();
+        if (rows.Count == 0) return true;
+        _context.GoodsReceiptNoteDetails.RemoveRange(rows);
         await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.GoodsReceiptNoteDetails.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        return true;
     }
 }

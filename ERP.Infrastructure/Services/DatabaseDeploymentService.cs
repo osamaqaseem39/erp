@@ -65,7 +65,9 @@ public class DatabaseDeploymentService
     {
         _logger.LogInformation("Deploying table schemas...");
 
-        var schemaFiles = new[]
+        // Base module schemas first (idempotent CREATE), then dated incremental patches
+        // (20261020_*.sql) that align SQL Server with EF-touched tables.
+        var schemaFiles = new List<string>
         {
             "CoreModule_Schema.sql",
             "HRMModule_Schema.sql",
@@ -74,6 +76,7 @@ public class DatabaseDeploymentService
             "CRMModule_Schema.sql",
             "ProcurementModule_Schema.sql"
         };
+        schemaFiles.AddRange(ListIncrementalSchemaFileNames(_schemasPath));
 
         foreach (var file in schemaFiles)
         {
@@ -97,6 +100,23 @@ public class DatabaseDeploymentService
                 _logger.LogWarning("Schema file not found: {File}", file);
             }
         }
+    }
+
+    /// <summary>
+    /// Dated incremental patches: <c>yyyyMMdd_Feature.sql</c> (e.g. <c>20261020_Auth_TwoFactorTotp.sql</c>).
+    /// Sorted by file name so dependent patches apply in chronological order.
+    /// </summary>
+    public static IReadOnlyList<string> ListIncrementalSchemaFileNames(string schemasPath)
+    {
+        if (string.IsNullOrWhiteSpace(schemasPath) || !Directory.Exists(schemasPath))
+            return Array.Empty<string>();
+
+        return Directory.GetFiles(schemasPath, "20*_*.sql")
+            .Select(Path.GetFileName)
+            .Where(n => !string.IsNullOrEmpty(n))
+            .Cast<string>()
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private async Task DeployStoredProceduresAsync()

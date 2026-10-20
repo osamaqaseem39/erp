@@ -18,6 +18,10 @@ public class User : BaseEntity
     public DateTime? PhoneVerifiedAt { get; set; }
     public string? ProfilePicture { get; set; }
     public string? Notes { get; set; }
+    public string? AddressLine1 { get; set; }
+    public string? City { get; set; }
+    /// <summary>Optional link to an HRM employee in the same tenant.</summary>
+    public Guid? EmployeeId { get; set; }
     
     // Additional properties expected by repositories
     public Guid? CompanyId { get; set; }
@@ -55,10 +59,21 @@ public class User : BaseEntity
     public DateTime? PasswordResetExpires { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpires { get; set; }
+
+    /// <summary>When true, password login must be followed by a TOTP code.</summary>
+    public bool TwoFactorEnabled { get; set; }
+    /// <summary>Base32 TOTP shared secret (set only after enable confirms pending).</summary>
+    public string? TwoFactorSecret { get; set; }
+    /// <summary>Pending secret during setup before the user confirms with a valid code.</summary>
+    public string? TwoFactorPendingSecret { get; set; }
+    /// <summary>Hashed one-time challenge issued after password OK when 2FA is on.</summary>
+    public string? TwoFactorChallengeTokenHash { get; set; }
+    public DateTime? TwoFactorChallengeExpires { get; set; }
     
     // Navigation properties
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public ICollection<UserSession> UserSessions { get; set; } = new List<UserSession>();
     public virtual Company? Company { get; set; }
+    public virtual ERP.Domain.HRM.Employee? Employee { get; set; }
     public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 }

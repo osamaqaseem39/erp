@@ -1,8 +1,10 @@
 using ERP.Api.Security;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Api.Security.Permissions;
 using ERP.Application.Interfaces.Core;
 using ERP.Infrastructure.Security;
+using ERP.Shared.DTOs.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +13,10 @@ namespace ERP.Api.Controllers.Admin;
 [ApiController]
 [Route("api/admin/permissions")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class PermissionController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IPermissionService _permissionService;
@@ -22,6 +28,7 @@ public class PermissionController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<PermissionDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] bool activeOnly = true)
     {
         var tenantId = GetTenantId();
@@ -31,6 +38,7 @@ public class PermissionController : ERP.Api.Abstractions.ControllerBase
 
     /// <summary>Every permission the application enforces, grouped by module, for the role editor.</summary>
     [HttpGet("catalog")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public IActionResult GetCatalog([FromServices] IPermissionCatalog catalog)
     {
         var modules = catalog.Permissions
@@ -52,6 +60,7 @@ public class PermissionController : ERP.Api.Abstractions.ControllerBase
     /// <summary>Re-runs permission and built-in role seeding for the caller's organization (also runs at startup).</summary>
     [HttpPost("seed")]
     [Authorize(Roles = "SuperAdmin")]
+    [ProducesResponseType(typeof(RbacSeedResult), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> SeedDefaults([FromServices] IRbacSeeder seeder)
     {
         var result = await seeder.SeedTenantAsync(GetTenantId());

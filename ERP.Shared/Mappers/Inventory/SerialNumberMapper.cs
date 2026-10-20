@@ -27,7 +27,7 @@ public class SerialNumberMapper : IMapper<SerialNumber, SerialNumberDto>
     {
         return new SerialNumber
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             ItemId = dto.ItemId,
             SerialNumberValue = dto.SerialNumber,
             Status = dto.Status,

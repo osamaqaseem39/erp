@@ -4,9 +4,7 @@ namespace ERP.Infrastructure.Interfaces.Procurement;
 
 public interface IPurchaseRequisitionDetailRepository
 {
-    Task<PurchaseRequisitionDetail?> GetByIdAsync(int id);
-    Task<IEnumerable<PurchaseRequisitionDetail>> GetAllAsync();
-    Task<PurchaseRequisitionDetail> AddAsync(PurchaseRequisitionDetail entity);
-    Task UpdateAsync(PurchaseRequisitionDetail entity);
-    Task DeleteAsync(int id);
+    Task<IEnumerable<PurchaseRequisitionDetail>> GetByRequisitionIdAsync(Guid prId, Guid tenantId);
+    Task<Guid> CreateAsync(PurchaseRequisitionDetail detail);
+    Task<bool> DeleteByRequisitionIdAsync(Guid prId, Guid tenantId);
 }

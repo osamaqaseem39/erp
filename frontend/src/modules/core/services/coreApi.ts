@@ -32,6 +32,8 @@ export interface CompanyProfile {
   postalCode?: string | null;
   country?: string | null;
   phone?: string | null;
+  mobilePhone?: string | null;
+  contactPerson?: string | null;
   email?: string | null;
   website?: string | null;
   logoUrl?: string | null;

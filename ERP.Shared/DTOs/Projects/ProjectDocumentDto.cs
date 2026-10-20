@@ -33,6 +33,8 @@ public class CreateProjectDocumentDto : CreateDto
     public string? Status { get; set; } = "Draft";
     public bool? IsPublic { get; set; } = false;
     public string? Notes { get; set; }
+    /// <summary>Optional base64 payload stored under the tenant document root on create.</summary>
+    public string? ContentBase64 { get; set; }
 }
 
 public class UpdateProjectDocumentDto : UpdateDto

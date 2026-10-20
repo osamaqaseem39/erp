@@ -9,41 +9,47 @@ public class VendorBankAccountRepository : IVendorBankAccountRepository
 {
     private readonly ERPDbContext _context;
 
-    public VendorBankAccountRepository(ERPDbContext context)
+    public VendorBankAccountRepository(ERPDbContext context) => _context = context;
+
+    private IQueryable<VendorBankAccount> Query(Guid tenantId) =>
+        _context.VendorBankAccounts.Where(a => a.TenantId == tenantId);
+
+    public async Task<VendorBankAccount?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        _context = context;
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(a => a.Id == id);
     }
 
-    public async Task<VendorBankAccount?> GetByIdAsync(int id)
+    public async Task<IEnumerable<VendorBankAccount>> GetByVendorAsync(Guid vendorId, Guid tenantId)
     {
-        return await _context.VendorBankAccounts.FindAsync(id);
+        if (tenantId == Guid.Empty) return Array.Empty<VendorBankAccount>();
+        return await Query(tenantId)
+            .Where(a => a.VendorId == vendorId && a.IsActive)
+            .OrderByDescending(a => a.IsPrimary)
+            .ThenBy(a => a.BankName)
+            .ToListAsync();
     }
 
-    public async Task<IEnumerable<VendorBankAccount>> GetAllAsync()
+    public async Task<Guid> CreateAsync(VendorBankAccount entity)
     {
-        return await _context.VendorBankAccounts.ToListAsync();
-    }
-
-    public async Task<VendorBankAccount> AddAsync(VendorBankAccount entity)
-    {
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         _context.VendorBankAccounts.Add(entity);
         await _context.SaveChangesAsync();
-        return entity;
+        return entity.Id;
     }
 
-    public async Task UpdateAsync(VendorBankAccount entity)
+    public async Task<bool> UpdateAsync(VendorBankAccount entity)
     {
         _context.VendorBankAccounts.Update(entity);
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.VendorBankAccounts.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        var entity = await GetByIdAsync(id, tenantId);
+        if (entity == null) return false;
+        entity.IsActive = false;
+        entity.UpdatedAt = DateTime.UtcNow;
+        return await _context.SaveChangesAsync() > 0;
     }
 }

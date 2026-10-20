@@ -1,14 +1,24 @@
-using ERP.Infrastructure.Numbering;
+using ERP.Application.Common;
 using ERP.Application.Interfaces.CRM;
-using ERP.Shared.DTOs.CRM;
-using ERP.Infrastructure.Repositories;
-using ERP.Infrastructure.Interfaces.CRM;
 using ERP.Domain.CRM;
+using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Infrastructure.Numbering;
+using ERP.Shared.DTOs.CRM;
 
 namespace ERP.Application.CRM;
 
 public class OpportunityService : IOpportunityService
 {
+    private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> Transitions =
+        new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Open"] = new[] { "Won", "Lost", "Cancelled" },
+            ["Won"] = new[] { "Converted" },
+            ["Lost"] = Array.Empty<string>(),
+            ["Cancelled"] = Array.Empty<string>(),
+            ["Converted"] = Array.Empty<string>()
+        };
+
     private readonly IDocumentNumberService _numbers;
     private readonly IOpportunityRepository _repository;
     private readonly IQuoteRepository _quoteRepository;
@@ -35,6 +45,12 @@ public class OpportunityService : IOpportunityService
     public async Task<Guid> CreateAsync(CreateOpportunityDto dto)
     {
         var entity = MapToEntity(dto);
+        // ERP-FIX-5: always start Open
+        entity.Status = "Open";
+        if (string.IsNullOrWhiteSpace(entity.OpportunityCode))
+            entity.OpportunityCode = await _numbers.NextAsync("crm.opportunity");
+        if (string.IsNullOrWhiteSpace(entity.OpportunityName))
+            entity.OpportunityName = entity.Title;
         return await _repository.CreateAsync(entity);
     }
 
@@ -42,13 +58,20 @@ public class OpportunityService : IOpportunityService
     {
         var entity = await _repository.GetByIdAsync(dto.Id);
         if (entity == null) return false;
+        if (!IsOpen(entity.Status)) return false;
 
+        var previousStatus = entity.Status;
         MapToEntity(dto, entity);
+        // ERP-FIX-5: status only via win/lose/cancel/convert
+        entity.Status = previousStatus;
         return await _repository.UpdateAsync(entity);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null) return false;
+        if (!IsOpen(entity.Status)) return false;
         return await _repository.DeleteAsync(id);
     }
 
@@ -76,10 +99,59 @@ public class OpportunityService : IOpportunityService
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> ConvertToQuoteAsync(Guid opportunityId)
+    public async Task<bool> MarkWonAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(opportunityId);
+        var entity = await GetScopedAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(StatusOf(entity), "Won", Transitions))
+            return false;
+
+        entity.Status = "Won";
+        entity.Stage = "Closed Won";
+        entity.ActualCloseDate = DateTime.UtcNow;
+        entity.ClosedDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        return await _repository.UpdateAsync(entity);
+    }
+
+    public async Task<bool> MarkLostAsync(Guid id, Guid tenantId, Guid userId, string? reason = null)
+    {
+        var entity = await GetScopedAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(StatusOf(entity), "Lost", Transitions))
+            return false;
+
+        entity.Status = "Lost";
+        entity.Stage = "Closed Lost";
+        entity.CloseReason = reason;
+        entity.ActualCloseDate = DateTime.UtcNow;
+        entity.ClosedDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        return await _repository.UpdateAsync(entity);
+    }
+
+    public async Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        var entity = await GetScopedAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(StatusOf(entity), "Cancelled", Transitions))
+            return false;
+
+        entity.Status = "Cancelled";
+        entity.ClosedDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        return await _repository.UpdateAsync(entity);
+    }
+
+    public Task<bool> CloseAsync(Guid id, Guid tenantId, Guid userId, string? reason = null) =>
+        MarkLostAsync(id, tenantId, userId, reason);
+
+    public async Task<Guid> ConvertToQuoteAsync(Guid opportunityId, Guid tenantId, Guid userId)
+    {
+        var entity = await GetScopedAsync(opportunityId, tenantId);
         if (entity == null) return Guid.Empty;
+        if (!DocumentWorkflow.CanTransition(StatusOf(entity), "Converted", Transitions))
+            return Guid.Empty;
 
         var quote = new Quote
         {
@@ -98,17 +170,45 @@ public class OpportunityService : IOpportunityService
             Currency = entity.Currency,
             Notes = entity.Notes,
             AssignedToUserId = entity.AssignedToUserId ?? entity.AssignedTo,
-            CreatedBy = entity.CreatedBy
+            CreatedBy = userId.ToString()
         };
 
         var quoteId = await _quoteRepository.CreateAsync(quote);
 
         entity.Status = "Converted";
         entity.ConvertedDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
         await _repository.UpdateAsync(entity);
 
         return quoteId;
     }
+
+    public async Task<bool> UpdateStageAsync(Guid id, string stage, decimal probability)
+    {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null) return false;
+        if (!IsOpen(entity.Status)) return false;
+
+        entity.Stage = stage;
+        entity.Probability = probability;
+        return await _repository.UpdateAsync(entity);
+    }
+
+    private async Task<Opportunity?> GetScopedAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null || entity.TenantId != tenantId) return null;
+        return entity;
+    }
+
+    private static bool IsOpen(string? status) =>
+        string.Equals(StatusOf(status), "Open", StringComparison.OrdinalIgnoreCase);
+
+    private static string StatusOf(Opportunity entity) => StatusOf(entity.Status);
+
+    private static string StatusOf(string? status) =>
+        string.IsNullOrWhiteSpace(status) ? "Open" : status.Trim();
 
     private static OpportunityDto MapToDto(Opportunity entity)
     {
@@ -153,7 +253,7 @@ public class OpportunityService : IOpportunityService
             CustomerId = dto.CustomerId,
             Description = dto.Description,
             Stage = dto.Stage ?? "Prospecting",
-            Status = dto.Status ?? "Open",
+            Status = "Open",
             Probability = dto.Probability ?? 0m,
             Amount = dto.Amount ?? 0m,
             Currency = dto.Currency ?? "USD",
@@ -170,38 +270,18 @@ public class OpportunityService : IOpportunityService
     {
         entity.CustomerId = dto.CustomerId;
         entity.Title = dto.Title ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(dto.OpportunityName))
+            entity.OpportunityName = dto.OpportunityName;
         entity.Description = dto.Description;
-        entity.Stage = dto.Stage ?? "Prospecting";
-        entity.Status = dto.Status ?? "Open";
-            entity.Probability = dto.Probability ?? 0m;
-            entity.Amount = dto.Amount ?? 0m;
-        entity.Currency = dto.Currency ?? "USD";
+        entity.Stage = dto.Stage ?? entity.Stage;
+        entity.Probability = dto.Probability ?? entity.Probability;
+        entity.Amount = dto.Amount ?? entity.Amount;
+        entity.Currency = dto.Currency ?? entity.Currency;
         entity.ExpectedCloseDate = dto.ExpectedCloseDate;
         entity.AssignedTo = dto.AssignedTo;
         entity.AssignedToUserId = dto.AssignedToUserId;
         entity.Source = dto.Source;
         entity.Notes = dto.Notes;
         entity.UpdatedBy = dto.UpdatedBy;
-    }
-
-    public async Task<bool> UpdateStageAsync(Guid id, string stage, decimal probability)
-    {
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null) return false;
-
-        entity.Stage = stage;
-        entity.Probability = probability;
-        return await _repository.UpdateAsync(entity);
-    }
-
-    public async Task<bool> CloseAsync(Guid id, string reason)
-    {
-        var entity = await _repository.GetByIdAsync(id);
-        if (entity == null) return false;
-
-        entity.Status = "Closed";
-        entity.CloseReason = reason;
-        entity.ClosedDate = DateTime.UtcNow;
-        return await _repository.UpdateAsync(entity);
     }
 }

@@ -31,7 +31,7 @@ public class ReorderRuleMapper : IMapper<ReorderRule, ReorderRuleDto>
     {
         return new ReorderRule
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             ItemId = dto.ItemId,
             WarehouseId = dto.WarehouseId,
             MinStockLevel = dto.MinStockLevel,

@@ -13,6 +13,8 @@ public interface ILeadService
     Task<IEnumerable<LeadDto>> GetBySourceAsync(string source);
     Task<IEnumerable<LeadDto>> GetByAssignedToAsync(Guid assignedTo);
     Task<IEnumerable<LeadDto>> SearchAsync(string searchTerm);
-    Task<Guid> ConvertToOpportunityAsync(Guid leadId);
-    Task<Guid> ConvertToCustomerAsync(Guid leadId);
+    Task<bool> QualifyAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> MarkLostAsync(Guid id, Guid tenantId, Guid userId);
+    Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid tenantId, Guid userId);
+    Task<Guid> ConvertToCustomerAsync(Guid leadId, Guid tenantId, Guid userId);
 }

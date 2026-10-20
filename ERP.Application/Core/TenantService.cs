@@ -60,7 +60,8 @@ public class TenantService : ITenantService
             Industry = dto.Industry ?? string.Empty,
             Country = dto.Country ?? string.Empty,
             Status = dto.Status,
-            DatabaseName = dto.DatabaseName ?? $"ERP_{dto.Domain}",
+            // DB identity is assigned by the host — never taken from the client request.
+            DatabaseName = $"ERP_{dto.Domain}",
             ConnectionString = $"Server=localhost;Database=ERP_{dto.Domain};Trusted_Connection=true;TrustServerCertificate=true;",
             IsActive = dto.IsActive,
             CreatedAt = DateTime.UtcNow,
@@ -124,8 +125,6 @@ public class TenantService : ITenantService
             Country = tenant.Country,
             Status = tenant.Status,
             DatabaseName = tenant.DatabaseName,
-            // Never expose connection strings on public/API DTOs
-            ConnectionString = string.Empty,
             IsActive = tenant.IsActive,
             CreatedAt = tenant.CreatedAt,
             UpdatedAt = tenant.UpdatedAt,

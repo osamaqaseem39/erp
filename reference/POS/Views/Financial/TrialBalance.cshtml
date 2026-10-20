@@ -1,0 +1,163 @@
+﻿<style>
+    .set-img {
+        font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    }
+
+    .table tr td {
+        border: 0 !important;
+    }
+
+    .custome-class-form h4 {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .custome-class-form label {
+        font-weight: bold !important;
+        color: #000;
+    }
+
+    .table tr .V__align {
+        vertical-align: bottom !important;
+    }
+
+    imgs {
+        opacity: 0.5;
+        filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
+    .dropwidth {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #03386C !important;
+        }
+</style>
+@model POS.Models.clsFinancialReports
+@{
+    Layout = null;
+}
+<div class="widget-body no-padding" style="overflow-x:hidden;">
+    @using (Html.BeginForm("printtrialbalancereport", "financial", FormMethod.Post, new { id = "trialBalanceForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+
+        <fieldset id="myField1">
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Account</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.DetailCode, ViewBag.Customers as SelectList, new { @id = "DetailCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <section class="col-md-12">
+                <div style="padding:3px;">
+                    <label>Until Date</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-calendar"></i>
+                        <input type="date" id="ToDate" name="ToDate" required />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Second Level Account</label>
+                    <div id="SecondLevelAccountDiv">
+                        @Html.DropDownListFor(m => m.SecondLevelAccountCode, ViewBag.SecondLevel as SelectList, new { @id = "SecondLevelAccountCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Third Level Account</label>
+                    <div id="ThirdLevelAccountDiv">
+                        @Html.DropDownListFor(m => m.ThirdLevelAccountCode, ViewBag.ThirdLevel as SelectList, new { @id = "ThirdLevelAccountCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </div>
+            </section>
+            <div class="row">
+                <section class="col col-md-12">
+                    <div style="padding:3px;">
+                        <label>Select City</label>
+                        <label class="select">
+                            <i class="append fa fa-caret-down"></i>
+                            @Html.DropDownListFor(model => model.CityId, ViewBag.City as SelectList, new { @style = "width:100%", @multiple = "multiple" })
+                        </label>
+                    </div>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col-md-12">
+                    <div style="padding:3px;">
+                        <label>Salesman</label>
+                        <div id="SalesmanIDDiv">
+                            @Html.DropDownListFor(m => m.SalesmanID, ViewBag.Salesman as SelectList, new { @id = "SalesmanID", @style = "width:100%" })
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </fieldset>
+        <footer>
+            <button formtarget="_blank" type="submit" class="btn btn-labeled btn-primary pull-right">
+                GENERATE REPORT
+            </button>
+        </footer>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#DetailCode').select2();
+        $('#CityId').select2();
+        $('#ThirdLevelAccountCode').select2();
+        $('#SecondLevelAccountCode').select2();
+
+        $('#SalesmanID').select2();
+        $('#SalesmanID').val(null).trigger('change');
+
+        $('#ThirdLevelAccountCode').val(null).trigger('change');
+        $('#SecondLevelAccountCode').val(null).trigger('change');
+        GetTodayBetweenDate();
+    });
+    //$('#DetailCode').change(function () {
+    //    $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('border-color', '#CCCCCC');
+    //    $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('color', 'black');
+    //})
+    function GetTodayBetweenDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm + '-' + dd;
+        $('#ToDate').val(today);
+    }
+    $('#trialBalanceForm').on('submit', function (e) {
+        var detailCode = $('#DetailCode').val();
+        var secondLevel = $('#SecondLevelAccountCode').val();
+        var thirdLevel = $('#ThirdLevelAccountCode').val();
+        if (detailCode != null) {
+            if (secondLevel != null || thirdLevel != null) {
+                alert("Please select only one filter.");
+                return false;
+            }
+        }
+        else {
+            if (thirdLevel != null && secondLevel != null) {
+                alert("Please select only one filter.");
+                return false;
+            }
+        }
+    })
+</script>

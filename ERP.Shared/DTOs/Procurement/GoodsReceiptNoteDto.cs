@@ -30,26 +30,36 @@ public class GoodsReceiptNoteDto : BaseDto
 
 public class CreateGoodsReceiptNoteDto : CreateDto
 {
+    public Guid? CompanyId { get; set; }
     public string? GRNNumber { get; set; }
     public Guid VendorId { get; set; }
     public Guid? PurchaseOrderId { get; set; }
+    public Guid? POId { get; set; }
+    public Guid? WarehouseId { get; set; }
     public DateTime? ReceiptDate { get; set; }
     public string? Status { get; set; } = "Draft";
     public string? Notes { get; set; }
+    public string? Remarks { get; set; }
     public string? ReceivedBy { get; set; }
     public string? InspectedBy { get; set; }
+    public List<CreateGoodsReceiptNoteDetailDto> Details { get; set; } = new();
 }
 
 public class UpdateGoodsReceiptNoteDto : UpdateDto
 {
+    public Guid? CompanyId { get; set; }
     public string? GRNNumber { get; set; }
     public Guid? VendorId { get; set; }
     public Guid? PurchaseOrderId { get; set; }
+    public Guid? POId { get; set; }
+    public Guid? WarehouseId { get; set; }
     public DateTime? ReceiptDate { get; set; }
     public string? Status { get; set; }
     public string? Notes { get; set; }
+    public string? Remarks { get; set; }
     public string? ReceivedBy { get; set; }
     public string? InspectedBy { get; set; }
+    public List<CreateGoodsReceiptNoteDetailDto> Details { get; set; } = new();
 }
 
 public class GoodsReceiptNoteDetailDto
@@ -84,6 +94,8 @@ public class CreateGoodsReceiptNoteDetailDto
     public decimal? ReceivedQuantity { get; set; }
     public decimal? AcceptedQuantity { get; set; }
     public decimal? RejectedQuantity { get; set; }
+    public decimal UnitPrice { get; set; }
+    public decimal TaxAmount { get; set; }
     public string? RejectionReason { get; set; }
     public string? Notes { get; set; }
 }

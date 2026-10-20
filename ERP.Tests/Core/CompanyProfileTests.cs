@@ -48,6 +48,24 @@ public class CompanyProfileTests
         Assert.Equal(("PKR", "Asia/Karachi"), (row.Currency, row.TimeZone));
     }
 
+    [Fact]
+    public async Task UpdatePersistsContactPersonAndMobilePhone()
+    {
+        await _service.UpdateAsync(_company.Id, Tenant, Valid() with
+        {
+            ContactPerson = "Aslam Khan",
+            MobilePhone = "+92-300-1234567",
+            Phone = "+92-21-1111111",
+            LogoUrl = "https://cdn.example.com/logo.png",
+        });
+
+        var profile = await _service.GetAsync(_company.Id, Tenant);
+        Assert.Equal("Aslam Khan", profile.ContactPerson);
+        Assert.Equal("+92-300-1234567", profile.MobilePhone);
+        Assert.Equal("+92-21-1111111", profile.Phone);
+        Assert.Equal("https://cdn.example.com/logo.png", profile.LogoUrl);
+    }
+
     [Theory]
     [InlineData("", "USD", "UTC")]
     [InlineData("Acme", "XYZ", "UTC")]
@@ -85,12 +103,25 @@ public class CompanyProfileTests
         public string? TaxId { get; init; }
         public string? AddressLine1 { get; init; }
         public string? PostalCode { get; init; }
+        public string? Phone { get; init; }
+        public string? MobilePhone { get; init; }
+        public string? ContactPerson { get; init; }
+        public string? LogoUrl { get; init; }
         public string Currency { get; init; } = "USD";
         public string TimeZone { get; init; } = "UTC";
 
         public static implicit operator UpdateCompanyProfileDto(UpdateRequest r) => new()
         {
-            CompanyName = r.CompanyName, TaxId = r.TaxId, AddressLine1 = r.AddressLine1, PostalCode = r.PostalCode, Currency = r.Currency, TimeZone = r.TimeZone,
+            CompanyName = r.CompanyName,
+            TaxId = r.TaxId,
+            AddressLine1 = r.AddressLine1,
+            PostalCode = r.PostalCode,
+            Phone = r.Phone,
+            MobilePhone = r.MobilePhone,
+            ContactPerson = r.ContactPerson,
+            LogoUrl = r.LogoUrl,
+            Currency = r.Currency,
+            TimeZone = r.TimeZone,
         };
     }
 

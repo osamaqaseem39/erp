@@ -1,3 +1,4 @@
+using ERP.Api.OpenApi;
 using ERP.Api.Security;
 using ERP.Application.SCM.Interfaces;
 using ERP.Shared.DTOs.Inventory;
@@ -9,6 +10,10 @@ namespace ERP.Api.Controllers.Inventory;
 [ApiController]
 [Route("api/inventory/items")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class ItemController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IItemService _itemService;
@@ -19,6 +24,7 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ItemDto), OpenApiResponseTypes.Ok)]
     public async Task<ActionResult<ItemDto>> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -31,6 +37,7 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ItemDto>), OpenApiResponseTypes.Ok)]
     public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll([FromQuery] Guid companyId, [FromQuery] Guid? categoryId = null)
     {
         var tenantId = GetTenantId();
@@ -45,6 +52,7 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("low-stock")]
+    [ProducesResponseType(typeof(IEnumerable<ItemDto>), OpenApiResponseTypes.Ok)]
     public async Task<ActionResult<IEnumerable<ItemDto>>> GetLowStockItems([FromQuery] Guid companyId)
     {
         var tenantId = GetTenantId();
@@ -53,6 +61,7 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(ItemDto), OpenApiResponseTypes.Created)]
     public async Task<ActionResult<ItemDto>> Create([FromBody] CreateItemDto dto)
     {
         var tenantId = GetTenantId();
@@ -62,6 +71,7 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ItemDto), OpenApiResponseTypes.Ok)]
     public async Task<ActionResult<ItemDto>> Update(Guid id, [FromBody] UpdateItemDto dto)
     {
         if (id != dto.Id)
@@ -74,6 +84,7 @@ public class ItemController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<ActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

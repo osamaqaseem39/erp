@@ -23,7 +23,7 @@ public static class ItemAttributeMapper
     {
         return new ItemAttribute
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             AttributeName = dto.AttributeName,
             AttributeType = dto.AttributeType,
             IsRequired = dto.IsRequired,

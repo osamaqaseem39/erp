@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using ERP.Shared.Exceptions;
 
@@ -37,4 +38,11 @@ public static class CurrentUser
     }
 
     public static bool IsSuperAdmin(this ClaimsPrincipal user) => SuperAdminRoles.Any(user.IsInRole);
+
+    /// <summary>Sign-in session id from JWT <c>sid</c>, if present.</summary>
+    public static Guid? TryGetSessionId(this ClaimsPrincipal user)
+    {
+        var raw = user.FindFirstValue(JwtRegisteredClaimNames.Sid) ?? user.FindFirstValue("sid");
+        return Guid.TryParse(raw, out var id) && id != Guid.Empty ? id : null;
+    }
 }

@@ -17,7 +17,6 @@ public class BankAccountRepository : IBankAccountRepository
     {
         return await _context.BankAccounts
             .Include(ba => ba.Bank)
-            .Include(ba => ba.GLAccount)
             .FirstOrDefaultAsync(ba => ba.Id == id);
     }
 
@@ -25,7 +24,6 @@ public class BankAccountRepository : IBankAccountRepository
     {
         return await _context.BankAccounts
             .Include(ba => ba.Bank)
-            .Include(ba => ba.GLAccount)
             .ToListAsync();
     }
 
@@ -33,7 +31,6 @@ public class BankAccountRepository : IBankAccountRepository
     {
         return await _context.BankAccounts
             .Include(ba => ba.Bank)
-            .Include(ba => ba.GLAccount)
             .Where(ba => ba.BankId == bankId)
             .ToListAsync();
     }
@@ -42,7 +39,6 @@ public class BankAccountRepository : IBankAccountRepository
     {
         return await _context.BankAccounts
             .Include(ba => ba.Bank)
-            .Include(ba => ba.GLAccount)
             .Where(ba => ba.IsActive)
             .ToListAsync();
     }
@@ -51,7 +47,6 @@ public class BankAccountRepository : IBankAccountRepository
     {
         return await _context.BankAccounts
             .Include(ba => ba.Bank)
-            .Include(ba => ba.GLAccount)
             .FirstOrDefaultAsync(ba => ba.AccountNumber == accountNumber);
     }
 
@@ -81,13 +76,7 @@ public class BankAccountRepository : IBankAccountRepository
 
     // Additional methods for IBankRepository interface
     public async Task<IEnumerable<BankAccount>> GetBankAccountsAsync(Guid bankId)
-    {
-        return await _context.BankAccounts
-            .Include(ba => ba.Bank)
-            .Include(ba => ba.GLAccount)
-            .Where(ba => ba.BankId == bankId)
-            .ToListAsync();
-    }
+        => await GetByBankAsync(bankId);
 
     public async Task<BankAccount?> GetBankAccountByIdAsync(Guid id)
     {

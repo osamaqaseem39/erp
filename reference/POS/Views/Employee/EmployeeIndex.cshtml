@@ -1,0 +1,1220 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+@model POS.Models.clsEmployee
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="EmployeeListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Employees List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="employeeListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="DocumentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Attach Documents</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="documentsDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="BossModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Employees List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="bossDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Employee </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("insertupdateemployee", "employee", FormMethod.Post, new { id = "employeeForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (User.Save == 1)
+                                        {
+                                            <td style="width: 42%; padding-bottom: 5px; padding-left: 3px;text-align: right;" id="addTd">
+                                                <a title="Add New Employee" id="btnAddEmployee" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/plus2.png" style="width: 45px; height: 45px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveEmployee" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTdd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintEmployee" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="listTd">
+                                                <a title="Employees List" id="btnEmployeeList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#EmployeeListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshEmployee" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 43%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitEmployee" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveEmployee" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTdd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintEmployee" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 41%; padding-bottom: 5px;text-align: right;" id="listTd">
+                                                <a title="Employees List" id="btnEmployeeList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#EmployeeListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshEmployee" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitEmployee" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                    </tr>
+                                </table>
+
+                                <div class="row" style="">
+                                    <div class="col col-3">
+                                        <label>Employee Ref. Id</label>
+                                        <label class="input">
+                                            <input type="hidden" id="EmployeeId" value="0" />
+                                            <i class="icon-prepend fa fa-hashtag"></i>
+                                            <input type="text" name="EmployeeRefId" id="EmployeeRefId" placeholder="Employee Ref. Id" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Full Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" name="FullName" id="FullName" placeholder="Full Name" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <div style="">
+                                            <label>Last Name</label>
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 30%; padding-right: 3px; padding-left: 3px" id="">
+                                                        <label class="select">
+                                                            <i class="append fa fa-caret-down"></i>
+                                                            <select id="LastNameType" name="LastNameType">
+                                                                <option value="s/o">s/o</option>
+                                                                <option value="d/o">d/o</option>
+                                                                <option value="w/o">w/o</option>
+                                                            </select>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 70%; padding-left: 3px; " id="">
+                                                        <label class="input">
+                                                            <input type="text" name="LastName" id="LastName" placeholder="Last Name" autocomplete="off" />
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Date of Birth</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-calendar"></i>
+                                            <input type="date" name="DateOfBirth" id="DateOfBirth" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-3">
+                                        <label>Gender</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="Gender" name="Gender">
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Religion</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.ReligionId, ViewBag.Religion as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Marital Status</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="MaritalStatus" name="MaritalStatus">
+                                                <option value="Single">Single</option>
+                                                <option value="Married">Married</option>
+                                                <option value="Widowed">Widowed</option>
+                                                <option value="Separated">Separated</option>
+                                                <option value="Divorced">Divorced</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Nationality</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.CountryId, ViewBag.Country as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+                                </div>
+
+
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-3">
+                                        <label>City</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="CityId" name="CityId" style="width:100%"></select>
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>CNIC</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-id-card"></i>
+                                            <input type="text" name="CNIC" id="CNIC" placeholder="CNIC" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Contact1</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-phone"></i>
+                                            <input type="text" name="Contact1" id="Contact1" placeholder="Contact1" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Contact2</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-phone"></i>
+                                            <input type="text" name="Contact2" id="Contact2" placeholder="Contact2" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-md-12">
+                                        <label>Present Address</label>
+                                        <label class="input">
+                                            <textarea id="PresentAddress" name="PresentAddress" style="width: 99%; padding: 5px"></textarea>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-md-12 pull-right" style="text-align:right">
+                                        <label class="checkbox pull-right" style="margin-top:2px;">
+                                            <input id="PermanentAddressSame" type="checkbox" name="PermanentAddressSame"><i></i>
+                                            <span style="font-size: 11px">Same Permanent Address</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-md-12">
+                                        <label>Permanent Address</label>
+                                        <label class="input">
+                                            <textarea id="PermanentAddress" name="PermanentAddress" style="width: 99%; padding: 5px"></textarea>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-3">
+                                        <label>Emg Contact No</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-phone"></i>
+                                            <input type="text" name="EmgContactNo" id="EmgContactNo" placeholder="Emg Contact No" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Emg Contact Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" name="EmgContactName" id="EmgContactName" placeholder="Emg Contact Name" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Emg Contact Relation</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.RelationId, ViewBag.Relation as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Additional Note</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" name="AdditionalNote" id="AdditionalNote" placeholder="Additional Note" />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-3">
+                                        <label>Department</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.DepartmentId, ViewBag.Department as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Work Nature</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.WorkNatureId, ViewBag.WorkNature as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Email</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-envelope"></i>
+                                            <input type="text" name="Email" id="Email" placeholder="Email" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Gross Salary</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                            <input type="text" name="GrossSalary" id="GrossSalary" placeholder="Gross Salary" />
+                                        </label>
+                                    </div>
+                                </div>
+
+
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-3">
+                                        <label>Daily Allowance</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-envelope"></i>
+                                            <input type="text" name="DailyAllowance" id="DailyAllowance" placeholder="Daily Allowance" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Time Record</label>
+                                        <label class="select">
+                                            <i class="append fa fa-clock"></i>
+                                            <select id="TimeRecord" name="TimeRecord">
+                                                <option value="Y">Y</option>
+                                                <option value="N">N</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Qualification</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" name="Qualification" id="Qualification" placeholder="Qualification" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <table class="" style="">
+                                            <tr>
+                                                <td style="width: 100%;" id="">
+                                                    <div style="padding: 3px">
+                                                        <label>Immediate Boss</label>
+                                                        <label class="input">
+                                                            <input type="hidden" id="ImmediateBossId" value="0" />
+                                                            <i class="icon-prepend fa fa-user"></i>
+                                                            <input type="text" name="ImmediateBoss" id="ImmediateBoss" placeholder="Immediate Boss" disabled />
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 2%;padding-left: 3px;padding-top:7px " id="">
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-circle btnSelectImmediateBoss" style="margin-top:10px;" title="Show Item Stock Warehouse Base">
+                                                        <i class="glyphicon glyphicon-user" style="margin-top:-10px;margin-left:1px"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:10px;">
+                                    <div class="col col-md-12">
+                                        <label>Select Profile Picture</label>
+                                        <div class="input input-file">
+                                            <span class="button"><input type="file" id="EmployeeProfilePicture" name="EmployeeProfilePicture" onchange="this.parentNode.nextSibling.value = this.value">Browse</span><input type="text" id="AttachDocument" placeholder="Attach Document" readonly="readonly">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="RowsDiv" style="padding: 10px; border: 1px solid #BDBDBD; background-color: #F2F2F2;margin-top:10px">
+                                    <center><h3>Work Experience</h3></center>
+                                    <div class="row LineRow" style="margin-top:10px;">
+                                        <div class="col col-md-3">
+                                            <label>Job Description</label>
+                                            <label class="input">
+                                                <input type="text" name="JobDescription" id="JobDescription" class="JobDescription" placeholder="Job Description" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-md-3">
+                                            <label>Organization</label>
+                                            <label class="input">
+                                                <input type="text" name="Organization" id="Organization" class="Organization" placeholder="Organization" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-md-3">
+                                            <label>From</label>
+                                            <label class="input">
+                                                <input type="date" name="FromDate" id="FromDate" class="FromDate" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-md-3">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 98%;" id="">
+                                                        <label>To</label>
+                                                        <label class="input">
+                                                            <input type="date" name="ToDate" id="ToDate" class="ToDate" />
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 2%;padding-left: 3px;padding-top:7px " id="">
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-circle btnAddWorkExperience" style="margin-top:10px;" title="Add Work Experience">
+                                                            <i class="glyphicon glyphicon-plus" style="margin-top:-10px;margin-left:1px"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row deleteRow" style="margin-top:10px" hidden>
+                                    <section class="col col-md-3"></section>
+                                    <section class="col col-md-9">
+                                        <table class="pull-right footer-nav" style="">
+                                            <tr>
+                                                <td></td>
+                                                <td>
+                                                    <a title="Delete Third Level" id="btnDeleteEmployee" href="javascript:void(0)" class="btn btn-danger" style="width:75px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                                        Delete
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </section>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#employeeForm').validate({
+                ignore: [],
+                // Rules for form validation
+                rules: {
+                    FullName: {
+                        required: true
+                    },
+                },
+
+                // Messages for form validation
+                messages: {
+                    FullName: {
+                        required: 'Full Name is required.'
+                    },
+                },
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+            EnableDisableFields();
+        })
+        $(document).on('click', '.btnAddWorkExperience', function () {
+            if (!$('#FullName').is(':disabled')) {
+                var rowCount = $('.LineRow').length + 1;
+                var div = '<div class="row LineRow NewRow" style="margin-top:10px;">' +
+                                            '<div class="col col-md-3">' +
+                                                '<label>Job Description</label>' +
+                                                '<label class="input">' +
+                                                    '<input type="text" name="JobDescription" id="JobDescription' + rowCount + '" class="JobDescription" placeholder="Job Description" />' +
+                                                '</label>' +
+                                            '</div>' +
+                                            '<div class="col col-md-3">' +
+                                                '<label>Organization</label>' +
+                                                '<label class="input">' +
+                                                    '<input type="text" name="Organization" id="Organization' + rowCount + '" class="Organization" placeholder="Organization" />' +
+                                                '</label>' +
+                                            '</div>' +
+                                            '<div class="col col-md-3">' +
+                                                '<label>From</label>' +
+                                                '<label class="input">' +
+                                                    '<input type="date" name="FromDate" id="FromDate' + rowCount + '" class="FromDate" />' +
+                                                '</label>' +
+                                            '</div>' +
+                                            '<div class="col col-md-3">' +
+                                                '<table class="" style="">' +
+                                                    '<tr>' +
+                                                        '<td style="width: 98%;" id="">' +
+                                                                '<label>To</label>' +
+                                                                '<label class="input">' +
+                                                                    '<input type="date" name="ToDate" id="ToDate' + rowCount + '" class="ToDate" />' +
+                                                                '</label>' +
+                                                        '</td>' +
+                                                        '<td style="width: 2%;padding-left: 3px;padding-top:7px " id="">' +
+                                                            '<a href="javascript:void(0);" class="btn btn-danger btn-circle btnDeleteWorkExperience" style="margin-top:10px;" title="Delete this Work Experience">' +
+                                                                '<i class="fa fa-times"  style="margin-top:-10px;margin-left:1px"></i>' +
+                                                            '</a>' +
+                                                        '</td>' +
+                                                    '</tr>' +
+                                                '</table>' +
+                                            '</div>' +
+                                        '</div>';
+                $('#RowsDiv').append(div);
+                GetTodayDateForLineEntry(rowCount);
+            }
+        })
+        $(document).on("click", ".btnDeleteWorkExperience", function () {
+            $(this).closest(".NewRow").remove();
+        });
+        function GetTodayDateForLineEntry(counter) {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+            if (parseFloat(dd) < 10) {
+                dd = "0" + dd;
+            }
+            if (parseFloat(mm) < 10) {
+                mm = "0" + mm;
+            }
+            var yyyy = today.getFullYear();
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#FromDate' + counter).val(today);
+            $('#ToDate' + counter).val(today);
+        }
+        function EnableDisableFields() {
+            $('.NewRow').remove();
+            $('#EmployeeRefId').prop("disabled", false);
+            $('#FullName').prop("disabled", false);
+            $('#LastNameType').prop("disabled", false);
+            $('#LastName').prop("disabled", false);
+            $('#DateOfBirth').prop("disabled", false);
+            $('#Gender').prop("disabled", false);
+            $('#ReligionId').prop("disabled", false);
+            $('#MaritalStatus').prop("disabled", false);
+            $('#CountryId').prop("disabled", false);
+            $('#EmployeeProfilePicture').prop("disabled", false);
+            $('#CityId').prop("disabled", false);
+            $('#CNIC').prop("disabled", false);
+            $('#Contact1').prop("disabled", false);
+            $('#Contact2').prop("disabled", false);
+            $('#PresentAddress').prop("disabled", false);
+            $('#PermanentAddressSame').prop("disabled", false);
+            $('#PermanentAddress').prop("disabled", false);
+            $('#EmgContactNo').prop("disabled", false);
+            $('#EmgContactName').prop("disabled", false);
+            $('#RelationId').prop("disabled", false);
+            $('#AdditionalNote').prop("disabled", false);
+            $('#DepartmentId').prop("disabled", false);
+            $('#WorkNatureId').prop("disabled", false);
+            $('#Email').prop("disabled", false);
+            $('#GrossSalary').prop("disabled", false);
+            $('#DailyAllowance').prop("disabled", false);
+            $('#TimeRecord').prop("disabled", false);
+            $('#Qualification').prop("disabled", false);
+            $('#JobDescription').prop("disabled", false);
+            $('#Organization').prop("disabled", false);
+            $('#FromDate').prop("disabled", false);
+            $('#ToDate').prop("disabled", false);
+            GetTodayDate();
+            $('#documentTd').attr("hidden", "hidden");
+            $('#EmployeeId').val(0);
+            $('#EmployeeProfilePicture').val('');
+            $('#AttachDocument').val('');
+            $('#EmployeeRefId').val('');
+            $('#FullName').val('');
+            $('#LastNameType').val('');
+            $('#LastName').val('');
+            $('#Gender').val('');
+            $('#ReligionId').val('');
+            $('#MaritalStatus').val('');
+            $('#CountryId').val('');
+            $('#CityId').val('');
+            $('#CNIC').val('');
+            $('#Contact1').val('');
+            $('#Contact2').val('');
+            $('#PresentAddress').val('');
+            $('#PermanentAddressSame').prop('checked', false);
+            $('#PermanentAddress').val('');
+            $('#EmgContactNo').val('');
+            $('#EmgContactName').val('');
+            $('#RelationId').val('');
+            $('#AdditionalNote').val('');
+            $('#DepartmentId').val('');
+            $('#WorkNatureId').val('');
+            $('#Email').val('');
+            $('#GrossSalary').val('');
+            $('#DailyAllowance').val('');
+            $('#TimeRecord').val('');
+            $('#Qualification').val('');
+            $('#ImmediateBossId').val(0);
+            $('#ImmediateBoss').val('');
+            $('#JobDescription').val('');
+            $('#Organization').val('');
+            $('#btnSaveEmployee').prop('disabled', false);
+            $('#btnSaveAndPrintEmployee').prop('disabled', false);
+            $('#saveTd').removeAttr("hidden");
+            $('#saveAndPrintTd').removeAttr("hidden");
+            $('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '44%', 'text-align': 'right' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'right' });
+            $('.deleteRow').attr("hidden", "hidden");
+        }
+        $('#btnAddEmployee').click(function () {
+            EnableDisableFields();
+        })
+        function ClearFormFields() {
+            $('.NewRow').remove();
+            $('#EmployeeRefId').prop("disabled", true);
+            $('#FullName').prop("disabled", true);
+            $('#LastNameType').prop("disabled", true);
+            $('#LastName').prop("disabled", true);
+            $('#DateOfBirth').prop("disabled", true);
+            $('#Gender').prop("disabled", true);
+            $('#ReligionId').prop("disabled", true);
+            $('#MaritalStatus').prop("disabled", true);
+            $('#CountryId').prop("disabled", true);
+            $('#CityId').prop("disabled", true);
+            $('#CNIC').prop("disabled", true);
+            $('#Contact1').prop("disabled", true);
+            $('#Contact2').prop("disabled", true);
+            $('#EmployeeProfilePicture').prop("disabled", true);
+            $('#PresentAddress').prop("disabled", true);
+            $('#PermanentAddressSame').prop("disabled", true);
+            $('#PermanentAddress').prop("disabled", true);
+            $('#EmgContactNo').prop("disabled", true);
+            $('#EmgContactName').prop("disabled", true);
+            $('#RelationId').prop("disabled", true);
+            $('#AdditionalNote').prop("disabled", true);
+            $('#DepartmentId').prop("disabled", true);
+            $('#WorkNatureId').prop("disabled", true);
+            $('#Email').prop("disabled", true);
+            $('#GrossSalary').prop("disabled", true);
+            $('#DailyAllowance').prop("disabled", true);
+            $('#TimeRecord').prop("disabled", true);
+            $('#Qualification').prop("disabled", true);
+            $('#JobDescription').prop("disabled", true);
+            $('#Organization').prop("disabled", true);
+            $('#FromDate').prop("disabled", true);
+            $('#ToDate').prop("disabled", true);
+            GetTodayDate();
+            $('#documentTd').attr("hidden", "hidden");
+            $('#EmployeeId').val(0);
+            $('#EmployeeProfilePicture').val('');
+            $('#AttachDocument').val('');
+            $('#EmployeeRefId').val('');
+            $('#FullName').val('');
+            $('#LastNameType').val('');
+            $('#LastName').val('');
+            $('#Gender').val('');
+            $('#ReligionId').val('');
+            $('#MaritalStatus').val('');
+            $('#CountryId').val('');
+            $('#CityId').val('');
+            $('#CNIC').val('');
+            $('#Contact1').val('');
+            $('#Contact2').val('');
+            $('#PresentAddress').val('');
+            $('#PermanentAddressSame').prop('checked', false);
+            $('#PermanentAddress').val('');
+            $('#EmgContactNo').val('');
+            $('#EmgContactName').val('');
+            $('#RelationId').val('');
+            $('#AdditionalNote').val('');
+            $('#DepartmentId').val('');
+            $('#WorkNatureId').val('');
+            $('#Email').val('');
+            $('#GrossSalary').val('');
+            $('#DailyAllowance').val('');
+            $('#TimeRecord').val('');
+            $('#Qualification').val('');
+            $('#ImmediateBossId').val(0);
+            $('#ImmediateBoss').val('');
+            $('#JobDescription').val('');
+            $('#Organization').val('');
+            $('#btnSaveEmployee').prop('disabled', true);
+            $('#btnSaveAndPrintEmployee').prop('disabled', true);
+            $('#addTd').removeAttr("hidden");
+            $('#saveTd').attr("hidden", "hidden");
+            $('#saveAndPrintTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            if ($('#CanSave').val() == 0) {
+                $('#listTd').css({ 'width': '44%', 'text-align': 'right' });
+                $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+                $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            }
+        }
+        $('#CountryId').change(function () {
+            var countryId = $(this).val();
+            getCities(countryId, 0);
+        })
+        function getCities(countryId, cityId) {
+            $.ajax({
+                type: "POST",
+                url: "/employee/getCities/" + countryId,
+                dataType: "json",
+                success: function (response) {
+                    var select = $("#CityId");
+                    select.children().remove();
+                    $('#CityId').append('<option  value="0" disabled selected style="display:none;">Select City</option>');
+                    $('#CityId').css('color', 'gray');
+                    if ($('#EmployeeId').val() > 0) {
+                        for (var key in response.data) {
+                            if (cityId == response.data[key].CityId) {
+                                select.append('<option value="' + response.data[key].CityId + '" selected>' + response.data[key].CityName + '</option>');
+                            }
+                            else {
+                                select.append('<option value="' + response.data[key].CityId + '">' + response.data[key].CityName + '</option>');
+                            }
+                        }
+                    }
+                    else {
+                        for (var key in response.data) {
+                            select.append('<option value="' + response.data[key].CityId + '">' + response.data[key].CityName + '</option>');
+                        }
+                    }
+                }
+            });
+        }
+        $('#EmployeeProfilePicture').change(function (e) {
+            var ext = $('#EmployeeProfilePicture').val().split('.').pop().toLowerCase();
+            var size = document.getElementById('EmployeeProfilePicture').files[0].size;
+            var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
+            if ($.inArray(ext, ['jpeg', 'jpg', 'png']) == -1) {
+                alert('Error! File type allowed : jpeg, jpg, png');
+                $('#EmployeeProfilePicture').val('');
+                $('#AttachDocument').val('');
+            }
+            else if (size > (5000 * 1024)) {
+                alert('Error! Maximum File size must be 5 mb');
+                $('#EmployeeProfilePicture').val('');
+                $('#AttachStaffDocument').val('');
+            }
+            else {
+
+                //Get count of selected files
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                $('#AttachDocument').val(filename);
+                //if (typeof (FileReader) != "undefined") {
+                //    for (var i = 0; i < countFiles; i++) {
+
+                //        var reader = new FileReader();
+                //        reader.onload = function (e) {
+                //            $("#StaffDocumentImage").prop("height", "150");
+                //            $("#StaffDocumentImage").prop("width", "150");
+                //            $("#StaffDocumentImage").prop("src", e.target.result);
+                //        }
+                //        //image_holder.show();
+                //        reader.readAsDataURL($(this)[0].files[i]);
+                //    }
+                //}
+                //else {
+                //    alert("This browser does not support FileReader.");
+                //}
+            }
+        });
+        $('#PermanentAddressSame').change(function () {
+            if ($(this).is(":checked")) {
+                var presentAddress = $('#PresentAddress').val();
+                $('#PermanentAddress').val(presentAddress);
+            }
+            else {
+                $('#PermanentAddress').val("");
+            }
+        })
+        $('#btnRefreshEmployee').click(function () {
+            location.reload();
+        })
+        $('#btnEmployeeList').click(function () {
+            $('#employeeListDiv').load('@Url.Action("employeeslist", "employee")')
+        })
+        $('#btnAttachDocument').click(function () {
+            var employeeInfoId = $('#EmployeeId').val();
+            $('#documentsDiv').load('@Url.Action("attachdocument", "documents")?type=Employee&id=' + employeeInfoId + '');
+        })
+        $('.btnSelectImmediateBoss').click(function () {
+            var employeeId = $('#EmployeeId').val();
+            if (!$('#FullName').is(':disabled')) {
+                $(this).attr("data-toggle", "modal");
+                $(this).attr("data-target", "#BossModal");
+                $('#bossDiv').load('@Url.Action("selectboss", "employee")?id=' + employeeId)
+            }
+            else {
+                $(this).attr("data-toggle", "");
+                $(this).attr("data-target", "");
+            }
+        })
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        //EmployeeId EmployeeRefId FullName LastNameType LastName DateOfBirth
+        //Gender ReligionId MaritalStatus CountryId CityId CNIC Contact1 Contact2
+        //    PresentAddress PermanentAddressSame PermanentAddress EmgContactNo EmgContactName
+        //        RelationId AdditionalNote DepartmentId WorkNatureId Email GrossSalary
+        //            DailyAllowance TimeRecord Qualification ImmediateBossId ImmediateBoss
+        //JobDescription Organization FromDate ToDate
+        function getAllData() {
+            var data = [];
+            $('.LineRow').each(function () {
+                var employeeId = $('#EmployeeId').val();
+                var employeeRefId = $('#EmployeeRefId').val();
+                var fullName = $('#FullName').val();
+                var lastNameType = $('#LastNameType').val();
+                var lastName = $('#LastName').val();
+                var dateOfBirth = $('#DateOfBirth').val();
+                var gender = $('#Gender').val();
+                var religionId = $('#ReligionId').val();
+                var maritalStatus = $('#MaritalStatus').val();
+                var countryId = $('#CountryId').val();
+                var cityId = $('#CityId').val();
+                var cnic = $('#CNIC').val();
+                var contact1 = $('#Contact1').val();
+                var contact2 = $('#Contact2').val();
+                var presentAddress = $('#PresentAddress').val();
+                var permanentSameAddress = $('#PermanentAddressSame').is(":checked");
+                var permenantAddressString = 'N';
+                if (permanentSameAddress == true) {
+                    permenantAddressString = 'Y'
+                }
+                var permanentAddress = $('#PermanentAddress').val();
+                var emgContactNo = $('#EmgContactNo').val();
+                var emgContactName = $('#EmgContactName').val();
+                var relationId = $('#RelationId').val();
+                var additionalNote = $('#AdditionalNote').val();
+                var departmentId = $('#DepartmentId').val();
+                var workNatureId = $('#WorkNatureId').val();
+                var email = $('#Email').val();
+                var grossSalary = $('#GrossSalary').val();
+                var dailyAllowance = $('#DailyAllowance').val();
+                var timeRecord = $('#TimeRecord').val();
+                var qualification = $('#Qualification').val();
+                var immediateBossId = $('#ImmediateBossId').val();
+                var jobDescription = $(this).find('.JobDescription').val();
+                var organization = $(this).find('.Organization').val();
+                var fromDate = $(this).find('.FromDate').val();
+                var toDate = $(this).find('.ToDate').val();
+                var alldata = {
+                    'EmployeeId': employeeId,
+                    'EmployeeRefId': employeeRefId,
+                    'FullName': fullName,
+                    'LastNameType': lastNameType,
+                    'LastName': lastName,
+                    'DateOfBirth': dateOfBirth,
+                    'Gender': gender,
+                    'ReligionId': religionId,
+                    'MaritalStatus': maritalStatus,
+                    'CountryId': countryId,
+                    'CityId': cityId,
+                    'CNIC': cnic,
+                    'Email': email,
+                    'PresentAddress': presentAddress,
+                    'PermanentAddressSame': permenantAddressString,
+                    'PermanentAddress': permanentAddress,
+                    'ContactNo1': contact1,
+                    'ContactNo2': contact2,
+                    'EmgContactNo': emgContactNo,
+                    'EmgContactName': emgContactName,
+                    'RelationId': relationId,
+                    'AdditionalNote': additionalNote,
+                    'DepartmentId': departmentId,
+                    'WorkNatureId': workNatureId,
+                    'ImmediateBossId': immediateBossId,
+                    'GrossSalary': grossSalary,
+                    'DailyAllowance': dailyAllowance,
+                    'TimeRecord': timeRecord,
+                    'Qualification': qualification,
+                    'JobDescription': jobDescription,
+                    'Organization': organization,
+                    'FromDate': fromDate,
+                    'ToDate': toDate,
+                }
+                data.push(alldata);
+            });
+            console.log(data);
+            return data;
+        }
+        $('#employeeForm').on('submit', function (e) {
+            if (!$("#employeeForm").valid()) {
+                return false;
+            }
+            var val = $(this).find("button:focus").attr("title");
+            var print = 0;
+            if (val.trim() == "Save") {
+                print = 0;
+            }
+            else {
+                print = 1;
+            }
+            $('#btnSaveEmployee').prop('disabled', true);
+            $('#btnSaveAndPrintEmployee').prop('disabled', true);
+            var myFormData = JSON.stringify(getAllData());
+            var url = $('#employeeForm')[0].action;
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'data': myFormData }),
+                success: function (data) {
+                    if (data.status == true) {
+                        var extension = $('#EmployeeProfilePicture').val().split('.').pop().toLowerCase();
+                        if (extension != '') {
+                            var typeId = data.employeeId;
+                            var documentType = "Employee";
+                            var documentId = 0;
+                            var date = $("#DateOfBirth").val();
+                            var remarks = "Profile Image";
+                            var extension = $('#EmployeeProfilePicture').val().split('.').pop().toLowerCase();
+                            var document = {
+                                DocumentId: documentId,
+                                DocumentType: documentType,
+                                TypeId: typeId,
+                                Date: date,
+                                Remarks: remarks,
+                                DocumentExtension: extension,
+                            }
+                            $.ajax({
+                                type: "POST",
+                                url: '/documents/AttachDocumentsForPost/',
+                                dataType: 'json',
+                                contentType: 'application/json; charset=utf-8',
+                                data: JSON.stringify({ 'doc': document }),
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        var bannerImage = $("#EmployeeProfilePicture").val();
+                                        var file = $('#EmployeeProfilePicture').get(0).files;
+                                        var documentFile = file[0];
+                                        var extension = $('#EmployeeProfilePicture').val().split('.').pop().toLowerCase();
+                                        var documentIdWithDocumentTypeWithExtension = data.documentId + "_" + data.documentType + "_" + data.typeId + "_" + extension;
+                                        var formData = new FormData();
+                                        formData.append(file.name, documentFile);
+                                        formData.append("DocumentName", $("#EmployeeProfilePicture").text());
+
+                                        var xhr = new XMLHttpRequest();
+                                        var url = '/documents/UploadDocument/' + documentIdWithDocumentTypeWithExtension;
+                                        xhr.open('POST', url, true);
+
+                                        xhr.onload = function (e) {
+                                            var response = $.parseJSON(e.target.response);
+                                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                    ' <strong>Success! </strong>' +
+                                                    'Employee Saved Succesfully.' +
+                                                '</div>');
+                                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                                $("#success-alert").slideUp(500);
+                                                $('.alertDiv').html('');
+                                            });
+                                            EnableDisableFields();
+                                        };
+                                        xhr.send(formData);  // multipart/form-data
+                                    }
+                                    else {
+                                        alert("Error! Please try again.");
+                                    }
+                                }
+                            })
+                        }
+                        else {
+                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                    ' <strong>Success! </strong>' +
+                                                    'Employee Saved Succesfully.' +
+                                                '</div>');
+                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert").slideUp(500);
+                                $('.alertDiv').html('');
+                            });
+                            EnableDisableFields();
+                        }
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSaveEmployee').prop('disabled', false);
+                        $('#btnSaveAndPrintEmployee').prop('disabled', false);
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        $('#btnDeleteEmployee').click(function () {
+            var employeeInfoId = $('#EmployeeId').val();
+            DeleteEmployee(employeeInfoId);
+        })
+        function DeleteEmployee(id) {
+            var a = $.confirm({
+                title: 'Delete Employee',
+                content: 'Are you sure u want to delete this employee?',
+                type: 'white',
+                buttons: {
+                    ok: {
+                        text: "Yes",
+                        btnClass: 'btnConfirm',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: '/employee/deleteemployee/' + id,
+                                type: "POST",
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        location.reload();
+                                    }
+                                    else {
+                                        alert(data.message);
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-default',
+                        keys: ['esc'],
+                        action: function () {
+                            a.close();
+                        }
+                    },
+                }
+            });
+        }
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#DateOfBirth').val(today);
+            $('#FromDate').val(today);
+            $('#ToDate').val(today);
+        }
+        // Contact2 EmgContactNo CNIC GrossSalary DailyAllowance
+        $("#Contact1").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        $("#Contact2").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        $("#EmgContactNo").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        $("#CNIC").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        $("#GrossSalary").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        $("#DailyAllowance").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        function NumberPostive(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 8) && (charCode != 127) && (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+    </script>
+}

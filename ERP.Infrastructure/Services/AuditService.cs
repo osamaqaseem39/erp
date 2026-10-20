@@ -1,38 +1,46 @@
+using System.Security.Claims;
 using ERP.Domain.Core;
 using ERP.Infrastructure.Database;
-using ERP.Infrastructure.Interfaces;
 using ERP.Shared.DTOs.Core;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Infrastructure.Services;
 
+/// <summary>
+/// Explicit audit logging and reads via EF (same AuditLogs store as AuditSaveChangesInterceptor).
+/// </summary>
 public class AuditService : IAuditService
 {
-    private readonly IStoredProcedureExecutor _executor;
+    private readonly ERPDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuditService(IStoredProcedureExecutor executor, IHttpContextAccessor httpContextAccessor)
+    public AuditService(ERPDbContext db, IHttpContextAccessor httpContextAccessor)
     {
-        _executor = executor;
+        _db = db;
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task LogAsync(string action, string entityName, string entityId, string? oldValues = null, string? newValues = null, string? ipAddress = null, string? userAgent = null)
+    public async Task LogAsync(
+        string action,
+        string entityName,
+        string entityId,
+        string? oldValues = null,
+        string? newValues = null,
+        string? ipAddress = null,
+        string? userAgent = null)
     {
         var context = _httpContextAccessor.HttpContext;
         if (context == null) return;
 
         var tenantId = GetTenantId(context);
         var userId = GetUserId(context);
-        
         if (tenantId == null || userId == null) return;
 
         ipAddress ??= GetClientIpAddress(context);
         userAgent ??= context.Request.Headers["User-Agent"].ToString();
 
-        var auditLog = new AuditLog
+        _db.AuditLogs.Add(new AuditLog
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId.Value,
@@ -47,64 +55,73 @@ public class AuditService : IAuditService
             Timestamp = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = GetUserEmail(context) ?? "System"
-        };
-
-        await _executor.ExecuteScalarAsync<Guid>("addAuditLog", new
-        {
-            Id = auditLog.Id,
-            TenantId = auditLog.TenantId,
-            UserId = auditLog.UserId,
-            Action = auditLog.Action,
-            EntityName = auditLog.EntityName,
-            EntityId = auditLog.EntityId,
-            OldValues = auditLog.OldValues,
-            NewValues = auditLog.NewValues,
-            IpAddress = auditLog.IpAddress,
-            UserAgent = auditLog.UserAgent,
-            Timestamp = auditLog.Timestamp,
-            CreatedAt = auditLog.CreatedAt,
-            CreatedBy = auditLog.CreatedBy
         });
+        await _db.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<AuditLogDto>> GetAuditLogsAsync(Guid tenantId, int pageNumber = 1, int pageSize = 50)
     {
-        var logs = await _executor.ExecuteQueryAsync<AuditLogDto>("getAuditLogsByTenant", new
-        {
-            TenantId = tenantId,
-            PageNumber = pageNumber,
-            PageSize = pageSize
-        });
+        if (tenantId == Guid.Empty) return Array.Empty<AuditLogDto>();
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageSize < 1) pageSize = 50;
+        if (pageSize > 200) pageSize = 200;
 
-        return logs;
+        var rows = await _db.AuditLogs.AsNoTracking()
+            .Where(a => a.TenantId == tenantId)
+            .OrderByDescending(a => a.Timestamp)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        return rows.Select(Map);
     }
 
     public async Task<AuditLogDto?> GetAuditLogByIdAsync(Guid id)
     {
-        return await _executor.ExecuteSingleAsync<AuditLogDto>("getAuditLogById", new { Id = id });
+        if (id == Guid.Empty) return null;
+
+        // SuperAdmin GraphQL may pass any id; when a tenant is present, keep reads fail-closed.
+        var context = _httpContextAccessor.HttpContext;
+        var tenantId = context != null ? GetTenantId(context) : null;
+
+        var q = _db.AuditLogs.AsNoTracking().Where(a => a.Id == id);
+        if (tenantId is Guid tid && tid != Guid.Empty)
+            q = q.Where(a => a.TenantId == tid);
+
+        var row = await q.FirstOrDefaultAsync();
+        return row == null ? null : Map(row);
     }
+
+    private static AuditLogDto Map(AuditLog a) => new()
+    {
+        Id = a.Id,
+        TenantId = a.TenantId,
+        UserId = a.UserId,
+        Action = a.Action,
+        EntityName = a.EntityName,
+        EntityId = a.EntityId,
+        OldValues = a.OldValues,
+        NewValues = a.NewValues,
+        IpAddress = a.IpAddress,
+        UserAgent = a.UserAgent,
+        Timestamp = a.Timestamp,
+        CreatedAt = a.CreatedAt,
+        CreatedBy = a.CreatedBy,
+        IsActive = a.IsActive
+    };
 
     private static Guid? GetTenantId(HttpContext context)
     {
-        // Try to get from JWT claims
         var user = context.User;
         if (user.Identity?.IsAuthenticated == true)
         {
             var tenantIdClaim = user.FindFirst("TenantId");
             if (tenantIdClaim != null && Guid.TryParse(tenantIdClaim.Value, out var tenantId))
-            {
                 return tenantId;
-            }
         }
 
-        // Try to get from header
-        if (context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdHeader))
-        {
-            if (Guid.TryParse(tenantIdHeader, out var headerTenantId))
-            {
-                return headerTenantId;
-            }
-        }
+        if (context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdHeader)
+            && Guid.TryParse(tenantIdHeader, out var headerTenantId))
+            return headerTenantId;
 
         return null;
     }
@@ -112,37 +129,21 @@ public class AuditService : IAuditService
     private static Guid? GetUserId(HttpContext context)
     {
         var user = context.User;
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                return userId;
-            }
-        }
-
-        return null;
+        if (user.Identity?.IsAuthenticated != true) return null;
+        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+        return userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId) ? userId : null;
     }
 
-    private static string? GetUserEmail(HttpContext context)
-    {
-        var user = context.User;
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            return user.FindFirst(ClaimTypes.Email)?.Value;
-        }
-
-        return null;
-    }
+    private static string? GetUserEmail(HttpContext context) =>
+        context.User.Identity?.IsAuthenticated == true
+            ? context.User.FindFirst(ClaimTypes.Email)?.Value
+            : null;
 
     private static string GetClientIpAddress(HttpContext context)
     {
         var ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
         if (string.IsNullOrEmpty(ipAddress))
-        {
             ipAddress = context.Connection.RemoteIpAddress?.ToString();
-        }
-
         return ipAddress ?? "Unknown";
     }
 }

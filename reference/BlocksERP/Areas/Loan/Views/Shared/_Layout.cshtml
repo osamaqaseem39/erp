@@ -1,0 +1,795 @@
+﻿@{
+
+    string businessName = System.Web.HttpContext.Current.Application["BusinessName"].ToString();
+    string adminImageSrc = "/Content/dummy.png";
+    string bgImageSrc = "/Content/img/download.jpg";
+    string adminName = "Admin";
+    string bgLogo = Url.Action("GetCompanyLogo", "account");
+    //string bgColor = "#584677";
+    string bgColor = "#015607";
+    string hoverColor = "#92C99F";
+    string blackColor = "#212121";
+    //string businessName = "Pharmaceutical ERP";
+    //string adminImageSrc = "/Content/dummy.png";
+    //string bgImageSrc = "/Content/img/download.jpg";
+    //string adminName = "Admin";
+    //string bgLogo = Url.Action("GetCompanyLogo", "account");
+    //string bgColor = "#584677";
+
+    //ViewBag.Title = "Dashboard";
+    //ViewBag.BusinessName = businessName;
+    //ViewBag.AdminPicture = adminImageSrc;
+    //ViewBag.BusinessBgImageSideBar = bgImageSrc;
+    //ViewBag.Admin = adminName;
+    //ViewBag.BusinessLogo = bgLogo;
+    //ViewBag.BgColor = bgColor;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>
+        @businessName - @ViewBag.Title
+    </title>
+    <meta name="description" content="Analytics Dashboard">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, minimal-ui">
+    <!-- Call App Mode on ios devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Remove Tap Highlight on Windows Phone IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+    <!-- Place favicon.ico in the root directory -->
+    <link rel="apple-touch-icon" sizes="180x180" href="~/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon.ico">
+    <link rel="mask-icon" href="~/favicon.ico" color="#5bbad5">
+    @Styles.Render("~/content/smartadmin")
+    <link href="~/Content/SearchBox.css" rel="stylesheet" />
+    <style>
+        /*my style*/
+
+        @*.breadcrumb-arrow li a:after {
+            border-color: @blackColor !important;
+        }*@
+
+        .breadcrumb-arrow li:nth-child(even) a:before {
+            border-color: @blackColor !important;
+            border-left-color:transparent !important;
+        }
+        .breadcrumb-arrow li a {
+            background-color: @blackColor !important;
+        }
+        .breadcrumb-arrow li:nth-child(even) a {
+            background-color: @blackColor !important;
+        }
+        .containerCheckBox input:checked ~ .checkmark{
+         background-color: @bgColor !important;
+        }
+         /* for dropdown list*/
+        .select2-container--default .select2-results__option--highlighted[aria-selected]{
+        background-color: @bgColor !important;
+        }
+        .select2-container--default .select2-results__option[aria-selected=true]{
+        background-color: @hoverColor !important;
+        }
+       /* for index page table*/
+         table.dataTable th{
+            background-color:@blackColor !important;
+            color:white !important;
+        }
+        .page-logo, .page-sidebar, .nav-footer, .bg-brand-gradient {
+            background-color: @bgColor !important;
+        }
+        /*header hide navigation*/
+        .dropdown-icon-menu > .btn:hover {
+            background-color: @bgColor !important;
+            border-color: @bgColor !important;
+        }
+        /*header minify navigation*/
+        .dropdown-icon-menu > ul > li .btn:hover{
+         background-color: @bgColor !important;
+        border-color: @bgColor !important;
+        }
+        /*header right side user dropdown background*/
+        .bg-trans-gradient{
+        background: linear-gradient(250deg, @hoverColor, @bgColor);
+        }
+         /*header right side user dropdown*/
+         .dropdown-item.active, .dropdown-item:hover{
+        color: @bgColor !important;
+        }
+        /*header right side user dropdown*/
+        .dropdown-item.active, .dropdown-item:active{
+        color: @bgColor !important;
+        }
+         /*Setting on/off btn*/
+        .header-function-fixed .btn-switch[data-class="header-function-fixed"], .nav-function-fixed .btn-switch[data-class="nav-function-fixed"], .nav-function-minify .btn-switch[data-class="nav-function-minify"], .nav-function-hidden .btn-switch[data-class="nav-function-hidden"], .nav-function-top .btn-switch[data-class="nav-function-top"], .nav-mobile-push .btn-switch[data-class="nav-mobile-push"], .nav-mobile-no-overlay .btn-switch[data-class="nav-mobile-no-overlay"], .nav-mobile-slide-out .btn-switch[data-class="nav-mobile-slide-out"], .mod-main-boxed .btn-switch[data-class="mod-main-boxed"], .mod-fixed-bg .btn-switch[data-class="mod-fixed-bg"], .mod-clean-page-bg .btn-switch[data-class="mod-clean-page-bg"], .mod-pace-custom .btn-switch[data-class="mod-pace-custom"], .mod-bigger-font .btn-switch[data-class="mod-bigger-font"], .mod-high-contrast .btn-switch[data-class="mod-high-contrast"], .mod-color-blind .btn-switch[data-class="mod-color-blind"], .mod-hide-nav-icons .btn-switch[data-class="mod-hide-nav-icons"], .mod-hide-info-card .btn-switch[data-class="mod-hide-info-card"], .mod-lean-subheader .btn-switch[data-class="mod-lean-subheader"], .mod-disable-animation .btn-switch[data-class="mod-disable-animation"], .mod-nav-link .btn-switch[data-class="mod-nav-link"], .mod-app-rtl .btn-switch[data-class="mod-app-rtl"]{
+         background-color: @bgColor !important;
+        }
+        /*Setting on/off btn side caption active*/
+        .header-function-fixed .btn-switch[data-class="header-function-fixed"] + .onoffswitch-title, .nav-function-fixed .btn-switch[data-class="nav-function-fixed"] + .onoffswitch-title, .nav-function-minify .btn-switch[data-class="nav-function-minify"] + .onoffswitch-title, .nav-function-hidden .btn-switch[data-class="nav-function-hidden"] + .onoffswitch-title, .nav-function-top .btn-switch[data-class="nav-function-top"] + .onoffswitch-title, .nav-mobile-push .btn-switch[data-class="nav-mobile-push"] + .onoffswitch-title, .nav-mobile-no-overlay .btn-switch[data-class="nav-mobile-no-overlay"] + .onoffswitch-title, .nav-mobile-slide-out .btn-switch[data-class="nav-mobile-slide-out"] + .onoffswitch-title, .mod-main-boxed .btn-switch[data-class="mod-main-boxed"] + .onoffswitch-title, .mod-fixed-bg .btn-switch[data-class="mod-fixed-bg"] + .onoffswitch-title, .mod-clean-page-bg .btn-switch[data-class="mod-clean-page-bg"] + .onoffswitch-title, .mod-pace-custom .btn-switch[data-class="mod-pace-custom"] + .onoffswitch-title, .mod-bigger-font .btn-switch[data-class="mod-bigger-font"] + .onoffswitch-title, .mod-high-contrast .btn-switch[data-class="mod-high-contrast"] + .onoffswitch-title, .mod-color-blind .btn-switch[data-class="mod-color-blind"] + .onoffswitch-title, .mod-hide-nav-icons .btn-switch[data-class="mod-hide-nav-icons"] + .onoffswitch-title, .mod-hide-info-card .btn-switch[data-class="mod-hide-info-card"] + .onoffswitch-title, .mod-lean-subheader .btn-switch[data-class="mod-lean-subheader"] + .onoffswitch-title, .mod-disable-animation .btn-switch[data-class="mod-disable-animation"] + .onoffswitch-title, .mod-nav-link .btn-switch[data-class="mod-nav-link"] + .onoffswitch-title, .mod-app-rtl .btn-switch[data-class="mod-app-rtl"] + .onoffswitch-title{
+        color: @bgColor !important;
+        }
+        /*small v btn to open side menu search*/
+       .pull-trigger-btn:hover{
+         background-color: @hoverColor !important;
+         border-color: @bgColor !important;
+        }
+         /*side menu search show showing 1 from total*/
+        .bg-success-600{
+         background-color: @hoverColor !important;
+        }
+        /*page header*/
+        .bg-primary-500 {
+            /*background-color: #015607 !important;*/
+            background-color: @hoverColor !important;
+            border-color: @hoverColor !important;
+        }
+        .bg-info-gradient{
+         background-image: linear-gradient(250deg, @hoverColor, @bgColor) !important;
+        }
+        /*side menu*/
+        .page-logo, .page-sidebar, .nav-footer, .bg-brand-gradient {
+            background-color: @bgColor !important;
+            background-image: none !important;
+        }
+        .nav-menu li.active > a {
+            -webkit-box-shadow: inset 3px 0 0 #2D2926 !important;
+            box-shadow: inset 3px 0 0 #2D2926 !important;
+        }
+        /*for table navigation btn active*/
+        table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > td:first-child:before, table.dataTable.dtr-inline.collapsed > tbody > tr[role="row"] > th:first-child:before, table.dataTable.dtr-column > tbody > tr > td.control:before, table.dataTable.dtr-column > tbody > tr > th.control:before {
+            background-color: @bgColor !important;
+
+        }
+        /*for table navigation btn hover*/
+        .pagination .page-link:hover {
+            background-color: @bgColor !important;
+             color: white !important;
+        }
+        /*for table + btn to - expand left side*/
+        .dataTables_wrapper tr.child td.child .dtr-details:after {
+            background-color: @hoverColor !important;
+        }
+        /*for table expand icon right arrow*/
+        .dataTables_wrapper tr.child td.child .dtr-details:before{
+             color: @bgColor !important;
+        }
+        .page-link{
+            color: @bgColor !important;
+        }
+        .page-item.active .page-link {
+            background-color: @bgColor !important;
+            border-color: @bgColor !important;
+            color: white !important;
+        }
+        .btn-primary {
+            background-color: @bgColor !important;
+            border-color: @bgColor !important;
+        }
+        .menu-item, label.menu-open-button {
+            background-color: @bgColor !important;
+        }
+        /*for header right menu like chat icon*/
+        .header-icon:not(.btn) > [class*='fa-']:first-child, .header-icon:not(.btn) > .ni:first-child {
+            color: @bgColor !important;
+        }
+        /*for +add btn*/
+        .btn-outline-primary:hover {
+            background-color: @bgColor !important;
+            border-color: @bgColor !important;
+        }
+        .form-control:focus {
+            border-color: @bgColor !important;
+        }
+        /*for input text side icon like fal-fa info*/
+        .has-length .input-group-text:not([class^="bg-"]):not([class^="bg-"]) {
+            background-color: @bgColor !important;
+            border-color: @bgColor !important;
+        }
+       input[type="checkbox"],
+input[type="radio"] {
+  filter: hue-rotate(240deg);
+  }
+        .breadcrumb-arrow li a:hover{
+            background-color: @bgColor !important;
+            border-color: @bgColor !important;
+        }
+        /*end*/
+        /*.info-card {
+            height:17px;
+            opacity:0.4;
+        }*/
+        .nav-menu li a > [class*='fa-'], .nav-menu li a > .ni {
+            color: #fff;
+        }
+
+            .nav-menu li a {
+                color: #fff;
+            }
+
+            .sticky {
+                position: fixed;
+                top: 0;
+                width: 79%;
+            }
+
+            #myHeader {
+                box-shadow: 0 0 1px rgba(0,0,0,.14), 0 2px 6px rgba(0,0,0,.22);
+            }
+
+            .collapse-sign > em {
+                color: #fff;
+            }
+        .custom-control-input:checked ~ .custom-control-label::before {
+    border-color: @bgColor ;
+    background-color: @bgColor ;
+}
+        /*.btn-danger{
+            background-color:#A90329 !important;
+            border-color:#A90329 !important;
+        }*/
+        .dataTables_empty {
+    color: #000 !important;
+    font-size: 1rem !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+        /*.dataTables_paginate paging_simple_numbers{
+            margin-top: -42px;
+        }*/
+
+        .btn-default-icon {
+            border: 1px solid #A2A8B5;
+            padding-left: 0px;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            vertical-align: middle;
+            background-color: #fff;
+            border-radius: 20px;
+        }
+
+            .btn-default-icon > i {
+                padding: 7px 11px;
+                height: 100%;
+                background-color: #5A6268;
+                border: 1px solid #5A6268 !important;
+                color: #fff;
+                font-size: 17px;
+                font-weight: bold;
+                border-top-left-radius: 20px;
+                border-bottom-left-radius: 20px;
+            }
+
+            .btn-default-icon:hover {
+                background-color: #E6E6E6;
+            }
+            .searchButtons {
+            background-color: #fff !important;
+            border: 1px solid #000;
+            width: 30px;
+            height: 30px;
+        }
+            .btnNew,.btnSearchGo{
+               background-color:#FAF8FB;
+               border-color:#ddd;
+               color:#000;
+               box-shadow:none !important;
+            }
+            .btnNew:hover,.btnSearchGo:hover {
+               color:#fff;
+            }
+            .Acenter{
+                text-align:center;
+            }
+            .Aright{
+                text-align:right;
+            }
+            #txtSearch:focus{
+                border-color:#E5E5E5;
+            }
+
+            input[type=text],input[type=date],input[type=password]{
+                border-color:#A2A2A2;
+            }
+        input[type=datetime-local] {
+            border-color: #A2A2A2;
+        }
+        input[type=password] {
+            border-color: #A2A2A2;
+        }
+           /* textarea{
+                border-color:#A2A2A2 !important;
+            }*/
+            input[type=file]{
+                border:1px solid #A2A2A2;
+            }
+
+            .input-group-text{
+                border:1px solid #A2A2A2;
+            }
+            .select2-selection{
+                border-color:#A2A2A2 !important;
+            }
+        select {
+            border: 1px solid #A2A2A2 !important;
+        }
+        textarea {
+            border: 1px solid #A2A2A2 !important;
+        }
+            textarea:focus {
+                border-color: @bgColor !important;
+            }
+            /*input[type="text"]:focus {
+            background-color: #D5C3F1 !important;
+            border-color: #D5C3F1 !important;
+        }
+
+        input[type="date"]:focus {
+            background-color: #D5C3F1 !important;
+            border-color: #D5C3F1 !important;
+        }
+
+        select:focus {
+            background-color: #D5C3F1 !important;
+            border-color: #D5C3F1 !important;
+        }*/
+            .dataTables_filter{
+                display:none !important;
+            }
+            .error{
+                font-size: 12px;
+            color: #af0001 !important;
+            }
+        .select2-selection:focus {
+            border-color: @bgColor !important;
+        }
+    </style>
+</head>
+<body class="mod-bg-1 mod-nav-link nav-function-minify pace-running desktop blur">
+    <script>
+        /**
+         *	This script should be placed right after the body tag for fast execution
+         *	Note: the script is written in pure javascript and does not depend on thirdparty library
+         **/
+        'use strict';
+
+        var classHolder = document.getElementsByTagName("BODY")[0],
+            /**
+             * Load from localstorage
+             **/
+            themeSettings = (localStorage.getItem('themeSettings')) ? JSON.parse(localStorage.getItem('themeSettings')) :
+                {},
+            themeURL = themeSettings.themeURL || '',
+            themeOptions = themeSettings.themeOptions || '';
+        /**a
+         * Load theme options
+         **/
+        if (themeSettings.themeOptions) {
+            classHolder.className = themeSettings.themeOptions;
+            console.log("%c✔ Theme settings loaded", "color: #148f32");
+        }
+        else {
+            console.log("Heads up! Theme settings is empty or does not exist, loading default settings...");
+        }
+        if (themeSettings.themeURL && !document.getElementById('mytheme')) {
+            var cssfile = document.createElement('link');
+            cssfile.id = 'mytheme';
+            cssfile.rel = 'stylesheet';
+            cssfile.href = themeURL;
+            document.getElementsByTagName('head')[0].appendChild(cssfile);
+        }
+
+        /**
+         * Save to localstorage
+         **/
+        var saveSettings = function () {
+            themeSettings.themeOptions = String(classHolder.className).split(/[^\w-]+/).filter(function (item) {
+                return /^(nav|header|mod|display)-/i.test(item);
+            }).join(' ');
+            if (document.getElementById('mytheme')) {
+                themeSettings.themeURL = document.getElementById('mytheme').getAttribute("href");
+            };
+            localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
+        }
+        /**
+         * Reset settings
+         **/
+        var resetSettings = function () {
+            localStorage.setItem("themeSettings", "");
+        }
+    </script>
+    <div class="modal modal-alert fade" id="DeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="DeleteModalTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="DeleteModalBody">
+                    Modal text description...
+                </div>
+                <div class="modal-footer" id="DeleteModalFooter">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="MyModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" id="AddEditModalHeader" style="height: 50px; color: #fff; margin-top: -3px; margin-left: -1px; background-color: rgb(59, 129, 67);">
+                    <h4 class="modal-title" style="color:white;margin-top:-9px;font-weight:normal">
+                        <i class="fal fa-edit"></i>&nbsp;&nbsp;
+                        <span id="ModelHeaderSpan">
+                        </span>
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -27px !important;color:#fff">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalDiv" style="padding:0px">
+                </div>
+                @*<div class="modal-footer" id="MyModalFooter" style="margin-top:11px;background-color:#F9F9F9;border-top:1px solid #ddd" hidden>
+                        <button  type="button"  class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button  type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Save</button>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="MyModalLarge" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header" id="AddEditModalHeaderLarge" style="height: 50px; color: #fff; margin-top: -3px; margin-left: -1px; background-color: rgb(59, 129, 67);">
+                    <h4 class="modal-title" style="color:white;margin-top:-9px;font-weight:normal">
+                        <i class="fal fa-edit"></i>&nbsp;&nbsp;
+                        <span id="ModelHeaderSpanLarge">
+                        </span>
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -27px !important;color:#fff">
+                        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalDivLarge" style="padding:0px">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <div class="page-inner">
+            @{Html.RenderAction("AsideMenu", "LoanDashboard", new { area = "Loan" });}
+            <div class="page-content-wrapper">
+                @Scripts.Render("~/script/smartadmin")
+
+                @{ Html.RenderPartial("_Header"); }
+                @Scripts.Render("~/script/jqueryvalidator")
+                @RenderBody()
+
+                <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div> <!-- END Page Content -->
+                <footer class="page-footer" role="contentinfo">
+                    <div class="d-flex align-items-center flex-1 text-muted">
+                        <span class="hidden-md-down fw-700">@businessName</span>
+                    </div>
+                </footer>
+                @*@{ Html.RenderPartial("_ModalPartialView"); }*@
+                @{ Html.RenderPartial("_ChatView"); }
+            </div>
+        </div>
+    </div>
+    <nav class="shortcut-menu d-none d-sm-block">
+        <input type="checkbox" class="menu-open" name="menu-open" id="menu_open" />
+        <label for="menu_open" class="menu-open-button " hidden>
+            <span class="app-shortcut-icon d-block"></span>
+        </label>
+        <a href="#" class="menu-item btn" data-toggle="tooltip" data-placement="left" title="Scroll Top" hidden>
+            <i class="fal fa-arrow-up"></i>
+        </a>
+        <a href="/account/logout" class="menu-item btn" data-toggle="tooltip" data-placement="left" title="Logout" hidden>
+            <i class="fal fa-sign-out"></i>
+        </a>
+        <a href="#" class="menu-item btn" data-action="app-fullscreen" data-toggle="tooltip" data-placement="left" title="Full Screen" hidden>
+            <i class="fal fa-expand"></i>
+        </a>
+        <a href="#" class="menu-item btn" data-action="app-print" data-toggle="tooltip" data-placement="left" title="Print page" hidden>
+            <i class="fal fa-print"></i>
+        </a>
+        @*<a href="#" class="menu-item btn" data-action="app-voice" data-toggle="tooltip" data-placement="left" title="Voice command">
+                <i class="fal fa-microphone"></i>
+            </a>*@
+    </nav>
+
+    @*<script src="~/Scripts/app.bundle.js"></script>*@
+    <script type="text/javascript">
+        $('#js-page-content').smartPanel();
+        $(function () {
+            if (location.pathname.toLowerCase() == '/' || location.pathname.toLowerCase() == '/home/index') {
+                $('.nav-menu li a[href="/home/index"]').parent("li").addClass('active');
+            }
+            else {
+                $('.nav-menu li a[href="' + location.pathname.toLowerCase() + '"]').parent("li").addClass('active');
+                $('.nav-menu li a[href="' + location.pathname.toLowerCase() + '"]').parent("li").parent("ul").parent("li").addClass('active').addClass('open');
+                $('.nav-menu li a[href="' + location.pathname.toLowerCase() + '"]').parent("li").parent("ul").parent("li").find('.collapse-sign').find('em').removeClass('fa-angle-down').addClass('fa-angle-up');
+            }
+        });
+        $("#txtSearch").keyup(function () {
+            var color = $('.TopSettingIcon').find("i").css("color");
+            if ($(this).val() == '' || $(this).val() == null) {
+                $(this).css("border-color", "#E5E5E5");
+                $('.btnSearchGo').css("background-color", "#FAF8FB");
+                $('.btnSearchGo').css("color", "#000");
+            }
+            else {
+                $(this).css("border-color", color);
+                $('.btnSearchGo').css("background-color", color);
+                $('.btnSearchGo').css("color", "#fff");
+            }
+
+        });
+        //Active child menu
+        function ActivateSideMenu(url) {
+            $('.nav-menu li a[href="' + url + '"]').parent("li").addClass('active');
+            $('.nav-menu li a[href="' + url + '"]').parent("li").parent("ul").parent("li").addClass('active').addClass('open');
+            $('.nav-menu li a[href="' + url + '"]').parent("li").parent("ul").parent("li").find('.collapse-sign').find('em').removeClass('fa-angle-down').addClass('fa-angle-up');
+        }
+        $(".btnSearchGo").mouseenter(function () {
+            var color = $('.TopSettingIcon').find("i").css("color");
+            $('.btnSearchGo').css("background-color", color);
+            $('.btnSearchGo').css("color", "#fff");
+        }).mouseleave(function () {
+            if ($("#txtSearch").val() == '' || $("#txtSearch").val() == null) {
+                $('.btnSearchGo').css("background-color", "#FAF8FB");
+                $('.btnSearchGo').css("color", "#000");
+            }
+            else {
+                var color = $('.TopSettingIcon').find("i").css("color");
+                $('.btnSearchGo').css("background-color", color);
+                $('.btnSearchGo').css("color", "#fff");
+            }
+        });
+        $(document).on('click', '.AddEditRecord,.Assign,.AssignModule', function () {
+            var color = $('.TopSettingIcon').find("i").css("color");
+            $('#AddEditModalHeader').css("background-color", color);
+        });
+        $("#ulSearchCategory").on("click", "a", function (e) {
+            e.preventDefault();
+            $("#btnSearchCategory").html($(this).html());
+            $("#ulSearchCategory").removeClass("show");
+        })
+
+        $("#ulSearchOrder").on("click", "a", function (e) {
+            e.preventDefault();
+            $("#btnSearchOrder").html($(this).html());
+            $("#ulSearchOrder").removeClass("show");
+        })
+
+        $("#ulSearchRequsition").on("click", "a", function (e) {
+            e.preventDefault();
+            $("#btnSearchRequsition").html($(this).html());
+            $("#ulSearchRequsition").removeClass("show");
+        })
+        $("#ulSearchRequsitionPending").on("click", "a", function (e) {
+            e.preventDefault();
+            $("#btnSearchPendingRequsitionPending").html($(this).html());
+            $("#ulSearchRequsitionPending").removeClass("show");
+        })
+
+        //        $('#MyModal').modal({
+        //    backdrop: 'static',
+        //    keyboard: false
+        //})
+        //$(document).on("mouseenter", "#txtSearch", function () {
+        //    var color = $(this).css("border-color") + " !important";
+        //    $('.btnSearchGo').css("background-color",color);
+        //})
+
+        //window.onscroll = function () { myFunction() };
+
+        //var header = document.getElementById("myHeader");
+        //var sticky = header.offsetTop;
+
+        //function myFunction() {
+        //    if (window.pageYOffset > sticky) {
+        //        header.classList.add("sticky");
+        //    } else {
+        //        header.classList.remove("sticky");
+        //    }
+        //}
+
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        var now = new Date();
+        var date = days[now.getDay()] + ', ' +
+            months[now.getMonth()] + ' ' +
+            now.getDate() + ', ' +
+            now.getFullYear();
+        $('.js-get-date').html(date);
+
+        function getDateTimeForDatatable(date) {
+            if (date == null) {
+                return '';
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (parseFloat(day) < 10) {
+                    day = "0" + day;
+                }
+                if (parseFloat(month) < 10) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+
+                var hours = newdate.getHours();
+                var minutes = newdate.getMinutes();
+                var ampm = hours >= 12 ? 'pm' : 'am';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                var strTime = hours + ':' + minutes + ' ' + ampm;
+                var today = day + '-' + month + '-' + year + '&nbsp;&nbsp;&nbsp;' + strTime;
+                return today;
+            }
+        }
+        function getDateForDatatable(date) {
+            if (date == null) {
+                return '';
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (parseFloat(day) < 10) {
+                    day = "0" + day;
+                }
+                if (parseFloat(month) < 10) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+
+                var today = day + '-' + month + '-' + year;
+                return today;
+            }
+        }
+        function getDateTimeForAppendedJquery(date) {
+            if (date == null) {
+                return '';
+            }
+            else {
+
+                var today = new Date(parseInt(date.substr(6)));
+                var dd = today.getDate();
+                var mm = today.getMonth() + 1; //January is 0!
+
+                var yyyy = today.getFullYear();
+                if (dd < 10) {
+                    dd = '0' + dd;
+                }
+                if (mm < 10) {
+                    mm = '0' + mm;
+                }
+                var h = today.getHours();
+                var m = today.getMinutes();
+                if (h < 10) h = '0' + h;
+                if (m < 10) m = '0' + m;
+                var today = yyyy + '-' + mm + '-' + dd + 'T' + h + ':' + m;
+                return today;
+            }
+        }
+        function getDateAndTimeFromInputTypeDate(myDate) {
+            var today = new Date(myDate);
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var hours = today.getHours();
+            var minutes = today.getMinutes();
+            var ampm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            var strTime = hours + ':' + minutes + ' ' + ampm;
+            var today = dd + '-' + mm + '-' + yyyy + '&nbsp;&nbsp;&nbsp;' + strTime;
+            return today;
+
+        }
+
+        function getDateForInputTypeDate(date) {
+            if (date == null) {
+                return null;
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (digits_count(day) == 1 || digits_count(day) == 0) {
+                    day = "0" + day;
+                }
+                if (digits_count(month) == 1 || digits_count(month) == 0) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+                var today = year + '-' + month + '-' + (day);
+                if (year == 1900) {
+                    return null;
+                }
+                else {
+                    return today;
+                }
+            }
+        }
+        function digits_count(n) {
+            var count = 0;
+            if (n > 1)
+                ++count;
+            while (n / 10 >= 1) {
+                n /= 10;
+                ++count;
+            }
+            return count;
+        }
+
+
+        function NumberPostiveNegativeWithDecimal(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 127) &&
+                (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function NumberPostive(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 8) && (charCode != 127) && (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+        function ReplaceCommas(yourNumber) {
+            var noCommas = yourNumber;
+            try {
+                var noCommas = yourNumber.replace(/,/g, ''),
+                    asANumber = +noCommas;
+            }
+            catch (e) {
+                /* Error handling */
+            }
+            return noCommas;
+        }
+    </script>
+
+</body>
+</html>

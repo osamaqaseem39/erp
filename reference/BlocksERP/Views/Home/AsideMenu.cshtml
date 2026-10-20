@@ -1,0 +1,773 @@
+﻿@{
+    MvcHtmlString businessName = Html.Action("GetCompanyName", "account");
+    string adminImageSrc = Url.Action("GetUserPicture", "account", new
+    {
+        id = Convert.ToInt32(User.UserId)
+    }); ;
+    string bgImageSrc = ""; // "/Content/pos.jpg";
+    string adminName = User.Name;
+    string bgLogo = Url.Action("GetCompanyLogo", "account");
+    string bgColor = "#584677";
+    // string businessName = "Pharmaceutical ERP";
+    //string adminImageSrc = "/Content/dummy.png";
+    //string bgImageSrc = "/Content/img/download.jpg";
+    //string adminName = "Admin";
+    //string bgLogo = Url.Action("GetCompanyLogo", "account");
+    //string bgColor = "#584677";
+
+    //ViewBag.Title = "Dashboard";
+    //ViewBag.BusinessName = businessName;
+    //ViewBag.AdminPicture = adminImageSrc;
+    //ViewBag.BusinessBgImageSideBar = bgImageSrc;
+    //ViewBag.Admin = adminName;
+    //ViewBag.BusinessLogo = bgLogo;
+    //ViewBag.BgColor = bgColor;
+}
+
+
+<style>
+    .nav-function-minify .page-logo img {
+        width: 90% !important;
+    }
+
+    .page-logo img {
+        width: auto !important;
+    }
+</style>
+@model List<BlocksERP.Models.clsModule>
+<aside class="page-sidebar">
+    <div class="page-logo" style="display:block !important;">
+        <a href="#" style="display:block !important;padding-top:10px;" class="page-logo-link press-scale-down d-flex align-items-center position-relative" data-toggle="modal" data-target="#modal-shortcut">
+            <img src="@bgLogo" alt="@businessName" aria-roledescription="logo"><br />
+            @*<span class="page-logo-text mr-1" style="margin-left: 0.2rem !important;">@businessName</span>*@
+            <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+            <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+        </a>
+    </div>
+    <!-- BEGIN PRIMARY NAVIGATION -->
+    <nav id="js-primary-nav" class="primary-nav" role="navigation">
+        <div class="nav-filter">
+            <div class="position-relative">
+                <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control" tabindex="0">
+                <a href="#" onclick="return false;" class="btn-primary btn-search-close js-waves-off" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar">
+                    <i class="fal fa-chevron-up"></i>
+                </a>
+            </div>
+        </div>
+        <div class="info-card" style="background-color: #99B801;color:black;">
+            <img src="@adminImageSrc" class="profile-image rounded-circle" alt="@adminName">
+            <div class="info-card-text" >
+                <a href="#" class="d-flex align-items-center text-white">
+                    <span class="text-truncate text-truncate-sm d-inline-block" style="color:black;">
+                        @adminName
+                    </span>
+                </a>
+                <span class="d-inline-block text-truncate text-truncate-sm">Pakistan</span>
+            </div>
+            @*<img src="@bgImageSrc" class="cover" style="width:100%" alt="cover">*@
+            <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                <i class="fal fa-angle-down"></i>
+            </a>
+        </div>
+        @*<div class="info-card">
+                <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                    <i class="fal fa-angle-down"></i>
+                </a>
+            </div>*@
+    <ul id="js-nav-menu" class="nav-menu">
+        @*<li class="nav-title">Dashboard</li>*@
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("MainUser").ToLower()))
+        {
+
+            <li>
+                <a href="/home/index" title="Dashboard" data-filter-tags="dashboard">
+                    <i class="fal fa-home"></i>
+                    <span class="nav-link-text" data-i18n="nav.Dashboard">Dashboard</span>
+                </a>
+            </li>
+
+        }
+
+
+        @if (Model.Any(x => x.ModuleName.ToLower() == "module"
+            || x.ModuleName.ToLower() == "action"
+            || x.ModuleName.ToLower() == "assign action to module"))
+        {
+            <li>
+                <a href="#" title="Module" data-filter-tags="module action assign action to module">
+                    <i class="fal fa-archive"></i>
+                    <span class="nav-link-text" data-i18n="nav.Module">Module</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "module"))
+                    {
+                        <li>
+                            <a href="/module/moduleindex" title="Module" data-filter-tags="module">
+                                <span class="nav-link-text" data-i18n="nav.Module">Module</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "action"))
+                    {
+                        <li>
+                            <a href="/action/actionindex" title="Action" data-filter-tags="action">
+                                <span class="nav-link-text" data-i18n="nav.Action">Action</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "assign action to module"))
+                    {
+                        <li>
+                            <a href="/action/assignactiontomodule" title="Assign Action to Module" data-filter-tags="assign action to module">
+                                <span class="nav-link-text" data-i18n="nav.Assign Action to Module">Assign Action to Module</span>
+                            </a>
+                        </li>
+                    }
+
+
+
+
+
+                </ul>
+            </li>
+        }
+
+
+
+        @if (Model.Any(x => x.ModuleName.ToLower() == "user"
+        || x.ModuleName.ToLower() == "user role"
+        || x.ModuleName.ToLower() == "user type"))
+        {
+            <li>
+                <a href="#" title="Settings" data-filter-tags="user user role user type">
+                    <i class="fal fa-user"></i>
+                    <span class="nav-link-text" data-i18n="nav.User">User</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "user type"))
+                    {
+                        <li>
+                            <a href="/usertype/usertypeindex" title="User Role" data-filter-tags="user type">
+                                <span class="nav-link-text" data-i18n="nav.user type">User Type</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "user"))
+                    {
+                        <li>
+                            <a href="/users/userindex" title="User" data-filter-tags="user">
+                                <span class="nav-link-text" data-i18n="nav.User">User</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "user role"))
+                    {
+                        <li>
+                            <a href="/userrole/userroleindex" title="User Role" data-filter-tags="user role">
+                                <span class="nav-link-text" data-i18n="nav.User Role">User Role</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    
+
+                </ul>
+            </li>
+        }
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "chart of account"
+|| x.ModuleName.ToLower() == "first level"
+|| x.ModuleName.ToLower() == "second level"
+|| x.ModuleName.ToLower() == "third level"
+|| x.ModuleName.ToLower() == "customer supplier account"
+|| x.ModuleName.ToLower() == "account"
+|| x.ModuleName.ToLower() == "defaul gl"
+
+))
+
+
+        {
+            <li>
+                <a href="#" title="Account Setup" data-filter-tags="first level second level third level account customer/supplier account default gl">
+                    <i class="fal fa-user"></i>
+                    <span class="nav-link-text" data-i18n="nav.Account Setup">Account Setup</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "first level"))
+                    {
+                        <li>
+                            <a href="/chartofaccount/firstlevelindex" title="First Level" data-filter-tags="first level">
+                                <span class="nav-link-text" data-i18n="nav.First Level">First Level</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "second level"))
+                    {
+                        <li>
+                            <a href="/chartofaccount/secondlevelindex" title="Second Level" data-filter-tags="second level">
+                                <span class="nav-link-text" data-i18n="nav.Second Level">Second Level</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "third level"))
+                    {
+                        <li>
+                            <a href="/chartofaccount/thirdlevelindex" title="Third Level" data-filter-tags="third level">
+                                <span class="nav-link-text" data-i18n="nav.Third Level">Third Level</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "account"))
+                    {
+                        <li>
+                            <a href="/chartofaccount/accountdetailindex" title="Account" data-filter-tags="account">
+                                <span class="nav-link-text" data-i18n="nav.Account">Account</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "customer account"))
+                    {
+                        <li>
+                            <a href="/chartofaccount/customerindex" title="Customer Account" data-filter-tags="customer account">
+                                <span class="nav-link-text" data-i18n="nav.Customer Account">Customer Account</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "customer supplier account"))
+                    {
+                        <li>
+                            <a href="/chartofaccount/customersupplierindex" title="Supplier Account" data-filter-tags="supplier account">
+                                <span class="nav-link-text" data-i18n="nav.Customer/Supplier Account">Supplier Account</span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "default gl"))
+                    {
+                        <li>
+                            <a href="/defaultgl/defaultglindex" title="Default Gl" data-filter-tags="default gl">
+                                <span class="nav-link-text" data-i18n="nav.Default Gl">Default Third Level Account</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "cost center"))
+                    {
+                        <li>
+                            <a href="/costcenter/costcenterindex" title="Cost Center" data-filter-tags="cost center">
+                                <span class="nav-link-text" data-i18n="nav.Cost Center">Cost Center</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "tax setup"))
+                    {
+                        <li>
+                            <a href="/taxsetup/taxsetupindex" title="Tax Setup" data-filter-tags="tax setup">
+                                <span class="nav-link-text" data-i18n="nav.TaxSetup">Tax Setup</span>
+                            </a>
+                        </li>
+                    }
+                    
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "budget"))
+                    {
+                        <li>
+                            <a href="/budget/budgetindex" title="Budget" data-filter-tags="budget">
+                                <span class="nav-link-text" data-i18n="nav.Budget">Budget</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "budget detail"))
+                    {
+                        <li>
+                            <a href="/budget/budgetdetailindex" title="Budget Detail" data-filter-tags="budget detail">
+                                <span class="nav-link-text" data-i18n="nav.Budget Detail">Budget Detail</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "fiscal year"))
+                    {
+                        <li>
+                            <a href="/fiscalyear/fiscalyearindex" title="Fiscal Year" data-filter-tags="fiscal year">
+                                <span class="nav-link-text" data-i18n="nav.Fiscal Year">Fiscal Year</span>
+                            </a>
+                        </li>
+                    }
+                   
+                </ul>
+            </li>
+        }*@
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "vouchers"
+|| x.ModuleName.ToLower() == "payment"
+|| x.ModuleName.ToLower() == "reciept"
+|| x.ModuleName.ToLower() == "bank payment"
+|| x.ModuleName.ToLower() == "bank reciept"
+|| x.ModuleName.ToLower() == "journal voucher"
+|| x.ModuleName.ToLower() == "voucher recheck"
+|| x.ModuleName.ToLower() == "voucher approved"
+|| x.ModuleName.ToLower() == "posted"
+))
+
+        {
+            <li>
+                <a href="#" title="Vouchers" data-filter-tags="cash payment cash reciept bank payment bank reciept journal voucher ">
+                    <i class="fal fa-money-bill"></i>
+                    <span class="nav-link-text" data-i18n="nav.Vouchers">Vouchers</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "payment"))
+                    {
+                        <li>
+                            <a href="/cashpayment/cashpaymentindex" title="Cash Payment" data-filter-tags="cash payment">
+                                <span class="nav-link-text" data-i18n="nav.Cash Payment">Cash Payment</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "reciept"))
+                    {
+                        <li>
+                            <a href="/cashpayment/cashReceiptindex" title="Cash Reciept" data-filter-tags="cash reciept">
+                                <span class="nav-link-text" data-i18n="nav.Cash Reciept">Cash Receiept</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "bank payment"))
+                    {
+                        <li>
+                            <a href="/bankpayment/bankpaymentindex" title="Bank Payment" data-filter-tags="bank payment">
+                                <span class="nav-link-text" data-i18n="nav.Bank Payment">Bank Payment</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "bank reciept"))
+                    {
+                        <li>
+                            <a href="/bankpayment/BankReceiptIndex" title="Bank Reciept" data-filter-tags="bank reciept">
+                                <span class="nav-link-text" data-i18n="nav.Bank Reciept">Bank Reciept</span>
+                            </a>
+                        </li>
+                    }
+
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "journal voucher"))
+                    {
+                        <li>
+                            <a href="/cashpayment/journalvoucherindex" title="Journal Voucher" data-filter-tags="journal voucher">
+                                <span class="nav-link-text" data-i18n="nav.Journal Voucher">Journal Voucher</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "voucher recheck"))
+                    {
+                        <li>
+                            <a href="/cashpayment/voucherrecheckindex" title="Voucher Recheck" data-filter-tags="voucher recheck">
+                                <span class="nav-link-text" data-i18n="nav.Voucher Recheck">Voucher Recheck</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "voucher approved"))
+                    {
+                        <li>
+                            <a href="/cashpayment/voucherapprovedindex" title="Voucher Approved" data-filter-tags="voucher approved">
+                                <span class="nav-link-text" data-i18n="nav.Voucher Approved">Voucher Approved</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "posted"))
+                    {
+                        <li>
+                            <a href="/cashpayment/voucherpostedindex" title="Posted" data-filter-tags="posted">
+                                <span class="nav-link-text" data-i18n="nav.Posted">Voucher Posted</span>
+                            </a>
+                        </li>
+                    }
+
+                </ul>
+            </li>
+        }*@
+
+        
+        
+        
+            @*@if (Model.Any(x => x.ModuleName.ToLower() == "cheque book"
+            || x.ModuleName.ToLower() == "post cheque book"
+              || x.ModuleName.ToLower() == "cheque received"
+                 || x.ModuleName.ToLower() == "cheque payment"
+                  || x.ModuleName.ToLower() == "cheque payment"
+                    || x.ModuleName.ToLower() == "cheque checked"
+                     || x.ModuleName.ToLower() == "cheque deposit"
+                      || x.ModuleName.ToLower() == "cheque approved"
+                       || x.ModuleName.ToLower() == "cheque clear"
+                        || x.ModuleName.ToLower() == "cheque return approval"
+                        || x.ModuleName.ToLower() == "cheque clear voucher"
+                         || x.ModuleName.ToLower() == "cheque returned"
+    ))
+
+
+            {
+                <li>
+                    <a href="#" title="Cheque" data-filter-tags="cheque book">
+                        <i class="fal fa-money-bill-alt"></i>
+                        <span class="nav-link-text" data-i18n="nav.Account Setup">Cheque</span>
+                    </a>
+                    <ul>
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque book"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequebookindex" title="Cheque Book" data-filter-tags="cheque book post cheque book">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Book">Cheque Book</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "post cheque book"))
+                        {
+                            <li>
+                                <a href="/chequebook/postchequebookindex" title="Post Cheque Book" data-filter-tags="post cheque book">
+                                    <span class="nav-link-text" data-i18n="nav.Post Cheque Book">Post Cheque Book</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque received"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequereceivedindex" title="Cheque Received" data-filter-tags="cheque received">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Received">Cheque Received</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque payment"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequepaymentindex" title="Cheque Payment" data-filter-tags="cheque payment">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Payment">Cheque Payment</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque checked"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequecheckedindex" title="Cheque Checked" data-filter-tags="cheque checked">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Checked">Cheque Checked</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque deposit"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequedepositindex" title="Cheque Deposit" data-filter-tags="cheque deposit">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Deposit">Cheque Deposit</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque approved"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequeapprovedindex" title="Cheque Approved" data-filter-tags="cheque approved">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Approved">Cheque Deposit Approved</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque clear"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequeclearindex" title="Cheque Clear" data-filter-tags="cheque clear">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque clear"> Clear/Cancel/Bounce/Return</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque return approval"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequereturnapprovalindex" title="Cheque Return Approval" data-filter-tags="cheque return approval">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Return Approval"> Clear/Cancel/Bounce/Return Approval</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque clear voucher"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequeclearvoucherindex" title="Cheque Clear Voucher" data-filter-tags="cheque clear voucher">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Clear Voucher">Cheque Clear/Bounce Voucher</span>
+                                </a>
+                            </li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == "cheque returned"))
+                        {
+                            <li>
+                                <a href="/chequebook/chequereturnedindex" title="Cheque Returned" data-filter-tags="cheque returned">
+                                    <span class="nav-link-text" data-i18n="nav.Cheque Returned">Cheque Returned</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }*@
+            
+            
+            
+            
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "item"
+    || x.ModuleName.ToLower() == "category"
+    || x.ModuleName.ToLower() == "brand"
+    || x.ModuleName.ToLower() == "origin"))
+        {
+            <li>
+                <a href="#" title="Inventory" data-filter-tags="item category brand">
+                    <i class="fal fa-cart-plus"></i>
+                    <span class="nav-link-text" data-i18n="nav.User">Inventory</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "brand"))
+                    {
+                        <li>
+                            <a href="/brand/brandindex" title="brand" data-filter-tags="brand">
+                                <span class="nav-link-text" data-i18n="nav.Brand">Brand</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "category"))
+                    {
+                        <li>
+                            <a href="/category/categoryindex" title="category" data-filter-tags="category">
+                                <span class="nav-link-text" data-i18n="nav.Category">Category</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "unit"))
+                    {
+                        <li>
+                            <a href="/unit/unitindex" title="Unit" data-filter-tags="unit">
+                                <span class="nav-link-text" data-i18n="nav.Unit">Unit</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "origin"))
+                    {
+                        <li>
+                            <a href="/origin/originindex" title="origin" data-filter-tags="origin">
+                                <span class="nav-link-text" data-i18n="nav.Origin">Origin</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "item"))
+                    {
+                        <li>
+                            <a href="/item/itemindex" title="Item" data-filter-tags="item">
+                                <span class="nav-link-text" data-i18n="nav.Item">Item</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }*@
+
+
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "purchase invoice"
+              || x.ModuleName.ToLower() == "purchase return"
+              || x.ModuleName.ToLower() == "purchase Order" ||
+              x.ModuleName.ToLower() == "goods receipt note"))
+        {
+            <li>
+                <a href="#" title="Purchase" data-filter-tags="Purchase Invoice Purchase Return Purchase Order">
+                    <i class="fal fa-cart-plus"></i>
+                    <span class="nav-link-text" data-i18n="nav.User">Purchase</span>
+                </a>
+                <ul>
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "purchase order"))
+                    {
+                        <li>
+                            <a href="/invoice/purchaseorderindex" title="Purchase Order" data-filter-tags="purchase order">
+
+                                <span class="nav-link-text" data-i18n="nav.Purchase Order">Purchase Order</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "goods receipt note"))
+                    {
+                        <li>
+                            <a href="/invoice/grnindex" title="Goods receipt Note" data-filter-tags="goods receipt note">
+
+                                <span class="nav-link-text" data-i18n="nav.Goods Receipt Note">Goods Receipt Note</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "purchase invoice"))
+                    {
+                        <li>
+                            <a href="/invoice/purchaseinvoiceindex" title="Purchase Invoice" data-filter-tags="purchase invoice">
+
+                                <span class="nav-link-text" data-i18n="nav.Invoice">Purchase Invoice</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "purchase return note"))
+                    {
+                        <li>
+                            <a href="/invoice/prnindex" title="Purchase Return Note" data-filter-tags="purchase return note">
+
+                                <span class="nav-link-text" data-i18n="nav.Invoice">Purchase Return Note</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "debit note"))
+                    {
+                        <li>
+                            <a href="/invoice/debitnoteindex" title="Debit Note" data-filter-tags="debit note">
+
+                                <span class="nav-link-text" data-i18n="nav.Invoice">Debit Note</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+
+
+
+            </li>
+
+        }*@
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "formulation"
+              || x.ModuleName.ToLower() == "production note"))
+        {
+            <li>
+                <a href="#" title="Production" data-filter-tags="formulation production note">
+                    <i class="fal fa-cart-plus"></i>
+                    <span class="nav-link-text" data-i18n="nav.User">Production</span>
+                </a>
+                <ul>
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "formulation"))
+                    {
+                        <li>
+                            <a href="/formulation/formulationindex" title="Formulation" data-filter-tags="formulation">
+                                <span class="nav-link-text" data-i18n="nav.Formulation">Formulation</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == "production note"))
+                    {
+                        <li>
+                            <a href="/production/pnindex" title="production note" data-filter-tags="production note">
+                                <span class="nav-link-text" data-i18n="nav.Production">Production Note</span>
+                            </a>
+                        </li>
+                    }
+
+
+                </ul>
+            </li>
+
+        }*@
+       
+        
+
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "company"))
+        {
+            <li>
+                <a href="/company/companyindex" title="Customer Account" data-filter-tags="company">
+                    <i class="fal fa-building"></i>
+                    <span class="nav-link-text" data-i18n="nav.customer account">Company</span>
+                </a>
+            </li>
+        }*@
+      
+       
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "language"))
+        {
+            <li>
+                <a href="/language/languageindex" title="Language" data-filter-tags="Language">
+                    <i class="fal fa-language"></i>
+                    <span class="nav-link-text" data-i18n="nav.Language">Language</span>
+                </a>
+            </li>
+        }
+        @if (Model.Any(x => x.ModuleName.ToLower() == "region"))
+        {
+            <li>
+                <a href="/region/regionindex" title="Region" data-filter-tags="Region">
+                    <i class="fal fa-globe"></i>
+                    <span class="nav-link-text" data-i18n="nav.Region">Region</span>
+                </a>
+            </li>
+        }*@
+       
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "warehouse"))
+        {
+            <li>
+                <a href="/warehouse/warehouseindex" title="Warehouse" data-filter-tags="Warehouse">
+                    <i class="fal fa-home"></i>
+                    <span class="nav-link-text" data-i18n="nav.Warehouse">Warehouse</span>
+                </a>
+            </li>
+        }*@
+
+
+
+        @if (Model.Any(x => x.ModuleName.ToLower() == "setting"))
+        {
+            <li>
+                <a href="/home/setting" title="Setting" data-filter-tags="setting">
+                    <i class="fal fa-cog"></i>
+                    <span class="nav-link-text" data-i18n="nav.Setting">Settings</span>
+                </a>
+            </li>
+        }
+
+        <li>
+            <a href="/home/mainmenu" title="Setting" data-filter-tags="setting">
+                <i class="fal fa-home"></i>
+                <span class="nav-link-text" data-i18n="nav.Setting">Main Menu</span>
+            </a>
+        </li>
+
+    </ul>
+        <div class="filter-message js-filter-message bg-success-600"></div>
+    </nav>
+    @*<div class="nav-footer shadow-top">
+            <a href="#" onclick="return false;" data-action="toggle" data-class="nav-function-minify" class="hidden-md-down">
+                <i class="ni ni-chevron-right"></i>
+                <i class="ni ni-chevron-right"></i>
+            </a>
+            <ul class="list-table m-auto nav-footer-buttons">
+                <li>
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Chat logs">
+                        <i class="fal fa-comments"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Support Chat">
+                        <i class="fal fa-life-ring"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Make a call">
+                        <i class="fal fa-phone"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>*@
+</aside>

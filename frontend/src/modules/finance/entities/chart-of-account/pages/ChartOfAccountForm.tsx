@@ -70,6 +70,7 @@ const ChartOfAccountForm: React.FC = () => {
           accountType: data.accountType,
           parentAccountId: data.parentAccountId || undefined,
           currencyCode: data.currencyCode || undefined,
+          remarks: data.remarks || undefined,
           isActive: data.isActive ?? true,
           isPostingAllowed: data.isPostingAllowed ?? true,
         };
@@ -81,6 +82,7 @@ const ChartOfAccountForm: React.FC = () => {
           accountType: data.accountType,
           parentAccountId: data.parentAccountId || undefined,
           currencyCode: data.currencyCode || undefined,
+          remarks: data.remarks || undefined,
           isActive: data.isActive ?? true,
           isPostingAllowed: data.isPostingAllowed ?? true,
         };
@@ -101,6 +103,7 @@ const ChartOfAccountForm: React.FC = () => {
         accountType: account.accountType || "",
         parentAccountId: account.parentAccountId || "",
         currencyCode: account.currencyCode || "",
+        remarks: account.remarks || "",
         isActive: account.isActive ?? true,
         isPostingAllowed: account.isPostingAllowed ?? true,
       }
@@ -110,6 +113,7 @@ const ChartOfAccountForm: React.FC = () => {
         accountType: "",
         parentAccountId: "",
         currencyCode: "",
+        remarks: "",
         isActive: true,
         isPostingAllowed: true,
       };
@@ -203,6 +207,16 @@ const ChartOfAccountForm: React.FC = () => {
                 labelClassName="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2"
               />
 
+              <FormInput
+                label="Remarks"
+                type="text"
+                name="remarks"
+                placeholder="Location, bank, or other detail"
+                containerClass="mb-4"
+                className="form-input"
+                labelClassName="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2"
+              />
+
               <div className="flex items-center gap-6">
                 <FormInput
                   label="Is Active"
@@ -229,7 +243,7 @@ const ChartOfAccountForm: React.FC = () => {
                 Cancel
               </Link>
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? "Saving…" : isEdit ? "Save changes" : "Add Chart Of Account"}
+                {loading ? "Saving?" : isEdit ? "Save changes" : "Add Chart Of Account"}
               </button>
             </div>
           </VerticalForm>

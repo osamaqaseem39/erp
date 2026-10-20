@@ -1,0 +1,350 @@
+﻿<div id="CssData">
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            @@page {
+                size: A4;
+                margin-top: 7px;
+                margin-bottom: 2px;
+                margin-left: -45px;
+                /*page-break-after: always;*/
+            }
+
+            @@page:first {
+                size: A4;
+                margin-top: -30px;
+                margin-bottom: 2px;
+                margin-left: -45px;
+                /*page-break-after: always;*/
+            }
+
+            .mainTable {
+                width: 97.5% !important;
+                margin-left: 16px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .CustomersDetail {
+                padding-left: 316px !important;
+            }
+
+            .customerHeadingTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+        }
+
+        #printable-content table {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        #printable-content .heading {
+            border-width: 0px;
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        .mainTable {
+            width: 94.5%;
+            /*margin-top: -25px;*/
+            margin-bottom: 1px;
+            margin-left: 10px;
+            padding-right: 19px !important;
+        }
+
+            .mainTable td {
+                border-left: 1px solid black;
+                border-bottom: 1px solid black;
+            }
+
+        .borderRight {
+            border-right: 1px solid black;
+        }
+
+        .mainTable th {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        .mainTable th {
+            padding: 3px;
+        }
+
+        .mainTable td {
+            padding: 3px;
+        }
+
+        .printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }
+    </style>
+</div>
+<!-- widget content -->
+@model List<POS.Models.clsChartOfAccount>
+<div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-home fa-fw "></i>
+                Report
+                <span>
+                    >
+                    Financial Statement
+                </span>
+            </h1>
+        </div>
+    </div>
+    <section>
+        <div class="panel">
+            <div class="panel-heading">
+                @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                {
+                    <span class="header"> Financial Statement&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                    <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                    <input type="hidden" name="FileName" id="FileName" value="FinancialStatement" />
+                    @*<a id="backBtn" class="btn btn-labeled  btn-default defaultBtn" href="@Url.Action("saleorderindex", "sale")" style="color: #000 !important; background-color: #fff !important; height: 34px; width: 65px;line-height:31px">
+                            Back
+                        </a>*@
+                    <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                        Print
+                    </button>
+                    <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                }
+            </div>
+            <div class="panel-body">
+                <div id="HtmlData">
+
+                    <div id="printable-content" class="panel rpt" style=" float: left; min-width: 800px; font-family: Arial, Helvetica, sans-serif;">
+                        <table style="padding: 5px" class="heading">
+                            <thead>
+                                <tr>
+                                    <th style="font-weight: normal; font-size: 11px; text-align: left;padding-right:12px;padding-top:0px;border-bottom:none;" colspan="12" class="pull-right"><strong>Print Date:&nbsp;</strong>@*<span class="LocalDate"></span>*@@Convert.ToDateTime(DateTime.Now).ToString("dd/MM/yyyy hh:mm tt")</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 20px; text-align: center; padding-bottom: 5px;padding-top:15px" colspan="6">@System.Web.HttpContext.Current.Application["BusinessName"]</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: normal; font-size: 14px; text-align: center; padding-bottom: 5px;" colspan="6">@System.Web.HttpContext.Current.Application["BusinessAddress"]</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 18px; text-align: center;" colspan="6">Financial Statement</th>
+                                </tr>
+                                @if (Model.Count != 0)
+                                {
+                                    <tr>
+                                        <th style="font-weight: bold; font-size: 14px; text-align: center;" colspan="6"><strong><span style="font-size: 12px">Until Date:&nbsp;</span></strong>@Convert.ToDateTime(Model[0].ToDate).ToString("dd/MM/yyyy")</th>
+                                    </tr>
+                                }
+                            </thead>
+                            <tbody class="report_body"></tbody>
+                        </table>
+                        @{
+                            string marginTop = "";
+                            if (Model.Count == 0)
+                            {
+                                marginTop = "5px";
+                            }
+                            else
+                            {
+                                marginTop = "-25px";
+                            }
+                        }
+                        <table class="mainTable" style="@marginTop">
+                            <tr class="mainTr">
+                                <th style="text-align: center; width: 55px">Sr#</th>
+                                <th style="text-align:left;">Description</th>
+                                <th class="borderRight" style="text-align: right; width: 120px;padding-right:8px">Balance</th>
+                            </tr>
+                            @if (Model.Count != 0)
+                            {
+                                <tbody>
+                                    @{
+                                int j = 0;
+                                    }
+                                    @if (Model.Any(x => x.DetailName.ToLower() == "equity"))
+                                    {
+                                        j = 0;
+                                        decimal totalBalance = Convert.ToDecimal(Model.Where(x => x.DetailName.ToLower() == "equity").Sum(x => x.TotalBalance));
+                                        <tr class="mainTr">
+                                            <td style="text-align: left; font-weight: bold;padding-left:5px"></td>
+                                            <td style="text-align: left; font-weight: bold;border-left:0px;font-size:16px;color:green">EQUITY</td>
+                                            <td class="borderRight" style="text-align: right; border-left: 0px; font-weight: bold; font-size: 16px; color: green; padding-right: 8px; ">@Convert.ToDecimal(totalBalance).ToString("#,##0.00")</td>
+                                        </tr>
+                                        foreach (clsChartOfAccount s in Model.Where(x => x.DetailName.ToLower() == "equity"))
+                                        {
+                                            j++;
+                                            <tr class="mainTr">
+                                                <td style="text-align: center; font-weight: normal;">@(j)</td>
+                                                <td style="text-align: left; font-weight: normal;font-size:13px">@s.LineDetailName</td>
+                                                <td class="borderRight" style="text-align: right; font-weight: normal; font-size: 13px; padding-right: 8px; ">@Convert.ToDecimal(s.TotalBalance).ToString("#,##0.00")</td>
+                                            </tr>
+                                        }
+                                    }
+                                    @if (Model.Any(x => x.DetailName.ToLower() == "current liabilities"))
+                                    {
+                                        j = 0;
+                                        decimal totalBalance = Convert.ToDecimal(Model.Where(x => x.DetailName.ToLower() == "current liabilities").Sum(x => x.TotalBalance));
+                                        <tr class="mainTr">
+                                            <td style="text-align: left; font-weight: bold;padding-left:5px"></td>
+                                            <td style="text-align: left; font-weight: bold;border-left:0px;font-size:16px;color:green">CURRENT LIABILITIES</td>
+                                            <td class="borderRight" style="text-align: right; border-left: 0px; font-weight: bold; font-size: 16px; color: green; padding-right: 8px; ">@Convert.ToDecimal(totalBalance).ToString("#,##0.00")</td>
+                                        </tr>
+                                        foreach (clsChartOfAccount s in Model.Where(x => x.DetailName.ToLower() == "current liabilities"))
+                                        {
+                                            j++;
+                                            <tr class="mainTr">
+                                                <td style="text-align: center; font-weight: normal;">@(j)</td>
+                                                <td style="text-align: left; font-weight: normal;font-size:13px">@s.LineDetailName</td>
+                                                <td class="borderRight" style="text-align: right; font-weight: normal; font-size: 13px; padding-right: 8px; ">@Convert.ToDecimal(s.TotalBalance).ToString("#,##0.00")</td>
+                                            </tr>
+                                        }
+                                    }
+                                    @if (Model.Any(x => x.DetailName.ToLower() == "non-current liabilities"))
+                                    {
+                                        j = 0;
+                                        decimal totalBalance = Convert.ToDecimal(Model.Where(x => x.DetailName.ToLower() == "non-current liabilities").Sum(x => x.TotalBalance));
+                                        <tr class="mainTr">
+                                            <td style="text-align: left; font-weight: bold;padding-left:5px"></td>
+                                            <td style="text-align: left; font-weight: bold;border-left:0px;font-size:16px;color:green">NON-CURRENT LIABILITIES</td>
+                                            <td class="borderRight" style="text-align: right; border-left: 0px; font-weight: bold; font-size: 16px; color: green; padding-right: 8px; ">@Convert.ToDecimal(totalBalance).ToString("#,##0.00")</td>
+                                        </tr>
+                                        foreach (clsChartOfAccount s in Model.Where(x => x.DetailName.ToLower() == "non-current liabilities"))
+                                        {
+                                            j++;
+                                            <tr class="mainTr">
+                                                <td style="text-align: center; font-weight: normal;">@(j)</td>
+                                                <td style="text-align: left; font-weight: normal;font-size:13px">@s.LineDetailName</td>
+                                                <td class="borderRight" style="text-align: right; font-weight: normal; font-size: 13px; padding-right: 8px; ">@Convert.ToDecimal(s.TotalBalance).ToString("#,##0.00")</td>
+                                            </tr>
+                                        }
+                                    }
+                                    @if (Model.Any(x => x.DetailName.ToLower() == "current assets"))
+                                    {
+                                        j = 0;
+                                        decimal totalBalance = Convert.ToDecimal(Model.Where(x => x.DetailName.ToLower() == "current assets").Sum(x => x.TotalBalance));
+                                        <tr class="mainTr">
+                                            <td style="text-align: left; font-weight: bold;padding-left:5px"></td>
+                                            <td style="text-align: left; font-weight: bold;border-left:0px;font-size:16px;color:green">CURRENT ASSETS</td>
+                                            <td class="borderRight" style="text-align: right; border-left: 0px; font-weight: bold; font-size: 16px; color: green; padding-right: 8px; ">@Convert.ToDecimal(totalBalance).ToString("#,##0.00")</td>
+                                        </tr>
+                                        foreach (clsChartOfAccount s in Model.Where(x => x.DetailName.ToLower() == "current assets"))
+                                        {
+                                            j++;
+                                            <tr class="mainTr">
+                                                <td style="text-align: center; font-weight: normal;">@(j)</td>
+                                                <td style="text-align: left; font-weight: normal;font-size:13px">@s.LineDetailName</td>
+                                                <td class="borderRight" style="text-align: right; font-weight: normal; font-size: 13px; padding-right: 8px; ">@Convert.ToDecimal(s.TotalBalance).ToString("#,##0.00")</td>
+                                            </tr>
+                                        }
+                                    }
+                                    @if (Model.Any(x => x.DetailName.ToLower() == "non-current assets"))
+                                    {
+                                        j = 0;
+                                        decimal totalBalance = Convert.ToDecimal(Model.Where(x => x.DetailName.ToLower() == "non-current assets").Sum(x => x.TotalBalance));
+                                        <tr class="mainTr">
+                                            <td style="text-align: left; font-weight: bold;padding-left:5px"></td>
+                                            <td style="text-align: left; font-weight: bold;border-left:0px;font-size:16px;color:green">NON-CURRENT ASSETS</td>
+                                            <td class="borderRight" style="text-align: right; border-left: 0px; font-weight: bold; font-size: 16px; color: green; padding-right: 8px; ">@Convert.ToDecimal(totalBalance).ToString("#,##0.00")</td>
+                                        </tr>
+                                        foreach (clsChartOfAccount s in Model.Where(x => x.DetailName.ToLower() == "non-current assets"))
+                                        {
+                                            j++;
+                                            <tr class="mainTr">
+                                                <td style="text-align: center; font-weight: normal;">@(j)</td>
+                                                <td style="text-align: left; font-weight: normal;font-size:13px">@s.LineDetailName</td>
+                                                <td class="borderRight" style="text-align: right; font-weight: normal; font-size: 13px; padding-right: 8px; ">@Convert.ToDecimal(s.TotalBalance).ToString("#,##0.00")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            }
+                            else
+                            {
+                                <tbody>
+                                    <tr class="mainTr">
+                                        <td class="borderRight" colspan="3" style="text-align:center;padding:10px">No Record Found.</td>
+                                    </tr>
+                                </tbody>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END MAIN CONTENT -->
+@section pagespecific {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var cssData = $('#CssData').html();
+            var htmlData = $('#HtmlData').html();
+            $('#DocumentName').val(cssData + htmlData);
+        })
+        function PrintElem(elem) {
+            var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+            mywindow.document.write('<html><head><title></title>');
+            mywindow.document.write('</head><body>');
+            //mywindow.document.write('<h1></h1>');
+            mywindow.document.write(document.getElementById(elem).innerHTML);
+            mywindow.document.write('</body></html>');
+
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            mywindow.print();
+            mywindow.close();
+
+            return true;
+        }
+        $('.report_body tr td').each(function () {
+            if (parseFloat($(this).html()) > 0) {
+                $(this).html(ReplaceNumberWithCommas($(this).html()));
+            }
+        });
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+    </script>
+}

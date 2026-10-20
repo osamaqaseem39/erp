@@ -91,6 +91,8 @@ CREATE TABLE [Core].[Companies] (
     [Country] NVARCHAR(100),
     [ZipCode] NVARCHAR(20),
     [Phone] NVARCHAR(20),
+    [MobilePhone] NVARCHAR(30),
+    [ContactPerson] NVARCHAR(200),
     [Email] NVARCHAR(200),
     [Website] NVARCHAR(200),
     [LogoUrl] NVARCHAR(500),
@@ -101,6 +103,51 @@ CREATE TABLE [Core].[Companies] (
     [UpdatedBy] NVARCHAR(100),
     FOREIGN KEY ([TenantId]) REFERENCES [Core].[Tenants]([Id])
 );
+GO
+
+-- =============================================
+-- ADMIN EMAILS (notification directory — User module)
+-- =============================================
+CREATE TABLE [Core].[AdminEmails] (
+    [Id] UNIQUEIDENTIFIER PRIMARY KEY,
+    [TenantId] UNIQUEIDENTIFIER NOT NULL,
+    [Email] NVARCHAR(200) NOT NULL,
+    [Type] NVARCHAR(50) NOT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2,
+    [CreatedBy] NVARCHAR(100),
+    [UpdatedBy] NVARCHAR(100),
+    FOREIGN KEY ([TenantId]) REFERENCES [Core].[Tenants]([Id])
+);
+GO
+CREATE UNIQUE INDEX [UX_AdminEmails_Tenant_Email]
+    ON [Core].[AdminEmails]([TenantId], [Email])
+    WHERE [IsActive] = 1;
+GO
+
+-- =============================================
+-- FISCAL YEARS (posting periods)
+-- =============================================
+CREATE TABLE [Core].[FiscalYears] (
+    [Id] UNIQUEIDENTIFIER NOT NULL,
+    [FiscalYearId] UNIQUEIDENTIFIER PRIMARY KEY,
+    [TenantId] UNIQUEIDENTIFIER NOT NULL,
+    [Name] NVARCHAR(200) NOT NULL,
+    [StartDate] DATE NOT NULL,
+    [EndDate] DATE NOT NULL,
+    [Status] NVARCHAR(20) NOT NULL DEFAULT 'Active',
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2,
+    [CreatedBy] NVARCHAR(100),
+    [UpdatedBy] NVARCHAR(100),
+    FOREIGN KEY ([TenantId]) REFERENCES [Core].[Tenants]([Id])
+);
+GO
+CREATE UNIQUE INDEX [UX_FiscalYears_Tenant_Id] ON [Core].[FiscalYears]([TenantId], [Id]);
+CREATE INDEX [IX_FiscalYears_Tenant_Status_Dates]
+    ON [Core].[FiscalYears]([TenantId], [Status], [StartDate], [EndDate]);
 GO
 
 -- =============================================

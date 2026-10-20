@@ -1,0 +1,2116 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+@model POS.Models.clsAccountDetail
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="AccountDetailListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Partners / Drivers List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="accountDetailListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="DocumentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Attach Documents</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="documentsDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="CategoriesListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Items List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="categoriesListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ACDetailSubListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Sub Customers</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="ACDetailSubListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Partners / Driver Registration Form</h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("InsertUpdateDriverDetail", "chartofaccount", FormMethod.Post, new { id = "accountDetailForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (User.Save == 1)
+                                        {
+                                            <td style="width: 44%; padding-bottom: 5px; padding-left: 3px;text-align: right;" id="addTd">
+                                                <a title="Add New Driver" id="btnAddAccountDetail" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/plus2.png" style="width: 45px; height: 45px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveAccountDetail" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="listTd">
+                                                <a title="Driver List" id="btnAccountDetailList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#AccountDetailListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshAccountDetail" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 44%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitAccountDetail" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveAccountDetail" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px;text-align: right;" id="listTd">
+                                                <a title="Drivers List" id="btnAccountDetailList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#AccountDetailListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshAccountDetail" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitAccountDetail" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                    </tr>
+                                </table>
+                                <div class="col-md-12" id="accountCodeSection" style="padding-top: 15px; padding-bottom: 15px; " hidden>
+                                    <div class="col-md-8">
+                                        <input type="hidden" id="IsNewOrEdit" value="" />
+                                        <input type="hidden" id="AccountCode" value="0" />
+                                        <input type="hidden" id="HiddenTr" value="0" />
+                                        <input type="hidden" id="HiddenTrM" value="0" />
+                                        <input type="hidden" id="HiddenTrV" value="0" />
+                                        <label class="" style="font-size:16px;" hidden>
+                                            Code:
+                                            <span class="badge bg-color-blue" id="AccountCodeSpan" style="font-size:16px;border-radius:4px;padding:5px;"></span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2"></div>
+                                </div>
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Partners / Driver:</label>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-4">
+                                        <label>Driver Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" placeholder="Driver Name" name="DetailName" id="DetailName" style="width: 100%;" required />
+                                        </label>
+                                    </div>
+                                    <div class="col col-6" hidden>
+                                        <table class="" style="width: 100%;">
+                                            <tr>
+                                                <td style="width: 96%;" id="AccountNameTd"></td>
+                                                <td style="width: 2%;padding-left: 3px;padding-top:7px " id="AddPriceTd" hidden>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-circle btnAddPrice" data-toggle="modal" data-target="#CategoriesListModal" style="margin-top:10px;" title="Show Items">
+                                                        <i class="glyphicon glyphicon-plus" style="margin-top:-10px;margin-left:1px"></i>
+                                                    </a>
+                                                </td>
+                                                <td style="width: 2%;padding-left: 3px;padding-top:7px " id="AddDetailSub" hidden>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-circle btnAddDetailSub" data-toggle="modal" data-target="#ACDetailSubListModal" style="margin-top:10px;" title="Show Items">
+                                                        <i class="glyphicon glyphicon-user" style="margin-top:-10px;margin-left:1px"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col col-4" hidden>
+                                        <label>Company Formation Type</label>
+                                        @*<label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Company Formation Type" name="TaxType" id="TaxType" />
+                                            </label>*@
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="TaxType" name="TaxType">
+                                                @*<option value="" selected></option>*@
+                                                <option value="Limited Liability Partnership (LLP)">Limited Liability Partnership (LLP)</option>
+                                                <option value="Private Company Limited by Shares (LTD)">Private Company Limited by Shares (LTD)</option>
+                                                <option value="Partnership">Partnership</option>
+                                                <option value="Partnership Limited">Partnership Limited</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>National Insurance Number</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-id-card"></i>
+                                            <input type="text" placeholder="National Insurance Number" name="CNIC" id="CNIC" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>VAT #</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-sort-amount-asc"></i>
+                                            <input type="text" placeholder="VAT #" name="GST" id="GST" />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-md-8">
+                                        <label>Address</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-map-marker"></i>
+                                            <input type="text" placeholder="Address" name="Address" id="Address" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Licensing Authority</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" placeholder="Licensing Authority" name="UrduName" id="UrduName" />
+                                        </label>
+                                    </div>
+
+                                </div>
+                                
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-4">
+                                        <label>Post Code</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-map"></i>
+                                            <input type="text" placeholder="Post Code" name="AcDescription" id="AcDescription" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Mobile No.</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-mobile"></i>
+                                            <input type="text" placeholder="Mobile No." name="Cell1" id="Cell1" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4" hidden>
+                                        <label>Primary Contact No.</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-phone"></i>
+                                            <input type="text" placeholder="Primary Contact No." name="Phone1" id="Phone1" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Emergency Contact No.</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-phone"></i>
+                                            <input type="text" placeholder="Emergency Contact No." name="Phone2" id="Phone2" />
+                                        </label>
+                                    </div>
+                                    
+                                </div>
+
+                                
+                                
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-6">
+                                        <label>Communication Email</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-envelope"></i>
+                                            <input type="text" placeholder="Communication Email" name="CommEmail" id="CommEmail" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-6">
+                                        <label>Booking Email</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-envelope"></i>
+                                            <input type="text" placeholder="Booking Email" name="BookingEmail" id="BookingEmail" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4" hidden>
+                                        <label>Contact Number for Customers</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-phone"></i>
+                                            <input type="text" placeholder="Contact Number for Customers" name="Cell2" id="Cell2" />
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="row" style="padding-bottom: 15px;" hidden>
+                                    <div class="col col-4">
+                                        <label>Website</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-sitemap"></i>
+                                            <input type="text" placeholder="Website" name="Website" id="Website" />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;" hidden>
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Licence:</label>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 15px;" hidden>
+                                    
+                                    <div class="col col-4">
+                                        <label>DVLA driving Licence Number</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-sort-amount-asc"></i>
+                                            <input type="text" placeholder="Licence Number" name="NTN" id="NTN" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Licence Expiry Date</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-calendar"></i>
+                                            <input type="date" name="ExpiryDate" id="ExpiryDate" />
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-4" hidden>
+                                        <label>Licence Type (Number of Vehicles)</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" placeholder="Number of Vehicles" name="CreditDays" id="CreditDays" />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 15px;" hidden>
+                                    
+                                    <div class="col col-4">
+                                        <label>PCO Expiry Date</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-calendar"></i>
+                                            <input type="date" name="IssueDate" id="IssueDate" />
+                                        </label>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;" hidden>
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Main Contact/ Representative/ Authorised Person:</label>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;" hidden>
+                                    <div class="col col-4">
+                                        <label>First Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" placeholder="First Name" name="FirstName" id="FirstName" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Last Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" placeholder="Last Name" name="LastName" id="LastName" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Position</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" placeholder="Position" name="Position" id="Position" />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 5px;">
+                                    <div class="col col-6">
+                                        <label>Select Image</label>
+                                        <div class="input input-file">
+                                            <span class="button"><input type="file" id="ItemPicture" name="ItemPicture" onchange="this.parentNode.nextSibling.value = this.value">Browse</span><input type="text" id="AttachDocument" placeholder="Attach Document" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <img src="" id="DisplayImage" style="height:150px;width:100%" />
+                                    </div>
+                                </div>
+
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Daily Working Hours:</label>
+                                </div>
+    <div class="row" style="padding-bottom: 15px;">
+        <div class="col col-3">
+            <label>From</label>
+            <label class="input">
+                <input type="time" name="WorkFrom" id="WorkFrom" />
+            </label>
+        </div>
+        <div class="col col-3">
+            <label>Upto</label>
+            <label class="input">
+                <input type="time" name="WorkUpTo" id="WorkUpTo" />
+            </label>
+        </div>
+
+        <div class="col col-2">
+            <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                <input id="Monday" type="checkbox" name="Monday"><i></i>
+                Monday
+            </label>
+        </div>
+        <div class="col col-2">
+            <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                <input id="Tuesday" type="checkbox" name="Tuesday"><i></i>
+                Tuesday
+            </label>
+        </div>
+        <div class="col col-2">
+            <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                <input id="Wednesday" type="checkbox" name="Wednesday"><i></i>
+                Wednesday
+            </label>
+        </div>
+    </div>
+    <div class="row" style="padding-bottom: 15px;">
+        <div class="col col-2">
+            <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                <input id="Thursday" type="checkbox" name="Thursday"><i></i>
+                Thursday
+            </label>
+        </div>
+        <div class="col col-2">
+            <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                <input id="Friday" type="checkbox" name="Friday"><i></i>
+                Friday
+            </label>
+        </div>
+        <div class="col col-2">
+            <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                <input id="Saturday" type="checkbox" name="Saturday"><i></i>
+                Saturday
+            </label>
+        </div>
+        <div class="col col-2">
+            <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                <input id="Sunday" type="checkbox" name="Sunday"><i></i>
+                Sunday
+            </label>
+        </div>
+
+    </div>
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Portal/Security Information:</label>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-3">
+                                        <label>Email (User Name)</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-envelope"></i>
+                                            <input type="text" placeholder="Email" name="Email" id="Email" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label class="checkbox" style="margin-right: -20px; margin-top: 5px">
+                                            <input id="chkchangepassword" type="checkbox" name="chkchangepassword"><i></i>
+                                            Change Password (Edit Mode)
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Password</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-lock"></i>
+                                            <input type="password" placeholder="Password" name="Fax" id="Fax" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3" hidden>
+                                        <label>Admin User Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-envelope"></i>
+                                            <input type="text" placeholder="Admin User Name" name="AdminUser" id="AdminUser" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3" hidden>
+                                        <label>Password (Admin)</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-lock"></i>
+                                            <input type="password" placeholder="Admin Password" name="AdminPassword" id="AdminPassword" />
+                                        </label>
+                                    </div>
+                                </div>
+
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Bank Detail:</label>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-4">
+                                        <label>Account Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" placeholder="Account Name" name="AccountName" id="AccountName" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Account Number</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" placeholder="Account Number" name="ACNumber" id="ACNumber" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-4">
+                                        <label>Sort Code</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" placeholder="Sort Code" name="SortCode" id="SortCode" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-4">
+                                        <label>Bank Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" placeholder="Bank Name" name="BankName" id="BankName" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-8">
+                                        <label>Bank Address</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" placeholder="Bank Address" name="BankAddress" id="BankAddress" />
+                                        </label>
+                                    </div>
+                                </div>
+
+
+
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Additional Information:</label>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-10">
+                                        <label>Additional Information</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" placeholder="Additional Information" name="Remarks" id="Remarks" />
+                                        </label>
+                                    </div>
+                                    <section class="col col-2">
+                                        <label>Status</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="Status" name="Status">
+                                                <option value="Active" selected>Active</option>
+                                                <option value="Hold">Hold</option>
+                                                <option value="Inactive">Inactive</option>
+                                            </select>
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;" hidden>
+                                    <div class="col col-6">
+                                        <label>Can we contact you for urgent job ?</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="UrgentPick" name="UrgentPick">
+                                                <option value="No" selected>No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <section class="col col-4 UrgentTimeDiv" hidden>
+                                        <label>Contact Minimum Before (Minutes)</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-clock"></i>
+                                            <input type="text" placeholder="Minutes" name="UrgentPickTime" id="UrgentPickTime" />
+                                        </label>
+                                    </section>
+                                </div>
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Vehicles Information:</label>
+                                </div>
+                                <div class="row" style="padding-top: 15px; padding-bottom: 15px;padding-left:10px;padding-right:10px">
+                                    <div class="col-md-12">
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px">
+                                                <label>Vehicle Type</label>
+                                                <label class="select">
+                                                    <i class="append fa fa-caret-down"></i>
+                                                    @Html.DropDownListFor(model => model.CabTypeID, ViewBag.CabType as SelectList, new { @style = "width:100%", @id = "CabTypeID" })
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px">
+                                                <label>Registration No.</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-info"></i>
+                                                    <input type="text" placeholder="Registration No." name="RegNo" id="RegNo" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px">
+                                                <label>Make</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-info"></i>
+                                                    <input type="text" placeholder="Make" name="Make" id="Make" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px">
+                                                <label>Model</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-info"></i>
+                                                    <input type="text" placeholder="Model" name="Model" id="Model" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px">
+                                                <label>Colour</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-info"></i>
+                                                    <input type="text" placeholder="Colour" name="Colour" id="Colour" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px">
+                                                <label>Fuel Type</label>
+                                                <label class="select">
+                                                    <i class="append fa fa-caret-down"></i>
+                                                    <select id="FuelType" name="FuelType">
+                                                        <option value="" selected></option>
+                                                        <option value="Petrol">Petrol</option>
+                                                        <option value="Diesel">Diesel</option>
+                                                        <option value="Hybrid">Hybrid</option>
+                                                        <option value="Electric">Electric</option>                                                       			 
+                                                    </select>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <center>
+                                    <a title="Add Detail" id="btnAddVehDetail" href="javascript:void(0)" class="btn btn-primary" style="width:95px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                        <i class="fa fa-plus"></i> Add
+                                    </a>
+                                    <a title="Cancel" id="btnCancelVehDetail" href="javascript:void(0)" class="btn btn-default" style="width:75px; height:28px;color:#333; margin-bottom:8px;line-height:26px;border-radius:5px;" hidden>
+                                        Cancel
+                                    </a>
+                                </center>
+                                <div class="col-md-12" style="margin-bottom:40px">
+                                    <table id="FleetDetailTable" class="display nowrap cell-border table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th data-class="" style="width: 20px; background-color: #03386C; color: white; padding: 7px; text-align: center;border-right:none "></th>
+                                                <th data-class="" style="width: 20px; background-color: #03386C; color: white; padding: 7px; text-align: center; border-left: none; "></th>
+                                                <th data-hide="" style="width: 150px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Vehicle Type</th>
+                                                <th data-hide="" style="width: 200px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Reg. No.</th>
+                                                <th data-hide="" style="width: 90px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Make</th>
+                                                <th data-hide="" style="width: 120px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Model</th>
+                                                <th data-hide="" style="width: 90px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Colour</th>
+                                                <th data-hide="" style="width: 90px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Fuel Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+
+
+
+
+                                <div class="row" style="padding-top: 10px; padding-bottom: 10px;">
+                                    <label class="" style="font-size: 20px; color: #03386C; padding-left: 10px;">Documents Numbers:</label>
+                                </div>
+                                <div class="col-md-12" style="margin-bottom:40px">
+                                    <table id="DocDetailTable" class="display nowrap cell-border table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th data-hide="" style="width: 250px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Document Type</th>
+                                                <th data-hide="" style="width: 250px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Document No.</th>
+                                                <th data-hide="" style="width: 150px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Expiry</th>
+                                                <th data-hide="" style="width: 80px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Active</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div class="row" style="padding-bottom: 15px;" hidden>
+                                    <div class="col col-3">
+                                        <label>Select Type</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="Type" name="Type">
+                                                <option value="" selected></option>
+                                                <option value="Customer">Customer</option>
+                                                <option value="Supplier">Supplier</option>
+                                                <option value="Driver">Driver</option>
+                                                <option value="Customer + Supplier">Customer + Supplier</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Select Reference</label>
+                                        <label class="select">
+                                            <select id="ThirdLevelAccountCode" name="ThirdLevelAccountCode" style="width:100%"></select>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <label>Credit Limit</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" placeholder="Credit Limit" name="CreditLimit" id="CreditLimit" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Select City</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.CityId, ViewBag.City as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 15px;" hidden>
+                                    <div class="col col-3" hidden>
+                                        <label>Salesman</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.SalesmanID, ViewBag.Salesman as SelectList, new { @style = "width:100%", @id = "SalesmanID" })
+                                        </label>
+                                    </div>
+
+                                </div>
+
+
+                                <h1 class="heading-1" style="margin-top: 10px;margin-bottom:5px; color: #03386C;font-weight:bold "><span>Operating Zone Detail</span></h1>
+                                <div class="row" style="padding-top: 15px; padding-bottom: 15px;padding-left:10px;padding-right:10px">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div style="padding: 3px">
+                                                <label>Zone</label>
+                                                <label class="select">
+                                                    <i class="append fa fa-caret-down"></i>
+                                                    @Html.DropDownListFor(model => model.ZoneID, ViewBag.Zones as SelectList, new { @style = "width:100%", @id = "ZoneID" })
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <center>
+                                    <a title="Add Detail" id="btnAddModelDetail" href="javascript:void(0)" class="btn btn-primary" style="width:95px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                        <i class="fa fa-plus"></i> Add
+                                    </a>
+                                    <a title="Cancel" id="btnCancelModelDetail" href="javascript:void(0)" class="btn btn-default" style="width:75px; height:28px;color:#333; margin-bottom:8px;line-height:26px;border-radius:5px;" hidden>
+                                        Cancel
+                                    </a>
+                                </center>
+                                <div class="col-md-12" style="margin-top:10px;margin-bottom:40px">
+                                    <table id="ModelDetailTable" class="display nowrap cell-border table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th data-class="" style="width: 20px; background-color: #03386C; color: white; padding: 7px; text-align: center;border-right:none "></th>
+                                                <th data-class="" style="width: 20px; background-color: #03386C; color: white; padding: 7px; text-align: center; border-left: none; "></th>
+                                                <th data-hide="" style="width: 250px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Zones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                
+                                
+                                
+                                <div class="row deleteRow" hidden>
+                                    <section class="col col-md-12">
+                                        <table class="pull-right footer-nav" style="">
+                                            <tr>
+                                                <td></td>
+                                                <td>
+                                                    <a title="Delete First Level" id="btnDeleteAccountDetail" href="javascript:void(0)" class="btn btn-danger" style="width:75px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                                        Delete
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </section>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+
+        $('#btnAttachDocument').click(function () {
+            var voucherNo = $('#AccountCode').val();
+            $('#documentsDiv').load('@Url.Action("attachdocument", "documents")?type=Accounts&id=' + voucherNo + '');
+        })
+
+        $('#ItemPicture').change(function (e) {
+            var ext = $('#ItemPicture').val().split('.').pop().toLowerCase();
+            var size = document.getElementById('ItemPicture').files[0].size;
+            var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
+            if ($.inArray(ext, ['jpeg', 'jpg', 'png']) == -1) {
+                alert('Error! File type allowed : jpeg, jpg, png');
+                $('#ItemPicture').val('');
+                $('#ImageRow').attr("hidden", "hidden");
+                $('#AttachDocument').val('');
+            }
+            else if (size > (5000 * 1024)) {
+                alert('Error! Maximum File size must be 5 mb');
+                $('#ItemPicture').val('');
+                $('#ImageRow').attr("hidden", "hidden");
+                $('#AttachStaffDocument').val('');
+            }
+            else {
+
+                //Get count of selected files
+                var countFiles = $(this)[0].files.length;
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                $('#ImageRow').removeAttr("hidden");
+                $('#AttachDocument').val(filename);
+                if (typeof (FileReader) != "undefined") {
+                    //loop for each file selected for uploaded.
+                    for (var i = 0; i < countFiles; i++) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#DisplayImage").prop("src", e.target.result);
+                        }
+                        //image_holder.show();
+                        reader.readAsDataURL($(this)[0].files[i]);
+                    }
+
+                }
+                else {
+                    alert("This browser does not support FileReader.");
+                }
+            }
+        });
+
+        $('#btnAddVehDetail').click(function () {
+
+            var check = 0;
+            var CabTypeID = $('#CabTypeID').val();
+            var RegNo = $('#RegNo').val();
+            var Make = $('#Make').val();
+            var Model = $('#Model').val();
+            var Colour = $('#Colour').val();
+            var FuelType = $('#FuelType').val();
+
+            if (CabTypeID == '' || CabTypeID == null || isNaN(CabTypeID)) {
+                check = 1;
+            }
+            if (RegNo == '' || RegNo == null) {
+                check = 1;
+            }
+            if (Make == '' || Make == null) {
+                check = 1;
+            }
+            if (Model == '' || Model == null) {
+                check = 1;
+            }
+            if (Colour == '' || Colour == null) {
+                check = 1;
+            }
+            if (FuelType == '' || FuelType == null) {
+                check = 1;
+            }
+
+            if (check == 1) {
+                return false;
+            }
+
+            var CabName = $('#CabTypeID option:selected').text();
+            var vtable = $('#FleetDetailTable').DataTable();
+            if ($(this).html().trim() == '<i class="fa fa-plus"></i> Add') {
+                vtable.row.add([
+                    "<a href='javascript:void(0);' class='btn btn-success editRowBtnV' title='Edit' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-edit'></i></a>",
+                    "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtnV' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                    "<span><input type='hidden' class='ItemID01' value=" + CabTypeID + " />" + CabName + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + RegNo + " />" + RegNo + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + Make + " />" + Make + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + Model + " />" + Model + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + Colour + " />" + Colour + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + FuelType + " />" + FuelType + "</span>",
+                ]).draw(false);
+            }
+            else {
+                $('#btnAddVehDetail').html('<i class="fa fa-plus"></i> Add');
+                $('#btnCancelVehDetail').hide();
+                var tr = $('#HiddenTrV').val();
+                vtable.row(tr).data([
+                    "<a href='javascript:void(0);' class='btn btn-success editRowBtnV' title='Edit' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-edit'></i></a>",
+                    "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtnV' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                    "<span><input type='hidden' class='ItemID01' value=" + CabTypeID + " />" + CabName + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + RegNo + " />" + RegNo + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + Make + " />" + Make + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + Model + " />" + Model + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + Colour + " />" + Colour + "</span>",
+                    "<span><input type='hidden' class='ItemID01' value=" + FuelType + " />" + FuelType + "</span>",
+                ]).draw(false);
+            }
+
+            $('#CabTypeID').val(null).trigger('change');
+            $('#RegNo').val('');
+            $('#Make').val('');
+            $('#Model').val('');
+            $('#Colour').val('');
+            $('#FuelType').val('');
+
+        })
+        $('#btnCancelVehDetail').click(function () {            
+            $('#CabTypeID').val(null).trigger('change');
+            $('#RegNo').val('');
+            $('#Make').val('');
+            $('#Model').val('');
+            $('#Colour').val('');
+            $('#FuelType').val('');
+
+            $('#btnAddVehDetail').show();
+            $('#btnCancelVehDetail').hide();
+            $('#btnAddVehDetail').html('<i class="fa fa-plus"></i> Add');
+        })
+        $(document).on('click', '.editRowBtnV', function () {
+            var vtable = $('#FleetDetailTable').DataTable();
+            var tr = vtable.row($(this).parents('tr')).index();
+            $('#HiddenTrV').val(tr);
+            var data = vtable.row($(this).parents('tr')).data();
+            var CabTypeID = data[2].split('value=')[1].split('/>')[0].trim();
+            var RegNo = data[3].split('value=')[1].split('/>')[0].trim();
+            var Make = data[4].split('value=')[1].split('/>')[0].trim();
+            var Model = data[5].split('value=')[1].split('/>')[0].trim();
+            var Colour = data[6].split('value=')[1].split('/>')[0].trim();
+            var FuelType = data[7].split('value=')[1].split('/>')[0].trim();
+            
+            $('#CabTypeID').val(CabTypeID).trigger('change');
+            $('#RegNo').val(RegNo);
+            $('#Make').val(Make);
+            $('#Model').val(Model);
+            $('#Colour').val(Colour);
+            $('#FuelType').val(FuelType);
+
+            $('#btnAddVehDetail').html('<i class="fa fa-edit"></i> Change');
+            $('#btnCancelVehDetail').removeAttr("hidden");
+            $('#btnCancelVehDetail').show();
+        })
+        $(document).on('click', '.deleteRowBtnV', function () {
+            var vtable = $('#FleetDetailTable').DataTable();
+            var tr = vtable.row($(this).parents('tr')).index();
+            vtable.row(tr).remove().draw(false);
+            
+            $('#CabTypeID').val(null).trigger('change');
+            $('#RegNo').val('');
+            $('#Make').val('');
+            $('#Model').val('');
+            $('#Colour').val('');
+            $('#FuelType').val('');
+
+            $('#btnAddVehDetail').show();
+            $('#btnCancelVehDetail').hide();
+            $('#btnAddVehDetail').html('<i class="fa fa-plus"></i> Add');
+        })
+
+
+
+
+
+
+
+
+
+        $('#btnAddModelDetail').click(function () {
+
+            var check = 0;
+            var ZoneID = $('#ZoneID').val();
+            if (ZoneID == '' || ZoneID == null || isNaN(ZoneID)) {
+                check = 1;
+            }
+            if (check == 1) {
+                return false;
+            }
+
+            var ZoneName = $('#ZoneID option:selected').text();
+            var vtable = $('#ModelDetailTable').DataTable();
+            if ($(this).html().trim() == '<i class="fa fa-plus"></i> Add') {
+                vtable.row.add([
+                "<a href='javascript:void(0);' class='btn btn-success editRowBtnM' title='Edit' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-edit'></i></a>",
+                "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtnM' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                "<span><input type='hidden' class='ItemID01' value=" + ZoneID + " />" + ZoneName + "</span>",
+                ]).draw(false);
+            }
+            else {
+                $('#btnAddModelDetail').html('<i class="fa fa-plus"></i> Add');
+                $('#btnCancelModelDetail').hide();
+                var tr = $('#HiddenTrM').val();
+                vtable.row(tr).data([
+                "<a href='javascript:void(0);' class='btn btn-success editRowBtnM' title='Edit' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-edit'></i></a>",
+                "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtnM' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                "<span><input type='hidden' class='ItemID01' value=" + ZoneID + " />" + ZoneName + "</span>",
+                ]).draw(false);
+            }
+
+            $('#ZoneID').val(null).trigger('change');
+        })
+        $('#btnCancelModelDetail').click(function () {
+            $('#btnCancelModelDetail').hide();
+            $('#ZoneID').val(null).trigger('change');
+            $('#btnAddModelDetail').html('<i class="fa fa-plus"></i> Add');
+        })
+        $(document).on('click', '.editRowBtnM', function () {
+            var vtable = $('#ModelDetailTable').DataTable();
+            var tr = vtable.row($(this).parents('tr')).index();
+            $('#HiddenTrM').val(tr);
+            var data = vtable.row($(this).parents('tr')).data();
+            var ZoneID = data[2].split('value=')[1].split('/>')[0].trim();
+
+            $('#ZoneID').val(ZoneID).trigger('change');
+
+            $('#btnAddModelDetail').html('<i class="fa fa-edit"></i> Change');
+            $('#btnCancelModelDetail').removeAttr("hidden");
+            $('#btnCancelModelDetail').show();
+        })
+        $(document).on('click', '.deleteRowBtnM', function () {
+            var vtable = $('#ModelDetailTable').DataTable();
+            var tr = vtable.row($(this).parents('tr')).index();
+            vtable.row(tr).remove().draw(false);
+            $('#btnCancelModelDetail').hide();
+            $('#ZoneID').val(null).trigger('change');
+            $('#btnAddModelDetail').html('<i class="fa fa-plus"></i> Add');
+        })
+
+
+        $(document).ready(function () {
+            $('#ZoneID').select2();
+            $('#ZoneID').val(null).trigger('change');
+            $('#ThirdLevelAccountCode').select2();
+            $('#ThirdLevelAccountCode').val(null).trigger('change');
+            $('#SalesmanID').select2();
+            $('#CityId').select2();
+            $('#CityId').val(null).trigger('change');
+            $('#accountDetailForm').validate({
+                ignore: [],
+                // Rules for form validation
+                rules: {
+                    DetailName: {
+                        required: true
+                    },
+                    //ThirdLevelAccountCode: {
+                    //    required: true
+                    //},
+                    //Type: {
+                    //    required: true
+                    //},
+                    //CityId: {
+                    //    required: true
+                    //},
+                    //Email:{
+                    //    email: true
+                    //}
+                },
+                // Messages for form validation
+                messages: {
+                    DetailName: {
+                        required: 'Driver Name is required.'
+                    },
+                    //ThirdLevelAccountCode: {
+                    //    required: 'Reference is required.'
+                    //},
+                    //Type: {
+                    //    required: 'Type is required.'
+                    //},
+                    //CityId: {
+                    //    required: 'City is required.'
+                    //},
+                },
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+
+
+            var responsiveHelper_dt_basic_mod = undefined;
+            var responsiveHelper_datatable_fixed_column_mod = undefined;
+            var responsiveHelper_datatable_col_reorder_mod = undefined;
+            var responsiveHelper_datatable_tabletools_mod = undefined;
+
+            var breakpointDefinition_mod = {
+                tablet: 1024,
+                phone: 480
+            };
+            $('#ModelDetailTable').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    if (!responsiveHelper_dt_basic_mod) {
+                        responsiveHelper_dt_basic_mod = new ResponsiveDatatablesHelper($('#ModelDetailTable'), breakpointDefinition_mod);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic_mod.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic_mod.respond();
+                },
+                "bPaginate": false,
+                "serverSide": false,
+                "bLengthChange": false,
+                "processing": false,
+                "searching": false,
+                "bInfo": false,
+                "ordering": false,
+                "scrollX": true,
+                //"scrollY": 200
+            });
+
+
+            var vtablem = $('#ModelDetailTable').DataTable();
+            vtablem.clear().draw();
+
+
+
+
+
+
+
+            var responsiveHelper_dt_basic_ft = undefined;
+            var responsiveHelper_datatable_fixed_column_ft = undefined;
+            var responsiveHelper_datatable_col_reorder_ft = undefined;
+            var responsiveHelper_datatable_tabletools_ft = undefined;
+
+            var breakpointDefinition_ft = {
+                tablet: 1024,
+                phone: 480
+            };
+            $('#FleetDetailTable').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    if (!responsiveHelper_dt_basic_ft) {
+                        responsiveHelper_dt_basic_ft = new ResponsiveDatatablesHelper($('#FleetDetailTable'), breakpointDefinition_ft);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic_ft.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic_ft.respond();
+                },
+                "bPaginate": false,
+                "serverSide": false,
+                "bLengthChange": false,
+                "processing": false,
+                "searching": false,
+                "bInfo": false,
+                "ordering": false,
+                "scrollX": true,
+            });
+
+
+
+
+            var responsiveHelper_dt_basic_dt = undefined;
+            var responsiveHelper_datatable_fixed_column_dt = undefined;
+            var responsiveHelper_datatable_col_reorder_dt = undefined;
+            var responsiveHelper_datatable_tabletools_dt = undefined;
+
+            var breakpointDefinition_dt = {
+                tablet: 1024,
+                phone: 480
+            };
+            $('#DocDetailTable').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    if (!responsiveHelper_dt_basic_dt) {
+                        responsiveHelper_dt_basic_dt = new ResponsiveDatatablesHelper($('#DocDetailTable'), breakpointDefinition_dt);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic_dt.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic_dt.respond();
+                },
+                "bPaginate": false,
+                "serverSide": false,
+                "bLengthChange": false,
+                "processing": false,
+                "searching": false,
+                "bInfo": false,
+                "ordering": false,
+                "scrollX": true,
+            });
+
+
+            EnableFormFields();
+        })
+
+
+
+
+        function LoadDefaultVehicle(){
+            $.ajax({
+                type: "POST",
+                url: "/ChartOfAccount/GetAllCabType",
+                dataType: 'json',
+                success: function (data) {
+                    var referencetab = $('#FleetDetailTable').DataTable();
+                    referencetab.clear().draw();
+                    for (var key in data) {
+                        referencetab.row.add([
+                                "<span style='text-align:left;' class='text-left'><input type='hidden' class='gCabType' value=" + data[key].CabTypeID + " /><center style='text-align:left;'>" + data[key].Description + "</center></span>",
+                                "<span style='text-align:center;' class='text-center'><input type='text' class='gQty'style='width: 65px;text-align:center;' value=0 /><center></span>",
+                        ]).draw(false);
+                    }
+                }
+            });
+        }
+
+
+
+        function LoadDefaultDocuments() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+
+
+
+            $.ajax({
+                type: "POST",
+                url: "/ChartOfAccount/GetAllDocType",
+                dataType: 'json',
+                success: function (data) {
+                    var referencetab = $('#DocDetailTable').DataTable();
+                    referencetab.clear().draw();
+                    for (var key in data) {
+
+                        referencetab.row.add([
+                                "<span style='text-align:left;' class='text-left'><input type='hidden' class='gdoctype' value=" + data[key].CabTypeID + " /><center style='text-align:left;'>" + data[key].Description + "</center></span>",
+                                "<span style='text-align:center;' class='text-center'><input type='text' class='gdocnumber'style='width: 100%;text-align:center;' value='' /><center></span>",
+                                "<span style='text-align:center;' class='text-center'><input type='date' class='gdocexpiry'style='width: 100%;' /><center></span>",
+                                "<span style='text-align:center;' class='text-center'><input type='checkbox' class='gdocstatus'style='width: 65px;' /><center></span>",
+                        ]).draw(false);
+
+                        $('.gdocexpiry').val(today);
+                    }
+                }
+            });
+        }
+
+
+
+        $('#UrgentPick').change(function () {
+            var type = $(this).val();
+            if (type == "Yes") {
+                $('.UrgentTimeDiv').removeAttr("hidden");
+            } else {
+                $('.UrgentTimeDiv').attr("hidden", "hidden");
+            }
+        })
+
+        $('#Type').change(function () {
+            var type = $(this).val();
+            LoadReferenceCombo(type);
+        })
+        function LoadReferenceCombo(type) {
+                $.ajax({
+                    type: "POST",
+                    url: "/chartofaccount/getThirdLevelsList/",
+                    dataType: "json",
+                    data:{'type':type},
+                    success: function (response) {
+                        var select = $("#ThirdLevelAccountCode");
+                        select.children().remove();
+                        for (var key in response.data) {
+                            select.append('<option value="' + response.data[key].AccountCode + '">' + response.data[key].Description + '</option>');
+                        }
+                        select.select2('val','');
+                    }
+                });
+        }
+        $('#btnAddAccountDetail').click(function () {
+            EnableFormFields();
+        })
+        function EnableFormFields() {
+            $('#ThirdLevelAccountCode').select().enable(true);
+            $('#ThirdLevelAccountCode').val(null).trigger('change');
+            $('#CityId').select().enable(true);
+            $('#CityId').val(null).trigger('change');
+            $('#AccountNameTd').css("width", "100% !important");
+            $('#AddPriceTd').attr("hidden", "hidden");
+            $('#AddDetailSub').attr("hidden", "hidden");
+            $('#DetailName').prop("disabled", false);
+            $('#UrduName').prop("disabled", false);
+            $('#AcDescription').prop("disabled", false);
+            $('#Phone1').prop("disabled", false);
+            $('#Phone2').prop("disabled", false);
+            $('#Cell1').prop("disabled", false);
+            $('#Cell2').prop("disabled", false);
+            $('#Fax').prop("disabled", false);
+            $('#Email').prop("disabled", false);
+            $('#Website').prop("disabled", false);
+            $('#Address').prop("disabled", false);
+            $('#Type').prop("disabled", false);
+            $('#CreditDays').prop("disabled", false);
+            $('#CreditLimit').prop("disabled", false);
+            $('#TaxType').prop("disabled", false);
+            $('#GST').prop("disabled", false);
+            $('#NTN').prop("disabled", false);
+            $('#CNIC').prop("disabled", false);
+            $('#Remarks').prop("disabled", false);
+            $('#SalesmanID').select2().enable(true);
+            $('#SalesmanID').val(null).trigger('change');
+
+            $('#AdminUser').prop("disabled", false);
+            $('#AdminPassword').prop("disabled", false);
+            $('#AdminUser').val('');
+            $('#AdminPassword').val('');
+
+            $('#ItemPicture').prop("disabled", true);
+            $('#ItemPicture').val(null);
+            $('#AttachDocument').val('');
+            $('#DisplayImage').prop("src", "");
+
+            $('#Monday').prop("checked", false);
+            $('#Tuesday').prop("checked", false);
+            $('#Wednesday').prop("checked", false);
+            $('#Thursday').prop("checked", false);
+            $('#Friday').prop("checked", false);
+            $('#Saturday').prop("checked", false);
+            $('#Sunday').prop("checked", false);
+
+
+            $('#chkchangepassword').prop("checked", false);
+            
+
+            $('#UrgentPick').val('No');
+            $('.UrgentTimeDiv').attr("hidden", "hidden");
+            $('#UrgentPickTime').val('');
+
+            $('#BankAddress').val('');
+
+
+
+            $('#DetailName').val('');
+            $('#UrduName').val('');
+            $('#AcDescription').val('');
+            $('#Phone1').val('');
+            $('#Phone2').val('');
+            $('#Cell1').val('');
+            $('#Cell2').val('');
+            $('#Fax').val('');
+            $('#Email').val('');
+            $('#Website').val('');
+            $('#Address').val('');
+            $('#Type').val('');
+            $('#CreditDays').val('');
+            $('#CreditLimit').val('');
+            $('#TaxType').val('');
+            $('#GST').val('');
+            $('#NTN').val('');
+            $('#CNIC').val('');
+            $('#Remarks').val('');
+
+            $('#FirstName').val('');
+            $('#LastName').val('');
+            $('#Position').val('');
+            $('#CommEmail').val('');
+            $('#BookingEmail').val('');
+            $('#AccountName').val('');
+            $('#ACNumber').val('');
+            $('#SortCode').val('');
+            $('#BankName').val('');
+
+            $('#btnAddModelDetail').show();
+            $('#btnCancelModelDetail').hide();
+            $('#btnAddModelDetail').html('<i class="fa fa-plus"></i> Add');
+
+
+            $('#CabTypeID').select2().enable(true);
+            $('#CabTypeID').val(null).trigger('change');
+            $('#RegNo').val('');
+            $('#Make').val('');
+            $('#Model').val('');
+            $('#Colour').val('');
+            $('#FuelType').val('');
+
+            $('#btnAddVehDetail').show();
+            $('#btnCancelVehDetail').hide();
+            $('#btnAddVehDetail').html('<i class="fa fa-plus"></i> Add');
+
+            var vtablem = $('#ModelDetailTable').DataTable();
+            vtablem.clear().draw();
+
+
+            var vtablef = $('#FleetDetailTable').DataTable();
+            vtablef.clear().draw();
+
+            //LoadDefaultVehicle();
+            LoadDefaultDocuments();
+            GetTodayDate();
+
+            $('#documentTd').attr("hidden", "hidden");
+            $('#btnSaveAccountDetail').prop('disabled', false);
+            $('#saveTd').removeAttr("hidden");
+            $('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '47%', 'text-align': 'right' });
+            $.ajax({
+                type: "POST",
+                url: "/chartofaccount/getMaxCodeForDetail/",
+                dataType: 'json',
+                success: function (response) {
+                    $('#accountCodeSection').removeAttr("hidden");
+                    $('#IsNewOrEdit').val("New");
+                    $('#AccountCode').val(response);
+                    $('#AccountCodeSpan').html(response);
+                }
+            })
+            $('.deleteRow').attr("hidden", "hidden");
+            $('.StatusSection').attr("hidden", "hidden");
+        }
+        $('#btnRefreshAccountDetail').click(function () {
+            location.reload();
+        })
+        $('#btnAccountDetailList').click(function () {
+            $('#accountDetailListDiv').load('@Url.Action("DriverDetailsList", "chartofaccount")')
+        })
+        $('.btnAddPrice').click(function () {
+            var detailCode = $('#AccountCode').val();
+            $('#categoriesListDiv').load('@Url.Action("itemslistforprice", "chartofaccount")?detailCode=' + detailCode)
+        })
+        $('.btnAddDetailSub').click(function () {
+            var detailCode = $('#AccountCode').val();
+            $('#ACDetailSubListDiv').load('@Url.Action("SupplierDetailSub", "chartofaccount")?detailCode=' + detailCode)
+        })
+
+
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        function ClearFormFields() {
+            $('#ThirdLevelAccountCode').select().enable(false);
+            $('#ThirdLevelAccountCode').val(null).trigger('change');
+            $('#CityId').select().enable(false);
+            $('#AccountNameTd').css("width", "100% !important");
+            $('#AddPriceTd').attr("hidden", "hidden");
+            $('#AddDetailSub').attr("hidden", "hidden");
+            $('#CityId').val(null).trigger('change');
+            $('#DetailName').prop("disabled", true);
+            $('#UrduName').prop("disabled", true);
+            $('#AcDescription').prop("disabled", true);
+            $('#Phone1').prop("disabled", true);
+            $('#Phone2').prop("disabled", true);
+            $('#Cell1').prop("disabled", true);
+            $('#Cell2').prop("disabled", true);
+            $('#Fax').prop("disabled", true);
+            $('#Email').prop("disabled", true);
+            $('#Website').prop("disabled", true);
+            $('#Address').prop("disabled", true);
+            $('#Type').prop("disabled", true);
+            $('#CreditDays').prop("disabled", true);
+            $('#CreditLimit').prop("disabled", true);
+            $('#TaxType').prop("disabled", true);
+            $('#GST').prop("disabled", true);
+            $('#NTN').prop("disabled", true);
+            $('#CNIC').prop("disabled", true);
+            $('#Remarks').prop("disabled", true);
+            $('#SalesmanID').select2().enable(false);
+            $('#SalesmanID').val(null).trigger('change');
+
+            $('#AdminUser').prop("disabled", true);
+            $('#AdminPassword').prop("disabled", true);
+            $('#AdminUser').val('');
+            $('#AdminPassword').val('');
+            $('#UrgentPick').val('No');
+            $('.UrgentTimeDiv').attr("hidden", "hidden");
+            $('#UrgentPickTime').val('');
+
+            $('#DetailName').val('');
+            $('#UrduName').val('');
+            $('#AcDescription').val('');
+            $('#Phone1').val('');
+            $('#Phone2').val('');
+            $('#Cell1').val('');
+            $('#Cell2').val('');
+            $('#Fax').val('');
+            $('#Email').val('');
+            $('#Website').val('');
+            $('#Address').val('');
+            $('#Type').val('');
+            $('#CreditDays').val('');
+            $('#CreditLimit').val('');
+            $('#TaxType').val('');
+            $('#GST').val('');
+            $('#NTN').val('');
+            $('#CNIC').val('');
+            $('#Remarks').val('');
+            $('#btnSaveAccountDetail').prop('disabled', true);
+            $('#addTd').removeAttr("hidden");
+            $('#saveTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#accountCodeSection').attr("hidden", "hidden");
+            $('#IsNewOrEdit').val("New");
+            $('#AccountCode').val(0);
+            $('#AccountCodeSpan').html('0');
+            if ($('#CanSave').val() == 0) {
+                $('#listTd').css({ 'width': '47%', 'text-align': 'right' });
+                $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            }
+            $('.StatusSection').attr("hidden", "hidden");
+        }
+
+
+        function getAllVehicleModel() {
+            var arrayData = [];
+            var count = 0;
+            $('#FleetDetailTable tr[role="row"]').each(function () {
+                count++;
+            });
+            var rowsCount = count - 1;
+            var vtable = $('#FleetDetailTable').DataTable();
+            for (irow = 0; irow < rowsCount; irow++) {
+                var data = vtable.row(irow).data();
+                var CabTypeID = data[2].split('value=')[1].split('/>')[0].trim();
+                var RegNo = data[3].split('value=')[1].split('/>')[0].trim();
+                var Make = data[4].split('value=')[1].split('/>')[0].trim();
+                var Model = data[5].split('value=')[1].split('/>')[0].trim();
+                var Colour = data[6].split('value=')[1].split('/>')[0].trim();
+                var FuelType = data[7].split('value=')[1].split('/>')[0].trim();
+
+                var alldata = {
+                    'CabTypeID': CabTypeID,
+                    'NoOfVeh': 1,
+                    'RegNo': RegNo,
+                    'Make': Make,
+                    'Model': Model,
+                    'Colour': Colour,
+                    'FuelType': FuelType
+                }
+                arrayData.push(alldata);
+            }
+
+            console.log(arrayData);
+            return arrayData;
+        }
+
+
+
+        function getAllDocModel() {
+            var arrayData = [];
+            var count = 0;
+            $('#DocDetailTable tbody tr[role=row]').each(function () {
+                var vdoctype = $(this).find('.gdoctype').val();
+                var vdocno = $(this).find('.gdocnumber').val();
+                if (vdoctype == null || vdoctype == "" || isNaN(vdoctype)) { vdoctype = 0; }
+
+                var vdocexp = $(this).find('.gdocexpiry').val();
+
+                var vdocstatusnum = 0;
+                var vdocstatus = $(this).find('.gdocstatus').is(':checked');
+                if (vdocstatus == true) {
+                    vdocstatusnum = 1;
+                }
+
+
+                if (vdoctype != 0) {
+                    var alldata = {
+                        'DocumentTypeID': vdoctype,
+                        'DocumentNo': vdocno,
+                        'ExpiryDate': vdocexp,
+                        'DocStatus': vdocstatusnum,
+                    }
+                    arrayData.push(alldata);
+                }
+            });
+            console.log(arrayData);
+            return arrayData;
+        }
+
+
+
+
+        function getAllDataModel() {
+            var arrayData = [];
+            var count = 0;
+            $('#ModelDetailTable tr[role="row"]').each(function () {
+                count++;
+            });
+            var rowsCount = count - 1;
+            var vtable = $('#ModelDetailTable').DataTable();
+            for (irow = 0; irow < rowsCount; irow++) {
+                var data = vtable.row(irow).data();
+                var carmodel = data[2].split('value=')[1].split('/>')[0].trim();
+                var alldata = {
+                    'ZoneID': carmodel,
+                }
+                arrayData.push(alldata);
+            }
+            console.log(arrayData);
+            return arrayData;
+        }
+
+        $('#accountDetailForm').on('submit', function (e) {
+            if (!$("#accountDetailForm").valid()) {
+                return false;
+            }
+
+            //if ($('#TaxType').val() == "Other") {
+            //    if ($('#UrduName').val() == "" || $('#UrduName').val() == null) {
+            //        alert('Enter the Other Company Formation');
+            //        return false;
+            //    }
+            //}
+
+
+            //       Status
+            //$('#btnSaveAccountDetail').prop('disabled', true);
+            var isNewOrEdit = $('#IsNewOrEdit').val();
+            var accountCode = $('#AccountCode').val();
+            var detailName = $('#DetailName').val();
+            var urduName = $('#UrduName').val();
+            var description = $('#AcDescription').val();
+            var taxType = $('#TaxType').val();
+            var phone1 = $('#Phone1').val();
+            var phone2 = $('#Phone2').val();
+            var cell1 = $('#Cell1').val();
+            var cell2 = $('#Cell2').val();
+
+            var fax = "";
+
+            if (isNewOrEdit == "Edit") {
+                if ($('#chkchangepassword').is(':checked') == true) {
+                    fax = $('#Fax').val();
+                }
+            } else {
+                fax = $('#Fax').val();
+            }
+            
+            var email = $('#Email').val();
+            var website = $('#Website').val();
+            var address = $('#Address').val();
+            var type = "Driver"; //$('#Type').val();
+            var thirdLevel = 0; // $('#ThirdLevelAccountCode').val();
+            var creditDays = $('#CreditDays').val();
+            var creditLimit = $('#CreditLimit').val();
+            var salesmanId = $('#SalesmanID').val();
+            var cityId = $('#CityId').val();
+            var gst = $('#GST').val();
+            var ntn = $('#NTN').val();
+            var cnic = $('#CNIC').val();
+            var remarks = $('#Remarks').val();
+            var stringStatus = $('#Status').val();
+
+            var adminuser= $('#AdminUser').val();
+            var adminpassword = $('#AdminPassword').val();
+
+            var IssueDate = $('#IssueDate').val();
+            var ExpiryDate = $('#ExpiryDate').val();
+            var FirstName = $('#FirstName').val();
+            var LastName = $('#LastName').val();
+            var Position = $('#Position').val();
+            var CommEmail = $('#CommEmail').val();
+            var BookingEmail = $('#BookingEmail').val();
+            var AccountName = $('#AccountName').val();
+            var ACNumber = $('#ACNumber').val();
+            var SortCode = $('#SortCode').val();
+            var BankName = $('#BankName').val();
+            var BankAddress = $('#BankAddress').val();
+            var WorkFrom = $('#WorkFrom').val();
+            var WorkUpTo = $('#WorkUpTo').val();
+
+            var UrgentPick = $('#UrgentPick').val();
+            var UrgentPickTime = $('#UrgentPickTime').val();
+            if (UrgentPickTime == null || UrgentPickTime == "" || isNaN(UrgentPickTime)) { UrgentPickTime = 0;}
+
+            var Monday = "N";
+            if ($('#Monday').is(':checked') == true) { Monday = "Y"; }
+            var Tuesday = "N";
+            if ($('#Tuesday').is(':checked') == true) { Tuesday = "Y"; }
+            var Wednesday = "N";
+            if ($('#Wednesday').is(':checked') == true) { Wednesday = "Y"; }
+            var Thursday = "N";
+            if ($('#Thursday').is(':checked') == true) { Thursday = "Y"; }
+            var Friday = "N";
+            if ($('#Friday').is(':checked') == true) { Friday = "Y"; }
+            var Saturday = "N";
+            if ($('#Saturday').is(':checked') == true) { Saturday = "Y"; }
+            var Sunday = "N";
+            if ($('#Sunday').is(':checked') == true) { Sunday = "Y"; }
+
+
+            var VehicleDetail = JSON.stringify(getAllVehicleModel());
+            var ModelDetail = JSON.stringify(getAllDataModel());
+            var DocDetail = JSON.stringify(getAllDocModel());
+
+
+            var detail =
+            {
+                IsNewOrEdit: isNewOrEdit,
+                DetailCode: accountCode,
+                Name: detailName,
+                UrduName: urduName,
+                AcDescription: description,
+                TaxType: taxType,
+                Phone1: phone1,
+                Phone2: phone2,
+                Cell1: cell1,
+                Cell2: cell2,
+                AdminUser: adminuser,
+                AdminPassword: adminpassword,
+                Fax: fax,
+                Email: email,
+                Website: website,
+                Address: address,
+                Type: type,
+                AccountCode: thirdLevel,
+                CreditDays: creditDays,
+                CreditLimit: creditLimit,
+                CityId: cityId,
+                GST: gst,
+                NTN: ntn,
+                CNIC: cnic,
+                Remarks: remarks,
+                SalesmanID: salesmanId,
+                Status: stringStatus,
+
+                IssueDate: IssueDate,
+                ExpiryDate: ExpiryDate,
+                FirstName: FirstName,
+                LastName: LastName,
+                Position: Position,
+                CommEmail: CommEmail,
+                BookingEmail: BookingEmail,
+                AccountName: AccountName,
+                ACNumber: ACNumber,
+                SortCode: SortCode,
+                BankName: BankName,
+                UrgentPick: UrgentPick,
+                UrgentPickTime: UrgentPickTime,
+
+                BankAddress: BankAddress,
+                WorkFrom: WorkFrom,
+                WorkUpTo: WorkUpTo,
+
+                Monday:Monday, 
+                Tuesday:Tuesday,
+                Wednesday:Wednesday,
+                Thursday: Thursday,
+                Friday:Friday,
+                Saturday:Saturday,
+                Sunday:Sunday,
+            }
+
+
+            var url = $('#accountDetailForm')[0].action;
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'detail': detail, data: ModelDetail, vehdata: VehicleDetail, docdata: DocDetail }),
+                success: function (data) {
+                    if (data.status == true) {
+
+                        var extension = $('#ItemPicture').val().split('.').pop().toLowerCase();
+                        if (extension != '') {
+                            var typeId = data.detailid;
+                            var documentType = "Driver";
+                            var documentId = 0;
+                            var date = null;
+                            var remarks = "Driver Image";
+                            var documentdata = {
+                                DocumentId: documentId,
+                                DocumentType: documentType,
+                                TypeId: typeId,
+                                Date: date,
+                                Remarks: remarks,
+                                DocumentExtension: extension,
+                            }
+                            $.ajax({
+                                type: "POST",
+                                url: '/documents/AttachDocumentsForPost/',
+                                dataType: 'json',
+                                contentType: 'application/json; charset=utf-8',
+                                data: JSON.stringify({ 'doc': documentdata }),
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        var bannerImage = $("#ItemPicture").val();
+                                        var file = $('#ItemPicture').get(0).files;
+                                        var documentFile = file[0];
+                                        var extension = $('#ItemPicture').val().split('.').pop().toLowerCase();
+                                        var documentIdWithDocumentTypeWithExtension = data.documentId + "_" + data.documentType + "_" + data.typeId + "_" + extension;
+                                        var formData = new FormData();
+                                        formData.append(file.name, documentFile);
+                                        formData.append("DocumentName", $("#ItemPicture").text());
+
+                                        var xhr = new XMLHttpRequest();
+                                        var url = '/documents/UploadDocument/' + documentIdWithDocumentTypeWithExtension;
+                                        xhr.open('POST', url, true);
+
+                                        xhr.onload = function (e) {
+                                            var response = $.parseJSON(e.target.response);
+                                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                    ' <strong>Success! </strong>' +
+                                                    'Driver Saved Succesfully.' +
+                                                '</div>');
+                                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                                $("#success-alert").slideUp(500);
+                                                $('.alertDiv').html('');
+                                            });
+                                            EnableFormFields();
+                                        };
+                                        xhr.send(formData);  // multipart/form-data
+                                    }
+                                    else {
+                                        alert("Error! Please try again.");
+                                    }
+                                }
+                            })
+                        }
+                        else {
+                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                    ' <strong>Success! </strong>' +
+                                                    'Driver Saved Succesfully.' +
+                                                '</div>');
+                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert").slideUp(500);
+                                $('.alertDiv').html('');
+                            });
+                                //$.notify("First Level Saved Successfully.", "success");
+                            EnableFormFields();
+                        }
+                        
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSaveAccountDetail').prop('disabled', false);
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        $('#btnDeleteAccountDetail').click(function () {
+            var accCode = $('#AccountCode').val();
+            DeleteAccountDetail(accCode);
+        })
+        function DeleteAccountDetail(id) {
+            var a = $.confirm({
+                title: 'Delete Detail',
+                content: 'Are you sure u want to delete this detail?',
+                type: 'white',
+                buttons: {
+                    ok: {
+                        text: "Yes",
+                        btnClass: 'btnConfirm',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: '/chartofaccount/deleteaccountdetail/' + id,
+                                type: "POST",
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        location.reload();
+                                    }
+                                    else {
+                                        alert(data.message);
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-default',
+                        keys: ['esc'],
+                        action: function () {
+                            a.close();
+                        }
+                    },
+                }
+            });
+        }
+
+        $("#CreditLimit").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#CreditDays").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        function NumberPostive(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 8) && (charCode != 127) && (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function NumberPostiveNegativeWithDecimal(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#IssueDate').val(today);
+            $('#ExpiryDate').val(today);
+
+
+
+            var date = new Date();
+            var vhour = date.getHours();
+            if (vhour.toString().length == 1) { vhour = '0' + vhour; }
+            var vmint = date.getMinutes();
+            if (vmint.toString().length == 1) { vmint = '0' + vmint; }
+            var currentTime = vhour + ':' + vmint;
+            $("#WorkFrom").val(currentTime);
+            $("#WorkUpTo").val(currentTime);
+        }
+    </script>
+}

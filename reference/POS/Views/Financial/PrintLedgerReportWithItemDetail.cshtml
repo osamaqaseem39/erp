@@ -1,0 +1,1318 @@
+﻿<div id="CssData">
+
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            @@page {
+                size: A4;
+                margin-left: -50px;
+            }
+
+            @@page:first {
+                size: A4;
+                margin-top: -40px;
+                margin-left: -50px;
+                margin-bottom: 10px;
+            }
+
+            .mainTable {
+                width: 97.5% !important;
+                margin-left: 16px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .CustomersDetail {
+                padding-left: 316px !important;
+            }
+
+            .customerHeadingTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            #myTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .purchaseHeading {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            a[href]:after {
+                content: none !important;
+            }
+        }
+
+        #printable-content table {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        #printable-content .heading {
+            border-width: 0px;
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        .mainTable {
+            width: 94.5%;
+            /*margin-top: -25px;*/
+            margin-bottom: 1px;
+            margin-left: 10px;
+            padding-right: 19px !important;
+        }
+
+            .mainTable td {
+                border-left: 1px solid black;
+                border-bottom: 1px solid black;
+            }
+
+        .borderRight {
+            border-right: 1px solid black;
+        }
+
+        .mainTable th {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        .mainTable th {
+            padding: 3px;
+        }
+
+        .mainTable td {
+            padding: 3px;
+        }
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }*/
+    </style>
+</div>
+
+<!-- widget content -->
+@model POS.Models.clsVoucher
+<div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-home fa-fw "></i>
+                Report
+                <span>
+                    >
+                    Ledger Report
+                </span>
+            </h1>
+        </div>
+    </div>
+    <section>
+        <div class="panel">
+            <div class="panel-heading">
+                @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @id = "downloadForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                {
+                    <span class="header"> Ledger Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                    <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                    <input type="hidden" name="FileName" id="FileName" value="LedgerReport" />
+                    <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                        Print
+                    </button>
+                    <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                }
+            </div>
+            <div class="panel-body">
+                <div id="HtmlData">
+                    <div id="printable-content" class="panel rpt" style=" float: left;width: 800px; font-family: Arial, Helvetica, sans-serif;">
+                        <table style="padding: 30px;padding-top:0px" id="myTable">
+                            <tr>
+                                <th style="font-weight: bold; font-size: 12px; text-align: right;font-weight:normal" colspan="12"><strong>Print Date:&nbsp;</strong>@*<span class="LocalDate"></span>*@@Convert.ToDateTime(DateTime.Now).ToString("dd/MM/yyyy hh:mm tt")</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: bold; font-size: 20px; text-align: center; padding-bottom: 5px;padding-top:15px" colspan="6">@System.Web.HttpContext.Current.Application["BusinessName"]</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: normal; font-size: 14px; text-align: center; padding-bottom: 5px;" colspan="6">@System.Web.HttpContext.Current.Application["BusinessAddress"]</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: bold; font-size: 18px; text-align: center;" colspan="6">Ledger</th>
+                            </tr>
+                            @if (Model.VouchersList.Count != 0)
+                            {
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 14px; text-align: center;" colspan="6"><strong><span style="font-size: 13px">From:</span> </strong>@Convert.ToDateTime(Model.VouchersList[0].FromDate).ToString("dd/MM/yyyy")&nbsp; <strong><span style="font-size:16px">To:</span></strong>@Convert.ToDateTime(Model.VouchersList[0].ToDate).ToString("dd/MM/yyyy")</th>
+                                </tr>
+                            }
+                            <thead>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding-bottom: 10px" colspan="12">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="12">
+                                        <center>
+                                            @for (int i = 0; i < Model.DetailList.Count; i++)
+                                            {
+                                                decimal detailCode = Model.DetailList[i].DetailCode;
+                                                decimal balance = 0;
+
+                                                <div style="border:1px solid black; padding:5px;width:96%;border-radius:10px;margin-top:10px">
+                                                    <table style="margin-bottom: 30px;margin-top:3px;" class="purchaseHeading">
+                                                        <tbody>
+                                                            <tr>
+                                                                @if (string.IsNullOrEmpty(Model.DetailList[i].CityName))
+                                                                {
+                                                                    <th style="font-weight: bold; font-size: 18px; text-align: left;width:100%;padding-left:14px" class="accountName" colspan="2">@Model.DetailList[i].Name</th>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <th style="font-weight: bold; font-size: 18px; text-align: left;width:100%;padding-left:14px" class="accountName" colspan="2">@Model.DetailList[i].Name, @Model.DetailList[i].CityName</th>
+                                                                }
+                                                            </tr>
+                                                            <tr>
+                                                                <th style="font-size: 14px; text-align: left; width: 100%; padding-left: 14px; font-weight: normal;" class="businssName RouteName" colspan="2">@Model.DetailList[i].Address</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th style="font-size: 14px; text-align: left; width: 50%; padding-left: 14px;font-weight:normal " class="businssName RouteName" colspan="1">@Model.DetailList[i].Phone1</th>
+                                                                @if (Model.VouchersList.Count != 0 && Model.VouchersList[0].OpeningBalanceType == "With Opening Balance")
+                                                                {
+                                                                    <th style="font-size: 14px; text-align: right; width: 50%; padding-right: 14px; " class="businssName RouteName" colspan="1">Previous Balance: @Convert.ToDecimal(Model.DetailList[i].PreviousBalance).ToString("#,##0.00")</th>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <th style="font-size: 14px; text-align: right; width: 50%; padding-right: 14px; " class="businssName RouteName" colspan="1">Previous Balance: 0.00</th>
+                                                                }
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    @if (Model.VouchersList.Where(x => x.DetailCode == detailCode).Count() != 0)
+                                                    {
+                                                        int j = 0;
+                                                        decimal totalDebit = 0;
+                                                        decimal totalCredit = 0;
+                                                        string marginTop = "";
+                                                        if (i == 0)
+                                                        {
+                                                            marginTop = "-48px";
+                                                        }
+                                                        else
+                                                        {
+                                                            marginTop = "-48px";
+                                                        }
+                                                        <div class="table-responsive">
+                                                            <table class="mainTable" style="margin-top: @marginTop">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;border-bottom:1px solid black" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tr class="mainTr">
+                                                                    <th style="text-align: center; width: 25px">Sr#</th>
+                                                                    <th style="text-align:center;width:90px">Date</th>
+                                                                    <th style="text-align: center;width:110px">Voucher No.</th>
+                                                                    @*
+                                    <th style="text-align: center; width: 45px">Ref<br />No.</th>*@
+                                                                    <th style="text-align: left;">Particular</th>
+                                                                    <th style="text-align: center; width: 45px">Qty</th>
+                                                                    <th style="text-align: right; width: 45px">Rate</th>
+                                                                    <th style="text-align: right; width: 45px">Tax1</th>
+                                                                    <th style="text-align: right; width: 45px; ">Tax2</th>
+                                                                    <th style="text-align: right; width: 75px">Net Rate</th>
+                                                                    @if (Model.VouchersList[0].DebitCreditType == "All")
+                                                                    {
+                                                                        <th style="text-align: right; width: 50px">Debit</th>
+                                                                        <th style="text-align: right; width: 50px">Credit</th>
+                                                                    }
+                                                                    else if (Model.VouchersList[0].DebitCreditType == "Debit")
+                                                                    {
+                                                                        <th style="text-align: right; width: 50px">Debit</th>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <th style="text-align: right; width: 50px">Credit</th>
+                                                                    }
+                                                                    <th class="borderRight" style="text-align: right; width: 50px">Balance</th>
+                                                                </tr>
+                                                                <tbody>
+                                                                    @if (Model.VouchersList[0].DebitCreditType == "All")
+                                                                    {
+                                                                        foreach (clsVoucher v in Model.VouchersList.Where(x => x.DetailCode == detailCode))
+                                                                        {
+                                                                            j++;
+                                                                            totalDebit += Convert.ToDecimal(v.Debit);
+                                                                            totalCredit += Convert.ToDecimal(v.Credit);
+                                                                            string href = "";
+                                                                            if (j == 1)
+                                                                            {
+                                                                                decimal previousBalance = Convert.ToDecimal(Model.DetailList[i].PreviousBalance);
+                                                                                balance = previousBalance + Convert.ToDecimal(v.Debit) - Convert.ToDecimal(v.Credit);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                balance = balance + Convert.ToDecimal(v.Debit) - Convert.ToDecimal(v.Credit);
+                                                                            }
+                                                                            if ((v.VoucherType == "Purchase" || v.VoucherType == "Purchase Return" || v.VoucherType == "Sale" || v.VoucherType == "Sale Return")
+                                                                            && (v.DetailType == "Customer" || v.DetailType == "Supplier" || v.DetailType == "Customer + Supplier"))
+                                                                            {
+                                                                                string borderBottom = "";
+                                                                                if (v.InvoicesList.Count > 1)
+                                                                                {
+                                                                                    borderBottom = "none";
+                                                                                }
+                                                                                <tr class="mainTr">
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@j</td>
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@Convert.ToDateTime(v.VoucherDate).ToString("dd/MM/yy")</td>
+                                                                                    @if (v.VoucherType == "Sale")
+                                                                                    {
+                                                                                        href = "/sale/saleinvoicereport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Sale Return")
+                                                                                    {
+                                                                                        href = "/sale/salereturnreport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase")
+                                                                                    {
+                                                                                        href = "/purchase/purchaseinvoicereport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase Return")
+                                                                                    {
+                                                                                        href = "/purchase/purchasereturnreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Payment")
+                                                                                    {
+                                                                                        href = "/cash/cashpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Receipt")
+                                                                                    {
+                                                                                        href = "/cash/cashreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Payment")
+                                                                                    {
+                                                                                        href = "/bank/bankpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Receipt")
+                                                                                    {
+                                                                                        href = "/bank/bankreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Journal Voucher")
+                                                                                    {
+                                                                                        href = "/journalvoucher/journalvoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Ledger")
+                                                                                    {
+                                                                                        href = "/journalvoucher/ledgervoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        href = "/journalvoucher/VoucherReport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count"><a class="aTag" href="@href" title="Print this Voucher" target="_blank" style="color: #3276B1">@v.VoucherNo</a></td>
+                                                                                    @*
+                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@v.RefrenceNo</td>*@
+                                                                                    <td style="text-align: left; border-top: none;">@v.InvoicesList[0].ItemName</td>
+                                                                                    <td style="text-align: center; border-top: none;">@v.InvoicesList[0].Qty</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].Rate</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].Tax1Value</td>
+                                                                                    <td style="text-align: right; border-top: none; ">@v.InvoicesList[0].Tax2Value</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].NetValue</td>
+                                                                                    @if (v.Debit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #F0FFF0;" rowspan="@v.InvoicesList.Count">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td style="text-align: right; background-color: #F0FFF0;" rowspan="@v.InvoicesList.Count">@Convert.ToDecimal(v.Debit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (v.Credit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #BEEEFF;" rowspan="@v.InvoicesList.Count">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td style="text-align: right; background-color: #BEEEFF;" rowspan="@v.InvoicesList.Count">@Convert.ToDecimal(v.Credit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (balance < 0)
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;" rowspan="@v.InvoicesList.Count">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;" rowspan="@v.InvoicesList.Count">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                </tr>
+                                                                                for (int m = 0; m < v.InvoicesList.Count; m++)
+                                                                                {
+                                                                                    if (m > 0)
+                                                                                    {
+                                                                                        <tr class="mainTr">
+                                                                                            <td style="text-align: left; border-top: none;">@v.InvoicesList[m].ItemName</td>
+                                                                                            <td style="text-align: center; border-top: none;">@v.InvoicesList[m].Qty</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].Rate</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].Tax1Value</td>
+                                                                                            <td style="text-align: right; border-top: none; ">@v.InvoicesList[m].Tax2Value</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].NetValue</td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <tr class="mainTr">
+                                                                                    <td style="text-align: center;">@j</td>
+                                                                                    <td style="text-align:center">@Convert.ToDateTime(v.VoucherDate).ToString("dd/MM/yy")</td>
+                                                                                    @if (v.VoucherType == "Sale")
+                                                                                    {
+                                                                                        href = "/sale/saleinvoicereport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Sale Return")
+                                                                                    {
+                                                                                        href = "/sale/salereturnreport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase")
+                                                                                    {
+                                                                                        href = "/purchase/purchaseinvoicereport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase Return")
+                                                                                    {
+                                                                                        href = "/purchase/purchasereturnreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Payment")
+                                                                                    {
+                                                                                        href = "/cash/cashpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Receipt")
+                                                                                    {
+                                                                                        href = "/cash/cashreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Payment")
+                                                                                    {
+                                                                                        href = "/bank/bankpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Receipt")
+                                                                                    {
+                                                                                        href = "/bank/bankreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Journal Voucher")
+                                                                                    {
+                                                                                        href = "/journalvoucher/journalvoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Ledger")
+                                                                                    {
+                                                                                        href = "/journalvoucher/ledgervoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        href = "/journalvoucher/VoucherReport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    <td style="text-align: center;"><a class="aTag" href="@href" title="Print this Voucher" target="_blank" style="color: #3276B1">@v.VoucherNo</a></td>
+                                                                                    @*
+                                                    <td style="text-align: center;">@v.RefrenceNo</td>*@
+                                                                                    <td style="text-align: left;">@v.Remarks</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center; ">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    @if (v.Debit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #F0FFF0;">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+
+                                                                                        <td style="text-align: right; background-color: #F0FFF0;">@Convert.ToDecimal(v.Debit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (v.Credit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #BEEEFF;">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td style="text-align: right; background-color: #BEEEFF;">@Convert.ToDecimal(v.Credit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (balance < 0)
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                </tr>
+                                                                            }
+                                                                        }
+                                                                        <tr class="mainTr">
+                                                                            <td style="text-align: right; border: 1px solid #fff; font-weight: bold; font-size: 14px; " colspan="9">Total: </td>
+                                                                            <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #F0FFF0; ">@Convert.ToDecimal(totalDebit).ToString("#,##0.00")</td>
+                                                                            <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #BEEEFF;">@Convert.ToDecimal(totalCredit).ToString("#,##0.00")</td>
+                                                                            @if (balance < 0)
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                            }
+                                                                        </tr>
+                                                                    }
+                                                                    else if (Model.VouchersList[0].DebitCreditType == "Debit")
+                                                                    {
+                                                                        foreach (clsVoucher v in Model.VouchersList.Where(x => x.DetailCode == detailCode && x.Debit != 0))
+                                                                        {
+                                                                            j++;
+                                                                            totalDebit += Convert.ToDecimal(v.Debit);
+                                                                            totalCredit += Convert.ToDecimal(v.Credit);
+                                                                            string href = "";
+                                                                            if (j == 1)
+                                                                            {
+                                                                                decimal previousBalance = Convert.ToDecimal(Model.DetailList[i].PreviousBalance);
+                                                                                balance = previousBalance + Convert.ToDecimal(v.Debit) - Convert.ToDecimal(v.Credit);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                balance = balance + Convert.ToDecimal(v.Debit) - Convert.ToDecimal(v.Credit);
+                                                                            }
+                                                                            if ((v.VoucherType == "Purchase" || v.VoucherType == "Purchase Return" || v.VoucherType == "Sale" || v.VoucherType == "Sale Return")
+                                                                            && (v.DetailType == "Customer" || v.DetailType == "Supplier" || v.DetailType == "Customer + Supplier"))
+                                                                            {
+                                                                                string borderBottom = "";
+                                                                                if (v.InvoicesList.Count > 1)
+                                                                                {
+                                                                                    borderBottom = "none";
+                                                                                }
+                                                                                <tr class="mainTr">
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@j</td>
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@Convert.ToDateTime(v.VoucherDate).ToString("dd/MM/yy")</td>
+                                                                                    @if (v.VoucherType == "Sale")
+                                                                                    {
+                                                                                        href = "/sale/saleinvoicereport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Sale Return")
+                                                                                    {
+                                                                                        href = "/sale/salereturnreport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase")
+                                                                                    {
+                                                                                        href = "/purchase/purchaseinvoicereport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase Return")
+                                                                                    {
+                                                                                        href = "/purchase/purchasereturnreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Payment")
+                                                                                    {
+                                                                                        href = "/cash/cashpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Receipt")
+                                                                                    {
+                                                                                        href = "/cash/cashreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Payment")
+                                                                                    {
+                                                                                        href = "/bank/bankpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Receipt")
+                                                                                    {
+                                                                                        href = "/bank/bankreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Journal Voucher")
+                                                                                    {
+                                                                                        href = "/journalvoucher/journalvoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Ledger")
+                                                                                    {
+                                                                                        href = "/journalvoucher/ledgervoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        href = "/journalvoucher/VoucherReport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count"><a class="aTag" href="@href" title="Print this Voucher" target="_blank" style="color: #3276B1">@v.VoucherNo</a></td>
+                                                                                    @*
+                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@v.RefrenceNo</td>*@
+                                                                                    <td style="text-align: left; border-top: none;">@v.InvoicesList[0].ItemName</td>
+                                                                                    <td style="text-align: center; border-top: none;">@v.InvoicesList[0].Qty</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].Rate</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].Tax1Value</td>
+                                                                                    <td style="text-align: right; border-top: none; ">@v.InvoicesList[0].Tax2Value</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].NetValue</td>
+                                                                                    @if (v.Debit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #F0FFF0;" rowspan="@v.InvoicesList.Count">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td style="text-align: right; background-color: #F0FFF0;" rowspan="@v.InvoicesList.Count">@Convert.ToDecimal(v.Debit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (balance < 0)
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;" rowspan="@v.InvoicesList.Count">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;" rowspan="@v.InvoicesList.Count">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                </tr>
+                                                                                for (int m = 0; m < v.InvoicesList.Count; m++)
+                                                                                {
+                                                                                    if (m > 0)
+                                                                                    {
+                                                                                        <tr class="mainTr">
+                                                                                            <td style="text-align: left; border-top: none;">@v.InvoicesList[m].ItemName</td>
+                                                                                            <td style="text-align: center; border-top: none;">@v.InvoicesList[m].Qty</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].Rate</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].Tax1Value</td>
+                                                                                            <td style="text-align: right; border-top: none; ">@v.InvoicesList[m].Tax2Value</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].NetValue</td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <tr class="mainTr">
+                                                                                    <td style="text-align: center;">@j</td>
+                                                                                    <td style="text-align:center">@Convert.ToDateTime(v.VoucherDate).ToString("dd/MM/yy")</td>
+                                                                                    @if (v.VoucherType == "Sale")
+                                                                                    {
+                                                                                        href = "/sale/saleinvoicereport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Sale Return")
+                                                                                    {
+                                                                                        href = "/sale/salereturnreport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase")
+                                                                                    {
+                                                                                        href = "/purchase/purchaseinvoicereport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase Return")
+                                                                                    {
+                                                                                        href = "/purchase/purchasereturnreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Payment")
+                                                                                    {
+                                                                                        href = "/cash/cashpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Receipt")
+                                                                                    {
+                                                                                        href = "/cash/cashreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Payment")
+                                                                                    {
+                                                                                        href = "/bank/bankpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Receipt")
+                                                                                    {
+                                                                                        href = "/bank/bankreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Journal Voucher")
+                                                                                    {
+                                                                                        href = "/journalvoucher/journalvoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Ledger")
+                                                                                    {
+                                                                                        href = "/journalvoucher/ledgervoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        href = "/journalvoucher/VoucherReport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    <td style="text-align: center;"><a class="aTag" href="@href" title="Print this Voucher" target="_blank" style="color: #3276B1">@v.VoucherNo</a></td>
+                                                                                    @*
+                                                    <td style="text-align: center;">@v.RefrenceNo</td>*@
+                                                                                    <td style="text-align: left;">@v.Remarks</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center; ">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    @if (v.Debit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #F0FFF0;">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+
+                                                                                        <td style="text-align: right; background-color: #F0FFF0;">@Convert.ToDecimal(v.Debit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (balance < 0)
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                </tr>
+                                                                            }
+                                                                        }
+                                                                        <tr class="mainTr">
+                                                                            <td style="text-align: right; border: 1px solid #fff; font-weight: bold; font-size: 14px; " colspan="9">Total: </td>
+                                                                            <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #F0FFF0; ">@Convert.ToDecimal(totalDebit).ToString("#,##0.00")</td>
+                                                                            @if (balance < 0)
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                            }
+                                                                        </tr>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        foreach (clsVoucher v in Model.VouchersList.Where(x => x.DetailCode == detailCode && x.Credit != 0))
+                                                                        {
+                                                                            j++;
+                                                                            totalDebit += Convert.ToDecimal(v.Debit);
+                                                                            totalCredit += Convert.ToDecimal(v.Credit);
+                                                                            string href = "";
+                                                                            if (j == 1)
+                                                                            {
+                                                                                decimal previousBalance = Convert.ToDecimal(Model.DetailList[i].PreviousBalance);
+                                                                                balance = previousBalance + Convert.ToDecimal(v.Debit) - Convert.ToDecimal(v.Credit);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                balance = balance + Convert.ToDecimal(v.Debit) - Convert.ToDecimal(v.Credit);
+                                                                            }
+                                                                            if ((v.VoucherType == "Purchase" || v.VoucherType == "Purchase Return" || v.VoucherType == "Sale" || v.VoucherType == "Sale Return")
+                                                                            && (v.DetailType == "Customer" || v.DetailType == "Supplier" || v.DetailType == "Customer + Supplier"))
+                                                                            {
+                                                                                string borderBottom = "";
+                                                                                if (v.InvoicesList.Count > 1)
+                                                                                {
+                                                                                    borderBottom = "none";
+                                                                                }
+                                                                                <tr class="mainTr">
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@j</td>
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@Convert.ToDateTime(v.VoucherDate).ToString("dd/MM/yy")</td>
+                                                                                    @if (v.VoucherType == "Sale")
+                                                                                    {
+                                                                                        href = "/sale/saleinvoicereport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Sale Return")
+                                                                                    {
+                                                                                        href = "/sale/salereturnreport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase")
+                                                                                    {
+                                                                                        href = "/purchase/purchaseinvoicereport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase Return")
+                                                                                    {
+                                                                                        href = "/purchase/purchasereturnreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Payment")
+                                                                                    {
+                                                                                        href = "/cash/cashpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Receipt")
+                                                                                    {
+                                                                                        href = "/cash/cashreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Payment")
+                                                                                    {
+                                                                                        href = "/bank/bankpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Receipt")
+                                                                                    {
+                                                                                        href = "/bank/bankreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Journal Voucher")
+                                                                                    {
+                                                                                        href = "/journalvoucher/journalvoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Ledger")
+                                                                                    {
+                                                                                        href = "/journalvoucher/ledgervoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        href = "/journalvoucher/VoucherReport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count"><a class="aTag" href="@href" title="Print this Voucher" target="_blank" style="color: #3276B1">@v.VoucherNo</a></td>
+                                                                                    @*
+                                                    <td style="text-align: center;" rowspan="@v.InvoicesList.Count">@v.RefrenceNo</td>*@
+                                                                                    <td style="text-align: left; border-top: none;">@v.InvoicesList[0].ItemName</td>
+                                                                                    <td style="text-align: center; border-top: none;">@v.InvoicesList[0].Qty</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].Rate</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].Tax1Value</td>
+                                                                                    <td style="text-align: right; border-top: none; ">@v.InvoicesList[0].Tax2Value</td>
+                                                                                    <td style="text-align: right; border-top: none;">@v.InvoicesList[0].NetValue</td>
+                                                                                    @if (v.Credit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #BEEEFF;" rowspan="@v.InvoicesList.Count">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td style="text-align: right; background-color: #BEEEFF;" rowspan="@v.InvoicesList.Count">@Convert.ToDecimal(v.Credit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (balance < 0)
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;" rowspan="@v.InvoicesList.Count">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;" rowspan="@v.InvoicesList.Count">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                </tr>
+                                                                                for (int m = 0; m < v.InvoicesList.Count; m++)
+                                                                                {
+                                                                                    if (m > 0)
+                                                                                    {
+                                                                                        <tr class="mainTr">
+                                                                                            <td style="text-align: left; border-top: none;">@v.InvoicesList[m].ItemName</td>
+                                                                                            <td style="text-align: center; border-top: none;">@v.InvoicesList[m].Qty</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].Rate</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].Tax1Value</td>
+                                                                                            <td style="text-align: right; border-top: none; ">@v.InvoicesList[m].Tax2Value</td>
+                                                                                            <td style="text-align: right; border-top: none;">@v.InvoicesList[m].NetValue</td>
+                                                                                        </tr>
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <tr class="mainTr">
+                                                                                    <td style="text-align: center;">@j</td>
+                                                                                    <td style="text-align:center">@Convert.ToDateTime(v.VoucherDate).ToString("dd/MM/yy")</td>
+                                                                                    @if (v.VoucherType == "Sale")
+                                                                                    {
+                                                                                        href = "/sale/saleinvoicereport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Sale Return")
+                                                                                    {
+                                                                                        href = "/sale/salereturnreport/" + v.VoucherNo ;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase")
+                                                                                    {
+                                                                                        href = "/purchase/purchaseinvoicereport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Purchase Return")
+                                                                                    {
+                                                                                        href = "/purchase/purchasereturnreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Payment")
+                                                                                    {
+                                                                                        href = "/cash/cashpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Cash Receipt")
+                                                                                    {
+                                                                                        href = "/cash/cashreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Payment")
+                                                                                    {
+                                                                                        href = "/bank/bankpaymentreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Bank Receipt")
+                                                                                    {
+                                                                                        href = "/bank/bankreceiptreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Journal Voucher")
+                                                                                    {
+                                                                                        href = "/journalvoucher/journalvoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else if (v.VoucherType == "Ledger")
+                                                                                    {
+                                                                                        href = "/journalvoucher/ledgervoucherreport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        href = "/journalvoucher/VoucherReport/" + v.VoucherNo;
+                                                                                    }
+                                                                                    <td style="text-align: center;"><a class="aTag" href="@href" title="Print this Voucher" target="_blank" style="color: #3276B1">@v.VoucherNo</a></td>
+                                                                                    @*
+                                                    <td style="text-align: center;">@v.RefrenceNo</td>*@
+                                                                                    <td style="text-align: left;">@v.Remarks</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    <td style="text-align: center; ">-</td>
+                                                                                    <td style="text-align: center;">-</td>
+                                                                                    @if (v.Credit == 0)
+                                                                                    {
+                                                                                        <td style="text-align: center; background-color: #BEEEFF;">-</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td style="text-align: right; background-color: #BEEEFF;">@Convert.ToDecimal(v.Credit).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                    @if (balance < 0)
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                                    }
+                                                                                </tr>
+                                                                            }
+                                                                        }
+                                                                        <tr class="mainTr">
+                                                                            <td style="text-align: right; border: 1px solid #fff; font-weight: bold; font-size: 14px; " colspan="9">Total: </td>
+                                                                            <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #BEEEFF;">@Convert.ToDecimal(totalCredit).ToString("#,##0.00")</td>
+                                                                            @if (balance < 0)
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                            }
+                                                                        </tr>
+                                                                    }
+
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <table class="mainTable" style="margin-top: -48px">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;border-bottom:1px solid black" colspan="12">&nbsp;</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tr class="mainTr">
+                                                                <th style="text-align: center; width: 25px">Sr#</th>
+                                                                <th style="text-align:center;width:90px">Date</th>
+                                                                <th style="text-align: center;width:100px">Voucher No.</th>
+                                                                @*
+                                                                    <th style="text-align: center; width: 65px">Ref No.</th>*@
+                                                                <th style="text-align: left;">Remarks</th>
+                                                                <th style="text-align: right; width: 50px">Debit</th>
+                                                                <th style="text-align: right; width: 50px">Credit</th>
+                                                                <th class="borderRight" style="text-align: right; width: 60px">Balance</th>
+                                                            </tr>
+                                                            <tbody>
+                                                                <tr class="mainTr">
+                                                                    <td class="borderRight" colspan="8" style="text-align:center;padding:10px">No Record Found.</td>
+                                                                </tr>
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    }
+                                                    @if (Model.DetailList[i].ChequeList.Count != 0)
+                                                    {
+                                                        decimal totalDebit = 0;
+                                                        decimal totalCredit = 0;
+                                                        int k = 0;
+                                                        if (Model.DetailList[i].ChequeList[0].DebitCreditType == "All")
+                                                        {
+                                                            <table class="mainTable" style="margin-top: -40px">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tr class="mainTr">
+                                                                    <th style="text-align: left;font-size:15px;border:none" colspan="8">Cheque Detail</th>
+                                                                </tr>
+                                                                <tr class="mainTr">
+                                                                    <th style="text-align: center; width: 25px">Sr#</th>
+                                                                    <th style="text-align: center;width:90px">Cheque No.</th>
+                                                                    <th style="text-align: center;width:100px">Cheque Date</th>
+                                                                    <th style="text-align:center;width:90px">Due Date</th>
+                                                                    <th style="text-align:left;">Bank / Remarks</th>
+                                                                    <th style="text-align: right; width: 50px">Debit</th>
+                                                                    <th style="text-align: right; width: 50px; ">Credit</th>
+                                                                    <th class="borderRight" style="text-align: right; width: 60px">Balance</th>
+                                                                </tr>
+                                                                <tbody>
+                                                                    @foreach (clsCheque c in Model.DetailList[i].ChequeList)
+                                                                    {
+                                                                        decimal debit = 0;
+                                                                        decimal credit = 0;
+                                                                        if (detailCode == c.DDetailCode)
+                                                                        {
+                                                                            debit = Convert.ToDecimal(c.Amount);
+                                                                            credit = 0;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            debit = 0;
+                                                                            credit = Convert.ToDecimal(c.Amount);
+                                                                        }
+                                                                        balance = balance + debit - credit;
+                                                                        totalDebit += debit;
+                                                                        totalCredit += credit;
+                                                                        <tr class="mainTr">
+                                                                            <td style="text-align: center;">@(k + 1)</td>
+                                                                            <td style="text-align:center;">@c.ChequeNo</td>
+                                                                            <td style="text-align:center;">@Convert.ToDateTime(c.ChequeDate).ToString("dd/MM/yy")</td>
+                                                                            <td style="text-align: center;">@Convert.ToDateTime(c.DueDate).ToString("dd/MM/yy")</td>
+                                                                            <td style="text-align: left;">@c.Bank / @c.Remarks</td>
+                                                                            @if (debit == 0)
+                                                                            {
+                                                                                <td style="text-align: center; background-color: #F0FFF0; ">-</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td style="text-align: right; background-color: #F0FFF0; ">@Convert.ToDecimal(debit).ToString("#,##0.00")</td>
+                                                                            }
+                                                                            @if (credit == 0)
+                                                                            {
+                                                                                <td style="text-align: center; background-color: #BEEEFF;">-</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td style="text-align: right; background-color: #BEEEFF;">@Convert.ToDecimal(credit).ToString("#,##0.00")</td>
+                                                                            }
+                                                                            @if (balance < 0)
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right;">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                            }
+                                                                        </tr>
+                                                                    }
+                                                                    <tr class="mainTr">
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td class="tdd" style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #F0FFF0;">@Convert.ToDecimal(totalDebit).ToString("#,##0.00")</td>
+                                                                        <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #BEEEFF;">@Convert.ToDecimal(totalCredit).ToString("#,##0.00")</td>
+                                                                        @if (balance < 0)
+                                                                        {
+                                                                            <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                        }
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        }
+                                                        else if (Model.DetailList[i].ChequeList[0].DebitCreditType == "Debit")
+                                                        {
+                                                            <table class="mainTable" style="margin-top: -40px">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tr class="mainTr">
+                                                                    <th style="text-align: left;font-size:15px;border:none" colspan="7">Cheque Detail</th>
+                                                                </tr>
+                                                                <tr class="mainTr">
+                                                                    <th style="text-align: center; width: 25px">Sr#</th>
+                                                                    <th style="text-align: center;width:90px">Cheque No.</th>
+                                                                    <th style="text-align: center;width:100px">Cheque Date</th>
+                                                                    <th style="text-align:center;width:90px">Due Date</th>
+                                                                    <th style="text-align:left;">Bank / Remarks</th>
+                                                                    <th style="text-align: right; width: 50px">Debit</th>
+                                                                    <th class="borderRight" style="text-align: right; width: 60px">Balance</th>
+                                                                </tr>
+                                                                <tbody>
+                                                                    @foreach (clsCheque c in Model.DetailList[i].ChequeList.Where(x => x.DDetailCode == detailCode))
+                                                                    {
+                                                                        decimal debit = 0;
+                                                                        decimal credit = 0;
+                                                                        if (detailCode == c.DDetailCode)
+                                                                        {
+                                                                            debit = Convert.ToDecimal(c.Amount);
+                                                                            credit = 0;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            debit = 0;
+                                                                            credit = Convert.ToDecimal(c.Amount);
+                                                                        }
+                                                                        balance = balance + debit - credit;
+                                                                        totalDebit += debit;
+                                                                        totalCredit += credit;
+                                                                        <tr class="mainTr">
+                                                                            <td style="text-align: center;">@(k + 1)</td>
+                                                                            <td style="text-align:center;">@c.ChequeNo</td>
+                                                                            <td style="text-align:center;">@Convert.ToDateTime(c.ChequeDate).ToString("dd/MM/yy")</td>
+                                                                            <td style="text-align: center;">@Convert.ToDateTime(c.DueDate).ToString("dd/MM/yy")</td>
+                                                                            <td style="text-align: left;">@c.Bank / @c.Remarks</td>
+                                                                            @if (debit == 0)
+                                                                            {
+                                                                                <td style="text-align: center; background-color: #F0FFF0; ">-</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td style="text-align: right; background-color: #F0FFF0; ">@Convert.ToDecimal(debit).ToString("#,##0.00")</td>
+                                                                            }
+                                                                            @if (balance < 0)
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right;">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                            }
+                                                                        </tr>
+                                                                    }
+                                                                    <tr class="mainTr">
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td class="tdd" style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #F0FFF0;">@Convert.ToDecimal(totalDebit).ToString("#,##0.00")</td>
+                                                                        @if (balance < 0)
+                                                                        {
+                                                                            <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                        }
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        }
+                                                        else
+                                                        {
+                                                            <table class="mainTable" style="margin-top: -40px">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tr class="mainTr">
+                                                                    <th style="text-align: left;font-size:15px;border:none" colspan="7">Cheque Detail</th>
+                                                                </tr>
+                                                                <tr class="mainTr">
+                                                                    <th style="text-align: center; width: 25px">Sr#</th>
+                                                                    <th style="text-align: center;width:90px">Cheque No.</th>
+                                                                    <th style="text-align: center;width:100px">Cheque Date</th>
+                                                                    <th style="text-align:center;width:90px">Due Date</th>
+                                                                    <th style="text-align:left;">Bank / Remarks</th>
+                                                                    <th style="text-align: right; width: 50px; ">Credit</th>
+                                                                    <th class="borderRight" style="text-align: right; width: 60px">Balance</th>
+                                                                </tr>
+                                                                <tbody>
+                                                                    @foreach (clsCheque c in Model.DetailList[i].ChequeList.Where(x => x.CDetailCode == detailCode))
+                                                                    {
+                                                                        decimal debit = 0;
+                                                                        decimal credit = 0;
+                                                                        if (detailCode == c.DDetailCode)
+                                                                        {
+                                                                            debit = Convert.ToDecimal(c.Amount);
+                                                                            credit = 0;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            debit = 0;
+                                                                            credit = Convert.ToDecimal(c.Amount);
+                                                                        }
+                                                                        balance = balance + debit - credit;
+                                                                        totalDebit += debit;
+                                                                        totalCredit += credit;
+                                                                        <tr class="mainTr">
+                                                                            <td style="text-align: center;">@(k + 1)</td>
+                                                                            <td style="text-align:center;">@c.ChequeNo</td>
+                                                                            <td style="text-align:center;">@Convert.ToDateTime(c.ChequeDate).ToString("dd/MM/yy")</td>
+                                                                            <td style="text-align: center;">@Convert.ToDateTime(c.DueDate).ToString("dd/MM/yy")</td>
+                                                                            <td style="text-align: left;">@c.Bank / @c.Remarks</td>
+                                                                            @if (credit == 0)
+                                                                            {
+                                                                                <td style="text-align: center; background-color: #BEEEFF;">-</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td style="text-align: right; background-color: #BEEEFF;">@Convert.ToDecimal(credit).ToString("#,##0.00")</td>
+                                                                            }
+                                                                            @if (balance < 0)
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right;">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                            }
+                                                                        </tr>
+                                                                    }
+                                                                    <tr class="mainTr">
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td class="tdd" style="text-align: center;border: 1px solid #fff"></td>
+                                                                        <td style="text-align: right; font-size: 14px; font-weight: bold; background-color: #BEEEFF;">@Convert.ToDecimal(totalCredit).ToString("#,##0.00")</td>
+                                                                        @if (balance < 0)
+                                                                        {
+                                                                            <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">(@Math.Abs(Convert.ToDecimal(balance)).ToString("#,##0.00"))</td>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td class="borderRight" style="text-align: right; font-size: 14px; font-weight: bold">@Convert.ToDecimal(balance).ToString("#,##0.00")</td>
+                                                                        }
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr>
+                                                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <table class="mainTable" style="margin-top: -40px">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;" colspan="12">&nbsp;</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tr class="mainTr">
+                                                                <th style="text-align: left;font-size:15px;border:none" colspan="8">Cheque Detail</th>
+                                                            </tr>
+                                                            <tr class="mainTr">
+                                                                <th style="text-align: center; width: 25px">Sr#</th>
+                                                                <th style="text-align: center;width:90px">Cheque No.</th>
+                                                                <th style="text-align: center;width:100px">Cheque Date</th>
+                                                                <th style="text-align:center;width:90px">Due Date</th>
+                                                                <th style="text-align:left;">Bank / Remarks</th>
+                                                                <th style="text-align: right; width: 50px">Debit</th>
+                                                                <th style="text-align: right; width: 50px; ">Credit</th>
+                                                                <th class="borderRight" style="text-align: right; width: 60px">Balance</th>
+                                                            </tr>
+                                                            <tbody>
+                                                                <tr class="mainTr">
+                                                                    <td class="borderRight" colspan="8" style="text-align:center;padding:10px">No Record Found.</td>
+                                                                </tr>
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    }
+                                                </div>
+                                            }
+                                        </center>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END MAIN CONTENT -->
+@section pagespecific {
+    <script src="~/Scripts/CustomJs/ResponsivePrintScreen.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+        })
+        $('#downloadForm').on("submit", function () {
+            $("table").each(function () {
+                $(this).css("border-collapse", "collapse");
+                $('.mainTable').css("width", "99.8%");
+                $('.mainTable').css("margin-top", "-15px");
+                $('.tdd').css("border-right", "1px solid black");
+                var cssData = $('#CssData').html();
+                var htmlData = $('#HtmlData').html();
+                $('#DocumentName').val(cssData + htmlData);
+            })
+            $("table").each(function () {
+                $(this).css("border-collapse", "separate");
+                $('.mainTable').css("width", "100%");
+                $('.mainTable').css("margin-top", "-25px");
+                $('.tdd').css("border-right", "0px");
+            })
+        })
+        function PrintElem(elem) {
+            var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+            mywindow.document.write('<html><head><title></title>');
+            mywindow.document.write('</head><body>');
+            //mywindow.document.write('<h1></h1>');
+            mywindow.document.write(document.getElementById(elem).innerHTML);
+            mywindow.document.write('</body></html>');
+
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            mywindow.print();
+            mywindow.close();
+
+            return true;
+        }
+        $('.report_body tr td').each(function () {
+            if (parseFloat($(this).html()) > 0) {
+                $(this).html(ReplaceNumberWithCommas($(this).html()));
+            }
+        });
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+    </script>
+}

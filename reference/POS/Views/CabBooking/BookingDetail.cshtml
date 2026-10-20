@@ -1,0 +1,220 @@
+﻿<style>
+    .Acenter {
+        text-align: center;
+    }
+</style>
+
+@model POS.Models.clsBooking
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="widget-body">
+        <input type="hidden" id="BookID" value="@Model.BookingId" />
+        <div class="row">
+            <div class="col col-1 pull-right" style="padding-left: 0px !important;">
+                <label style="color: red; font-size: 24px;border:1px solid red;cursor:context-menu" id="closepanel">&nbsp; X &nbsp;</label>
+            </div>
+        </div>
+
+        @if (!String.IsNullOrEmpty(Model.Startpoint1) || !String.IsNullOrEmpty(Model.Startpoint2) || !String.IsNullOrEmpty(Model.Startpoint3))
+        {
+            <div class="row">
+                @if (!String.IsNullOrEmpty(Model.Startpoint1))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Startpoint1
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Startpoint2))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Startpoint2
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Startpoint3))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Startpoint3
+                    </div>
+                }
+            </div>
+        }
+        @if (!String.IsNullOrEmpty(Model.Endposition1) || !String.IsNullOrEmpty(Model.Endposition2) || !String.IsNullOrEmpty(Model.Endposition3))
+        {
+            <div class="row">
+                @if (!String.IsNullOrEmpty(Model.Endposition1))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Endposition1
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Endposition2))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Endposition2
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Endposition3))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Endposition3
+                    </div>
+                }
+            </div>
+        }
+        <div class="row">
+            <div class="col-12">
+                <span style="font-weight:bold">Cancel Remarks :</span>&nbsp;&nbsp;&nbsp;
+                <textarea id="BidRemarks" style="width:100%;height:100px;font-weight:normal;color:black;"></textarea>
+                @*<input type="text" id="BidRemarks" class="form-control inputEnabled" style="width:100%;" autocomplete="off">*@
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                @*<a title="To Supplier" id="btnSaveBid" href="javascript:void(0)" class="btn btn-success" style="width: 140px; height: 28px; color: white; font-size: 16px; vertical-align: middle; border-radius: 5px; background-color: rgb(243,113,1) !important; ">
+                    To Supplier
+                </a>*@
+                <a title="Cancel Job" id="btnCancelBid" href="javascript:void(0)" class="btn btn-success" style="width: 140px; height: 28px; color: white; font-size: 16px; vertical-align: middle; border-radius: 5px; background-color: rgb(243,113,1) !important; ">
+                    Cancel Job
+                </a>
+                <a title="Back to New Booking" id="btnCancelBidNew" href="javascript:void(0)" class="btn btn-success" style="width: 190px; height: 28px; color: white; font-size: 16px; vertical-align: middle; border-radius: 5px; background-color: rgb(6, 134, 14) !important;">
+                    Back to New Booking
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript">
+
+    $('#closepanel').click(function () {
+        var infoId = $("#BookID").val();
+        $('#detaildiv' + infoId).empty();
+        //$(this).empty();
+    });
+
+    $(document).ready(function () {
+        
+    });
+
+    function ConvertDate(dateStr) {
+        var parts = dateStr.split("-");
+        //return new Date(parts[2], parts[1] - 1 , parts[0]);
+        return parts[1] + "/" + parts[0] + "/" + parts[2];
+    }
+
+
+    
+    $('#btnCancelBidNew').click(function () {
+
+        var bookid = $('#BookID').val();
+        var vremk = $('#BidRemarks').val();
+        if (vremk == null || vremk == "") {
+            alert("Enter Remarks");
+            return false
+        } else {
+            CancelBidNewFunction(bookid, vremk);
+        }
+    })
+
+
+    function CancelBidNewFunction(id, vremk) {
+        var a = $.confirm({
+            title: 'Back to New Booking',
+            content: 'Are you sure u want to Back to New this booking?',
+            type: 'red',
+            buttons: {
+                ok: {
+                    text: "Yes",
+                    btnClass: 'btnConfirm',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '/CabBooking/BackToNewBid/',
+                            data: { id: id, remk: vremk },
+                            type: "POST",
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.status == true) {
+                                    location.reload();
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: "No",
+                    btnClass: 'btn-default',
+                    keys: ['esc'],
+                    action: function () {
+                        a.close();
+                    }
+                },
+            }
+        });
+    }
+
+
+    $('#btnCancelBid').click(function () {
+        
+        var bookid = $('#BookID').val();
+        var vremk = $('#BidRemarks').val();
+        if (vremk == null || vremk == "") {
+            alert("Enter Cancel Remarks");
+            return false
+        } else {
+            CancelBidFunction(bookid, vremk);
+        }
+    })
+
+
+    function CancelBidFunction(id, vremk) {
+        var a = $.confirm({
+            title: 'Cancel Booking',
+            content: 'Are you sure u want to Cancel this booking?',
+            type: 'red',
+            buttons: {
+                ok: {
+                    text: "Yes",
+                    btnClass: 'btnConfirm',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '/CabBooking/CancelBid/',
+                            data: { id: id, remk: vremk},
+                            type: "POST",
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.status == true) {
+                                    location.reload();
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: "No",
+                    btnClass: 'btn-default',
+                    keys: ['esc'],
+                    action: function () {
+                        a.close();
+                    }
+                },
+            }
+        });
+    }
+
+    function NumberPostiveNegativeWithDecimal(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+            (charCode < 48 || charCode > 57))
+            evt.preventDefault();
+        return true;
+    }
+</script>

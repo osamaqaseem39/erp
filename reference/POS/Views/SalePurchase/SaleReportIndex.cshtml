@@ -1,0 +1,487 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+
+    .Amount {
+        text-align: right;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+    .NoDisplay {
+        display: none;
+    }
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    input[type="text"]:disabled {
+        background-color: #eeeeee;
+    }
+
+    #CashCreditType:disabled {
+        background-color: #eeeeee;
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+@model POS.Models.clsInvoice
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Sale Invoice Report </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            <div class="widget-body">
+                                <div class="well smart-form" style="border: 1px solid #bdbdbd; background-color: #F7F7F7;padding:10px">
+                                    <div class="row">
+                                        <div class="col col-md-2">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 7%; padding-right: 3px; padding-left: 7px" id=""></td>
+                                                    <td style="width: 22%; padding-right: 3px; padding-left: 7px" id="">
+                                                        <label class="checkbox pull-left" style="margin-top:2px">
+                                                            <input id="CashCreditTypeCheckbox" type="checkbox" name="CashCreditTypeCheckbox"><i></i>
+                                                            <span style="font-size:11px">Type</span>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 71%; padding-left: 3px; " id="">
+                                                        <label class="select">
+                                                            <i class="append fa fa-caret-down"></i>
+                                                            <select id="CashCreditType" name="Type" style="width:100%" disabled>
+                                                                <option value="Cash">Cash</option>
+                                                                <option value="Credit">Credit</option>
+                                                            </select>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col col-md-4">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 10%; padding-right: 3px; padding-left: 7px" id="">
+                                                        <label class="checkbox pull-left" style="margin-top:2px">
+                                                            <input id="CustomerCheckbox" type="checkbox" name="CustomerCheckbox" checked><i></i>
+                                                            <span style="font-size: 11px">Customer</span>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 90%; padding-left: 3px; " id="">
+                                                        <label class="select">
+                                                            <i class="append fa fa-caret-down"></i>
+                                                            @Html.DropDownListFor(model => model.DetailCode, ViewBag.DetailCode as SelectList, new { })
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col col-md-3">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 45%; padding-right: 3px; padding-left: 7px" id="">
+                                                        <label class="checkbox pull-left" style="margin-top:2px">
+                                                            <input id="CashCustomerNameCheckbox" type="checkbox" name="CashCustomerNameCheckbox"><i></i>
+                                                            <span style="font-size: 10px; ">Cash Cust.</span>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 55%; padding-left: 3px; " id="">
+                                                        <label class="select">
+                                                            <i class="append fa fa-caret-down"></i>
+                                                            @Html.DropDownListFor(model => model.CashCustomerName, Enumerable.Empty<SelectListItem>(), new { @style = "width:100%", @id = "txtCashCustomerName", @disabled = "disabled" })
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col col-md-3">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 40%; padding-right: 3px; padding-left: 7px" id="">
+                                                        <label class="checkbox pull-left" style="margin-top:2px">
+                                                            <input id="ComputerNoCheckbox" type="checkbox" name="ComputerNoCheckbox"><i></i>
+                                                            <span style="font-size:11px">Inv. No</span>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 60%; padding-left: 3px; " id="">
+                                                        <label class="input">
+                                                            <input type="text" id="ComputerNo" value="" style="width:100%" disabled />
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top:10px">
+                                        <div class="col col-md-3">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 7%; padding-right: 3px; padding-left: 7px" id=""></td>
+                                                    <td style="width: 10%; padding-right: 3px; padding-left: 7px" id="">
+                                                        <label class="checkbox pull-left" style="margin-top:2px">
+                                                            <input id="DateCheckbox" type="checkbox" name="DateCheckbox"><i></i>
+                                                            <span style="font-size:11px">&nbsp;</span>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 83%; padding-right: 3px; padding-left: 0px" id="">
+
+                                                        <label style="font-size:13px">Date</label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col col-md-5">
+                                        </div>
+                                        <div class="col col-md-4">
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top:10px;padding-left:40px" id="DatesRow" hidden>
+                                        <div class="col col-md-3">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 10%; padding-right: 3px; padding-left: 7px" id=""></td>
+                                                    <td style="width: 90%; padding-right: 3px; padding-left: 7px" id="">
+                                                        <label>From</label>
+                                                        <label class="input">
+                                                            <i class="icon-prepend fa fa-user"></i>
+                                                            <input type="date" name="FromDate" id="FromDate" autocomplete="off" required />
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col col-md-3">
+                                            <label>To</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                <input type="date" name="ToDate" id="ToDate" autocomplete="off" required />
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                    <div class="row" style="margin-top:10px">
+                                        <table class="pull-right" style="margin-right:14px">
+                                            <tr>
+                                                <td>
+                                                    <button type="button" id="btnPrint" class="btn btn-success" style="width: 100px; height: 25px; font-size: 13px; margin-bottom: 8px; color: white; line-height: 5px;">
+                                                        Print Reports
+                                                    </button>
+                                                </td>
+                                                @*<td style="padding-left:7px">
+                                                    <button type="button" id="btnSearch" class="btn btn-primary" style="width: 65px; height: 25px; font-size: 13px; margin-bottom: 8px; color: white; line-height: 5px;">
+                                                        Search
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <button type="button" id="btnRefresh" class="btn btn-default" style="width: 65px; height: 27px; font-size: 13px; margin-left: 5px; margin-bottom: 8px; color: #000; line-height: 3px;">
+                                                        Refresh
+                                                    </button>
+                                                </td>*@
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#DetailCode').select2();
+            $('#DetailCode').val(null).trigger('change');
+            $('#CashCreditType').val('');
+            GetTodayDate();
+            ///////////////////////Item///////////////////////////////
+            var pageSize = 20;
+            var optionListUrl = '@Url.Action("GetOptionList", "CashCustomerComboList")';
+            $('#txtCashCustomerName').select2({
+                ajax: {
+                    delay: 150,
+                    url: optionListUrl,
+                    dataType: 'json',
+
+                    data: function (params) {
+                        params.page = params.page || 1;
+                        return {
+                            searchTerm: params.term,
+                            pageSize: pageSize,
+                            pageNumber: params.page
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.Results,
+                            pagination: {
+                                more: (params.page * pageSize) < data.Total
+                            }
+                        };
+                    }
+                },
+                //placeholder: "-- Select Item--",
+                minimumInputLength: 0,
+                allowClear: true,
+            });
+        });
+        $('#CustomerCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#DetailCode').prop("disabled", false);
+            }
+            else {
+                $('#DetailCode').prop("disabled", true);
+                $('#DetailCode').val(null).trigger('change');
+            }
+        })
+        $('#CashCustomerNameCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#txtCashCustomerName').prop("disabled", false);
+            }
+            else {
+                $('#txtCashCustomerName').prop("disabled", true);
+                $('#txtCashCustomerName').val('');
+            }
+        })
+        $('#ComputerNoCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#ComputerNo').prop("disabled", false);
+            }
+            else {
+                $('#ComputerNo').prop("disabled", true);
+                $('#ComputerNo').val('');
+            }
+        })
+        $('#CashCreditTypeCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#CashCreditType').prop("disabled", false);
+            }
+            else {
+                $('#CashCreditType').prop("disabled", true);
+                $('#CashCreditType').val('');
+            }
+        })
+        $('#DateCheckbox').change(function () {
+            if ($(this).is(":checked")) {
+                $('#DatesRow').removeAttr("hidden");
+            }
+            else {
+                $('#DatesRow').attr("hidden", "hidden");
+            }
+        })
+        $('#btnPrint').click(function () {
+            var customerCheckbox = $('#CustomerCheckbox').is(":checked");
+            var customerId = $('#DetailCode').val();
+            
+            var cashCustomerNameCheckbox = $('#CashCustomerNameCheckbox').is(":checked");
+            var cashCustomerName = $('#txtCashCustomerName').val();
+
+            var cashCreditTypeCheckbox = $('#CashCreditTypeCheckbox').is(":checked");
+            var cashCreditType = $('#CashCreditType').val();
+
+            var computerNoCheckbox = $('#ComputerNoCheckbox').is(":checked");
+            var computerNo = $('#ComputerNo').val();
+
+            var dateCheckbox = $('#DateCheckbox').is(":checked");
+            var fromDate = $('#FromDate').val();
+            var toDate = $('#ToDate').val();
+            $.ajax({
+                type: "POST",
+                url: "/salepurchase/SetSessionsForSaleReport/",
+                dataType: 'json',
+                data: {
+                    'customerCheckbox': customerCheckbox, 'customerId': customerId,
+                    'dateCheckbox': dateCheckbox, 'fromDate': fromDate, 'toDate': toDate,
+                    'cashCustomerCheckbox': cashCustomerNameCheckbox, 'cashCustomerName': cashCustomerName,
+                    'cashCreditTypeCheckbox': cashCreditTypeCheckbox, 'cashCreditType': cashCreditType,
+                    'computerNoCheckbox': computerNoCheckbox, 'computerNo': computerNo,
+                },
+                success: function (response) {
+                    window.open("/salepurchase/printsaleinvoicereports", "_blank");
+                }
+            })
+        })
+        $('#btnRefresh').click(function () {
+            location.reload();
+        })
+        function getItems() {
+            var responsiveHelper_dt_basic = undefined;
+            var responsiveHelper_datatable_fixed_column = undefined;
+            var responsiveHelper_datatable_col_reorder = undefined;
+            var responsiveHelper_datatable_tabletools = undefined;
+
+            var breakpointDefinition = {
+                desktop: 1920,
+                tablet: 1024,
+                phone: 380
+            };
+            $('#myTableMinStockLevel').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    if (!responsiveHelper_dt_basic) {
+                        responsiveHelper_dt_basic = new ResponsiveDatatablesHelper($('#myTableMinStockLevel'), breakpointDefinition);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic.respond();
+                },
+                "bLengthChange": true,
+                "processing": true,
+                "serverSide": true,
+                "pageLength": 20,
+                "bInfo": true,
+                "bDestroy": true,
+                "ajax": {
+                    "url": "/salepurchase/GetAllItems",
+                    "type": "POST",
+                    "datatype": "json",
+                    error: function (xhr, httpStatusMessage, customErrorMessage) {
+                        if (xhr.status === 410) {
+                            window.location.href = customErrorMessage;
+                        }
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "RecordDate", "class": "Acenter", "orderable": false, 'render': function (date) {
+                            if (date != null) {
+                                var date = new Date(parseInt(date.substr(6)));
+                                var day = date.getDate();
+                                var month = date.getMonth() + 1;
+                                if (parseFloat(day) < 10) {
+                                    day = "0" + day;
+                                }
+                                if (parseFloat(month) < 10) {
+                                    month = "0" + month;
+                                }
+                                return day + "-" + month + "-" + date.getFullYear();
+                            }
+                            else {
+                                return "";
+                            }
+                        }
+                    },
+                        { "data": "Barcode", "name": "Barcode", "class": "Acenter", "autoWidth": true, "orderable": true, },
+                        { "data": "BrandName", "name": "BrandName", "autoWidth": true, "orderable": true, },
+                        { "data": "Qty", "name": "Qty", "class": "Amount", "autoWidth": true, "orderable": true, },
+                        { "data": "Rate", "name": "Rate", "class": "Amount", "autoWidth": true, "orderable": true, },
+                        { "data": "GrossValue", "name": "GrossValue", "class": "Amount", "autoWidth": true, "orderable": true, },
+                        { "data": "DetailName", "name": "DetailName", "autoWidth": true, "orderable": true, },
+
+                ]
+            });
+            oTable = $('#myTableMinStockLevel').DataTable();
+        }
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#FromDate').val(today);
+            $('#ToDate').val(today);
+        }
+    </script>
+}

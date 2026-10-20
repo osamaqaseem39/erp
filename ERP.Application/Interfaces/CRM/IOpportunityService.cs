@@ -13,7 +13,10 @@ public interface IOpportunityService
     Task<IEnumerable<OpportunityDto>> GetByCustomerAsync(Guid customerId);
     Task<IEnumerable<OpportunityDto>> GetByStageAsync(string stage);
     Task<IEnumerable<OpportunityDto>> GetByAssignedToAsync(Guid assignedTo);
-    Task<Guid> ConvertToQuoteAsync(Guid opportunityId);
+    Task<bool> MarkWonAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> MarkLostAsync(Guid id, Guid tenantId, Guid userId, string? reason = null);
+    Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId);
+    Task<Guid> ConvertToQuoteAsync(Guid opportunityId, Guid tenantId, Guid userId);
     Task<bool> UpdateStageAsync(Guid id, string stage, decimal probability);
-    Task<bool> CloseAsync(Guid id, string reason);
+    Task<bool> CloseAsync(Guid id, Guid tenantId, Guid userId, string? reason = null);
 }

@@ -42,12 +42,21 @@ public class PaymentRepositoryAdapter : Contracts.IPaymentRepository
     public PaymentRepositoryAdapter(Repos.IPaymentRepository inner) => _inner = inner;
 
     public Task<Payment?> GetByIdAsync(Guid id) => _inner.GetByIdAsync(id);
+    public Task<Payment?> GetByIdAsync(Guid id, Guid tenantId) => _inner.GetByIdAsync(id, tenantId);
     public Task<IEnumerable<Payment>> GetAllAsync() => _inner.GetAllAsync();
+    public Task<IEnumerable<Payment>> GetAllAsync(Guid tenantId) => _inner.GetAllAsync(tenantId);
     public Task<Guid> CreateAsync(Payment payment) => _inner.CreateAsync(payment);
     public Task<bool> UpdateAsync(Payment payment) => _inner.UpdateAsync(payment);
     public Task<bool> DeleteAsync(Guid id) => _inner.DeleteAsync(id);
+    public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _inner.DeleteAsync(id, tenantId);
+
     public async Task<bool> ExistsAsync(Guid id) => await _inner.GetByIdAsync(id) != null;
+    public async Task<bool> ExistsAsync(Guid id, Guid tenantId)
+        => await _inner.GetByIdAsync(id, tenantId) != null;
+
     public Task<Payment?> GetByNumberAsync(string number) => _inner.GetByNumberAsync(number);
+    public Task<Payment?> GetByNumberAsync(string number, Guid tenantId)
+        => _inner.GetByNumberAsync(number, tenantId);
 
     public async Task<bool> IsNumberUniqueAsync(string number, Guid? excludeId = null)
     {
@@ -55,12 +64,28 @@ public class PaymentRepositoryAdapter : Contracts.IPaymentRepository
         return existing == null || (excludeId.HasValue && existing.Id == excludeId.Value);
     }
 
+    public async Task<bool> IsNumberUniqueAsync(string number, Guid tenantId, Guid? excludeId = null)
+    {
+        if (tenantId == Guid.Empty) return false;
+        var existing = await _inner.GetByNumberAsync(number, tenantId);
+        return existing == null || (excludeId.HasValue && existing.Id == excludeId.Value);
+    }
+
     public async Task<IEnumerable<Payment>> GetByInvoiceAsync(Guid invoiceId)
         => (await _inner.GetAllAsync()).Where(p => p.RelatedInvoiceId == invoiceId);
+
+    public Task<IEnumerable<Payment>> GetByInvoiceAsync(Guid invoiceId, Guid tenantId)
+        => _inner.GetByInvoiceAsync(invoiceId, tenantId);
 
     public async Task<IEnumerable<Payment>> GetByBillAsync(Guid billId)
         => (await _inner.GetAllAsync()).Where(p => p.RelatedBillId == billId);
 
+    public Task<IEnumerable<Payment>> GetByBillAsync(Guid billId, Guid tenantId)
+        => _inner.GetByBillAsync(billId, tenantId);
+
     public Task<IEnumerable<Payment>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
         => _inner.GetByDateRangeAsync(startDate, endDate);
+
+    public Task<IEnumerable<Payment>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
+        => _inner.GetByDateRangeAsync(startDate, endDate, tenantId);
 }

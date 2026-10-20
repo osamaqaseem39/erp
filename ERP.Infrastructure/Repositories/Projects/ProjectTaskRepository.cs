@@ -8,66 +8,67 @@ public class ProjectTaskRepository : IProjectTaskRepository
 {
     private readonly ERPDbContext _context;
 
-    public ProjectTaskRepository(ERPDbContext context)
+    public ProjectTaskRepository(ERPDbContext context) => _context = context;
+
+    private IQueryable<ProjectTask> Query(Guid tenantId)
     {
-        _context = context;
+        if (tenantId == Guid.Empty)
+            return _context.ProjectTasks.Where(_ => false);
+        return _context.ProjectTasks.Where(pt => pt.TenantId == tenantId);
     }
 
-    public async Task<ProjectTask?> GetByIdAsync(Guid id)
+    private async Task LoadRelatedAsync(ProjectTask? entity)
     {
-        return await _context.ProjectTasks
-            .Include(pt => pt.Project)
-            .Include(pt => pt.AssignedTo)
-            .Include(pt => pt.ParentTask)
-            .Include(pt => pt.Subtasks)
-            .FirstOrDefaultAsync(pt => pt.Id == id);
+        if (entity == null) return;
+        await _context.Entry(entity).Reference(pt => pt.Project).LoadAsync();
+        await _context.Entry(entity).Reference(pt => pt.AssignedTo).LoadAsync();
     }
 
-    public async Task<IEnumerable<ProjectTask>> GetAllAsync()
+    private async Task LoadRelatedAsync(IEnumerable<ProjectTask> entities)
     {
-        return await _context.ProjectTasks
-            .Include(pt => pt.Project)
-            .Include(pt => pt.AssignedTo)
-            .Include(pt => pt.ParentTask)
-            .Include(pt => pt.Subtasks)
-            .ToListAsync();
+        foreach (var entity in entities)
+            await LoadRelatedAsync(entity);
     }
 
-    public async Task<IEnumerable<ProjectTask>> GetByProjectAsync(Guid projectId)
+    public async Task<ProjectTask?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        return await _context.ProjectTasks
-            .Include(pt => pt.Project)
-            .Include(pt => pt.AssignedTo)
-            .Include(pt => pt.ParentTask)
-            .Include(pt => pt.Subtasks)
-            .Where(pt => pt.ProjectId == projectId)
-            .ToListAsync();
+        var entity = await Query(tenantId).FirstOrDefaultAsync(pt => pt.Id == id);
+        await LoadRelatedAsync(entity);
+        return entity;
     }
 
-    public async Task<IEnumerable<ProjectTask>> GetByAssignedToAsync(Guid assignedToId)
+    public async Task<IEnumerable<ProjectTask>> GetAllAsync(Guid tenantId)
     {
-        return await _context.ProjectTasks
-            .Include(pt => pt.Project)
-            .Include(pt => pt.AssignedTo)
-            .Include(pt => pt.ParentTask)
-            .Include(pt => pt.Subtasks)
-            .Where(pt => pt.AssignedToId == assignedToId)
-            .ToListAsync();
+        var list = await Query(tenantId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
     }
 
-    public async Task<IEnumerable<ProjectTask>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<ProjectTask>> GetByProjectAsync(Guid projectId, Guid tenantId)
     {
-        return await _context.ProjectTasks
-            .Include(pt => pt.Project)
-            .Include(pt => pt.AssignedTo)
-            .Include(pt => pt.ParentTask)
-            .Include(pt => pt.Subtasks)
-            .Where(pt => pt.Status == status)
-            .ToListAsync();
+        var list = await Query(tenantId).Where(pt => pt.ProjectId == projectId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<ProjectTask>> GetByAssignedToAsync(Guid assignedToId, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(pt => pt.AssignedToId == assignedToId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<ProjectTask>> GetByStatusAsync(string status, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(pt => pt.Status == status).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
     }
 
     public async Task<Guid> CreateAsync(ProjectTask projectTask)
     {
+        if (projectTask.Id == Guid.Empty) projectTask.Id = Guid.NewGuid();
+        if (projectTask.CreatedAt == default) projectTask.CreatedAt = DateTime.UtcNow;
         _context.ProjectTasks.Add(projectTask);
         await _context.SaveChangesAsync();
         return projectTask.Id;
@@ -75,18 +76,16 @@ public class ProjectTaskRepository : IProjectTaskRepository
 
     public async Task<bool> UpdateAsync(ProjectTask projectTask)
     {
+        projectTask.UpdatedAt = DateTime.UtcNow;
         _context.ProjectTasks.Update(projectTask);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var projectTask = await _context.ProjectTasks.FindAsync(id);
+        var projectTask = await GetByIdAsync(id, tenantId);
         if (projectTask == null) return false;
-
         _context.ProjectTasks.Remove(projectTask);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 }

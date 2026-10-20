@@ -1,159 +1,62 @@
 using ERP.Application.Interfaces;
-using ERP.Shared.DTOs.Inventory;
+using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Interfaces.SCM;
-using ERP.Domain.SCM;
+using ERP.Shared.DTOs.Inventory;
 
 namespace ERP.Application.Services;
 
+/// <summary>DI facade over <see cref="Inventory.StockService"/>.</summary>
 public class StockService : IStockService
 {
-    private readonly IStockBalanceRepository _repository;
+    private readonly Inventory.StockService _inner;
 
-    public StockService(IStockBalanceRepository repository)
+    public StockService(
+        IStockBalanceRepository repository,
+        IStockLedgerRepository ledgers,
+        ERPDbContext db)
     {
-        _repository = repository;
+        _inner = new Inventory.StockService(repository, ledgers, db);
     }
 
-    public async Task<StockBalanceDto?> GetByIdAsync(Guid id)
-    {
-        var entity = await _repository.GetByIdAsync(id, Guid.Empty);
-        return entity != null ? MapToDto(entity) : null;
-    }
-
-    public async Task<IEnumerable<StockBalanceDto>> GetAllAsync()
-    {
-        var entities = await _repository.GetAllAsync(Guid.Empty);
-        return entities.Select(MapToDto);
-    }
-
-    public async Task<Guid> CreateAsync(StockBalanceDto dto)
-    {
-        var entity = MapToEntity(dto);
-        var created = await _repository.CreateAsync(entity);
-        return created.Id;
-    }
-
-    public async Task<bool> UpdateAsync(StockBalanceDto dto)
-    {
-        var entity = await _repository.GetByIdAsync(dto.Id, dto.TenantId);
-        if (entity == null) return false;
-
-        MapToEntity(dto, entity);
-        await _repository.UpdateAsync(entity);
-        return true;
-    }
-
-    public async Task<bool> DeleteAsync(Guid id)
-    {
-        return await _repository.DeleteAsync(id, Guid.Empty);
-    }
-
-    public async Task<StockBalanceDto?> GetByItemAndWarehouseAsync(Guid itemId, Guid warehouseId)
-    {
-        var entity = await _repository.GetByItemAndWarehouseAsync(itemId, warehouseId, Guid.Empty);
-        return entity != null ? MapToDto(entity) : null;
-    }
-
-    public async Task<IEnumerable<StockBalanceDto>> GetByItemAsync(Guid itemId)
-    {
-        var entities = await _repository.GetByItemAsync(itemId, Guid.Empty);
-        return entities.Select(MapToDto);
-    }
-
-    public async Task<IEnumerable<StockBalanceDto>> GetByWarehouseAsync(Guid warehouseId)
-    {
-        var entities = await _repository.GetByWarehouseAsync(warehouseId, Guid.Empty);
-        return entities.Select(MapToDto);
-    }
-
-    public async Task<decimal> GetStockLevelAsync(Guid itemId, Guid warehouseId)
-    {
-        var stockBalance = await _repository.GetByItemAndWarehouseAsync(itemId, warehouseId, Guid.Empty);
-        return stockBalance?.CurrentQuantity ?? 0;
-    }
-
-    public async Task<bool> AdjustStockAsync(StockAdjustmentDto dto)
-    {
-        // Process each detail in the stock adjustment
-        foreach (var detail in dto.Details)
-        {
-            var stockBalance = await _repository.GetByItemAndWarehouseAsync(detail.ItemId, dto.WarehouseId, dto.TenantId);
-            
-            if (stockBalance == null)
-            {
-                // Create new stock balance if it doesn't exist
-                stockBalance = new StockBalance
-                {
-                    Id = Guid.NewGuid(),
-                    TenantId = dto.TenantId,
-                    ItemId = detail.ItemId,
-                    WarehouseId = dto.WarehouseId,
-                    CurrentQuantity = detail.QuantityCounted,
-                    ReservedQuantity = 0,
-                    LastUpdated = DateTime.UtcNow,
-                    CreatedBy = dto.CreatedBy,
-                    CreatedAt = DateTime.UtcNow
-                };
-                await _repository.CreateAsync(stockBalance);
-            }
-            else
-            {
-                // Update existing stock balance with the difference
-                stockBalance.CurrentQuantity += detail.QuantityDifference;
-                stockBalance.LastUpdated = DateTime.UtcNow;
-                stockBalance.UpdatedBy = dto.UpdatedBy;
-                stockBalance.UpdatedAt = DateTime.UtcNow;
-                await _repository.UpdateAsync(stockBalance);
-            }
-        }
-
-        return true;
-    }
-
-    private static StockBalanceDto MapToDto(StockBalance entity)
-    {
-        return new StockBalanceDto
-        {
-            Id = entity.Id,
-            TenantId = entity.TenantId,
-            ItemId = entity.ItemId,
-            ItemName = entity.Item?.ItemName ?? string.Empty,
-            WarehouseId = entity.WarehouseId,
-            WarehouseName = entity.Warehouse?.WarehouseName ?? string.Empty,
-            QuantityOnHand = entity.CurrentQuantity,
-            QuantityReserved = entity.ReservedQuantity,
-            QuantityAvailable = entity.CurrentQuantity - entity.ReservedQuantity,
-            LastUpdated = entity.LastUpdated,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-            CreatedBy = entity.CreatedBy,
-            UpdatedBy = entity.UpdatedBy,
-            IsActive = entity.IsActive
-        };
-    }
-
-    private static StockBalance MapToEntity(StockBalanceDto dto)
-    {
-        return new StockBalance
-        {
-            Id = dto.Id,
-            TenantId = dto.TenantId,
-            ItemId = dto.ItemId,
-            WarehouseId = dto.WarehouseId,
-            CurrentQuantity = dto.QuantityOnHand,
-            ReservedQuantity = dto.QuantityReserved,
-            LastUpdated = dto.LastUpdated,
-            CreatedBy = dto.CreatedBy
-        };
-    }
-
-    private static void MapToEntity(StockBalanceDto dto, StockBalance entity)
-    {
-        entity.ItemId = dto.ItemId;
-        entity.WarehouseId = dto.WarehouseId;
-        entity.CurrentQuantity = dto.QuantityOnHand;
-        entity.ReservedQuantity = dto.QuantityReserved;
-        entity.LastUpdated = dto.LastUpdated;
-        entity.UpdatedBy = dto.UpdatedBy;
-    }
+    public Task<StockBalanceDto?> GetByIdAsync(Guid id) => _inner.GetByIdAsync(id);
+    public Task<StockBalanceDto?> GetByIdAsync(Guid id, Guid tenantId) => _inner.GetByIdAsync(id, tenantId);
+    public Task<IEnumerable<StockBalanceDto>> GetAllAsync() => _inner.GetAllAsync();
+    public Task<IEnumerable<StockBalanceDto>> GetAllAsync(Guid tenantId) => _inner.GetAllAsync(tenantId);
+    public Task<Guid> CreateAsync(StockBalanceDto dto) => _inner.CreateAsync(dto);
+    public Task<Guid> CreateAsync(StockBalanceDto dto, Guid tenantId) => _inner.CreateAsync(dto, tenantId);
+    public Task<bool> UpdateAsync(StockBalanceDto dto) => _inner.UpdateAsync(dto);
+    public Task<bool> UpdateAsync(StockBalanceDto dto, Guid tenantId) => _inner.UpdateAsync(dto, tenantId);
+    public Task<bool> DeleteAsync(Guid id) => _inner.DeleteAsync(id);
+    public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _inner.DeleteAsync(id, tenantId);
+    public Task<StockBalanceDto?> GetByItemAndWarehouseAsync(Guid itemId, Guid warehouseId)
+        => _inner.GetByItemAndWarehouseAsync(itemId, warehouseId);
+    public Task<StockBalanceDto?> GetByItemAndWarehouseAsync(Guid itemId, Guid warehouseId, Guid tenantId)
+        => _inner.GetByItemAndWarehouseAsync(itemId, warehouseId, tenantId);
+    public Task<IEnumerable<StockBalanceDto>> GetByItemAsync(Guid itemId) => _inner.GetByItemAsync(itemId);
+    public Task<IEnumerable<StockBalanceDto>> GetByItemAsync(Guid itemId, Guid tenantId)
+        => _inner.GetByItemAsync(itemId, tenantId);
+    public Task<IEnumerable<StockBalanceDto>> GetByWarehouseAsync(Guid warehouseId)
+        => _inner.GetByWarehouseAsync(warehouseId);
+    public Task<IEnumerable<StockBalanceDto>> GetByWarehouseAsync(Guid warehouseId, Guid tenantId)
+        => _inner.GetByWarehouseAsync(warehouseId, tenantId);
+    public Task<decimal> GetStockLevelAsync(Guid itemId, Guid warehouseId)
+        => _inner.GetStockLevelAsync(itemId, warehouseId);
+    public Task<decimal> GetStockLevelAsync(Guid itemId, Guid warehouseId, Guid tenantId)
+        => _inner.GetStockLevelAsync(itemId, warehouseId, tenantId);
+    public Task<bool> AdjustStockAsync(StockAdjustmentDto dto) => _inner.AdjustStockAsync(dto);
+    public Task<bool> AdjustStockAsync(StockAdjustmentDto dto, Guid tenantId)
+        => _inner.AdjustStockAsync(dto, tenantId);
+    public Task<bool> TransferStockAsync(StockTransferDto dto) => _inner.TransferStockAsync(dto);
+    public Task<bool> ReceiveStockAsync(Guid tenantId, Guid warehouseId, IEnumerable<(Guid ItemId, decimal Quantity)> lines, string? userId = null)
+        => _inner.ReceiveStockAsync(tenantId, warehouseId, lines, userId);
+    public Task<bool> ReceiveStockAsync(Guid tenantId, Guid warehouseId, IEnumerable<(Guid ItemId, decimal Quantity, decimal UnitCost)> lines, string? userId = null)
+        => _inner.ReceiveStockAsync(tenantId, warehouseId, lines, userId);
+    public Task<bool> IssueStockAsync(Guid tenantId, Guid warehouseId, IEnumerable<(Guid ItemId, decimal Quantity)> lines, string? userId = null)
+        => _inner.IssueStockAsync(tenantId, warehouseId, lines, userId);
+    public Task<bool> IssueStockAnyWarehouseAsync(Guid tenantId, IEnumerable<(Guid ItemId, decimal Quantity)> lines, string? userId = null)
+        => _inner.IssueStockAnyWarehouseAsync(tenantId, lines, userId);
+    public Task<IEnumerable<StockLedgerDto>> GetStockLedgerAsync(Guid itemId, Guid tenantId, Guid? warehouseId = null, DateTime? toDate = null)
+        => _inner.GetStockLedgerAsync(itemId, tenantId, warehouseId, toDate);
+    public Task<StockAverageRateDto> CalculateAverageRateAsync(Guid tenantId, CalculateStockAverageRateRequest request)
+        => _inner.CalculateAverageRateAsync(tenantId, request);
 }

@@ -13,37 +13,52 @@ public class TaxCodeRepository : ITaxCodeRepository
         _context = context;
     }
 
-    public async Task<TaxCode?> GetByIdAsync(Guid id)
+    private IQueryable<TaxCode> Query(Guid tenantId) =>
+        tenantId == Guid.Empty
+            ? _context.TaxCodes.Where(_ => false)
+            : _context.TaxCodes
+                .Include(tc => tc.Account)
+                .Where(tc => tc.TenantId == tenantId);
+
+    public async Task<TaxCode?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        return await _context.TaxCodes
-            .Include(tc => tc.Account)
-            .FirstOrDefaultAsync(tc => tc.TaxCodeId == id);
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId)
+            .FirstOrDefaultAsync(tc => tc.Id == id || tc.TaxCodeId == id);
     }
 
-    public async Task<IEnumerable<TaxCode>> GetAllAsync()
+    public async Task<IEnumerable<TaxCode>> GetAllAsync(Guid tenantId)
     {
-        return await _context.TaxCodes
-            .Include(tc => tc.Account)
+        if (tenantId == Guid.Empty) return Array.Empty<TaxCode>();
+        return await Query(tenantId).OrderBy(tc => tc.Code).ToListAsync();
+    }
+
+    public async Task<IEnumerable<TaxCode>> GetActiveAsync(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return Array.Empty<TaxCode>();
+        return await Query(tenantId).Where(tc => tc.IsActive).OrderBy(tc => tc.Code).ToListAsync();
+    }
+
+    public async Task<IEnumerable<TaxCode>> GetByTypeAsync(string taxType, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return Array.Empty<TaxCode>();
+        return await Query(tenantId)
+            .Where(tc => tc.TaxType == taxType)
+            .OrderBy(tc => tc.Code)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<TaxCode>> GetActiveAsync()
+    public async Task<TaxCode?> GetByCodeAsync(string taxCode, Guid tenantId)
     {
-        return await _context.TaxCodes
-            .Include(tc => tc.Account)
-            .Where(tc => tc.IsActive)
-            .ToListAsync();
-    }
-
-    public async Task<TaxCode?> GetByCodeAsync(string taxCode)
-    {
-        return await _context.TaxCodes
-            .Include(tc => tc.Account)
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId)
             .FirstOrDefaultAsync(tc => tc.Code == taxCode);
     }
 
     public async Task<Guid> CreateAsync(TaxCode taxCode)
     {
+        if (taxCode.TenantId == Guid.Empty)
+            throw new InvalidOperationException("TenantId is required.");
         _context.TaxCodes.Add(taxCode);
         await _context.SaveChangesAsync();
         return taxCode.Id;
@@ -56,9 +71,10 @@ public class TaxCodeRepository : ITaxCodeRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var taxCode = await _context.TaxCodes.FindAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        var taxCode = await GetByIdAsync(id, tenantId);
         if (taxCode == null) return false;
 
         _context.TaxCodes.Remove(taxCode);

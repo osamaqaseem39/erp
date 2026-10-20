@@ -1,0 +1,78 @@
+﻿<style>
+    .well-light {
+        box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24);
+    }
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .Amount {
+        text-align: right;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+</style>
+@model POS.Models.clsDashboard
+<div id="content" style=" padding: 30px 30px;">
+    <div class="evry__pg__shimmer__hd">
+        <div class="row">
+            <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+                <div class="lb02__40__c"></div>
+                <div style="margin-left: 54px;margin-top: -42px;">
+                    <div class="lb01"></div>
+                    <div class="lb02__50"></div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-5 col-md-5 col-lg-8" style="margin-top: 18px;">
+                <ul>
+                    <li class="lb_dot">
+
+                    </li>
+                    <li class="lb01">
+
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END MAIN CONTENT -->
+<!-- MAIN CONTENT -->
+<!-- END MAIN CONTENT -->
+<!-- MAIN CONTENT -->
+@section pagespecific {
+<link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            
+        });
+       
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+    </script>
+}

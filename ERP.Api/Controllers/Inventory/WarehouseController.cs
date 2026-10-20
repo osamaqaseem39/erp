@@ -1,5 +1,6 @@
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Inventory;
 using ERP.Shared.DTOs.Inventory;
@@ -10,6 +11,10 @@ namespace ERP.Api.Controllers.Inventory;
 [ApiController]
 [Route("api/inventory/warehouses")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class WarehouseController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IWarehouseService _warehouseService;
@@ -22,13 +27,17 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateWarehouseDto dto)
     {
+        dto.TenantId = GetTenantId();
+        dto.CreatedBy = GetUserId().ToString();
         var result = await _warehouseService.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = result }, new { WarehouseId = result });
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(WarehouseDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var warehouse = await _warehouseService.GetByIdAsync(id);
@@ -38,6 +47,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<WarehouseDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] Guid? companyId = null, [FromQuery] bool? isActive = null)
     {
         IEnumerable<WarehouseDto> warehouses;
@@ -51,6 +61,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateWarehouseDto dto)
     {
         dto.Id = id;
@@ -59,6 +70,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _warehouseService.DeleteAsync(id);
@@ -68,6 +80,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/activate")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Activate(Guid id)
     {
         var result = await _warehouseService.ActivateAsync(id);
@@ -75,6 +88,7 @@ public class WarehouseController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/deactivate")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Deactivate(Guid id)
     {
         var result = await _warehouseService.DeactivateAsync(id);

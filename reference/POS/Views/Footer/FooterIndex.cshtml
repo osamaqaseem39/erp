@@ -1,0 +1,629 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="FooterListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Footers List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="footerListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Footer </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("insertupdatefooter", "footer", FormMethod.Post, new { id = "footerForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (User.Save == 1)
+                                        {
+                                            <td style="width: 44%; padding-bottom: 5px; padding-left: 3px;text-align: right;" id="addTd">
+                                                <a title="Add New First Level" id="btnAddFooter" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/plus2.png" style="width: 45px; height: 45px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveFooter" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="listTd">
+                                                <a title="Footers List" id="btnFooterList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#FooterListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshFooter" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 44%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitFooter" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveFooter" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px;text-align: right;" id="listTd">
+                                                <a title="Footers List" id="btnFooterList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#FooterListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshFooter" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitFooter" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                    </tr>
+                                </table>
+                                <div class="col-md-12" style="padding-top: 10px; padding-bottom: 5px;">
+                                    <div class="col-md-3"></div>
+                                    <div class="col-md-3">
+                                        <div style="padding:3px">
+                                            <label>Footer Name</label>
+                                            <input type="hidden" id="FooterId" value="0" />
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Footer Name" name="FooterName" id="FooterName" required />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div style="padding:3px">
+                                            <label>Select Image</label>
+                                            <div class="input input-file fileDiv">
+                                                <span class="button"><input type="file" id="FooterImage" name="FooterImage" onchange="this.parentNode.nextSibling.value = this.value">Browse</span><input type="text" id="AttachDocumentFooter" placeholder="Attach Document" readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                                <div class="col-md-12" style="padding-bottom: 15px;">
+                                    <div class="col-md-3"></div>
+                                    <div class="col-md-6">
+                                        <div style="padding:3px">
+                                            <label>Description</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Description" name="Description" id="Description" required />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                                <div class="col-md-12" style="padding-bottom: 15px;" id="ImageRow" hidden>
+                                    <div class="col-md-4"></div>
+                                    <div class="col-md-4">
+                                        <img src="" id="DisplayImage" style="height:150px;width:100%" />
+                                    </div>
+                                    <div class="col-md-4"></div>
+                                </div>
+                                <div class="row deleteRow" hidden>
+                                    <section class="col col-md-3"></section>
+                                    <section class="col col-md-6">
+                                        <table class="pull-right footer-nav" style="">
+                                            <tr>
+                                                <td></td>
+                                                <td>
+                                                    <a title="Delete Footer" id="btnDeleteFooter" href="javascript:void(0)" class="btn btn-danger" style="width:75px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                                        Delete
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </section>
+                                    <section class="col col-md-3"></section>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+    <div id="DocumentGallaryPanel">
+        <section id="widget-grid2" class="" style="padding: 10px;margin-top:-10px">
+            <div class="row">
+                <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                        <header>
+                            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                            <h2>
+                                Default Footer Preview
+                            </h2>
+                        </header>
+                        <div>
+                            <div class="jarviswidget-editbox">
+                            </div>
+                            <div class="widget-body smart-form">
+                                <div class="row">
+                                    <div class="col col-md-4">
+                                    </div>
+                                    <div class="col col-md-4">
+                                        <img src="" id="ListDisplayImage" style="height:150px;width:100%" />
+                                    </div>
+                                    <div class="col col-md-4">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col col-md-3">
+                                    </div>
+                                    <div class="col col-md-6">
+                                        <table class="" style="">
+                                            <tr>
+                                                <td style="width: 100%;" id="">
+                                                    <div style="padding: 3px">
+                                                        <label class="select">
+                                                            <i class="append fa fa-caret-down"></i>
+                                                                <select id="ListFooterId" name="ListFooterId" style="width:100%"></select>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 2%;padding-left: 3px;padding-top:7px " id="ItemStockListTd">
+                                                    <a href="javascript:void(0);" class="btn btn-primary btnSetDefaultFooter" style="padding:3px;margin-top:-7px" title="Set Default">
+                                                       Set Default
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col col-md-3">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+        $('#FooterImage').change(function (e) {
+            $('.fileDiv').removeClass('state-error');
+            $('.invalid-File').remove();
+            var ext = $('#FooterImage').val().split('.').pop().toLowerCase();
+            var size = document.getElementById('FooterImage').files[0].size;
+            var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
+            if ($.inArray(ext, ['jpeg', 'jpg', 'png']) == -1) {
+                $('#FooterImage').val('');
+                $('#AttachDocumentFooter').val('');
+                $('#ImageRow').attr("hidden", "hidden");
+                alert('Error! File type allowed : jpeg, jpg, png');
+            }
+            else if (size > (5000 * 1024)) {
+                $('#FooterImage').val('');
+                $('#AttachDocumentFooter').val('');
+                $('#ImageRow').attr("hidden", "hidden");
+                alert('Error! Maximum File size must be 5 mb');
+            }
+            else {
+
+                //Get count of selected files
+                var countFiles = $(this)[0].files.length;
+
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+                if (extn == "png" || extn == "jpg" || extn == "jpeg") {
+                    $('#ImageRow').removeAttr("hidden");
+                    $('#AttachDocumentFooter').val(filename);
+                    if (typeof (FileReader) != "undefined") {
+
+                        //loop for each file selected for uploaded.
+                        for (var i = 0; i < countFiles; i++) {
+
+                            var reader = new FileReader();
+                            reader.onload = function (e) {
+                                $("#DisplayImage").prop("src", e.target.result);
+                            }
+                            //image_holder.show();
+                            reader.readAsDataURL($(this)[0].files[i]);
+                        }
+
+                    }
+                    else {
+                        alert("This browser does not support FileReader.");
+                    }
+                }
+                else {
+                    //$('.ImageDisplayRow').hide();
+                    //$('#AttachDocument').val(filename);
+                    @*$("#imgItemstdreg").prop("height", "100");
+                    $("#imgItemstdreg").prop("width", "100");
+                    //$("#imgItemstdreg").prop("src", '@Url.Content("~/Content/Images/noimage.jpg")');
+
+                    $("#imgItemstdreg").prop("src", '@Url.Content("~/Content/Images/noimage.jpg")');*@
+                }
+            }
+        });
+        $(document).ready(function () {
+            $('.arrow-box-up-right').append('<li></li>');
+            $('#footerForm').validate({
+                ignore: [],
+                // Rules for form validation
+                rules: {
+                    FooterName: {
+                        required: true
+                    },
+                },
+
+                // Messages for form validation
+                messages: {
+                    FooterName: {
+                        required: 'Footer Name is required.'
+                    },
+                },
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+            EnableDisableFields();
+        })
+        $('#btnAddFooter').click(function () {
+            EnableDisableFields();
+        })
+        function EnableDisableFields() {
+            $('#FooterId').val(0);
+            $('#FooterName').prop("disabled", false);
+            $('#FooterName').val('');
+            $('#Description').prop("disabled", false);
+            $('#Description').val('');
+            $('#ListFooterId').select2();
+            $('#btnSaveFooter').prop('disabled', false);
+            $('#saveTd').removeAttr("hidden");
+            $('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '47%', 'text-align': 'right' });
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#ImageRow').attr("hidden", "hidden");
+            $('#FooterImage').val('');
+            $('#AttachDocumentFooter').val('');
+            getDefaultFooterImage();
+            getFootersList();
+        }
+        function getDefaultFooterImage()
+        {
+            $.ajax({
+                type: "POST",
+                url: "/footer/getActiveFooter/",
+                dataType: 'json',
+                success: function (response) {
+                    $("#ListDisplayImage").prop("src", "/FormsDocuments/SaleFooter/" + response.footerId + ".jpg");
+                }
+            })
+        }
+        function getFootersList() {
+            $.ajax({
+                type: "POST",
+                url: "/footer/getFootersList/",
+                dataType: 'json',
+                success: function (response) {
+                    var select = $("#ListFooterId");
+                    select.children().remove();
+                    var footerId = 0;
+                    for (var key in response.data) {
+                        if (response.data[key].Status == 'Active')
+                        {
+                            footerId = response.data[key].FooterId;
+                        }
+                        select.append('<option value="' + response.data[key].FooterId + '">' + response.data[key].FooterName + '</option>');
+                    }
+                    select.val(footerId).trigger("change");
+                }
+            })
+        }
+        $('#btnRefreshFooter').click(function () {
+            location.reload();
+        })
+        $('#btnFooterList').click(function () {
+            $('#footerListDiv').load('@Url.Action("footerslist", "footer")')
+        })
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        function ClearFormFields() {
+            $('#FooterId').val(0);
+            $('#FooterName').prop("disabled", true);
+            $('#FooterName').val('');
+            $('#Description').prop("disabled", true);
+            $('#Description').val('');
+            $('#btnSaveFooter').prop('disabled', true);
+            $('#addTd').removeAttr("hidden");
+            $('#saveTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#ImageRow').attr("hidden", "hidden");
+            if ($('#CanSave').val() == 0) {
+                $('#listTd').css({ 'width': '47%', 'text-align': 'right' });
+                $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            }
+            $('#FooterImage').val('');
+            $('#AttachDocumentFooter').val('');
+        }
+        $('#footerForm').on('submit', function (e) {
+            if (!$("#footerForm").valid()) {
+                return false;
+            }
+            var document = $('#FooterImage').get(0).files;
+            var documentFile = document[0];
+            if ($('#FooterId').val() == 0) {
+            if (documentFile == '' || documentFile == undefined) {
+                $('.fileDiv').removeClass('state-error');
+                $('.invalid-File').remove();
+                $('.fileDiv').addClass('state-error');
+                $('.fileDiv').append('<label style="color:#cf564a;font-size:11px" for="Document" class="invalid-File">Image is required.</label>');
+                return false;
+            }
+            else {
+                $('.fileDiv').removeClass('state-error');
+                $('.invalid-File').remove();
+            }
+        }
+            $('#btnSaveFooter').prop('disabled', true);
+            var footerId = $('#FooterId').val();
+            var footerName = $('#FooterName').val();
+            var description = $('#Description').val();
+            var footerForm =
+            {
+                FooterId: footerId,
+                FooterName: footerName,
+                Description: description
+            }
+            var url = $('#footerForm')[0].action;
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'footer': footerForm }),
+                success: function (data) {
+                    if (data.status == true) {
+                        var bannerImage = $("#FooterImage").val();
+                        var file = $('#FooterImage').get(0).files;
+                        var documentFile = file[0];
+                        var extension = $('#FooterImage').val().split('.').pop().toLowerCase();
+                        var invoiceNoWithExtension = data.footerId + "|" + extension;
+                        var formData = new FormData();
+                        formData.append(file.name, documentFile);
+                        formData.append("DocumentName", $("#FooterImage").text());
+
+                        var xhr = new XMLHttpRequest();
+                        var url = '/footer/AttachFooter/' + invoiceNoWithExtension;
+                        xhr.open('POST', url, true);
+
+                        xhr.onload = function (e) {
+                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                            '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                            ' <strong>Success! </strong>' +
+                                            'Footer Saved Succesfully.' +
+                                        '</div>');
+                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert").slideUp(500);
+                                $('.alertDiv').html('');
+                            });
+                            //$.notify("First Level Saved Successfully.", "success");
+                            EnableDisableFields();
+                        };
+                        xhr.send(formData);  // multipart/form-data
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSaveFooter').prop('disabled', false);
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        $('.btnSetDefaultFooter').click(function () {
+            var listFooterId = $('#ListFooterId').val();
+            $.ajax({
+                url: '/footer/SetDefaultFooter/' + listFooterId,
+                type: "POST",
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == true) {
+                        getDefaultFooterImage();
+                        getFootersList();
+                    }
+                    else {
+                        alert(data.message);
+                    }
+                }
+            })
+        })
+        $('#btnDeleteFooter').click(function () {
+            var footerId = $('#FooterId').val();
+            DeleteFooter(footerId);
+        })
+        function DeleteFooter(id) {
+            var a = $.confirm({
+                title: 'Delete Footer',
+                content: 'Are you sure u want to delete this footer?',
+                type: 'white',
+                buttons: {
+                    ok: {
+                        text: "Yes",
+                        btnClass: 'btnConfirm',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: '/footer/deletefooter/' + id,
+                                type: "POST",
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        location.reload();
+                                    }
+                                    else {
+                                        alert(data.message);
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-default',
+                        keys: ['esc'],
+                        action: function () {
+                            a.close();
+                        }
+                    },
+                }
+            });
+        }
+    </script>
+}

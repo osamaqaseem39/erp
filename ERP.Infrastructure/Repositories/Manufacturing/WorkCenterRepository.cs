@@ -13,41 +13,39 @@ public class WorkCenterRepository : IWorkCenterRepository
         _context = context;
     }
 
-    public async Task<WorkCenter?> GetByIdAsync(Guid id)
-    {
-        return await _context.WorkCenters
+    private IQueryable<WorkCenter> Query(Guid tenantId) =>
+        _context.WorkCenters
             .Include(wc => wc.ProductionRuns)
-            .FirstOrDefaultAsync(wc => wc.Id == id);
+            .Where(wc => wc.TenantId == tenantId);
+
+    public async Task<WorkCenter?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(wc => wc.Id == id);
     }
 
-    public async Task<IEnumerable<WorkCenter>> GetAllAsync()
+    public async Task<IEnumerable<WorkCenter>> GetAllAsync(Guid tenantId)
     {
-        return await _context.WorkCenters
-            .Include(wc => wc.ProductionRuns)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<WorkCenter>();
+        return await Query(tenantId).ToListAsync();
     }
 
-    public async Task<IEnumerable<WorkCenter>> GetActiveAsync()
+    public async Task<IEnumerable<WorkCenter>> GetActiveAsync(Guid tenantId)
     {
-        return await _context.WorkCenters
-            .Include(wc => wc.ProductionRuns)
-            .Where(wc => wc.IsActive)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<WorkCenter>();
+        return await Query(tenantId).Where(wc => wc.IsActive).ToListAsync();
     }
 
-    public async Task<IEnumerable<WorkCenter>> GetByTypeAsync(string workCenterType)
+    public async Task<IEnumerable<WorkCenter>> GetByTypeAsync(string workCenterType, Guid tenantId)
     {
-        return await _context.WorkCenters
-            .Include(wc => wc.ProductionRuns)
-            .Where(wc => wc.WorkCenterType == workCenterType)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<WorkCenter>();
+        return await Query(tenantId).Where(wc => wc.WorkCenterType == workCenterType).ToListAsync();
     }
 
-    public async Task<WorkCenter?> GetByCodeAsync(string workCenterCode)
+    public async Task<WorkCenter?> GetByCodeAsync(string workCenterCode, Guid tenantId)
     {
-        return await _context.WorkCenters
-            .Include(wc => wc.ProductionRuns)
-            .FirstOrDefaultAsync(wc => wc.WorkCenterCode == workCenterCode);
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(wc => wc.WorkCenterCode == workCenterCode);
     }
 
     public async Task<Guid> CreateAsync(WorkCenter workCenter)
@@ -64,9 +62,9 @@ public class WorkCenterRepository : IWorkCenterRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var workCenter = await _context.WorkCenters.FindAsync(id);
+        var workCenter = await GetByIdAsync(id, tenantId);
         if (workCenter == null) return false;
 
         _context.WorkCenters.Remove(workCenter);

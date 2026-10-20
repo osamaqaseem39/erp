@@ -1,0 +1,340 @@
+﻿@{
+    string businessName = System.Web.HttpContext.Current.Application["BusinessName"].ToString();
+    string adminImageSrc = System.Web.HttpContext.Current.Application["UserImage"].ToString();
+    string bgImageSrc = ""; // "/Content/pos.jpg";
+    string adminName = User.Identity.Name;
+    string bgLogo = System.Web.HttpContext.Current.Application["CompanyLogo"].ToString();
+    string bgColor = "#584677";
+    ViewBag.Title = "Bank";
+
+}
+@model List<BlocksERP.Models.clsModule>
+
+<main id="js-page-content" role="main" class="page-content">
+    <!-- BREADCRUMNB -->
+    <div class="row">
+
+        <div class="col-md-12" style="display:flex">
+            <table style="width:100%">
+                <tr>
+                    <th>
+                        <ol class="breadcrumb breadcrumb-sm breadcrumb-arrow">
+                            <li>
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-clipboard"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">Setup</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-list-ol"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">Bank List</span>
+                                </a>
+                            </li>
+                        </ol>
+                    </th>
+                    <th style="text-align:right">
+                        <h6 class="js-get-date" style="margin-top: -7px;"></h6>
+                    </th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- PANEL STARTS HERE -->
+            <div class="panel">
+                <div class="panel-hdr bg-primary-500 bg-info-gradient" role="heading">
+                    <h2>Bank List</h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="row" style="padding-left: 0px;padding-right: 0px;padding-top:0px">
+
+                            <!-- USER ROLE AND ADD CREATE BUTTON -->
+                            <div class="col-lg-6" style="margin-top:4px">
+
+                                @if (Model.Any(x => x.ActionName.ToLower() == "save"))
+                                {
+                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#MyModal" data-value="0" class="btn btn-outline-primary waves-effect waves-themed btnNew AddEditRecord" id="AddEditRecord">
+                                        <i class="fal fa-plus-circle"></i>
+                                        &nbsp;
+                                        Add BankId
+                                    </a>
+                                }
+                                @if (Model.Any(x => x.ActionName.ToLower() == "edit") || Model.Any(x => x.ActionName.ToLower() == "delete"))
+                                {
+                                    <input type="hidden" id="EditActionRole" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="EditActionRole" value="0" />
+                                }
+                                @if (Model.Any(x => x.ActionName.ToLower() == "delete"))
+
+                                {
+                                    <input type="hidden" id="DeleteActionRole" value="1" />
+                                    @*<button type="button" class="btn btn-labeled btn-default DeleteMultipleRecord "> <span class="btn-label"><i class="fa fa-lg fa-trash-alt"></i></span>Delete</button>*@
+
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="DeleteActionRole" value="0" />
+                                }
+
+                            </div>
+
+                            <!-- SEARCH BUTTON -->
+                            <div class="col-lg-6" style="margin-top:4px">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button id="btnSearchCategory" class="btn btn-outline-default dropdown-toggle btnSearchGo" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Bank Name</button>
+                                        <div class="dropdown-menu" id="ulSearchCategory">
+                                            <a class="dropdown-item" href="#"> Bank Name</a>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="txtSearch" class="form-control" placeholder="Search here..." aria-label="Text input with dropdown button">
+                                    <div class="input-group-append">
+                                        <button id="btnSearch" class="btn btn-outline-default btnSearchGo" type="button" aria-haspopup="true" aria-expanded="false">Go</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <!-- TABLE STARTS HERE -->
+                        <table id="myTable" class="table table-bordered table-hover table-striped w-100">
+                            <thead>
+                                <tr>
+                                    <th>Bank Name</th>
+                                    <th class="min-mobile">Description</th>
+                                    <th class="min-mobile">Status</th>
+                                    <th class="min-mobile">Edit</th>
+                                    <th class="max-mobile-p">Created Date</th>
+                                    <th class="max-mobile-p">Created By</th>
+                                    <th class="max-mobile-p">Updated Date</th>
+                                    <th class="max-mobile-p">Updated By</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <!-- TABLE ENDS HERE -->
+                    </div>
+                </div>
+            </div>
+            <!-- PANEL ENDS HERE -->
+        </div>
+    </div>
+
+</main>
+
+<!-- SCRIPT STARTS HERE -->
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#myTable').dataTable({
+            "autoWidth": true,
+            "bLengthChange": false,
+            //"searching": false,
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+
+            "ajax": {
+                "url": "/Loan/Bank/GetAllBank",
+                "type": "POST",
+                "datatype": "json",
+                error: function (xhr, httpStatusMessage, customErrorMessage) {
+                    if (xhr.status === 410) {
+                        window.location.href = customErrorMessage;
+                    }
+                }
+            },
+            "responsive": {
+                "breakpoints": [
+                    { "name": 'desktop', "width": "Infinity" },
+                    { "name": 'tablet', "width": "1024" },
+                    //{ "name": 'fablet',  "width": "768" },
+                    { "name": 'phone', "width": "480" }
+                ]
+            },
+            //========== INSERTING VALUES INTO TABLE COLUMNS ==========\\
+            "columns": [
+                { "data": "BankName", "name": "BankName", "autoWidth": true },
+                { "data": "Description", "name": "Description", "autoWidth": true },
+                { "data": "StatusString", "name": "StatusString", "autoWidth": true },
+                {
+                    "data": "BankId", "width": "50px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        var edit = '<a title="Edit BankId" data-toggle="modal" data-target="#MyModal" class="AddEditRecord btn btn-primary" href="javascript:void(0)" data-value="' + data + '" style="border-radius:20px;padding:5px;color:#fff;padding-left:15px;padding-right:15px"><i class="fal fa-fw fa-edit"></i></a>&nbsp';
+                        var final = '';
+                        if ($('#EditActionRole').val() > 0) {
+                            final = final + edit;
+                        }
+                        return final;
+                    }
+                },
+                //{
+                //    "data": "BankId", "width": "50px", "class": "Acenter", "orderable": false, "render": function (data) {
+                //        var del = '<a title="Delete BankId" class="DeleteRecord btn btn-danger" data-toggle="modal" data-target="#DeleteModal" href="javascript:void(0)" data-value="' + data + '" style="border-radius:20px;padding:5px;color:#fff;padding-left:15px;padding-right:15px"><i class="fal fa-fw fa-times-circle"></i></a>&nbsp';
+
+                //        var final = '';
+                //        if ($('#DeleteActionRole').val() > 0) {
+                //            final = final + del;
+                //        }
+                //        return final;
+
+                //    }
+                //},
+                {
+                    "data": "CreatedDate", "name": "CreatedDate", "class": "Acenter", "orderable": true, "autoWidth": true, 'render': function (date) {
+                        return getDateTimeForDatatable(date);
+                    }
+                },
+                { "data": "CreatedByString", "name": "CreatedBy", "autoWidth": true },
+                {
+                    "data": "UpdatedDate", "name": "UpdatedDate", "class": "Acenter", "orderable": true, "autoWidth": true, 'render': function (date) {
+                        return getDateTimeForDatatable(date);
+                    }
+                },
+                { "data": "UpdatedByString", "name": "UpdatedBy", "autoWidth": true },
+
+            ]
+        });
+        oTable = $('#myTable').DataTable();
+
+    });
+    $(document).keypress(function (e) {
+        var keyCode = (e.keyCode ? e.keyCode : e.which);
+        if (keyCode == '13') {
+            e.preventDefault();
+        }
+    });
+    //83 for save form shift+s
+    $(document).on('keydown', function (event) {
+        if (event.ctrlKey && event.keyCode === 13) {
+            $('#btn_Save').click();
+        }
+    })
+    //========== SHOWING MODAL ==========\\
+     $(document).on('keydown', function (event) {
+            if (event.altKey && event.keyCode === 78) {
+                $('#AddEditRecord').click();
+            }
+        })
+    $(document).on('shown.bs.modal',"#MyModal", function(){
+            $('#BankName').focus();
+    });
+
+    //========== CLICK TO SHOW MODAL ==========\\
+    $(document).on('click', '.AddEditRecord', function () {
+            var id = $(this).attr("data-value");
+            if(id > 0)
+            {
+                $('#ModelHeaderSpan').html('Edit Bank');
+            }
+            else {
+                $('#ModelHeaderSpan').html('Add Bank');
+            }
+            $('#modalDiv').html('');
+            $('#modalDiv').load('@Url.Action("insertupdateBank", "Bank", new { area = "Loan" })?id=' + id + '');
+    });
+
+    //========== CLICK ON SEARCH BUTTON ==========\\
+    $('#btnSearch').click(function () {
+            SearchItem();
+    });
+
+    //========== ENTER PRESS ON SEARCH BUTTON ==========\\
+        $('#txtSearch').on('keypress', function (event) {
+            if (event.keyCode == 13) {
+                SearchItem();
+            }
+        });
+
+    //========== SEARCH FUNCTION ==========\\
+        function SearchItem() {
+            var BElement = $("#btnSearchCategory");
+            if (BElement.html() == 'Bank Name') {
+                oTable.columns(0).search($('#txtSearch').val().trim()).draw();
+            }
+            else {
+                alert("Error! try again.");
+            }
+    }
+
+    ////========== CLICK ON DELETE BUTTON ==========\\
+    //$(document).on('click', '.DeleteRecord', function () {
+    //    var id = $(this).attr("data-value");
+    //    $('#DeleteModalTitle').html("Delete BankId");
+    //    $('#DeleteModalBody').html("Are you sure you want to delete this BankId?");
+    //    $('#DeleteModalFooter').html(
+    //        '<button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>' +
+    //        '<button type="button" class="btn btn-primary" onclick="DeleteRecord('+id+')">Yes</button>'
+    //    );
+    //});
+
+    ////========== DELETE FUNCTION ==========\\
+    //function DeleteRecord(id) {
+    //    $.ajax({
+    //        url: '/Bank/DeleteModule/' + id,
+    //        type: "POST",
+    //        dataType: 'json',
+    //        success: function (data) {
+    //            if (data.status == true) {
+    //                oTable.ajax.reload(null, false);
+    //                $('#DeleteModal').modal('toggle');
+    //            }
+    //            else {
+    //                alert(data.message);
+    //            }
+    //        }
+    //    })
+    //}
+
+    //========= CLICK ON DELETE BUTTON ==========\\
+    $(document).on('click', '.btnDeleteRecord', function () {
+
+        var id = $('#BankId').val();
+        DeleteRecord(id);
+    });
+
+
+    //========= DELETE FUNCTION ==========\\
+    function DeleteRecord(id) {
+
+
+        var checkstr = confirm('Are you sure you want to delete this BankId?');
+        if (checkstr == true) {
+            $.ajax({
+                url: '/Loan/Bank/DeleteModule/' + id,
+                type: "POST",
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == true) {
+                        //$('#MyModal').modal('toggle');
+                        toastr.error("BankId Deleted Successfully", "Deleted", { timeOut: 3000, "closeButton": true });
+
+                        $('.close').click();
+                        oTable.ajax.reload(null, false);
+                    }
+                    else {
+                        alert(data.message);
+                    }
+                }
+            })
+        }
+        else {
+            return false;
+        }
+    }
+
+
+</script>
+
+

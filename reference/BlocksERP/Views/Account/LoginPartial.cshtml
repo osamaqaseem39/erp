@@ -1,0 +1,36 @@
+﻿
+<div class="col-md-12 rounded-plus bg-faded" style="padding: 5%; padding-top: 25% !important; padding-bottom: 20% !important; text-align: left; height: 100% !important; background-color: #015607 !important; color:white !important; ">
+    @using (Html.BeginForm("login", "account", FormMethod.Post, new { id = "loginForm", enctype = "multipart/form-data", role = "form" }))
+    {
+        <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <input type="text" id="Email" class="form-control form-control-lg" placeholder="Username" style="width:100% !important" value="" required>
+            <div class="invalid-feedback">Username is required.</div>
+            <div class="help-block">Your unique Username to app</div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="Password" class="form-control form-control-lg" placeholder="Password" style="width: 100% !important" value="" required>
+            @*<span data-toggle="#Password" id="eyeIcon" class="fal fa-fw fa-eye field-icon toggle-password" style="cursor:pointer"></span>*@
+            <div class="invalid-feedback">Password is required.</div>
+            <div class="help-block">Your password</div>
+        </div>
+        <div class="form-group text-left">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="rememberme">
+                <label class="custom-control-label" for="rememberme"> Remember me</label>
+            </div>
+        </div>
+        //position: absolute; bottom: 20px; padding-right: 15px !important;
+        <div class="row" style="">
+            <div class="col-md-12" style="">
+                <button id="btnLogin" type="submit" class="btn btn-danger btn-block btn-lg" style="width: 100% !important; background-color: #99B801 !important; border-color: #99B801 !important; color: black !important; font-weight:bold; font-size:20px; ">LOG IN</button>
+            </div>
+
+        </div>
+        <div class="text-center important" style="margin-top:10px">
+
+
+        </div>
+    }
+</div>

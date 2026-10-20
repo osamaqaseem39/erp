@@ -1,6 +1,7 @@
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.SCM.Interfaces;
 using ERP.Shared.DTOs.Inventory;
@@ -10,6 +11,10 @@ namespace ERP.Api.Controllers.Inventory;
 [ApiController]
 [Route("api/inventory/units-of-measure")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class UnitOfMeasureController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IUnitOfMeasureService _service;
@@ -22,6 +27,7 @@ public class UnitOfMeasureController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<UnitOfMeasureDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] bool? isActive = null)
     {
         var tenantId = GetTenantId();
@@ -30,6 +36,7 @@ public class UnitOfMeasureController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(UnitOfMeasureDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -38,6 +45,7 @@ public class UnitOfMeasureController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] UnitOfMeasureDto dto)
     {
         var tenantId = GetTenantId();
@@ -47,6 +55,7 @@ public class UnitOfMeasureController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(UnitOfMeasureDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UnitOfMeasureDto dto)
     {
         dto.Id = id;
@@ -57,6 +66,7 @@ public class UnitOfMeasureController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

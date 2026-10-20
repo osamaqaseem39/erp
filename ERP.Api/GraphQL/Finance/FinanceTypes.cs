@@ -38,6 +38,9 @@ public class JournalType
     public DateTime? PostedAt { get; set; }
     public Guid? PostedBy { get; set; }
     public bool IsLocked { get; set; }
+    public string? InvoiceNumber { get; set; }
+    public string? EntityReferenceTable { get; set; }
+    public Guid? EntityReferenceId { get; set; }
     public List<JournalEntryType> JournalEntries { get; set; } = new();
 }
 

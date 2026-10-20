@@ -39,6 +39,7 @@ public class InvoiceLineCreateDto : CreateDto
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal TaxRate { get; set; }
+    public Guid GLAccountId { get; set; }
     public Guid? CostCenterId { get; set; }
     public Guid? ProjectId { get; set; }
 }
@@ -50,6 +51,7 @@ public class InvoiceLineUpdateDto : UpdateDto
     public decimal? Quantity { get; set; }
     public decimal? UnitPrice { get; set; }
     public decimal? TaxRate { get; set; }
+    public Guid? GLAccountId { get; set; }
     public Guid? CostCenterId { get; set; }
     public Guid? ProjectId { get; set; }
 }
@@ -79,6 +81,7 @@ public class BillLineCreateDto : CreateDto
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal TaxRate { get; set; }
+    public Guid GLAccountId { get; set; }
     public Guid? CostCenterId { get; set; }
     public Guid? ProjectId { get; set; }
 }
@@ -90,6 +93,7 @@ public class BillLineUpdateDto : UpdateDto
     public decimal? Quantity { get; set; }
     public decimal? UnitPrice { get; set; }
     public decimal? TaxRate { get; set; }
+    public Guid? GLAccountId { get; set; }
     public Guid? CostCenterId { get; set; }
     public Guid? ProjectId { get; set; }
 }

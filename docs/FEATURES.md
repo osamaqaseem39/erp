@@ -49,12 +49,12 @@ See [CRM_MODULE_STATUS.md](CRM_MODULE_STATUS.md) for layer-by-layer detail.
 |------|-----------|-------------------|
 | Customers | `/api/crm/customers` | CRUD, search, filter by status/industry |
 | Contacts | `/api/crm/contacts` | CRUD, by customer, search |
-| Leads | `/api/crm/leads` | convert → customer; convert → opportunity |
-| Opportunities | `/api/crm/opportunities` | convert → quote |
-| Quotes | `/api/crm/quotes` | send; convert → sales order; line items |
+| Leads | `/api/crm/leads` | qualify/lose; convert → customer/opportunity (from Qualified) |
+| Opportunities | `/api/crm/opportunities` | win/lose/cancel; convert → quote (from Won) |
+| Quotes | `/api/crm/quotes` | send / approve / reject; convert → sales order (Accepted only); line items |
 | Sales orders | `/api/crm/sales-orders` | approve / ship / invoice; line items |
-| Activities | `/api/crm/activities` | complete / reschedule |
-| Campaigns | `/api/crm/campaigns` | launch / pause / complete |
+| Activities | `/api/crm/activities` | complete / cancel / reschedule (Open-only edit) |
+| Campaigns | `/api/crm/campaigns` | launch / pause / complete / cancel (Draft-only edit) |
 | Customer groups, price lists, territories, return orders | `/api/crm/customer-groups`, `price-lists`, `sales-territories`, `return-orders` | CRUD |
 | Frontend | `/crm/*` list/new/edit + `/crm/dashboard` | |
 
@@ -83,11 +83,11 @@ Frontend routes exist under `/finance/*`.
 
 ## HRM — Wired (some Stub)
 
-DI-registered via `AddErpHrmModule`. Routes include `/api/hrm/employees`, `departments`, `attendance`, `leaves`, `leave-requests`, `payroll`, `performance`, `recruitment`, `training`, `time-tracking`, `benefits`. Attendance/Benefits/Department/LeaveRequest use stub services where full domain logic is incomplete. Frontend under `/hrm/*`.
+DI-registered via `AddErpHrmModule`. Routes include `/api/hrm/employees`, `departments`, `attendance`, `leaves`, `leave-requests`, `payroll`, `performance`, `recruitment`, `training`, `time-tracking`, `benefits`. Leave + time-tracking/attendance: tenant fail-closed. Frontend under `/hrm/*`.
 
 ## Inventory / SCM — Wired
 
-DI-registered via `AddErpInventoryModule`. Controllers under `/api/inventory/...`. Stock level/adjust/transfer implemented on `StockService`. Frontend under `/inventory/*` (companyId from auth session).
+DI-registered via `AddErpInventoryModule`. Controllers under `/api/inventory/...`. Stock level/adjust/transfer on `StockService` (tenant fail-closed via `ITenantProvider` + repository guards). Frontend under `/inventory/*` (companyId from auth session).
 
 ## Procurement — Wired (Stub-heavy)
 

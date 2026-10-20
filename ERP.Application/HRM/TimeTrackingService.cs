@@ -1,7 +1,7 @@
 using ERP.Application.Interfaces.HRM;
-using ERP.Shared.DTOs.HRM;
-using ERP.Infrastructure.Interfaces.HRM;
 using ERP.Domain.HRM;
+using ERP.Infrastructure.Interfaces.HRM;
+using ERP.Shared.DTOs.HRM;
 
 namespace ERP.Application.HRM;
 
@@ -14,53 +14,62 @@ public class TimeTrackingService : ITimeTrackingService
         _repository = repository;
     }
 
-    public async Task<TimeEntryDto?> GetByIdAsync(Guid id)
+    public async Task<TimeEntryDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
         return entity != null ? MapToDto(entity) : null;
     }
 
-    public async Task<IEnumerable<TimeEntryDto>> GetAllAsync()
+    public async Task<IEnumerable<TimeEntryDto>> GetAllAsync(Guid tenantId)
     {
-        var entities = await _repository.GetAllAsync();
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetAllAsync(tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> CreateAsync(CreateTimeEntryDto dto)
+    public async Task<Guid> CreateAsync(CreateTimeEntryDto dto, Guid tenantId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         var entity = MapToEntity(dto);
+        entity.TenantId = tenantId;
         return await _repository.CreateAsync(entity);
     }
 
-    public async Task<bool> UpdateAsync(UpdateTimeEntryDto dto)
+    public async Task<bool> UpdateAsync(UpdateTimeEntryDto dto, Guid tenantId)
     {
-        var entity = await _repository.GetByIdAsync(dto.Id);
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
         if (entity == null) return false;
 
         MapToEntity(dto, entity);
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        return await _repository.DeleteAsync(id);
+        if (tenantId == Guid.Empty) return false;
+        return await _repository.DeleteAsync(id, tenantId);
     }
 
-    public async Task<IEnumerable<TimeEntryDto>> GetByEmployeeAsync(Guid employeeId)
+    public async Task<IEnumerable<TimeEntryDto>> GetByEmployeeAsync(Guid employeeId, Guid tenantId)
     {
-        var entities = await _repository.GetByEmployeeAsync(employeeId);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByEmployeeAsync(employeeId, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<TimeEntryDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<TimeEntryDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        var entities = await _repository.GetByDateRangeAsync(startDate, endDate);
+        if (tenantId == Guid.Empty) return [];
+        var entities = await _repository.GetByDateRangeAsync(startDate, endDate, tenantId);
         return entities.Select(MapToDto);
     }
 
-    public async Task<decimal> GetTotalHoursAsync(Guid employeeId, DateTime startDate, DateTime endDate)
+    public async Task<decimal> GetTotalHoursAsync(Guid employeeId, DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        var entities = await _repository.GetByEmployeeAndDateRangeAsync(employeeId, startDate, endDate);
+        if (tenantId == Guid.Empty) return 0m;
+        var entities = await _repository.GetByEmployeeAndDateRangeAsync(employeeId, startDate, endDate, tenantId);
         return entities.Sum(e => e.HoursWorked ?? 0m);
     }
 
@@ -99,7 +108,8 @@ public class TimeTrackingService : ITimeTrackingService
             ClockOut = dto.EndTime,
             HoursWorked = dto.HoursWorked,
             Notes = dto.Description,
-            Status = dto.Status,
+            Status = string.IsNullOrWhiteSpace(dto.Status) ? "Active" : dto.Status,
+            Source = "Manual",
             CreatedBy = dto.CreatedBy
         };
     }

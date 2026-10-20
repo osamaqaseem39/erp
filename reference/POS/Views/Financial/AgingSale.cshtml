@@ -1,0 +1,125 @@
+﻿<style>
+    .set-img {
+        font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    }
+
+    .table tr td {
+        border: 0 !important;
+    }
+
+    .custome-class-form h4 {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .custome-class-form label {
+        font-weight: bold !important;
+        color: #000;
+    }
+
+    .table tr .V__align {
+        vertical-align: bottom !important;
+    }
+
+    imgs {
+        opacity: 0.5;
+        filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
+    .dropwidth {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #03386C !important;
+        }
+</style>
+@model POS.Models.clsFinancialReports
+@{
+    Layout = null;
+}
+<div class="widget-body no-padding" style="overflow-x:hidden;">
+    @using (Html.BeginForm("printsaleaging", "financial", FormMethod.Post, new { id = "agingForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+
+        <fieldset id="myField1">
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Customer</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.DetailCode, ViewBag.Customers as SelectList, new { @id = "DetailCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-md-8">
+                    <div id="UntilDateDiv">
+                        <label>Until Date</label>
+                        <label class="input">
+                            <i class="icon-prepend fa fa-calendar"></i>
+                            <input type="date" id="UntilDate" name="UntilDate" required />
+                        </label>
+                    </div>
+                </section>
+                <section class="col col-md-4">
+                    <label class="checkbox pull-right checkBoxLbl" style="margin-top:20px">
+                        <input id="AllCheckbox" type="checkbox" name="AllCheckbox"><i></i>
+                        <span style="">All Invoices</span>
+                    </label>
+                </section>
+            </div>
+        </fieldset>
+        <footer>
+            <button formtarget="_blank" type="submit" class="btn btn-labeled btn-primary pull-right">
+                GENERATE REPORT
+            </button>
+        </footer>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#DetailCode').select2();
+        GetTodayBetweenDate();
+    });
+    //$('#DetailCode').change(function () {
+    //    $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('border-color', '#CCCCCC');
+    //    $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('color', 'black');
+    //})
+    function GetTodayBetweenDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm + '-' + dd;
+        $('#UntilDate').val(today);
+    }
+    $('#agingForm').on('submit', function (e) {
+        var detailCode = $('#DetailCode').val();
+        var secondLevel = $('#SecondLevelAccountCode').val();
+        var thirdLevel = $('#ThirdLevelAccountCode').val();
+        if (detailCode != null) {
+            if (secondLevel != null || thirdLevel != null) {
+                alert("Please select only one filter.");
+                return false;
+            }
+        }
+        else {
+            if (thirdLevel != null && secondLevel != null) {
+                alert("Please select only one filter.");
+                return false;
+            }
+        }
+    })
+</script>

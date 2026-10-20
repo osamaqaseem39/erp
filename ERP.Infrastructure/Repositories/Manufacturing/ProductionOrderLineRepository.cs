@@ -13,38 +13,34 @@ public class ProductionOrderLineRepository : IProductionOrderLineRepository
         _context = context;
     }
 
-    public async Task<ProductionOrderLine?> GetByIdAsync(Guid id)
-    {
-        return await _context.ProductionOrderLines
+    private IQueryable<ProductionOrderLine> Query(Guid tenantId) =>
+        _context.ProductionOrderLines
             .Include(pol => pol.ProductionOrder)
             .Include(pol => pol.Item)
-            .FirstOrDefaultAsync(pol => pol.Id == id);
+            .Where(pol => pol.TenantId == tenantId);
+
+    public async Task<ProductionOrderLine?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(pol => pol.Id == id);
     }
 
-    public async Task<IEnumerable<ProductionOrderLine>> GetAllAsync()
+    public async Task<IEnumerable<ProductionOrderLine>> GetAllAsync(Guid tenantId)
     {
-        return await _context.ProductionOrderLines
-            .Include(pol => pol.ProductionOrder)
-            .Include(pol => pol.Item)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionOrderLine>();
+        return await Query(tenantId).ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductionOrderLine>> GetByProductionOrderAsync(Guid productionOrderId)
+    public async Task<IEnumerable<ProductionOrderLine>> GetByProductionOrderAsync(Guid productionOrderId, Guid tenantId)
     {
-        return await _context.ProductionOrderLines
-            .Include(pol => pol.ProductionOrder)
-            .Include(pol => pol.Item)
-            .Where(pol => pol.ProductionOrderId == productionOrderId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionOrderLine>();
+        return await Query(tenantId).Where(pol => pol.ProductionOrderId == productionOrderId).ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductionOrderLine>> GetByItemAsync(Guid itemId)
+    public async Task<IEnumerable<ProductionOrderLine>> GetByItemAsync(Guid itemId, Guid tenantId)
     {
-        return await _context.ProductionOrderLines
-            .Include(pol => pol.ProductionOrder)
-            .Include(pol => pol.Item)
-            .Where(pol => pol.ItemId == itemId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionOrderLine>();
+        return await Query(tenantId).Where(pol => pol.ItemId == itemId).ToListAsync();
     }
 
     public async Task<Guid> CreateAsync(ProductionOrderLine productionOrderLine)
@@ -61,9 +57,9 @@ public class ProductionOrderLineRepository : IProductionOrderLineRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var productionOrderLine = await _context.ProductionOrderLines.FindAsync(id);
+        var productionOrderLine = await GetByIdAsync(id, tenantId);
         if (productionOrderLine == null) return false;
 
         _context.ProductionOrderLines.Remove(productionOrderLine);

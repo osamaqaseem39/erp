@@ -1,0 +1,394 @@
+﻿@model List<POS.Models.clsUser>
+<style>
+    .containerCheckBox {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        font-size: 8px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        text-align: center;
+    }
+
+        /* Hide the browser's default checkbox */
+        .containerCheckBox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+    /* Create a custom checkbox */
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 17px;
+        width: 17px;
+        background-color: #eee;
+        border: 1px solid #011C36;
+    }
+
+    /* On mouse-over, add a grey background color */
+    .containerCheckBox:hover input ~ .checkmark {
+        background-color: #ddd;
+    }
+
+    /* When the checkbox is checked, add a blue background */
+    .containerCheckBox input:checked ~ .checkmark {
+        background-color: #46AB03;
+    }
+
+    /* Create the checkmark/indicator (hidden when not checked) */
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    /* Show the checkmark when checked */
+    .containerCheckBox input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    /* Style the checkmark/indicator */
+    .containerCheckBox .checkmark:after {
+        left: 4px;
+        top: 0px;
+        width: 7px;
+        height: 14px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+</style>
+<div class="alertDiv2">
+
+</div>
+<div class="row">
+    <div class="col col-md-3">
+        <table class="" style="">
+            <tr>
+                <td style="width: 50%; padding-right: 3px; padding-left: 3px" id="">
+                    <a href="javascript:void(0);" class="btn btn-success selectAllBtn" title="Select All" style=" text-align: center;font-size: 12px;margin-bottom:10px;padding:4px;color:#fff !important;border-radius:2px ">
+                        Select All
+                    </a>
+                </td>
+                <td style="width: 50%;; padding-left: 3px; " id="">
+                    <a href="javascript:void(0);" class="btn btn-warning clearAllBtn" title="Clear All" style=" text-align: center;font-size: 12px;margin-bottom:10px;padding:4px;color:#fff !important;border-radius:2px ">
+                        Clear All
+                    </a>
+                </td>
+            </tr>
+        </table>
+            
+    </div>
+    <div class="col col-md-8">
+
+    </div>
+    <div class="col col-md-1 pull-right">
+        <a href="javascript:void(0);" class="btn btn-primary saveRoleBtn pull-right" title="Save" style=" text-align: center;font-size: 12px;height:30px;width:55px;margin-bottom:10px;padding:4px;color:#fff !important;background-color:#428bca !important;border-color:#357ebd !important;border-radius:2px ">
+            Save
+        </a>
+    </div>
+</div>
+<table class="table table-bordered table-striped" style="width:100%">
+    <tr>
+        <th colspan="5" style="width:100%;text-align: center;padding:8px;">
+            <span style="font-size: 16px; font-weight: normal">Menu</span>
+        </th>
+    </tr>
+    <tr class="headingRowBilling">
+        <th style=" text-align: left; padding: 5px; padding-left:10px; ">
+            Menu Name
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px; ">
+            Main
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px;">
+            Save
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px; ">
+            Change
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px; ">
+            Delete
+        </th>
+    </tr>
+    @if (Model.Where(x=>x.MenuGroup != "Report").Count() == 0)
+    {
+        <tr style="" class="rowsListBilling">
+            <th colspan="5" style="width:100%;text-align: center;padding:15px;">
+                <span style="font-size: 16px; font-weight: normal">No record found.</span>
+            </th>
+        </tr>
+    }
+    @foreach (clsUser u in Model.Where(x=>x.MenuGroup != "Report"))
+    {
+        string showMain = "";
+        string showSave = "";
+        string showChange = "";
+        string showDelete = "";
+        if (u.showMain == 1)
+        {
+            showMain = "checked";
+        }
+        else
+        {
+            showMain = "";
+        }
+        if (u.showSave == 1)
+        {
+            showSave = "checked";
+        }
+        else
+        {
+            showSave = "";
+        }
+        if (u.showChange == 1)
+        {
+            showChange = "checked";
+        }
+        else
+        {
+            showChange = "";
+        }
+        if (u.showDelete == 1)
+        {
+            showDelete = "checked";
+        }
+        else
+        {
+            showDelete = "";
+        }
+            <tr class="roleRows">
+                <th style="text-align: left; padding: 5px; padding-left: 10px; ">
+                    <input type="hidden" class="MenuName" value="@u.MenuName" />
+                    <input type="hidden" class="RoleUserID" value="@u.UserID" />
+                    <span style="font-size:14px;font-weight:normal"> @u.MenuTitle </span>
+                </th>
+                <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                    @*<label class="checkbox" style="">
+                            <input class="ShowMain" type="checkbox" name="ShowMain" @showMain><i></i>
+                            <span></span>
+                        </label>*@
+                    <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                        <input type="checkbox" class="ShowMain" @showMain>
+                        <span class="checkmark" style="margin-left:15px;margin-top:3px"></span>
+                    </label>
+                </th>
+                <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                    <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                        <input type="checkbox" class="ShowSave" @showSave>
+                        <span class="checkmark" style="margin-left:15px;margin-top:3px"></span>
+                    </label>
+                </th>
+                <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                    <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                        <input type="checkbox" class="ShowChange" @showChange>
+                        <span class="checkmark" style="margin-left:21px;margin-top:3px"></span>
+                    </label>
+                </th>
+                <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                    <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                        <input type="checkbox" class="ShowDelete" @showDelete>
+                        <span class="checkmark" style="margin-left:15px;margin-top:3px"></span>
+                    </label>
+                </th>
+            </tr>
+    }
+
+    <tr>
+        <th colspan="5" style="width: 100%; text-align: center; padding: 8px; background-color: #fff;padding-top:12px;border-right:0px;border-left:0px;border-bottom:0px">
+        </th>
+    </tr>
+    <tr>
+        <th colspan="5" style="width: 100%; text-align: center; padding: 8px; background-color: #f9f9f9;padding-top:12px;">
+            <span style="font-size: 16px; font-weight: normal">Reports</span>
+        </th>
+    </tr>
+    <tr class="headingRowBilling">
+        <th style=" text-align: left; padding: 5px; padding-left:10px; ">
+            Menu Name
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px; ">
+            Main
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px;">
+            Save
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px; ">
+            Change
+        </th>
+        <th style="width: 50px !important; text-align: center; padding: 5px; ">
+            Delete
+        </th>
+    </tr>
+    @if (Model.Where(x => x.MenuGroup == "Report").Count() == 0)
+    {
+        <tr style="" class="rowsListBilling">
+            <th colspan="5" style="width:100%;text-align: center;padding:15px;">
+                <span style="font-size: 16px; font-weight: normal">No record found.</span>
+            </th>
+        </tr>
+    }
+    @foreach (clsUser u in Model.Where(x => x.MenuGroup == "Report"))
+    {
+        string showMain = "";
+        string showSave = "";
+        string showChange = "";
+        string showDelete = "";
+        if (u.showMain == 1)
+        {
+            showMain = "checked";
+        }
+        else
+        {
+            showMain = "";
+        }
+        if (u.showSave == 1)
+        {
+            showSave = "checked";
+        }
+        else
+        {
+            showSave = "";
+        }
+        if (u.showChange == 1)
+        {
+            showChange = "checked";
+        }
+        else
+        {
+            showChange = "";
+        }
+        if (u.showDelete == 1)
+        {
+            showDelete = "checked";
+        }
+        else
+        {
+            showDelete = "";
+        }
+        <tr class="roleRows">
+            <th style="text-align: left; padding: 5px; padding-left: 10px; ">
+                <input type="hidden" class="MenuName" value="@u.MenuName" />
+                <input type="hidden" class="RoleUserID" value="@u.UserID" />
+                <span style="font-size:14px;font-weight:normal"> @u.MenuTitle </span>
+            </th>
+            <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                @*<label class="checkbox" style="">
+                        <input class="ShowMain" type="checkbox" name="ShowMain" @showMain><i></i>
+                        <span></span>
+                    </label>*@
+                <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                    <input type="checkbox" class="ShowMain" @showMain>
+                    <span class="checkmark" style="margin-left:15px;margin-top:3px"></span>
+                </label>
+            </th>
+            <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                    <input type="checkbox" class="ShowSave" @showSave>
+                    <span class="checkmark" style="margin-left:15px;margin-top:3px"></span>
+                </label>
+            </th>
+            <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                    <input type="checkbox" class="ShowChange" @showChange>
+                    <span class="checkmark" style="margin-left:21px;margin-top:3px"></span>
+                </label>
+            </th>
+            <th style="width: 50px !important; text-align: center; padding: 5px; padding-right: 10px;">
+                <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                    <input type="checkbox" class="ShowDelete" @showDelete>
+                    <span class="checkmark" style="margin-left:15px;margin-top:3px"></span>
+                </label>
+            </th>
+        </tr>
+    }
+</table>
+<script type="text/javascript">
+    $('.selectAllBtn').click(function () {
+        $('.roleRows').find('input[type=checkbox]').prop('checked', true);
+    })
+    $('.clearAllBtn').click(function () {
+        $('.roleRows').find('input[type=checkbox]').prop('checked', false);
+    })
+    $('.saveRoleBtn').click(function () {
+        var data = [];
+        $('.roleRows').each(function () {
+            var menuName = $(this).find('.MenuName').val();
+            var userId = $(this).find('.RoleUserID').val();
+            var showMain = $(this).find('.ShowMain').is(':checked');
+            var showSave = $(this).find('.ShowSave').is(':checked');
+            var showChange = $(this).find('.ShowChange').is(':checked');
+            var showDelete = $(this).find('.ShowDelete').is(':checked');
+            var showMainInt = 0;
+            var showSaveInt = 0;
+            var showChangeInt = 0;
+            var showDeleteInt = 0;
+            if (showMain == true) {
+                showMainInt = 1;
+            }
+            else {
+                showMainInt = 0;
+            }
+            if (showSave == true) {
+                showSaveInt = 1;
+            }
+            else {
+                showSaveInt = 0;
+            }
+            if (showChange == true) {
+                showChangeInt = 1;
+            }
+            else {
+                showChangeInt = 0;
+            }
+            if (showDelete == true) {
+                showDeleteInt = 1;
+            }
+            else {
+                showDeleteInt = 0;
+            }
+            var alldata = {
+                'UserID': userId,
+                'MenuName': menuName,
+                'showMain': showMainInt,
+                'showSave': showSaveInt,
+                'showChange': showChangeInt,
+                'showDelete': showDeleteInt
+            }
+            data.push(alldata);
+        });
+        var allData = JSON.stringify(data);
+        $.ajax({
+            type: "POST",
+            url: "/user/InsertUpdateUserRole/",
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ 'data': allData }),
+            success: function (data) {
+                if (data.status == true) {
+                    $('.alertDiv2').html('<div class="alert alert-success success-alert2" style="margin-top:15px;">' +
+                                            '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                            ' <strong>Success! </strong>' +
+                                            'Roles Assigned Succesfully.' +
+                                        '</div>');
+                    $(".success-alert2").fadeTo(1000, 500).slideUp(500, function () {
+                        $(".success-alert2").slideUp(500);
+                        $('.alertDiv2').html('');
+                    });
+                }
+                else {
+                    alert(data.message);
+                }
+            }
+        })
+    })
+</script>

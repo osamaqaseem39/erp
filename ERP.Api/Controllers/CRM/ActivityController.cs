@@ -1,17 +1,23 @@
 using ERP.Api.Errors;
+using ERP.Api.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
+using ERP.Shared.DTOs;
 using ERP.Shared.DTOs.CRM;
 using ERP.Api.Validators.CRM;
-using FluentValidation;
 
 namespace ERP.Api.Controllers.CRM;
 
 [Authorize]
 [ApiController]
 [Route("api/crm/activities")]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class ActivityController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IActivityService _service;
@@ -30,101 +36,110 @@ public class ActivityController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        return await HandleAsync(() => _service.GetByIdAsync(id));
-    }
+    [ProducesResponseType(typeof(ActivityDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetById(Guid id) =>
+        await HandleAsync(() => _service.GetByIdAsync(id));
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        return await HandleAsync(() => _service.GetAllAsync());
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetAll() =>
+        await HandleAsync(() => _service.GetAllAsync());
 
     [HttpGet("customer/{customerId}")]
-    public async Task<IActionResult> GetByCustomer(Guid customerId)
-    {
-        return await HandleAsync(() => _service.GetByCustomerAsync(customerId));
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByCustomer(Guid customerId) =>
+        await HandleAsync(() => _service.GetByCustomerAsync(customerId));
 
     [HttpGet("lead/{leadId}")]
-    public async Task<IActionResult> GetByLead(Guid leadId)
-    {
-        return await HandleAsync(() => _service.GetByLeadAsync(leadId));
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByLead(Guid leadId) =>
+        await HandleAsync(() => _service.GetByLeadAsync(leadId));
 
     [HttpGet("opportunity/{opportunityId}")]
-    public async Task<IActionResult> GetByOpportunity(Guid opportunityId)
-    {
-        return await HandleAsync(() => _service.GetByOpportunityAsync(opportunityId));
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByOpportunity(Guid opportunityId) =>
+        await HandleAsync(() => _service.GetByOpportunityAsync(opportunityId));
 
     [HttpGet("related/{entityType}/{entityId}")]
-    public async Task<IActionResult> GetByRelatedEntity(string entityType, Guid entityId)
-    {
-        return await HandleAsync(() => _service.GetByEntityAsync(entityType, entityId));
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByRelatedEntity(string entityType, Guid entityId) =>
+        await HandleAsync(() => _service.GetByEntityAsync(entityType, entityId));
 
     [HttpGet("assigned/{assignedTo}")]
-    public async Task<IActionResult> GetByAssignedTo(Guid assignedTo)
-    {
-        return await HandleAsync(() => _service.GetByAssignedToAsync(assignedTo));
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByAssignedTo(Guid assignedTo) =>
+        await HandleAsync(() => _service.GetByAssignedToAsync(assignedTo));
 
     [HttpGet("type/{activityType}")]
-    public async Task<IActionResult> GetByType(string activityType)
-    {
-        return await HandleAsync(() => _service.GetByTypeAsync(activityType));
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByType(string activityType) =>
+        await HandleAsync(() => _service.GetByTypeAsync(activityType));
 
     [HttpGet("period")]
-    public async Task<IActionResult> GetByDateRange(DateTime startDate, DateTime endDate)
-    {
-        return await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate));
-    }
+    [ProducesResponseType(typeof(IEnumerable<ActivityDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByDateRange(DateTime startDate, DateTime endDate) =>
+        await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate));
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateActivityDto dto)
     {
         var validationResult = await _createValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
-        {
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
-        }
 
         return await HandleAsync(() => _service.CreateAsync(dto));
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateActivityDto dto)
     {
         dto.Id = id;
         var validationResult = await _updateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
-        {
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
-        }
 
         return await HandleAsync(() => _service.UpdateAsync(dto));
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
-    {
-        return await HandleAsync(() => _service.DeleteAsync(id));
-    }
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
+    public async Task<IActionResult> Delete(Guid id) =>
+        await HandleAsync(() => _service.DeleteAsync(id));
 
     [HttpPost("{id}/complete")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Complete(Guid id)
     {
-        return await HandleAsync(() => _service.CompleteAsync(id));
+        var ok = await _service.CompleteAsync(id, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to complete activity (must be Open)" });
+        return Ok(new MessageResponse { Message = "Activity completed" });
+    }
+
+    [HttpPost("{id}/cancel")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> Cancel(Guid id)
+    {
+        var ok = await _service.CancelAsync(id, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to cancel activity (must be Open)" });
+        return Ok(new MessageResponse { Message = "Activity cancelled" });
     }
 
     [HttpPost("{id}/reschedule")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Reschedule(Guid id, [FromBody] RescheduleActivityRequest request)
     {
-        return await HandleAsync(() => _service.RescheduleAsync(id, request.NewDate));
+        var ok = await _service.RescheduleAsync(id, request.NewDate, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to reschedule activity (must be Open)" });
+        return Ok(new MessageResponse { Message = "Activity rescheduled" });
     }
+
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
+    private Guid GetUserId() => User.RequireUserId();
 }
 
 public class RescheduleActivityRequest

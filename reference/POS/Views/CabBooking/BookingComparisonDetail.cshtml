@@ -1,0 +1,283 @@
+﻿<style>
+    .Acenter {
+        text-align: center;
+    }
+</style>
+
+@model POS.Models.clsBooking
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="widget-body">        
+        @*@if (!String.IsNullOrEmpty(Model.Startpoint1) || !String.IsNullOrEmpty(Model.Startpoint2) || !String.IsNullOrEmpty(Model.Startpoint3))
+        {
+            <div class="row">
+                @if (!String.IsNullOrEmpty(Model.Startpoint1))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Startpoint1
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Startpoint2))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Startpoint2
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Startpoint3))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Startpoint3
+                    </div>
+                }
+            </div>
+        }
+        @if (!String.IsNullOrEmpty(Model.Endposition1) || !String.IsNullOrEmpty(Model.Endposition2) || !String.IsNullOrEmpty(Model.Endposition3))
+        {
+            <div class="row">
+                @if (!String.IsNullOrEmpty(Model.Endposition1))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Endposition1
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Endposition2))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Endposition2
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.Endposition3))
+                {
+                    <div class="col-4">
+                        <span style="font-weight:bold">Via :</span>@Model.Endposition3
+                    </div>
+                }
+            </div>
+        }*@
+
+        
+        @if (Model.BookingList.Count != 0)
+        {
+            <input type="hidden" id="BookID" value="@Model.BookingList[0].BookingId" />
+            <input type="hidden" id="formtype" value="@Model.BookingList[0].FormType.ToLower()" />
+            <div class="row">
+                <div class="col col-1 pull-right" style="padding-left: 0px !important;">
+                    <label style="color: red; font-size: 24px;border:1px solid red;cursor:context-menu" id="closepanel">&nbsp; X &nbsp;</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-3">
+                    <label>C.A Close Date</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-calendar"></i>
+                        <input type="text" id="CloseDate" class="form-control inputEnabled" style="width: 100%;" data-date-format="dd-mm-yyyy" autocomplete="off">
+                    </label>
+                </div>
+                <div class="col col-3">
+                    <label>C.A Close Time</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-clock"></i>
+                        <input type="time" id="CloseTime" class="form-control inputEnabled" style="width:100%;" autocomplete="off">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-10">
+                    <table style="width:90%;border:none !important;">
+                        <tr>
+                            <td style="font-weight: bold; width: 55%; padding: 5px;">Supplier</td>
+                            <td style="width: 80px; padding: 5px;">Bid Amount</td>
+                            <td style="padding: 5px; "></td>
+                        </tr>
+                        @for (var i = 0; i < Model.BookingList.Count; i++)
+                        {
+                            <tr>
+                                <td style="padding: 5px; ">@Model.BookingList[i].DetailName</td>
+                                <td style="padding: 5px; ">@Convert.ToDecimal(Model.BookingList[i].SuppBidAmount).ToString("#,##0.00")</td>
+                                <td style="padding: 5px; ">
+                                    <a title="Assigned" id="btnSave_@Model.BookingList[i].RecordID" href="javascript:AssignBooking(@Model.BookingList[i].RecordID)" class="btn btn-success" style="width: 140px; height: 28px; color: white; font-size: 16px; vertical-align: middle; border-radius: 5px; background-color: rgb(243,113,1) !important; ">
+                                        Assigned
+                                    </a> &nbsp;&nbsp;
+                                    <a title="Confirmed" id="btnSaveConf_@Model.BookingList[i].RecordID" href="javascript:AssignBookingConf(@Model.BookingList[i].RecordID)" class="btn btn-success" style="width: 140px; height: 28px; color: white; font-size: 16px; vertical-align: middle; border-radius: 5px; background-color: rgb(243,113,1) !important; ">
+                                        Confirmed
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+
+
+    function ConvertToDateLocal(dateStr, timestr) {
+        var parts = dateStr.split("-");
+        var vyear = parseFloat(parts[2]);
+        var vmonth = parseFloat(parts[1]) - 1;
+        var vday = parseFloat(parts[0]);
+        var partstime = timestr.split(":");
+        var vhour = parseFloat(partstime[0]);
+        var vmint = parseFloat(partstime[1]);
+
+        return new Date(vyear, vmonth, vday, vhour, vmint, 0, 0);
+    }
+
+    $('#closepanel').click(function () {
+        var infoId = $("#BookID").val();
+        $('#detaildiv' + infoId).empty();
+        //$(this).empty();
+    });
+
+    $(document).ready(function () {
+
+        var formtype = $("#formtype").val();
+        if (formtype == "compare") {
+            $("#CloseDate").datepicker({ dateFormat: "dd-mm-yy" });
+            var vdate = getFormattedDate(new Date());
+            $("#CloseDate").val(vdate);
+            var date = new Date();
+            var vhour = date.getHours();
+            if (vhour.toString().length == 1) { vhour = '0' + vhour; }
+            var vmint = date.getMinutes();
+            if (vmint.toString().length == 1) { vmint = '0' + vmint; }
+            var currentTime = vhour + ':' + vmint;
+            $("#CloseTime").val(currentTime);
+        }
+    });
+
+    function ConvertDate(dateStr) {
+        var parts = dateStr.split("-");
+        //return new Date(parts[2], parts[1] - 1 , parts[0]);
+        return parts[1] + "/" + parts[0] + "/" + parts[2];
+    }
+
+    function AssignBookingConf(vrecordid) {
+        var bookid = vrecordid;
+        if (bookid == null || bookid == "" || isNaN(bookid) || bookid == "0") {
+            alert("Select Supplier");
+            return false
+        } else {
+            SaveBidFunctionConf(bookid);
+        }
+    }
+
+    function SaveBidFunctionConf(id) {
+        var a = $.confirm({
+            title: 'Confirmed To Supplier',
+            content: 'Are you sure u want to Confirm this booking?',
+            type: 'green',
+            buttons: {
+                ok: {
+                    text: "Yes",
+                    btnClass: 'btnConfirm',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '/CabBooking/FinalBidConfirm/',
+                            data: { id: id },
+                            type: "POST",
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.status == true) {
+                                    location.reload();
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: "No",
+                    btnClass: 'btn-default',
+                    keys: ['esc'],
+                    action: function () {
+                        a.close();
+                    }
+                },
+            }
+        });
+    }
+
+    function AssignBooking(vrecordid) {
+        var bookid = vrecordid;
+        var vclosedate = ConvertDate($('#CloseDate').val());
+        var vclosetime = $('#CloseTime').val();
+
+        var jobdatetime = ConvertToDateLocal('@Model.PickupDateTimeStr', '@Model.PickupTimeString');
+        var bidclosedatetime = new Date(vclosedate + " " + vclosetime);
+        var diff = (bidclosedatetime - jobdatetime) / 1000 / 60 / 60;
+        var vServerDateTime = ConvertToDateLocal('@ViewBag.ServerDate', '@ViewBag.ServerTime');
+        var diffnow = (bidclosedatetime - vServerDateTime) / 1000 / 60 / 60;
+        if (diff >= 0) {
+            alert('Close Date Should be Less Than Job Date');
+        } else if (diffnow <= 0) {
+            alert('Close Date Should be greater than Current Time');
+        } else if (bookid == null || bookid == "" || isNaN(bookid) || bookid == "0") {
+            alert("Select Supplier");
+            return false
+        }else if (vclosedate == null || vclosedate == "") {
+            alert("Enter Confirm Upto Date");
+            return false
+        } else if (vclosetime == null || vclosetime == "") {
+            alert("Enter Confirm Upto Time");
+            return false
+        } else {
+            SaveBidFunction(bookid, vclosedate, vclosetime);
+        }
+    }
+
+
+    function SaveBidFunction(id, vclosedate, vclosetime) {
+        var a = $.confirm({
+            title: 'Assigned To Supplier' ,
+            content: 'Are you sure u want to Assigned this booking?',
+            type: 'green',
+            buttons: {
+                ok: {
+                    text: "Yes",
+                    btnClass: 'btnConfirm',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '/CabBooking/FinalBid/',
+                            data: { id: id, closedate: vclosedate, closetime: vclosetime },
+                            type: "POST",
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.status == true) {
+                                    location.reload();
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: "No",
+                    btnClass: 'btn-default',
+                    keys: ['esc'],
+                    action: function () {
+                        a.close();
+                    }
+                },
+            }
+        });
+    }
+
+    function NumberPostiveNegativeWithDecimal(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+            (charCode < 48 || charCode > 57))
+            evt.preventDefault();
+        return true;
+    }
+</script>

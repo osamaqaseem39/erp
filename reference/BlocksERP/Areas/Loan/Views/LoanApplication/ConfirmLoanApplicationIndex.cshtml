@@ -1,0 +1,374 @@
+﻿@{
+    ViewBag.Title = "Confirmed Loan Application";
+}
+@model List<BlocksERP.Models.clsModule>
+<!-- END Page Header -->
+<!-- BEGIN Page Content -->
+<!-- the #js-page-content id is needed for some plugins to initialize -->
+
+<main id="js-page-content" role="main" class="page-content">
+    <div class="row">
+        <div class="col-lg-6" style="margin-top:4px">    
+
+        </div>
+        <div class="col-md-12" style="display:flex">
+            <table style="width:100%">
+                <tr>
+                    <th>
+                        <ol class="breadcrumb breadcrumb-sm breadcrumb-arrow">
+                            <li>
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-clipboard"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">Loan</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-list-ol"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">Confirmed Loan Application List</span>
+                                </a>
+                            </li>
+                        </ol>
+                    </th>
+                    <th style="text-align:right">
+                        <h6 class="js-get-date" style="margin-top: -7px;"></h6>
+                    </th>
+                </tr>
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel">
+                <div class="panel-hdr bg-primary-500 bg-info-gradient" role="heading">
+                    <h2>Confirmed Loan Application List</h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="row" style="padding-left: 0px;padding-right: 0px;padding-top:0px">
+
+
+
+                            <div class="col-lg-6" style="margin-top:4px">
+                                @*@if (Model.Any(x => x.ActionName.ToLower() == "save"))
+                                {
+                                    <a href="javascript:void(0)" data-toggle="modal" data-target="#MyModal" data-value="0" class="btn btn-outline-primary waves-effect waves-themed btnNew AddEditRecord" id="AddEditRecord">
+                                        <i class="fal fa-plus-circle"></i>
+                                        &nbsp;
+                                        Add User
+                                    </a>
+                                }*@
+                                @if (Model.Any(x => x.ActionName.ToLower() == "edit") || Model.Any(x => x.ActionName.ToLower() == "delete"))
+                                {
+                                    <input type="hidden" id="EditActionRole" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="EditActionRole" value="0" />
+                                }
+                                @if (Model.Any(x => x.ActionName.ToLower() == "delete"))
+
+                                {
+                                    <input type="hidden" id="DeleteActionRole" value="1" />
+                                   
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="DeleteActionRole" value="0" />
+                                }
+                            </div>
+
+
+
+
+                            <div class="col-lg-6" style="margin-top:4px">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button id="btnSearchCategory" class="btn btn-outline-default dropdown-toggle btnSearchGo" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Email</button>
+                                        <div class="dropdown-menu" id="ulSearchCategory">
+                                            <a class="dropdown-item" href="#">Email</a>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="txtSearch" class="form-control" placeholder="Search here..." aria-label="Text input with dropdown button">
+                                    <div class="input-group-append">
+                                        <button id="btnSearch" class="btn btn-outline-default btnSearchGo" type="button" aria-haspopup="true" aria-expanded="false">Go</button>
+                                    </div>
+                                </div>
+                    
+                            </div>
+                        </div>
+                   
+                        <table id="myTable" class="table table-bordered table-hover table-striped w-100">
+                            <thead>
+                                <tr>
+                                    <th data-hide="" style="text-align:center">
+                                    </th>
+                                    <th class="min-desktop"> Email</th>
+                                    <th class="min-desktop"> Phone No.</th>
+                                    <th class="min-desktop"> Name</th>
+                                    <th class="max-mobile-p"> Gender</th>
+                                    <th class="min-desktop"> S.I No.</th>
+                                    <th class="max-mobile-p"> Residance Address</th>
+                                    <th class="min-desktop"> Residance City</th>
+                                    <th class="max-mobile-p"> Permanent Address</th>
+                                    <th class="max-mobile-p"> Permanent City</th>
+                                    <th class="max-mobile-p"> Nationality</th>
+                                    <th class="max-mobile-p"> Education</th>
+                                    <th class="max-mobile-p"> Marital Status</th>
+                                    <th class="max-mobile-p"> D.O.B</th>
+
+                                    <th class="min-desktop"> Loan Date</th>
+                                    <th class="min-desktop"> Bank</th>
+                                    <th class="min-desktop"> Purpose</th>
+                                    <th class="min-desktop"> Category</th>
+                                    <th class="min-desktop"> Amount</th>
+                                    <th class="max-mobile-p"> Fixed<br />Charges</th>
+                                    <th class="max-mobile-p"> Company<br />Fee</th>
+                                    <th class="min-desktop"> Return Type</th>
+                                    <th class="min-desktop"> Days</th>
+
+                                    <th class="max-mobile-p"> Status</th>
+                                    <th class="max-mobile-p">Updated Date</th>
+                                    <th class="max-mobile-p">Updated By</th>
+                                    <th>Cancel</th>
+                                    <th>Doc</th>
+                                    <th>Work</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+<!-- this overlay is activated only when mobile menu is triggered -->
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#myTable').dataTable({
+
+            "autoWidth": true,
+            "bLengthChange": false,
+            //"searching": false,
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+
+            "ajax": {
+                "url": "/Loan/LoanApplication/GetAllConfirmLoanApplication",
+                "type": "POST",
+                "datatype": "json",
+                error: function (xhr, httpStatusMessage, customErrorMessage) {
+                    if (xhr.status === 410) {
+                        window.location.href = customErrorMessage;
+                    }
+                }
+            },
+            "columns": [
+
+                {
+                    "data": "ImagePath", "width": "45px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        return '<img src="' + data + '" style="height:45px;width:45px;" />';
+                    }
+                },
+                { "data": "Email", "name": "Email", "autoWidth": true },
+                { "data": "PhoneNumber", "name": "PhoneNumber", "autoWidth": true },
+                { "data": "FullName", "name": "FullName", "autoWidth": true },
+
+                { "data": "GenderName", "name": "GenderName", "autoWidth": true },
+                { "data": "SocialInsuranceNumber", "SocialInsuranceNumber": "FullName", "autoWidth": true },
+                { "data": "ResidentialAddress", "name": "ResidentialAddress", "autoWidth": true },
+                { "data": "ResidenceCityName", "name": "ResidenceCityName", "autoWidth": true },
+                { "data": "DetailAddress", "name": "DetailAddress", "autoWidth": true },
+                { "data": "DetailedCityName", "name": "DetailedCityName", "autoWidth": true },
+                { "data": "CountryName", "name": "CountryName", "autoWidth": true },
+                { "data": "EducationName", "name": "EducationName", "autoWidth": true },
+                { "data": "MaritalStatusName", "name": "MaritalStatusName", "autoWidth": true },
+                {
+                    "data": "DOB", "name": "DOB", "class": "Acenter", "orderable": true, "autoWidth": true, 'render': function (date) {
+                        return getDateForDatatable(date);
+                    }
+                },
+                {
+                    "data": "LoanDate", "name": "LoanDate", "class": "Acenter", "orderable": true, "autoWidth": true, 'render': function (date) {
+                        return getDateForDatatable(date);
+                    }
+                },
+
+                { "data": "BankName", "name": "BankName", "autoWidth": true },
+                { "data": "LoanPurposeName", "name": "LoanPurposeName", "autoWidth": true },
+                { "data": "LoanCategoryName", "name": "LoanCategoryName", "autoWidth": true },
+                { "data": "LoanAmount", "name": "LoanAmount", "autoWidth": true },
+                { "data": "FixedCharges", "name": "FixedCharges", "autoWidth": true },
+                { "data": "CompanyFee", "name": "CompanyFee", "autoWidth": true },
+                { "data": "LoanReturnType", "name": "LoanReturnType", "autoWidth": true },
+                { "data": "LoanDays", "name": "LoanDays", "autoWidth": true },
+
+                { "data": "Status", "name": "Status", "autoWidth": true },
+                {
+                    "data": "UpdatedDate", "name": "UpdatedDate", "class": "Acenter", "orderable": true, "autoWidth": true, 'render': function (date) {
+                        return getDateTimeForDatatable(date);
+                    }
+                },
+                { "data": "UpdatedByString", "name": "UpdatedBy", "autoWidth": true },
+
+
+                {
+                    "data": "LoanID", "width": "50px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        var edit = '<a title="Verify User" class="VerifyUser btn btn-danger" href="javascript:void(0)" data-value="' + data + '" style="border-radius:20px;padding:5px;color:#fff;padding-left:15px;padding-right:15px"><i class="fal fa-fw fa-times"></i></a>&nbsp';
+                        var final = '';
+                        if ($('#EditActionRole').val() > 0) {
+                            final = final + edit;
+                        }
+                        return final;
+                    }
+                },
+
+                {
+                    "data": "LoanID", "width": "50px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        var edit = '<a title="Documents" data-toggle="modal" data-target="#MyModal" class="ShowDocuments btn btn-warning" href="javascript:void(0)" data-value="' + data + '" style="border-radius:20px;padding:5px;color:#000;padding-left:15px;padding-right:15px"><i class="fal fa-fw fa-paperclip"></i></a>&nbsp';
+                        var final = '';
+                        if ($('#EditActionRole').val() > 0) {
+                            final = final + edit;
+                        }
+                        return final;
+                    }
+                },
+
+                {
+                    "data": "UserID", "width": "50px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        var edit = '<a title="Work" data-toggle="modal" data-target="#MyModal" class="ShowWork btn btn-success" href="javascript:void(0)" data-value="' + data + '" style="border-radius:20px;padding:5px;color:#000;padding-left:15px;padding-right:15px"><i class="fal fa-fw fa-edit"></i></a>&nbsp';
+                        var final = '';
+                        if ($('#EditActionRole').val() > 0) {
+                            final = final + edit;
+                        }
+                        return final;
+                    }
+                },
+            ]
+        });
+        oTable = $('#myTable').DataTable();
+
+    });
+
+
+     $(document).on('keydown', function (event) {
+        if (event.altKey && event.keyCode === 78) {
+            $('#AddEditRecord').click();
+        }
+     })
+
+    $(document).on('shown.bs.modal',"#MyModal", function(){
+        $('#FirstName').focus();
+    });
+
+
+    $(document).on('click', '.ShowDocuments', function () {
+        $("#MyModal").find('.modal-dialog').removeClass("modal-lg").addClass("modal-lg");
+            var id = $(this).attr("data-value");
+            $('#ModelHeaderSpan').html('Documents');
+            $('#modalDiv').html('');
+            $('#modalDiv').load('@Url.Action("LoanDocumentList", "loanapplication", new { area = "Loan" })?id=' + id + '');
+    });
+
+    $(document).on('click', '.ShowWork', function () {
+        $("#MyModal").find('.modal-dialog').removeClass("modal-lg").addClass("modal-lg");
+            var id = $(this).attr("data-value");
+            $('#ModelHeaderSpan').html('User Work List');
+            $('#modalDiv').html('');
+            $('#modalDiv').load('@Url.Action("UserWorkList", "loanapplication", new { area = "Loan" })?id=' + id + '');
+    });
+    
+
+    $(document).on('click', '.VerifyUser', function () {
+        var id = $(this).attr("data-value");
+        var checkstr = confirm('Are you sure you want to Cancel this Record?');
+        if (checkstr == true) {
+            $.ajax({
+                url: '/loan/loanapplication/UpdateLoanStatus/',
+                data: { 'id': id, 'status': 'cancel', 'remarks': '' },
+                type: "POST",
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == true) {
+                        toastr.success("Record Updated Successfully", "Update", { timeOut: 3000, "closeButton": true });
+                        location.reload();
+
+                    }
+                    else {
+                        alert(data.message);
+                    }
+                }
+            })
+        }
+        else {
+            return false;
+        }
+    });
+
+
+
+
+    $('#btnSearch').click(function () {
+            SearchItem();
+        });
+        $('#txtSearch').on('keypress', function (event) {
+            if (event.keyCode == 13) {
+                SearchItem();
+            }
+        });
+        function SearchItem() {
+            var BElement = $("#btnSearchCategory");
+            if (BElement.html() == 'Email') {
+                oTable.columns(0).search($('#txtSearch').val().trim()).draw();
+            }
+            else {
+                alert("Error! try again.");
+            }
+        }
+
+
+    $(document).on('click', '.btnDeleteRecord', function () {
+
+        var id = $('#UserId').val();
+        DeleteRecord(id);
+    });
+    function DeleteRecord(id) {
+
+
+        var checkstr = confirm('Are you sure you want to delete this User?');
+        if (checkstr == true) {
+            $.ajax({
+                url: '/users/Users/DeleteUser/' + id,
+                type: "POST",
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == true) {
+                        //$('#MyModal').modal('toggle');
+                        toastr.success("User Deleted Successfully", "Deleted", { timeOut: 3000, "closeButton": true });
+
+                        $('.close').click();
+                        oTable.ajax.reload(null, false);
+                    }
+                    else {
+                        alert(data.message);
+                    }
+                }
+            })
+        }
+        else {
+            return false;
+        }
+    }
+</script>

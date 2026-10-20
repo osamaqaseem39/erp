@@ -62,6 +62,9 @@ public class EndpointPermissionTests
         Assert.Equal("finance.chartOfAccounts.view", Code("GET", "api/finance/chartofaccounts"));
         Assert.Equal("projects.projects.start", Code("POST", "api/projects/{id}/start"));
         Assert.Equal("admin.permissions.view", Code("GET", "api/admin/permissions/catalog"));
+        Assert.Equal("procurement.vendors.view", Code("GET", "api/procurement/vendors"));
+        Assert.Equal("procurement.vendors.create", Code("POST", "api/procurement/vendors"));
+        Assert.Equal("admin.emails.view", Code("GET", "api/admin/emails"));
         Assert.Contains(rules, r => r.Route == "api/core/context" && r.Access == EndpointAccess.SignedIn);
         Assert.Contains(rules, r => r.Route == "api/admin/permissions/seed" && r.Access == EndpointAccess.SuperAdmin);
     }

@@ -1,3 +1,4 @@
+using ERP.Application.Common;
 using ERP.Application.Interfaces.CRM;
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
@@ -7,6 +8,14 @@ namespace ERP.Application.CRM;
 
 public class ActivityService : IActivityService
 {
+    private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> Transitions =
+        new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Open"] = new[] { "Completed", "Cancelled" },
+            ["Completed"] = Array.Empty<string>(),
+            ["Cancelled"] = Array.Empty<string>()
+        };
+
     private readonly IActivityRepository _repository;
 
     public ActivityService(IActivityRepository repository)
@@ -29,6 +38,8 @@ public class ActivityService : IActivityService
     public async Task<Guid> CreateAsync(CreateActivityDto dto)
     {
         var entity = MapToEntity(dto);
+        // ERP-FIX-5: always start Open
+        entity.Status = "Open";
         return await _repository.CreateAsync(entity);
     }
 
@@ -36,13 +47,20 @@ public class ActivityService : IActivityService
     {
         var entity = await _repository.GetByIdAsync(dto.Id);
         if (entity == null) return false;
+        if (!IsOpen(entity.Status)) return false;
 
+        var previousStatus = entity.Status;
         MapToEntity(dto, entity);
+        // ERP-FIX-5: status only via complete/cancel
+        entity.Status = previousStatus;
         return await _repository.UpdateAsync(entity);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null) return false;
+        if (!IsOpen(entity.Status)) return false;
         return await _repository.DeleteAsync(id);
     }
 
@@ -88,26 +106,60 @@ public class ActivityService : IActivityService
         return entities.Select(MapToDto);
     }
 
-    public async Task<bool> CompleteAsync(Guid id)
+    public async Task<bool> CompleteAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await GetScopedAsync(id, tenantId);
         if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(StatusOf(entity), "Completed", Transitions))
+            return false;
 
         entity.Status = "Completed";
         entity.EndDate ??= DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> RescheduleAsync(Guid id, DateTime newDate)
+    public async Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await GetScopedAsync(id, tenantId);
         if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(StatusOf(entity), "Cancelled", Transitions))
+            return false;
+
+        entity.Status = "Cancelled";
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(entity);
+    }
+
+    public async Task<bool> RescheduleAsync(Guid id, DateTime newDate, Guid tenantId, Guid userId)
+    {
+        var entity = await GetScopedAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!IsOpen(entity.Status)) return false;
 
         entity.StartDate = newDate;
+        entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
     }
+
+    private async Task<Activity?> GetScopedAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null || entity.TenantId != tenantId) return null;
+        return entity;
+    }
+
+    private static bool IsOpen(string? status) =>
+        string.Equals(StatusOf(status), "Open", StringComparison.OrdinalIgnoreCase);
+
+    private static string StatusOf(Activity entity) => StatusOf(entity.Status);
+
+    private static string StatusOf(string? status) =>
+        string.IsNullOrWhiteSpace(status) ? "Open" : status.Trim();
 
     private static ActivityDto MapToDto(Activity entity)
     {
@@ -152,13 +204,13 @@ public class ActivityService : IActivityService
         return new Activity
         {
             TenantId = dto.TenantId,
-            ActivityType = dto.ActivityType,
-            Subject = dto.Subject,
+            ActivityType = dto.ActivityType ?? string.Empty,
+            Subject = dto.Subject ?? string.Empty,
             Description = dto.Description,
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,
-            Status = dto.Status,
-            Priority = dto.Priority,
+            Status = "Open",
+            Priority = dto.Priority ?? "Medium",
             AssignedToUserId = dto.AssignedToUserId,
             Location = dto.Location,
             Notes = dto.Notes,
@@ -173,13 +225,12 @@ public class ActivityService : IActivityService
 
     private static void MapToEntity(UpdateActivityDto dto, Activity entity)
     {
-        entity.ActivityType = dto.ActivityType;
-        entity.Subject = dto.Subject;
+        entity.ActivityType = dto.ActivityType ?? entity.ActivityType;
+        entity.Subject = dto.Subject ?? entity.Subject;
         entity.Description = dto.Description;
         entity.StartDate = dto.StartDate;
         entity.EndDate = dto.EndDate;
-        entity.Status = dto.Status;
-        entity.Priority = dto.Priority;
+        entity.Priority = dto.Priority ?? entity.Priority;
         entity.AssignedToUserId = dto.AssignedToUserId;
         entity.Location = dto.Location;
         entity.Notes = dto.Notes;

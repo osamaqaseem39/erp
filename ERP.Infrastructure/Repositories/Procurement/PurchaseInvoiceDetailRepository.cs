@@ -9,41 +9,24 @@ public class PurchaseInvoiceDetailRepository : IPurchaseInvoiceDetailRepository
 {
     private readonly ERPDbContext _context;
 
-    public PurchaseInvoiceDetailRepository(ERPDbContext context)
-    {
-        _context = context;
-    }
+    public PurchaseInvoiceDetailRepository(ERPDbContext context) => _context = context;
 
-    public async Task<PurchaseInvoiceDetail?> GetByIdAsync(int id)
-    {
-        return await _context.PurchaseInvoiceDetails.FindAsync(id);
-    }
+    public async Task<IEnumerable<PurchaseInvoiceDetail>> GetByInvoiceIdAsync(Guid invoiceId, Guid tenantId) =>
+        await _context.PurchaseInvoiceDetails.Where(d => d.InvoiceId == invoiceId && d.TenantId == tenantId).ToListAsync();
 
-    public async Task<IEnumerable<PurchaseInvoiceDetail>> GetAllAsync()
+    public async Task<Guid> CreateAsync(PurchaseInvoiceDetail detail)
     {
-        return await _context.PurchaseInvoiceDetails.ToListAsync();
-    }
-
-    public async Task<PurchaseInvoiceDetail> AddAsync(PurchaseInvoiceDetail entity)
-    {
-        _context.PurchaseInvoiceDetails.Add(entity);
+        _context.PurchaseInvoiceDetails.Add(detail);
         await _context.SaveChangesAsync();
-        return entity;
+        return detail.Id;
     }
 
-    public async Task UpdateAsync(PurchaseInvoiceDetail entity)
+    public async Task<bool> DeleteByInvoiceIdAsync(Guid invoiceId, Guid tenantId)
     {
-        _context.PurchaseInvoiceDetails.Update(entity);
+        var rows = await _context.PurchaseInvoiceDetails.Where(d => d.InvoiceId == invoiceId && d.TenantId == tenantId).ToListAsync();
+        if (rows.Count == 0) return true;
+        _context.PurchaseInvoiceDetails.RemoveRange(rows);
         await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.PurchaseInvoiceDetails.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        return true;
     }
 }

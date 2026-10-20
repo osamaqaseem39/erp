@@ -1,0 +1,205 @@
+﻿@model List<BlocksERP.Models.clsModule>
+<style>
+    .containerCheckBox {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        font-size: 8px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        text-align: center;
+    }
+
+        /* Hide the browser's default checkbox */
+        .containerCheckBox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+    /* Create a custom checkbox */
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 17px;
+        width: 17px;
+        background-color: #eee;
+        border: 1px solid #011C36;
+    }
+
+    /* On mouse-over, add a grey background color */
+    .containerCheckBox:hover input ~ .checkmark {
+        background-color: #ddd;
+    }
+
+    /* When the checkbox is checked, add a blue background */
+    .containerCheckBox input:checked ~ .checkmark {
+        background-color: #46AB03;
+    }
+
+    /* Create the checkmark/indicator (hidden when not checked) */
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    /* Show the checkmark when checked */
+    .containerCheckBox input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    /* Style the checkmark/indicator */
+    .containerCheckBox .checkmark:after {
+        left: 4px;
+        top: 0px;
+        width: 7px;
+        height: 14px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+</style>
+<div class="alertDiv2">
+
+</div>
+<div class="row">
+    <div class="col col-md-3">
+        <table class="" style="">
+            <tr>
+                <td style="width: 50%; padding-right: 3px; padding-left: 3px" id="">
+                    <a href="javascript:void(0);" class="btn btn-success selectAllBtn" title="Select All" style=" text-align: center;font-size: 12px;margin-bottom:10px;padding:4px;color:#fff !important;border-radius:2px ">
+                        Select All
+                    </a>
+                </td>
+                <td style="width: 50%;; padding-left: 3px; " id="">
+                    <a href="javascript:void(0);" class="btn btn-warning clearAllBtn" title="Clear All" style=" text-align: center;font-size: 12px;margin-bottom:10px;padding:4px;color:#fff !important;border-radius:2px ">
+                        Clear All
+                    </a>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+    <div class="col col-md-8">
+
+    </div>
+    <div class="col col-md-1 pull-right">
+        <a href="javascript:void(0);" class="btn btn-primary saveRoleBtn pull-right" title="Save" style=" text-align: center;font-size: 12px;height:30px;width:55px;margin-bottom:10px;padding:4px;color:#fff !important;background-color:#428bca !important;border-color:#357ebd !important;border-radius:2px ">
+            Save
+        </a>
+    </div>
+</div>
+<table class="table table-bordered table-striped" style="width:100%">
+    @*<tr>
+            <th colspan="5" style="width:100%;text-align: center;padding:8px;">
+                <span style="font-size: 16px; font-weight: normal">Modules List</span>
+            </th>
+        </tr>*@
+    <tr class="headingRowBilling">
+        <th style=" width:85%;text-align: left; padding: 5px; padding-left:10px; ">
+            Action Name
+        </th>
+        <th style="text-align: center; padding: 5px;border-right:1px solid #ddd ">
+            Assign
+        </th>
+    </tr>
+    @if (Model.Count() == 0)
+    {
+        <tr style="" class="rowsListBilling">
+            <th colspan="2" style="width:100%;text-align: center;padding:15px;">
+                <span style="font-size: 16px; font-weight: normal">No action found.</span>
+            </th>
+        </tr>
+    }
+    @foreach (clsModule u in Model)
+    {
+        string check = "";
+        if (u.UserRoleId > 0)
+        {
+            check = "checked";
+        }
+        else
+        {
+            check = "";
+        }
+        <tr class="roleRows">
+            <th style=" width:85%;text-align: left; padding: 5px; padding-left: 10px; ">
+                <input type="hidden" class="UserId" value="@u.UserId" />
+                <input type="hidden" class="ActionId" value="@u.ActionId" />
+                <span style="font-size:14px;font-weight:normal"> @u.ActionName </span>
+            </th>
+            <th style="text-align: center; padding: 5px;border-right:1px solid #ddd;padding-left:18px ">
+                <label class="containerCheckBox" style="font-size:16px;text-align:center">
+                    <input type="checkbox" class="ActionIdCheckbox" @check>
+                    <span class="checkmark" style="margin-left:15px;margin-top:3px"></span>
+                </label>
+            </th>
+        </tr>
+    }
+</table>
+<script type="text/javascript">
+    $('.selectAllBtn').click(function () {
+        $('.roleRows').find('input[type=checkbox]').prop('checked', true);
+    })
+    $('.clearAllBtn').click(function () {
+        $('.roleRows').find('input[type=checkbox]').prop('checked', false);
+    })
+    $('.saveRoleBtn').click(function () {
+        var data = [];
+        var mainUserId = 0;
+        $('.roleRows').each(function () {
+            var userId = $(this).find('.UserId').val();
+            mainUserId = userId;
+            var actionId = $(this).find('.ActionId').val();
+            var actionIdCheck = $(this).find('.ActionIdCheckbox').is(':checked');
+            var alldata = {
+                'UserId': userId,
+                'ActionId': actionId,
+                'ModuleId': 0
+            }
+            if (actionIdCheck == true) {
+                data.push(alldata);
+            }
+        });
+        var allData = JSON.stringify(data);
+        $.ajax({
+            type: "POST",
+            url: "/UserRole/InsertUpdateAssignAction/",
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ 'userId': mainUserId, 'assignType': 'Action', 'data': allData }),
+            success: function (data) {
+                if (data.status == true) {
+                    $('.alertDiv2').html('<div class="alert alert-success success-alert2" style="margin-top:15px;">' +
+                        '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                        ' <strong>Success! </strong>' +
+                        'Action Assigned Succesfully.' +
+                        '</div>');
+                    $(".success-alert2").fadeTo(1000, 500).slideUp(500, function () {
+                        $(".success-alert2").slideUp(500);
+                        $('.alertDiv2').html('');
+                        //$('.close').click();
+                        location.reload();
+                    });
+                }
+                else {
+                    alert(data.message);
+                }
+            }
+        })
+    })
+    $(document).keypress(function (event) {
+        var keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == '13') {
+            event.preventDefault();
+        }
+    });
+</script>

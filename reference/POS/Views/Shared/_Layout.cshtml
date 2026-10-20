@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+<html lang="en-us" id="@ViewBag.PageId" class="">
+<head>
+    <meta charset=" utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title> Tikla Cars </title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Basic Styles -->
+    @Styles.Render("~/content/smartadmin")
+    <!-- FAVICONS -->
+    <link rel="shortcut icon" href="~/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon">
+
+    <!-- Specifying a Webpage Icon for Web Clip
+         Ref: https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html -->
+    <link rel="apple-touch-icon" href="~/content/img/splash/sptouch-icon-iphone.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="~/content/img/splash/touch-icon-ipad.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="~/content/img/splash/touch-icon-iphone-retina.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="~/content/img/splash/touch-icon-ipad-retina.png">
+
+    <!-- iOS web-app metas : hides Safari UI Components and Changes Status Bar Appearance -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <!-- Startup image for web apps -->
+    <link rel="apple-touch-startup-image" href="~/content/img/splash/ipad-landscape.png" media="screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:landscape)">
+    <link rel="apple-touch-startup-image" href="~/content/img/splash/ipad-portrait.png" media="screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:portrait)">
+    <link rel="apple-touch-startup-image" href="~/content/img/splash/iphone.png" media="screen and (max-device-width: 320px)">
+    @* New FontAwesome *@
+    <link href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href=@Url.Content("~/Content/jqxWidget/jqx.base.css") type="text/css" />
+    @*<script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>*@
+   
+    <script src="//maps.googleapis.com/maps/api/js?key=AIzaSyC7W4MIjUl-83OZv1Coz7gfzxNEiipTipM&v=3.exp&signed_in=true&libraries=places,geometry" type="text/javascript"></script>
+    
+    <style>
+
+        html {
+            background-color: #f2f2f2 !important;
+        }
+
+        .defaultBackgroundColor {
+            background-color: #03386C !important;
+            border-color: #03386C !important;
+        }
+        input[type="text"]:focus {
+            background-color: #F0FFF0 !important;
+            border-color: #7DC27D !important;
+        }
+
+        input[type="date"]:focus {
+            background-color: #F0FFF0 !important;
+            border-color: #7DC27D !important;
+        }
+
+        select:focus {
+            background-color: #F0FFF0 !important;
+            border-color: #7DC27D !important;
+        }
+
+        .select2-selection:focus {
+            background-color: rgb(240,255,240) !important;
+            border: 1px solid #07681A !important;
+        }
+
+        #btnAddInvoiceDetail:focus {
+            background-color: #07681A !important;
+        }
+
+    </style>
+</head>
+<body class="" style="background-color: #f2f2f2 !important;">
+    @{ Html.RenderPartial("_Header", RenderSection("topright", false)); }
+    @{ Html.RenderPartial("_Aside"); }
+    <div id="main" role="main">
+        @{ Html.RenderPartial("_Ribbon"); }
+        @*<article>
+                <div style="margin-left: 10px;margin: 20px;margin-bottom: -10px;" class="alert alert-warning fade in">
+                    <button class="close" data-dismiss="alert">
+                        ×
+                    </button>
+                    <i class="fa-fw fa fa-warning"></i>
+                    <strong>Warning</strong> Please pay your subscription charges. Otherwise your website will be closed in <strong>1 day</strong>.
+                </div>
+            </article>*@
+        @RenderBody()
+    </div>
+    @*@{
+            //Html.RenderPartial("_Footer");
+            Html.RenderPartialIf("_Tiles", Settings.EnableTiles);
+        }*@
+    @{ Html.RenderPartial("_Scripts", RenderSection("pagespecific", false)); }
+    @RenderSection("scripts", required: false)
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            ChangeScreenwidth();
+        });
+        $(window).resize(function () {
+            // This will execute whenever the window is resized
+            ChangeScreenwidth();
+        });
+        function ChangeScreenwidth() {
+            // This function will be used for make responsive app name in header
+            if ($(window).width() <= 420) {
+                $('.AppName').css('margin-top', '16px');
+                $('.AppName').css('font-size', '10px');
+            }
+            else {
+                $('.AppName').css('margin-top', '11px');
+                $('.AppName').css('font-size', '24px');
+            }
+        }
+
+
+        function getFormattedDate(date) {
+            var year = date.getFullYear();
+
+            var month = (1 + date.getMonth()).toString();
+            month = month.length > 1 ? month : '0' + month;
+
+            var day = date.getDate().toString();
+            day = day.length > 1 ? day : '0' + day;
+
+            return day + '-' + month + '-' + year;
+        }
+
+
+
+
+        function getDueNotif() {
+            $.ajax({
+                type: 'POST',
+                url: '/cabbooking/getNewBooking/',
+                dataType: 'json',
+                success: function (response) {
+                    var duenotif = response.result;
+                    if (duenotif == null) { duenotif = ""; }
+                    if (duenotif == "0") { duenotif = ""; }
+                    if (duenotif == "") {
+                        $("#DueNotificationSpan").hide();
+                        $("#DueNotificationSpan").html(duenotif);
+                    } else {
+                        $("#DueNotificationSpan").show();
+                        $("#DueNotificationSpan").html(duenotif);
+                    }
+
+
+                }
+            });
+        }
+
+        function getUnpaidNotif() {
+            $.ajax({
+                type: 'POST',
+                url: '/cabbooking/getUnpaidNewBooking/',
+                dataType: 'json',
+                success: function (response) {
+                    var duenotif = response.result;
+                    if (duenotif == null) { duenotif = ""; }
+                    if (duenotif == "0") { duenotif = ""; }
+                    if (duenotif == "") {
+                        $("#UnPaidNotificationSpan").hide();
+                        $("#UnPaidNotificationSpan").html(duenotif);
+                    } else {
+                        $("#UnPaidNotificationSpan").show();
+                        $("#UnPaidNotificationSpan").html(duenotif);
+                    }
+
+
+                }
+            });
+        }
+
+
+
+        function getNoPayNotif() {
+            $.ajax({
+                type: 'POST',
+                url: '/cabbooking/getNoPayNewBooking/',
+                dataType: 'json',
+                success: function (response) {
+                    var duenotif = response.result;
+                    if (duenotif == null) { duenotif = ""; }
+                    if (duenotif == "0") { duenotif = ""; }
+                    if (duenotif == "") {
+                        $("#NoPayNotificationSpan").hide();
+                        $("#NoPayNotificationSpan").html(duenotif);
+                    } else {
+                        $("#NoPayNotificationSpan").show();
+                        $("#NoPayNotificationSpan").html(duenotif);
+                    }
+
+
+                }
+            });
+        }
+
+
+
+        function getNotifForEmail() {
+            $.ajax({
+                type: 'POST',
+                url: '/cabbooking/getNewConfirmForAvail/',
+                dataType: 'json',
+                success: function (response) {
+                    var duenotif = response.result;
+                    if (duenotif == null) { duenotif = ""; }
+                    if (duenotif == "0") { duenotif = ""; }
+                    if (duenotif == "") {
+                        $("#DueNotificationForEmail").hide();
+                        $("#DueNotificationForEmail").html(duenotif);
+                    } else {
+                        $("#DueNotificationForEmail").show();
+                        $("#DueNotificationForEmail").html(duenotif);
+                    }
+                }
+            });
+        }
+        
+        $(document).ready(function () {
+            //setTimeout(allnotif(), 10000);//5*60*1000
+            allnotif();
+            var interval = setInterval(function () { allnotif(); }, 120000);
+        })
+
+        function allnotif() {
+            getDueNotif();
+            getUnpaidNotif();
+            getNoPayNotif();
+            getNotifForEmail();
+        }
+
+
+    </script>
+</body>
+
+</html>

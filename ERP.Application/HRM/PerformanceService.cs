@@ -1,8 +1,7 @@
 using ERP.Application.Interfaces.HRM;
-using ERP.Shared.DTOs.HRM;
-using ERP.Infrastructure.Repositories;
-using ERP.Infrastructure.Interfaces.HRM;
 using ERP.Domain.HRM;
+using ERP.Infrastructure.Repositories.HRM;
+using ERP.Shared.DTOs.HRM;
 
 namespace ERP.Application.HRM;
 
@@ -10,123 +9,144 @@ public class PerformanceService : IPerformanceService
 {
     private readonly IPerformanceReviewRepository _repository;
 
-    public PerformanceService(IPerformanceReviewRepository repository)
+    public PerformanceService(IPerformanceReviewRepository repository) => _repository = repository;
+
+    public async Task<PerformanceReviewDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        _repository = repository;
+        var entity = await _repository.GetByIdAsync(id, tenantId);
+        return entity == null ? null : MapToDto(entity);
     }
 
-    public async Task<PerformanceReviewDto?> GetByIdAsync(Guid id)
-    {
-        var entity = await _repository.GetByIdAsync(id);
-        return entity != null ? MapToDto(entity) : null;
-    }
+    public async Task<IEnumerable<PerformanceReviewDto>> GetAllAsync(Guid tenantId) =>
+        (await _repository.GetAllAsync(tenantId)).Select(MapToDto);
 
-    public async Task<IEnumerable<PerformanceReviewDto>> GetAllAsync()
+    public async Task<Guid> CreateAsync(CreatePerformanceReviewDto dto, Guid tenantId, Guid userId)
     {
-        var entities = await _repository.GetAllAsync();
-        return entities.Select(MapToDto);
-    }
+        if (!dto.EmployeeId.HasValue || dto.EmployeeId == Guid.Empty)
+            throw new ArgumentException("EmployeeId is required.");
+        if (!dto.ReviewerId.HasValue || dto.ReviewerId == Guid.Empty)
+            throw new ArgumentException("ReviewerId is required.");
 
-    public async Task<Guid> CreateAsync(CreatePerformanceReviewDto dto)
-    {
-        var entity = MapToEntity(dto);
-        return await _repository.CreateAsync(entity);
-    }
+        var start = (dto.ReviewPeriodStart ?? DateTime.UtcNow).ToUniversalTime();
+        var end = (dto.ReviewPeriodEnd ?? start).ToUniversalTime();
+        if (end < start)
+            throw new ArgumentException("ReviewPeriodEnd must be on or after ReviewPeriodStart.");
 
-    public async Task<bool> UpdateAsync(UpdatePerformanceReviewDto dto)
-    {
-        var entity = await _repository.GetByIdAsync(dto.Id);
-        if (entity == null) return false;
-
-        MapToEntity(dto, entity);
-        return await _repository.UpdateAsync(entity);
-    }
-
-    public async Task<bool> DeleteAsync(Guid id)
-    {
-        return await _repository.DeleteAsync(id);
-    }
-
-    public async Task<IEnumerable<PerformanceReviewDto>> GetByEmployeeAsync(Guid employeeId)
-    {
-        var entities = await _repository.GetByEmployeeAsync(employeeId);
-        return entities.Select(MapToDto);
-    }
-
-    public async Task<IEnumerable<PerformanceReviewDto>> GetByReviewerAsync(Guid reviewerId)
-    {
-        var entities = await _repository.GetByReviewerAsync(reviewerId);
-        return entities.Select(MapToDto);
-    }
-
-    public async Task<IEnumerable<PerformanceReviewDto>> GetByPeriodAsync(DateTime startDate, DateTime endDate)
-    {
-        var entities = await _repository.GetByPeriodAsync(startDate, endDate);
-        return entities.Select(MapToDto);
-    }
-
-    private static PerformanceReviewDto MapToDto(PerformanceReview entity)
-    {
-        return new PerformanceReviewDto
+        var entity = new PerformanceReview
         {
-            Id = entity.Id,
-            TenantId = entity.TenantId,
-            CompanyId = entity.CompanyId,
-            EmployeeId = entity.EmployeeId,
-            ReviewerId = entity.ReviewerId,
-            ReviewPeriodStart = entity.ReviewPeriodStart,
-            ReviewPeriodEnd = entity.ReviewPeriodEnd,
-            ReviewDate = entity.ReviewDate,
-            OverallRating = entity.OverallRating,
-            GoalsAchieved = entity.GoalsAchieved,
-            GoalsNotAchieved = entity.GoalsNotAchieved,
-            Strengths = entity.Strengths,
-            AreasForImprovement = entity.AreasForImprovement,
-            Comments = entity.Comments,
-            Status = entity.Status,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-            CreatedBy = entity.CreatedBy,
-            UpdatedBy = entity.UpdatedBy,
-            IsActive = entity.IsActive
-        };
-    }
-
-    private static PerformanceReview MapToEntity(CreatePerformanceReviewDto dto)
-    {
-        return new PerformanceReview
-        {
-            TenantId = dto.TenantId,
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
             CompanyId = dto.CompanyId,
-            EmployeeId = dto.EmployeeId ?? Guid.Empty,
-            ReviewerId = dto.ReviewerId ?? Guid.Empty,
-            ReviewPeriodStart = dto.ReviewPeriodStart ?? DateTime.UtcNow,
-            ReviewPeriodEnd = dto.ReviewPeriodEnd ?? DateTime.UtcNow,
-            ReviewDate = dto.ReviewDate ?? DateTime.UtcNow,
+            EmployeeId = dto.EmployeeId.Value,
+            ReviewerId = dto.ReviewerId.Value,
+            ReviewPeriodStart = start,
+            ReviewPeriodEnd = end,
+            ReviewDate = (dto.ReviewDate ?? DateTime.UtcNow).ToUniversalTime(),
             OverallRating = dto.OverallRating ?? 0m,
             GoalsAchieved = dto.GoalsAchieved,
             GoalsNotAchieved = dto.GoalsNotAchieved,
             Strengths = dto.Strengths,
             AreasForImprovement = dto.AreasForImprovement,
             Comments = dto.Comments,
-            Status = dto.Status,
-            CreatedBy = dto.CreatedBy
+            Status = "Draft",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = userId == Guid.Empty ? null : userId.ToString()
         };
+        return await _repository.CreateAsync(entity);
     }
 
-    private static void MapToEntity(UpdatePerformanceReviewDto dto, PerformanceReview entity)
+    public async Task<bool> UpdateAsync(UpdatePerformanceReviewDto dto, Guid tenantId, Guid userId)
     {
-        entity.ReviewerId = dto.ReviewerId ?? entity.ReviewerId;
-        entity.ReviewPeriodStart = dto.ReviewPeriodStart ?? entity.ReviewPeriodStart;
-        entity.ReviewPeriodEnd = dto.ReviewPeriodEnd ?? entity.ReviewPeriodEnd;
-        entity.ReviewDate = dto.ReviewDate ?? entity.ReviewDate;
-        entity.OverallRating = dto.OverallRating ?? entity.OverallRating;
-        entity.GoalsAchieved = dto.GoalsAchieved;
-        entity.GoalsNotAchieved = dto.GoalsNotAchieved;
-        entity.Strengths = dto.Strengths;
-        entity.AreasForImprovement = dto.AreasForImprovement;
-        entity.Comments = dto.Comments;
-        entity.Status = dto.Status;
-        entity.UpdatedBy = dto.UpdatedBy;
+        var entity = await _repository.GetByIdAsync(dto.Id, tenantId);
+        if (entity == null) return false;
+        if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Only Draft reviews can be updated.");
+
+        if (dto.ReviewerId.HasValue && dto.ReviewerId != Guid.Empty)
+            entity.ReviewerId = dto.ReviewerId.Value;
+        if (dto.ReviewPeriodStart.HasValue)
+            entity.ReviewPeriodStart = dto.ReviewPeriodStart.Value.ToUniversalTime();
+        if (dto.ReviewPeriodEnd.HasValue)
+            entity.ReviewPeriodEnd = dto.ReviewPeriodEnd.Value.ToUniversalTime();
+        if (entity.ReviewPeriodEnd < entity.ReviewPeriodStart)
+            throw new ArgumentException("ReviewPeriodEnd must be on or after ReviewPeriodStart.");
+        if (dto.ReviewDate.HasValue)
+            entity.ReviewDate = dto.ReviewDate.Value.ToUniversalTime();
+        if (dto.OverallRating.HasValue) entity.OverallRating = dto.OverallRating.Value;
+        if (dto.GoalsAchieved != null) entity.GoalsAchieved = dto.GoalsAchieved;
+        if (dto.GoalsNotAchieved != null) entity.GoalsNotAchieved = dto.GoalsNotAchieved;
+        if (dto.Strengths != null) entity.Strengths = dto.Strengths;
+        if (dto.AreasForImprovement != null) entity.AreasForImprovement = dto.AreasForImprovement;
+        if (dto.Comments != null) entity.Comments = dto.Comments;
+        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedBy = userId == Guid.Empty ? null : userId.ToString();
+        return await _repository.UpdateAsync(entity);
     }
+
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
+    {
+        var entity = await _repository.GetByIdAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Only Draft reviews can be deleted.");
+        return await _repository.DeleteAsync(id, tenantId);
+    }
+
+    public async Task<IEnumerable<PerformanceReviewDto>> GetByEmployeeAsync(Guid employeeId, Guid tenantId) =>
+        (await _repository.GetByEmployeeAsync(employeeId, tenantId)).Select(MapToDto);
+
+    public async Task<IEnumerable<PerformanceReviewDto>> GetByReviewerAsync(Guid reviewerId, Guid tenantId) =>
+        (await _repository.GetByReviewerAsync(reviewerId, tenantId)).Select(MapToDto);
+
+    public async Task<IEnumerable<PerformanceReviewDto>> GetByPeriodAsync(
+        DateTime startDate, DateTime endDate, Guid tenantId) =>
+        (await _repository.GetByPeriodAsync(startDate, endDate, tenantId)).Select(MapToDto);
+
+    public Task<bool> SubmitAsync(Guid id, Guid tenantId, Guid userId) =>
+        TransitionAsync(id, tenantId, userId, "Draft", "Submitted");
+
+    public Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId) =>
+        TransitionAsync(id, tenantId, userId, "Submitted", "Approved");
+
+    public Task<bool> CompleteAsync(Guid id, Guid tenantId, Guid userId) =>
+        TransitionAsync(id, tenantId, userId, "Approved", "Completed");
+
+    private async Task<bool> TransitionAsync(
+        Guid id, Guid tenantId, Guid userId, string fromStatus, string toStatus)
+    {
+        var entity = await _repository.GetByIdAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!string.Equals(entity.Status, fromStatus, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Review must be {fromStatus} to move to {toStatus}.");
+
+        entity.Status = toStatus;
+        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedBy = userId == Guid.Empty ? null : userId.ToString();
+        return await _repository.UpdateAsync(entity);
+    }
+
+    private static PerformanceReviewDto MapToDto(PerformanceReview entity) => new()
+    {
+        Id = entity.Id,
+        TenantId = entity.TenantId,
+        CompanyId = entity.CompanyId,
+        EmployeeId = entity.EmployeeId,
+        ReviewerId = entity.ReviewerId,
+        ReviewPeriodStart = entity.ReviewPeriodStart,
+        ReviewPeriodEnd = entity.ReviewPeriodEnd,
+        ReviewDate = entity.ReviewDate,
+        OverallRating = entity.OverallRating,
+        GoalsAchieved = entity.GoalsAchieved,
+        GoalsNotAchieved = entity.GoalsNotAchieved,
+        Strengths = entity.Strengths,
+        AreasForImprovement = entity.AreasForImprovement,
+        Comments = entity.Comments,
+        Status = entity.Status,
+        CreatedAt = entity.CreatedAt,
+        UpdatedAt = entity.UpdatedAt,
+        CreatedBy = entity.CreatedBy,
+        UpdatedBy = entity.UpdatedBy,
+        IsActive = entity.IsActive
+    };
 }

@@ -11,6 +11,9 @@ export interface ChartOfAccountDto {
   parentAccountId?: string;
   parentAccountName?: string;
   currencyCode?: string;
+  remarks?: string;
+  level?: number;
+  hasChildren?: boolean;
   isActive?: boolean;
   isPostingAllowed?: boolean;
   createdAt?: string;
@@ -25,6 +28,7 @@ export interface CreateChartOfAccountDto {
   accountType: string;
   parentAccountId?: string;
   currencyCode?: string;
+  remarks?: string;
   isActive?: boolean;
   isPostingAllowed?: boolean;
 }
@@ -37,6 +41,7 @@ export interface UpdateChartOfAccountDto {
   accountType?: string;
   parentAccountId?: string;
   currencyCode?: string;
+  remarks?: string;
   isActive?: boolean;
   isPostingAllowed?: boolean;
 }
@@ -44,6 +49,9 @@ export interface UpdateChartOfAccountDto {
 export interface ChartOfAccountQuery {
   accountType?: string;
   isActive?: boolean;
+  level?: number;
+  parentAccountId?: string;
+  postingOnly?: boolean;
 }
 
 // Account Type Options

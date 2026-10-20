@@ -1,13 +1,23 @@
-using ERP.Infrastructure.Numbering;
+using ERP.Application.Common;
 using ERP.Application.Interfaces.CRM;
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Infrastructure.Numbering;
 using ERP.Shared.DTOs.CRM;
 
 namespace ERP.Application.CRM;
 
 public class LeadService : ILeadService
 {
+    private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> Transitions =
+        new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["New"] = new[] { "Qualified", "Lost" },
+            ["Qualified"] = new[] { "Converted", "Lost" },
+            ["Converted"] = Array.Empty<string>(),
+            ["Lost"] = Array.Empty<string>()
+        };
+
     private readonly IDocumentNumberService _numbers;
     private readonly ILeadRepository _repository;
     private readonly ICustomerRepository _customerRepository;
@@ -40,8 +50,14 @@ public class LeadService : ILeadService
     public async Task<Guid> CreateAsync(CreateLeadDto dto)
     {
         var entity = MapToEntity(dto);
+        // ERP-FIX-5: always start New
+        entity.Status = "New";
         if (string.IsNullOrWhiteSpace(entity.LeadCode))
             entity.LeadCode = await _numbers.NextAsync("crm.lead");
+        if (string.IsNullOrWhiteSpace(entity.LeadSource) && !string.IsNullOrWhiteSpace(entity.Source))
+            entity.LeadSource = entity.Source;
+        if (string.IsNullOrWhiteSpace(entity.Source) && !string.IsNullOrWhiteSpace(entity.LeadSource))
+            entity.Source = entity.LeadSource;
 
         return await _repository.CreateAsync(entity);
     }
@@ -50,12 +66,23 @@ public class LeadService : ILeadService
     {
         var entity = await _repository.GetByIdAsync(dto.Id);
         if (entity == null) return false;
+        if (!IsEditable(entity.Status)) return false;
 
+        var previousStatus = entity.Status;
         MapToEntity(dto, entity);
+        // ERP-FIX-5: status only via qualify/lose/convert
+        entity.Status = previousStatus;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> DeleteAsync(Guid id) => await _repository.DeleteAsync(id);
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null) return false;
+        if (!string.Equals(StatusOf(entity), "New", StringComparison.OrdinalIgnoreCase))
+            return false;
+        return await _repository.DeleteAsync(id);
+    }
 
     public async Task<IEnumerable<LeadDto>> GetBySourceAsync(string source)
     {
@@ -81,14 +108,40 @@ public class LeadService : ILeadService
         return entities.Select(MapToDto);
     }
 
-    public async Task<Guid> ConvertToOpportunityAsync(Guid leadId)
+    public async Task<bool> QualifyAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var lead = await _repository.GetByIdAsync(leadId);
-        if (lead == null) return Guid.Empty;
+        var lead = await GetScopedAsync(id, tenantId);
+        if (lead == null) return false;
+        if (!DocumentWorkflow.CanTransition(StatusOf(lead), "Qualified", Transitions))
+            return false;
 
-        var displayName = !string.IsNullOrWhiteSpace(lead.CompanyName)
-            ? lead.CompanyName!
-            : $"{lead.FirstName} {lead.LastName}".Trim();
+        lead.Status = "Qualified";
+        lead.UpdatedBy = userId.ToString();
+        lead.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(lead);
+    }
+
+    public async Task<bool> MarkLostAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        var lead = await GetScopedAsync(id, tenantId);
+        if (lead == null) return false;
+        if (!DocumentWorkflow.CanTransition(StatusOf(lead), "Lost", Transitions))
+            return false;
+
+        lead.Status = "Lost";
+        lead.UpdatedBy = userId.ToString();
+        lead.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(lead);
+    }
+
+    public async Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid tenantId, Guid userId)
+    {
+        var lead = await GetScopedAsync(leadId, tenantId);
+        if (lead == null) return Guid.Empty;
+        if (!DocumentWorkflow.CanTransition(StatusOf(lead), "Converted", Transitions))
+            return Guid.Empty;
+
+        var displayName = DisplayName(lead);
 
         var opportunity = new Opportunity
         {
@@ -107,26 +160,28 @@ public class LeadService : ILeadService
             AssignedTo = lead.AssignedTo,
             AssignedToUserId = lead.AssignedToUserId ?? lead.AssignedTo,
             Notes = lead.Notes,
-            CreatedBy = lead.CreatedBy
+            CreatedBy = userId.ToString()
         };
 
         var opportunityId = await _opportunityRepository.CreateAsync(opportunity);
 
         lead.Status = "Converted";
         lead.ConvertedDate = DateTime.UtcNow;
+        lead.UpdatedBy = userId.ToString();
+        lead.UpdatedAt = DateTime.UtcNow;
         await _repository.UpdateAsync(lead);
 
         return opportunityId;
     }
 
-    public async Task<Guid> ConvertToCustomerAsync(Guid leadId)
+    public async Task<Guid> ConvertToCustomerAsync(Guid leadId, Guid tenantId, Guid userId)
     {
-        var lead = await _repository.GetByIdAsync(leadId);
+        var lead = await GetScopedAsync(leadId, tenantId);
         if (lead == null) return Guid.Empty;
+        if (!DocumentWorkflow.CanTransition(StatusOf(lead), "Converted", Transitions))
+            return Guid.Empty;
 
-        var displayName = !string.IsNullOrWhiteSpace(lead.CompanyName)
-            ? lead.CompanyName!
-            : $"{lead.FirstName} {lead.LastName}".Trim();
+        var displayName = DisplayName(lead);
 
         var customer = new Customer
         {
@@ -147,17 +202,44 @@ public class LeadService : ILeadService
             CustomerType = string.IsNullOrWhiteSpace(lead.CompanyName) ? "Individual" : "Company",
             Status = "Active",
             Notes = lead.Notes,
-            CreatedBy = lead.CreatedBy
+            CreatedBy = userId.ToString()
         };
 
         var customerId = await _customerRepository.CreateAsync(customer);
 
         lead.Status = "Converted";
         lead.ConvertedDate = DateTime.UtcNow;
+        lead.UpdatedBy = userId.ToString();
+        lead.UpdatedAt = DateTime.UtcNow;
         await _repository.UpdateAsync(lead);
 
         return customerId;
     }
+
+    private async Task<Lead?> GetScopedAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null || entity.TenantId != tenantId) return null;
+        return entity;
+    }
+
+    private static bool IsEditable(string? status)
+    {
+        var s = StatusOf(status);
+        return string.Equals(s, "New", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(s, "Qualified", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string StatusOf(Lead entity) => StatusOf(entity.Status);
+
+    private static string StatusOf(string? status) =>
+        string.IsNullOrWhiteSpace(status) ? "New" : status.Trim();
+
+    private static string DisplayName(Lead lead) =>
+        !string.IsNullOrWhiteSpace(lead.CompanyName)
+            ? lead.CompanyName!
+            : $"{lead.FirstName} {lead.LastName}".Trim();
 
     private static LeadDto MapToDto(Lead entity) => new()
     {
@@ -198,7 +280,7 @@ public class LeadService : ILeadService
     {
         TenantId = dto.TenantId,
         CompanyId = dto.CompanyId,
-        LeadCode = dto.LeadCode,
+        LeadCode = dto.LeadCode ?? string.Empty,
         CompanyName = dto.CompanyName,
         ContactPerson = dto.ContactPerson,
         Email = dto.Email,
@@ -209,8 +291,8 @@ public class LeadService : ILeadService
         Country = dto.Country,
         PostalCode = dto.PostalCode,
         Industry = dto.Industry,
-        Source = dto.Source,
-        Status = dto.Status,
+        Source = dto.Source ?? string.Empty,
+        Status = "New",
         AssignedTo = dto.AssignedTo,
         LeadScore = dto.LeadScore,
         Notes = dto.Notes,
@@ -229,8 +311,7 @@ public class LeadService : ILeadService
         entity.Country = dto.Country;
         entity.PostalCode = dto.PostalCode;
         entity.Industry = dto.Industry;
-        entity.Source = dto.Source;
-        entity.Status = dto.Status;
+        entity.Source = dto.Source ?? entity.Source;
         entity.AssignedTo = dto.AssignedTo;
         entity.LeadScore = dto.LeadScore;
         entity.Notes = dto.Notes;

@@ -13,46 +13,77 @@ public class TimeEntryRepository : ITimeEntryRepository
         _context = context;
     }
 
-    public async Task<TimeEntry?> GetByIdAsync(Guid id)
+    // Avoid Include on required Employee — missing rows become INNER JOINs and hide entries.
+    private IQueryable<TimeEntry> Query(Guid tenantId)
     {
-        return await _context.TimeEntries
-            .Include(t => t.Employee)
-            .FirstOrDefaultAsync(t => t.Id == id);
+        if (tenantId == Guid.Empty)
+            return _context.TimeEntries.Where(_ => false);
+        return _context.TimeEntries.Where(t => t.TenantId == tenantId);
     }
 
-    public async Task<IEnumerable<TimeEntry>> GetAllAsync()
+    private async Task LoadEmployeeAsync(TimeEntry? entity)
     {
-        return await _context.TimeEntries
-            .Include(t => t.Employee)
-            .ToListAsync();
+        if (entity == null) return;
+        await _context.Entry(entity).Reference(t => t.Employee).LoadAsync();
     }
 
-    public async Task<IEnumerable<TimeEntry>> GetByEmployeeAsync(Guid employeeId)
+    private async Task LoadEmployeesAsync(IEnumerable<TimeEntry> entities)
     {
-        return await _context.TimeEntries
-            .Include(t => t.Employee)
-            .Where(t => t.EmployeeId == employeeId)
-            .ToListAsync();
+        foreach (var entity in entities)
+            await _context.Entry(entity).Reference(t => t.Employee).LoadAsync();
     }
 
-    public async Task<IEnumerable<TimeEntry>> GetByProjectAsync(Guid projectId)
+    public async Task<TimeEntry?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        return await _context.TimeEntries
-            .Include(t => t.Employee)
-            .Where(t => t.ProjectId == projectId)
-            .ToListAsync();
+        var entity = await Query(tenantId).FirstOrDefaultAsync(t => t.Id == id);
+        await LoadEmployeeAsync(entity);
+        return entity;
     }
 
-    public async Task<IEnumerable<TimeEntry>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<TimeEntry>> GetAllAsync(Guid tenantId)
     {
-        return await _context.TimeEntries
-            .Include(t => t.Employee)
+        var list = await Query(tenantId).ToListAsync();
+        await LoadEmployeesAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<TimeEntry>> GetByEmployeeAsync(Guid employeeId, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(t => t.EmployeeId == employeeId).ToListAsync();
+        await LoadEmployeesAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<TimeEntry>> GetByProjectAsync(Guid projectId, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(t => t.ProjectId == projectId).ToListAsync();
+        await LoadEmployeesAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<TimeEntry>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
+    {
+        var list = await Query(tenantId)
             .Where(t => t.Date >= startDate && t.Date <= endDate)
             .ToListAsync();
+        await LoadEmployeesAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<TimeEntry>> GetByEmployeeAndDateRangeAsync(
+        Guid employeeId, DateTime startDate, DateTime endDate, Guid tenantId)
+    {
+        var list = await Query(tenantId)
+            .Where(t => t.EmployeeId == employeeId && t.Date >= startDate && t.Date <= endDate)
+            .ToListAsync();
+        await LoadEmployeesAsync(list);
+        return list;
     }
 
     public async Task<Guid> CreateAsync(TimeEntry timeEntry)
     {
+        if (timeEntry.Id == Guid.Empty) timeEntry.Id = Guid.NewGuid();
+        if (timeEntry.CreatedAt == default) timeEntry.CreatedAt = DateTime.UtcNow;
         _context.TimeEntries.Add(timeEntry);
         await _context.SaveChangesAsync();
         return timeEntry.Id;
@@ -60,18 +91,16 @@ public class TimeEntryRepository : ITimeEntryRepository
 
     public async Task<bool> UpdateAsync(TimeEntry timeEntry)
     {
+        timeEntry.UpdatedAt = DateTime.UtcNow;
         _context.TimeEntries.Update(timeEntry);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var timeEntry = await _context.TimeEntries.FindAsync(id);
+        var timeEntry = await GetByIdAsync(id, tenantId);
         if (timeEntry == null) return false;
-
         _context.TimeEntries.Remove(timeEntry);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 }

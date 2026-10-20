@@ -8,7 +8,7 @@ namespace ERP.Application.SCM.Services;
 public class InventoryValuationMethodService : IInventoryValuationMethodService
 {
     private readonly IInventoryValuationMethodRepository _repository;
-    
+
     public InventoryValuationMethodService(IInventoryValuationMethodRepository repository)
     {
         _repository = repository;
@@ -29,20 +29,26 @@ public class InventoryValuationMethodService : IInventoryValuationMethodService
     public async Task<InventoryValuationMethodDto> CreateAsync(InventoryValuationMethodDto dto, Guid tenantId, string createdBy)
     {
         var entity = InventoryValuationMethodMapper.ToEntity(dto);
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         entity.TenantId = tenantId;
         entity.CreatedBy = createdBy;
-        
+
         var created = await _repository.CreateAsync(entity);
         return InventoryValuationMethodMapper.ToDto(created);
     }
 
     public async Task<InventoryValuationMethodDto> UpdateAsync(InventoryValuationMethodDto dto, Guid tenantId, string updatedBy)
     {
-        var entity = InventoryValuationMethodMapper.ToEntity(dto);
-        entity.TenantId = tenantId;
-        entity.UpdatedBy = updatedBy;
-        
-        var updated = await _repository.UpdateAsync(entity);
+        var existing = await _repository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Valuation method '{dto.Id}' not found.");
+
+        existing.MethodName = dto.MethodName;
+        existing.MethodCode = dto.MethodCode;
+        existing.Description = dto.Description;
+        existing.IsActive = dto.IsActive;
+        existing.UpdatedBy = updatedBy;
+
+        var updated = await _repository.UpdateAsync(existing);
         return InventoryValuationMethodMapper.ToDto(updated);
     }
 

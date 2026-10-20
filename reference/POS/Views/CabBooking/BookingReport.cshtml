@@ -1,0 +1,231 @@
+﻿<style>
+    .set-img {
+        font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    }
+
+    .table tr td {
+        border: 0 !important;
+    }
+
+    .custome-class-form h4 {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .custome-class-form label {
+        font-weight: bold !important;
+        color: #000;
+    }
+
+    .table tr .V__align {
+        vertical-align: bottom !important;
+    }
+
+    imgs {
+        opacity: 0.5;
+        filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
+    .dropwidth {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #03386C !important;
+        }
+</style>
+@model POS.Models.clsInvoice
+@{
+    Layout = null;
+}
+<div class="widget-body no-padding" style="overflow-x:hidden;">
+    @using (Html.BeginForm("printbookingreport", "cabbooking", FormMethod.Post, new { id = "bookingForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+
+        <fieldset id="myField1">
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Drivers</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.DriverDetailCode, ViewBag.Drivers as SelectList, new { @id = "DriverDetailCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Suppliers</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.SupplierDetailCode, ViewBag.Suppliers as SelectList, new { @id = "SupplierDetailCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+
+            <div class="row">
+                <section class="col col-md-6">
+                    <label>Select Service Provider</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.ServiceProviderID, ViewBag.ServiceProvider as SelectList, new { @id = "ServiceProviderID", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+                <section class="col col-md-6">
+                    <label>Select Cab Type</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.CabTypeID, ViewBag.CabType as SelectList, new { @id = "CabTypeID", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-md-6">
+                    <label>Select Job Status</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.Status, ViewBag.Status as SelectList, new { @id = "Status", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+                <section class="col col-md-6">
+                    <label>Select Payment Status</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.PaymentStatus, ViewBag.PaymentStatus as SelectList, new { @id = "PaymentStatus", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Our Booking No.</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-hashtag"></i>
+                        <input type="text" id="ComputerNo" name="ComputerNo" placeholder="Invoice No." autocomplete="off" />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Service Provider Reference No.</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-hashtag"></i>
+                        <input type="text" id="ReferenceNo" name="ReferenceNo" placeholder="Reference No." autocomplete="off" />
+                    </label>
+                </div>
+            </section>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label class="checkbox pull-right checkBoxLbl">
+                        <input id="DateCheckbox" type="checkbox" name="DateCheckbox"><i></i>
+                        <span style="">Date</span>
+                    </label>
+                </section>
+            </div>
+            <section class="col-md-6 dateSection" hidden>
+                <div style="padding:3px;">
+                    <label>From</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-calendar"></i>
+                        <input type="date" id="FromDate" name="FromDate" />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6 dateSection" hidden>
+                <div style="padding:3px;">
+                    <label>From Time</label>
+                    <label class="input">
+                        <input type="time" name="FromTime" id="FromTime" />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6 dateSection" hidden>
+                <div style="padding:3px;">
+                    <label>To</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-calendar"></i>
+                        <input type="date" id="ToDate" name="ToDate" />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6 dateSection" hidden>
+                <div style="padding:3px;">
+                    <label>To Time</label>
+                    <label class="input">
+                        <input type="time" name="ToTime" id="ToTime" />
+                    </label>
+                </div>
+            </section>
+
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Report Type</label>
+                    <div id="ReportTypeDiv">
+                        <select name="ReportType" id="ReportType" style="width:100%">
+                            <option value="Booking Detail">Booking Detail</option>
+                            <option value="Driver Invoice">Driver Invoice</option>
+                            <option value="Service Provider Invoice">Service Provider Invoice</option>
+                        </select>
+                    </div>
+                </section>
+            </div>
+        </fieldset>
+        <footer>
+            <button formtarget="_blank" type="submit" class="btn btn-labeled btn-primary pull-right">
+                GENERATE REPORT
+            </button>
+        </footer>
+    }
+</div>
+<script type="text/javascript">
+    
+
+    $('#DateCheckbox').change(function () {
+        if ($(this).is(":checked")) {
+            $('.dateSection').removeAttr("hidden");
+        }
+        else {
+            $('.dateSection').attr("hidden", "hidden");
+        }
+    })
+    
+    $(document).ready(function () {
+
+        $('#DriverDetailCode').select2();
+        $('#SupplierDetailCode').select2();
+        $('#Status').select2();
+        $('#PaymentStatus').select2();
+        $('#CabTypeID').select2();
+        $('#ServiceProviderID').select2();        
+        $('#ReportType').select2();
+        $('#ReportType').val('Booking Detail').trigger('change');
+
+        GetTodayBetweenDate();
+       
+    });
+    
+    function GetTodayBetweenDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm + '-' + dd;
+        $('#FromDate').val(today);
+        $('#ToDate').val(today);
+
+        var date = new Date();
+        var vhour = date.getHours();
+        if (vhour.toString().length == 1) { vhour = '0' + vhour; }
+        var vmint = date.getMinutes();
+        if (vmint.toString().length == 1) { vmint = '0' + vmint; }
+        var currentTime = vhour + ':' + vmint;
+        $("#FromTime").val(currentTime);
+        $("#ToTime").val(currentTime);
+
+    }
+    
+</script>

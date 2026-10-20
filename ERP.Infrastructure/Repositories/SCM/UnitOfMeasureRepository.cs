@@ -16,6 +16,9 @@ public class UnitOfMeasureRepository : IUnitOfMeasureRepository
 
     public async Task<IEnumerable<UnitOfMeasure>> GetAllAsync(Guid tenantId, bool? isActive = null)
     {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<UnitOfMeasure>();
+
         var query = _context.Set<UnitOfMeasure>()
             .Include(uom => uom.BaseUnit)
             .Where(uom => uom.TenantId == tenantId);
@@ -28,6 +31,9 @@ public class UnitOfMeasureRepository : IUnitOfMeasureRepository
 
     public async Task<UnitOfMeasure?> GetByIdAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return null;
+
         return await _context.Set<UnitOfMeasure>()
             .Include(uom => uom.BaseUnit)
             .FirstOrDefaultAsync(uom => uom.Id == id && uom.TenantId == tenantId);
@@ -51,6 +57,9 @@ public class UnitOfMeasureRepository : IUnitOfMeasureRepository
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return false;
+
         var entity = await _context.Set<UnitOfMeasure>()
             .FirstOrDefaultAsync(uom => uom.Id == id && uom.TenantId == tenantId);
 

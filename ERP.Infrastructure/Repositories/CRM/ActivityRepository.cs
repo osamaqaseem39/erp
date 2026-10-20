@@ -13,18 +13,38 @@ public class ActivityRepository : CrmRepositoryBase, IActivityRepository
     {
     }
 
+    // Avoid Include on required AssignedToUser — missing User rows become INNER JOINs and hide activities.
     private IQueryable<Activity> ActivitiesQuery() =>
         ApplyTenant(Context.Activities
             .Include(a => a.Customer)
             .Include(a => a.Lead)
-            .Include(a => a.Opportunity)
-            .Include(a => a.AssignedToUser));
+            .Include(a => a.Opportunity));
 
-    public async Task<Activity?> GetByIdAsync(Guid id) =>
-        await ActivitiesQuery().FirstOrDefaultAsync(a => a.Id == id);
+    private async Task LoadAssigneeAsync(Activity? entity)
+    {
+        if (entity == null) return;
+        await Context.Entry(entity).Reference(a => a.AssignedToUser).LoadAsync();
+    }
 
-    public async Task<IEnumerable<Activity>> GetAllAsync() =>
-        await ActivitiesQuery().ToListAsync();
+    private async Task LoadAssigneesAsync(IEnumerable<Activity> entities)
+    {
+        foreach (var entity in entities)
+            await Context.Entry(entity).Reference(a => a.AssignedToUser).LoadAsync();
+    }
+
+    public async Task<Activity?> GetByIdAsync(Guid id)
+    {
+        var entity = await ActivitiesQuery().FirstOrDefaultAsync(a => a.Id == id);
+        await LoadAssigneeAsync(entity);
+        return entity;
+    }
+
+    public async Task<IEnumerable<Activity>> GetAllAsync()
+    {
+        var list = await ActivitiesQuery().ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 
     public async Task<Guid> CreateAsync(Activity activity)
     {
@@ -54,24 +74,54 @@ public class ActivityRepository : CrmRepositoryBase, IActivityRepository
     public async Task<bool> ExistsAsync(Guid id) =>
         await ActivitiesQuery().AnyAsync(a => a.Id == id);
 
-    public async Task<IEnumerable<Activity>> GetByCustomerAsync(Guid customerId) =>
-        await ActivitiesQuery().Where(a => a.CustomerId == customerId).ToListAsync();
+    public async Task<IEnumerable<Activity>> GetByCustomerAsync(Guid customerId)
+    {
+        var list = await ActivitiesQuery().Where(a => a.CustomerId == customerId).ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 
-    public async Task<IEnumerable<Activity>> GetByLeadAsync(Guid leadId) =>
-        await ActivitiesQuery().Where(a => a.LeadId == leadId).ToListAsync();
+    public async Task<IEnumerable<Activity>> GetByLeadAsync(Guid leadId)
+    {
+        var list = await ActivitiesQuery().Where(a => a.LeadId == leadId).ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 
-    public async Task<IEnumerable<Activity>> GetByOpportunityAsync(Guid opportunityId) =>
-        await ActivitiesQuery().Where(a => a.OpportunityId == opportunityId).ToListAsync();
+    public async Task<IEnumerable<Activity>> GetByOpportunityAsync(Guid opportunityId)
+    {
+        var list = await ActivitiesQuery().Where(a => a.OpportunityId == opportunityId).ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 
-    public async Task<IEnumerable<Activity>> GetByAssignedToAsync(Guid assignedTo) =>
-        await ActivitiesQuery().Where(a => a.AssignedToUserId == assignedTo).ToListAsync();
+    public async Task<IEnumerable<Activity>> GetByAssignedToAsync(Guid assignedTo)
+    {
+        var list = await ActivitiesQuery().Where(a => a.AssignedToUserId == assignedTo).ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 
-    public async Task<IEnumerable<Activity>> GetByTypeAsync(string activityType) =>
-        await ActivitiesQuery().Where(a => a.ActivityType == activityType).ToListAsync();
+    public async Task<IEnumerable<Activity>> GetByTypeAsync(string activityType)
+    {
+        var list = await ActivitiesQuery().Where(a => a.ActivityType == activityType).ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 
-    public async Task<IEnumerable<Activity>> GetByDateRangeAsync(DateTime startDate, DateTime endDate) =>
-        await ActivitiesQuery().Where(a => a.StartDate >= startDate && a.StartDate <= endDate).ToListAsync();
+    public async Task<IEnumerable<Activity>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    {
+        var list = await ActivitiesQuery().Where(a => a.StartDate >= startDate && a.StartDate <= endDate).ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 
-    public async Task<IEnumerable<Activity>> GetByEntityAsync(string entityType, Guid entityId) =>
-        await ActivitiesQuery().Where(a => a.RelatedEntityType == entityType && a.RelatedEntityId == entityId).ToListAsync();
+    public async Task<IEnumerable<Activity>> GetByEntityAsync(string entityType, Guid entityId)
+    {
+        var list = await ActivitiesQuery()
+            .Where(a => a.RelatedEntityType == entityType && a.RelatedEntityId == entityId)
+            .ToListAsync();
+        await LoadAssigneesAsync(list);
+        return list;
+    }
 }

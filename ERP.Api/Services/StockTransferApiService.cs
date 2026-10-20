@@ -1,4 +1,4 @@
-using ERP.Application.Interfaces;
+using ERP.Application.Interfaces.Inventory;
 using ERP.Shared.DTOs.Inventory;
 
 namespace ERP.Api.Services;
@@ -12,93 +12,33 @@ public class StockTransferApiService : IStockTransferApiService
         _service = service;
     }
 
-    public async Task<StockTransferDto?> GetByIdAsync(Guid id)
-    {
-        return await _service.GetByIdAsync(id);
-    }
+    public Task<StockTransferDto?> GetByIdAsync(Guid id) =>
+        _service.GetByIdAsync(id, Guid.Empty);
 
-    public async Task<IEnumerable<StockTransferDto>> GetAllAsync()
-    {
-        return await _service.GetAllAsync();
-    }
+    public Task<IEnumerable<StockTransferDto>> GetAllAsync() =>
+        _service.GetAllAsync(Guid.Empty);
 
-    public async Task<Guid> CreateAsync(CreateStockTransferDto dto)
-    {
-        // Convert CreateStockTransferDto to StockTransferDto
-        var stockTransferDto = new StockTransferDto
-        {
-            FromWarehouseId = dto.FromWarehouseId,
-            ToWarehouseId = dto.ToWarehouseId,
-            TransferDate = dto.TransferDate,
-            Reference = dto.Reference,
-            Notes = dto.Notes,
-            Status = "Draft",
-            Details = dto.Details?.Select(d => new StockTransferDetailDto
-            {
-                ItemId = d.ItemId,
-                Quantity = d.Quantity,
-                Notes = d.Notes
-            }).ToList() ?? new List<StockTransferDetailDto>()
-        };
-        return await _service.CreateAsync(stockTransferDto);
-    }
+    public Task<Guid> CreateAsync(CreateStockTransferDto dto) =>
+        _service.CreateAsync(dto, dto.TenantId, Guid.TryParse(dto.CreatedBy, out var u) ? u : Guid.Empty);
 
-    public async Task<bool> UpdateAsync(UpdateStockTransferDto dto)
-    {
-        // Convert UpdateStockTransferDto to StockTransferDto
-        var stockTransferDto = new StockTransferDto
-        {
-            Id = dto.Id,
-            FromWarehouseId = dto.FromWarehouseId,
-            ToWarehouseId = dto.ToWarehouseId,
-            TransferDate = dto.TransferDate,
-            Reference = dto.Reference,
-            Notes = dto.Notes,
-            Status = dto.Status,
-            Details = dto.Details?.Select(d => new StockTransferDetailDto
-            {
-                Id = d.Id,
-                ItemId = d.ItemId,
-                Quantity = d.Quantity,
-                Notes = d.Notes
-            }).ToList() ?? new List<StockTransferDetailDto>()
-        };
-        return await _service.UpdateAsync(stockTransferDto);
-    }
+    public Task<bool> UpdateAsync(UpdateStockTransferDto dto) =>
+        _service.UpdateAsync(dto, Guid.Empty, Guid.TryParse(dto.UpdatedBy, out var u) ? u : Guid.Empty);
 
-    public async Task<bool> DeleteAsync(Guid id)
-    {
-        return await _service.DeleteAsync(id);
-    }
+    public Task<bool> DeleteAsync(Guid id) =>
+        _service.DeleteAsync(id, Guid.Empty);
 
-    public async Task<IEnumerable<StockTransferDto>> GetByFromWarehouseAsync(Guid warehouseId)
-    {
-        // Use the available GetByWarehouseAsync method as a fallback
-        return await _service.GetByWarehouseAsync(warehouseId);
-    }
+    public Task<IEnumerable<StockTransferDto>> GetByFromWarehouseAsync(Guid warehouseId) =>
+        _service.GetByFromWarehouseAsync(warehouseId, Guid.Empty);
 
-    public async Task<IEnumerable<StockTransferDto>> GetByToWarehouseAsync(Guid warehouseId)
-    {
-        // Use the available GetByWarehouseAsync method as a fallback
-        return await _service.GetByWarehouseAsync(warehouseId);
-    }
+    public Task<IEnumerable<StockTransferDto>> GetByToWarehouseAsync(Guid warehouseId) =>
+        _service.GetByToWarehouseAsync(warehouseId, Guid.Empty);
 
-    public async Task<IEnumerable<StockTransferDto>> GetByStatusAsync(string status)
-    {
-        return await _service.GetByStatusAsync(status);
-    }
+    public Task<IEnumerable<StockTransferDto>> GetByStatusAsync(string status) =>
+        _service.GetByStatusAsync(status, Guid.Empty);
 
-    public async Task<bool> ApproveAsync(Guid id)
-    {
-        // Note: IStockTransferService doesn't have ApproveAsync method
-        // This would need to be implemented or use a different approach
-        return false;
-    }
+    public Task<bool> ApproveAsync(Guid id) =>
+        _service.ApproveAsync(id, Guid.Empty, Guid.Empty);
 
-    public async Task<bool> CompleteAsync(Guid id)
-    {
-        // Note: IStockTransferService doesn't have CompleteAsync method
-        // This would need to be implemented or use a different approach
-        return false;
-    }
+    public Task<bool> CompleteAsync(Guid id) =>
+        _service.CompleteAsync(id, Guid.Empty, Guid.Empty);
 }

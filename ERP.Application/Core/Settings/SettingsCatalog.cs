@@ -65,8 +65,9 @@ public static class SettingsCatalog
     public const string Preferences = "preferences";
     public const string Security = "security";
     public const string Email = "email";
+    public const string Finance = "finance";
 
-    public static readonly IReadOnlyList<string> Categories = [Preferences, Security, Email];
+    public static readonly IReadOnlyList<string> Categories = [Preferences, Security, Email, Finance];
 
     private static readonly SettingOption[] DateFormats =
     [
@@ -123,7 +124,29 @@ public static class SettingsCatalog
             "Stored encrypted. It can be replaced but never read back."),
         new("email.fromAddress", Email, "Send from address", SettingType.Email, null, Max: 200),
         new("email.fromName", Email, "Send from name", SettingType.Text, null, Max: 100),
+
+        // Finance / CoA setup (Accounts module)
+        new("finance.coa.maxDepth", Finance, "Chart of accounts max depth", SettingType.Number, "4",
+            "Maximum hierarchy levels (1–8). Level 4 is the usual posting leaf.", Min: 1, Max: 8, Required: true),
+        new("finance.coa.valueDecimalPlaces", Finance, "Amount decimal places", SettingType.Number, "4",
+            "Decimals used to validate voucher and journal amounts (1–8).", Min: 1, Max: 8, Required: true),
+        new("finance.coa.postingLeafOnly", Finance, "Posting leaf accounts only", SettingType.Boolean, "true",
+            "When true, only accounts without children may have posting allowed."),
+        new("finance.coa.requireCostCenterOnExpense", Finance, "Require cost center on expense", SettingType.Boolean, "false",
+            "When true, expense debit lines on vouchers must include a cost center."),
+        new("finance.voucher.allowPostWithoutApprove", Finance, "Allow post without approve", SettingType.Boolean, "true",
+            "When true, journals may post from Draft; when false, only from Approved."),
+        // Last-used typed-voucher defaults (Default Voucher UX) — written on CPV/CRV/BPV/BRV create.
+        new(LastCashOrBankAccountIdKey, Finance, "Last cash/bank account", SettingType.Text, null,
+            "Remembered after creating a cash/bank voucher; used when the next voucher omits CashOrBankAccountId.", Max: 36),
+        new(LastCostCenterIdKey, Finance, "Last cost center", SettingType.Text, null,
+            "Remembered from the first offset line with a cost center on a cash/bank voucher.", Max: 36),
     ];
+
+    /// <summary>Settings key for last typed-voucher cash/bank CoA.</summary>
+    public const string LastCashOrBankAccountIdKey = "finance.voucher.lastCashOrBankAccountId";
+    /// <summary>Settings key for last typed-voucher cost center.</summary>
+    public const string LastCostCenterIdKey = "finance.voucher.lastCostCenterId";
 
     private static readonly Dictionary<string, SettingDefinition> ByKey = All.ToDictionary(d => d.Key, StringComparer.OrdinalIgnoreCase);
 

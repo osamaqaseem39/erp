@@ -1,0 +1,212 @@
+﻿<style>
+    .Acenter {
+        text-align: center;
+    }
+</style>
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+
+    @*<div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <h1 class="page-title txt-color-blueDark">
+                    <i class="fa fa-home fa-fw "></i>
+                    Dashboard
+                    <span>
+                        >
+                        Fee Titles List
+                    </span>
+                </h1>
+            </div>
+        </div>*@
+    @*<section id="widget-grid" class="">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Fee Titles List</h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>*@
+    <div class="widget-body">
+        <div class="row">
+            <div class="col-lg-2">
+            </div>
+            <div class="col-lg-10">
+                <div class="input-group input-group-sm col-lg-8 col-md-5 col-sm-6 col-xs-12 pull-right">
+                    <div class="input-group-btn">
+                        <button id="btnSearchCategorySmsUser" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Sms User Name</button>
+                        <ul class="dropdown-menu" id="ulSearchCategorySmsUser" style="cursor:pointer">
+                            <li data-value="Sms User Name">
+                                <a class="ListItem">Sms User Name</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <input class="form-control input-lg" type="text" placeholder="Search here..." name="txtSearch" id="txtSearchSmsUser">
+                    <div class="input-group-btn">
+                        <button type="button" id="btnSearchSmsUser" class="btn btn-default">
+                            &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-search fa-lg"></i>&nbsp;&nbsp;&nbsp;
+                        </button>
+                        @*<button type="button" id="btnRefreshSmsUser" class="btn btn-default">
+                                &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-refresh fa-lg"></i>&nbsp;&nbsp;&nbsp;
+                            </button>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table id="myTableSmsUser" class="table table-striped table-bordered table-hover" width="100%">
+            <thead>
+                <tr>
+                    <th data-hide=""></th>
+                    <th data-class="expand"><i class="fa fa-fw fa-user text-muted"></i> Sms User Name</th>
+                    <th data-hide="mobile" style="width:140px"><i class="fa fa-fw fa-mobile-alt text-muted"></i> Cell No</th>
+                    <th data-hide="mobile" style="width:70px"><i class="fa fa-fw fa-map-marker text-muted"></i> Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    @*</div>
+
+                    </div>
+                </article>
+            </div>
+        </section>*@
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var responsiveHelper_dt_basic = undefined;
+        var responsiveHelper_datatable_fixed_column = undefined;
+        var responsiveHelper_datatable_col_reorder = undefined;
+        var responsiveHelper_datatable_tabletools = undefined;
+
+        var breakpointDefinition = {
+            tablet: 1024,
+            phone: 380
+        };
+
+        $('#myTableSmsUser').dataTable({
+            "sDom": '<"top">rt<"bottom"lp i><"clear">',
+            "autoWidth": true,
+            "preDrawCallback": function () {
+                if (!responsiveHelper_dt_basic) {
+                    responsiveHelper_dt_basic = new ResponsiveDatatablesHelper($('#myTableSmsUser'), breakpointDefinition);
+                }
+            },
+            "rowCallback": function (nRow) {
+                responsiveHelper_dt_basic.createExpandIcon(nRow);
+            },
+            "drawCallback": function (oSettings) {
+                responsiveHelper_dt_basic.respond();
+            },
+            "bLengthChange": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": "/smsUser/GetAllSmsUsers",
+                "type": "POST",
+                "datatype": "json",
+                error: function (xhr, httpStatusMessage, customErrorMessage) {
+                    if (xhr.status === 410) {
+                        window.location.href = customErrorMessage;
+                    }
+                }
+            },
+            "columns": [
+                {
+                    "data": "SmsUserId", "width": "5%", "class": "Acenter", "orderable": false, "render": function (data) {
+                        if ($('#CanChange').val() == 1 || $('#CanDelete').val() == 1) {
+                            return '<a href="javascript:void(0);"  data-toggle="modal" data-target="#SmsUserListModal" class="btn btn-primary selectBtn" data-value="' + data + '"  title="Select" style=" text-align: center; height: 25px;width:25px; font-size: 12px;line-height:0px;color:#fff !important;background-color:#428bca !important;border-color:#357ebd !important;border-radius:2px "><i class="fa fa-edit" style="margin-left:-6px;"></i></a>';
+                        }
+                        else {
+                            return '';
+                        }
+                    }
+                },
+                    { "data": "Name", "name": "Name", "autoWidth": true, "orderable": true, },
+                    { "data": "CellNo", "name": "CellNo","class":"Acenter", "autoWidth": true, "orderable": true, },
+                    { "data": "Status", "name": "Status", "class": "Acenter", "autoWidth": true, "orderable": true, },
+
+            ]
+        });
+        oTable = $('#myTableSmsUser').DataTable();
+        $(document).on('click', '.selectBtn', function (e) {
+            e.preventDefault();
+            var smsUserId = $(this).attr("data-value");
+            $.ajax({
+                type: "POST",
+                url: "/smsUser/GetSmsUserById/" + smsUserId,
+                dataType: 'json',
+                success: function (response) {
+                    //response.data.ReportType;
+                    $('#SmsUserName').prop("disabled", false);
+                    $('#CellNo').prop("disabled", false);
+                    $('#SmsUserId').val(response.data.SmsUserId);
+                    $('#SmsUserName').val(response.data.Name);
+                    $('#CellNo').val(response.data.CellNo);
+                    $('.StatusSection').removeAttr("hidden");
+                    if (response.data.Status == "Active") {
+                        $('#Status').prop("checked", true);
+                    }
+                    else {
+                        $('#Status').prop("checked", false);
+                    }
+                    $('#btnSaveSmsUser').prop('disabled', false);
+                    if ($('#CanChange').val() == 1) {
+                        $('#saveTd').removeAttr("hidden");
+                        $('#listTd').css({ 'width': '3%', 'text-align': 'left' });
+                    }
+                    else {
+                        $('#saveTd').attr("hidden", "hidden");
+                        if ($('#CanSave').val() == 0) {
+                            $('#listTd').css({ 'width': '47%', 'text-align': 'right' });
+                        }
+                        else {
+                            $('#listTd').css({ 'width': '3%', 'text-align': 'left' });
+                        }
+                    }
+
+
+                    if ($('#CanSave').val() == 0) {
+                        $('#saveTd').css({ 'width': '47%', 'text-align': 'right' });
+                    }
+                    else {
+                        $('#addTd').removeAttr("hidden");
+                        $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+                    }
+
+
+                    if ($('#CanDelete').val() == 1) {
+                        $('.deleteRow').removeAttr("hidden");
+                    }
+                }
+            })
+        })
+        $('#btnSearchSmsUser').click(function () {
+            SearchItem();
+        });
+        $('#txtSearchSmsUser').on('keypress', function (event) {
+            if (event.keyCode == 13) {
+                SearchItem();
+            }
+        });
+        function SearchItem() {
+            var BElement = $("#btnSearchCategorySmsUser");
+            if (BElement.html().trim() == 'Sms User Name') {
+                oTable.columns(0).search($('#txtSearchSmsUser').val().trim()).draw();
+            }
+            else {
+                alert("Error! try again.");
+            }
+        }
+        //$('#btnRefreshSmsUser').click(function () {
+        //    oTable.ajax.reload(null,false);
+        //});
+        $("#ulSearchCategorySmsUser").on("click", "a", function (e) {
+            e.preventDefault();
+            var $this = $(this).parent();
+            $this.addClass("select").siblings().removeClass("select");
+            $("#btnSearchCategorySmsUser").html($this.data("value"));
+        })
+    });
+</script>

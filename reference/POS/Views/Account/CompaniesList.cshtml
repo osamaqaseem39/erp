@@ -1,0 +1,445 @@
+﻿
+<!-- MAIN CONTENT -->
+<div id="content" class="tablecontainer">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-table fa-fw "></i>
+                Dashboard
+                <span>
+                    >
+                    Companies list
+                </span>
+            </h1>
+        </div>
+        <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 pull-right" style="padding-top:8px;">
+
+            <a class="btn btn-labeled btn-default popup" id="dialog_link" href="/Account/AddEditCompany/0"> <span class="btn-label"><i class="glyphicon glyphicon-plus"></i></span>Add New Company</a>
+
+        </div>
+        @*<div id="dialog_simple" title="Dialog Simple Title">
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
+        </div>*@
+    </div>
+    <section id="widget-grid" class="">
+
+        <!-- row -->
+        <div class="row">
+
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    @*widget options:
+            usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+            data-widget-colorbutton="false"
+            data-widget-editbutton="false"
+            data-widget-togglebutton="false"
+            data-widget-deletebutton="false"
+            data-widget-fullscreenbutton="false"
+            data-widget-custombutton="false"
+            data-widget-collapsed="true"
+            data-widget-sortable="false"
+
+            </div>*@
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Companies List</h2>
+
+                    </header>
+
+                    <!-- widget div-->
+                    <div>
+
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body">
+                            @* search field *@
+                            <div class="input-group input-group-sm col-lg-5 col-md-5 col-sm-6 col-xs-12">
+                                <div class="input-group-btn">
+                                    <button id="btnSearchCategory" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Company Name</button>
+                                    <ul class="dropdown-menu" id="ulSearchCategory" style="cursor:pointer">
+                                        <li data-value="Company Name">
+                                            <a class="ListItem">Company Name</a>
+                                        </li>
+                                        <li data-value="Person Name">
+                                            <a class="ListItem">Person Name</a>
+                                        </li>
+                                        <li data-value="City">
+                                            <a class="ListItem">City</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <input class="form-control input-lg" type="text" placeholder="Search again..." name="txtSearch" id="txtSearch">
+                                <div class="input-group-btn">
+                                    <button type="button" id="btnSearch" class="btn btn-default">
+                                        &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-search fa-lg"></i>&nbsp;&nbsp;&nbsp;
+                                    </button>
+                                    <button type="button" id="btnRefresh" class="btn btn-default">
+                                        &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-refresh fa-lg"></i>&nbsp;&nbsp;&nbsp;
+                                    </button>
+                                </div>
+                            </div>
+
+                            @* //search *@
+                            <table id="myTable" class="table table-striped table-bordered table-hover" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th data-hide="phone">Company Name</th>
+                                        <th data-class="expand"><i class="fa fa-fw fa-user text-muted hidden-md hidden-sm hidden-xs"></i> Person Name</th>
+                                        <th data-hide="phone"><i class="fa fa-fw fa-phone text-muted hidden-md hidden-sm hidden-xs"></i> Personal Contact</th>
+                                        <th>Home Contact</th>
+                                        <th data-hide="phone,tablet"><i class="fa fa-fw fa-map-marker txt-color-blue hidden-md hidden-sm hidden-xs"></i> Landline No</th>
+                                        <th data-hide="phone,tablet">Street Address</th>
+                                        <th data-hide="phone,tablet"><i class="fa fa-fw fa-calendar txt-color-blue hidden-md hidden-sm hidden-xs"></i> City</th>
+                                        <th data-hide="phone,tablet"><i class="fa fa-fw fa-calendar txt-color-blue hidden-md hidden-sm hidden-xs"></i> Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+                        </div>
+                        <!-- end widget content -->
+
+                    </div>
+                    <!-- end widget div -->
+
+                </div>
+                <!-- end widget -->
+            </article>
+            <!-- WIDGET END -->
+
+        </div>
+
+        <!-- end row -->
+        <!-- end row -->
+
+    </section>
+    <!-- end widget grid -->
+</div>
+@*<style>
+    .ui-dialog{
+        border-radius:2px;
+        
+    }
+    .ui-dialog .ui-dialog-titlebar {
+    height: 60px;
+    background: rgba(90, 90, 90, 0.02);
+    border-bottom-color: #eee;
+    box-shadow: 0 5px 15px rgba(0,0,0,.5);
+}
+    .ui-dialog .ui-dialog-title {
+    padding: 17px 0px;
+    float: left;
+    color: #404040;
+    font-weight: 300;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+    
+</style>*@
+        <!-- END MAIN CONTENT -->
+@section pagespecific {
+    <script type="text/javascript">
+
+        // DO NOT REMOVE : GLOBAL FUNCTIONS!
+
+        $(document).ready(function () {
+
+            /* // DOM Position key index //
+
+            l - Length changing (dropdown)
+            f - Filtering input (search)
+            t - The Table! (datatable)
+            i - Information (records)
+            p - Pagination (paging)
+            r - pRocessing
+            < and > - div elements
+            <"#id" and > - div with an id
+            <"class" and > - div with a class
+            <"#id.class" and > - div with an id and class
+
+            Also see: http://legacy.datatables.net/usage/features
+            */
+
+            /* BASIC ;*/
+            var responsiveHelper_dt_basic = undefined;
+            var responsiveHelper_datatable_fixed_column = undefined;
+            var responsiveHelper_datatable_col_reorder = undefined;
+            var responsiveHelper_datatable_tabletools = undefined;
+
+            var breakpointDefinition = {
+                tablet: 1024,
+                phone: 480
+            };
+            
+            $('#myTable').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    // Initialize the responsive datatables helper once.
+                    if (!responsiveHelper_dt_basic) {
+                        responsiveHelper_dt_basic = new ResponsiveDatatablesHelper($('#myTable'), breakpointDefinition);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic.respond();
+                },
+                "bLengthChange": false,
+                "processing": true, 
+                "serverSide": true, // for process on server side
+                "ajax": {
+                    "url": "/account/GetAllCompanies",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columns": [
+                        { "data": "CompanyName", "name": "CompanyName", "autoWidth": true }, //index 0
+                        { "data": "PersonName", "name": "PersonName", "autoWidth": true }, //index 1
+                        { "data": "MobileNo1", "name": "MobileNo1", "autoWidth": true },
+                        { "data": "MobileNo2", "name": "MobileNo2", "autoWidth": true },
+                        { "data": "LandlineNo", "name": "LandlineNo", "autoWidth": true },
+                        { "data": "Address1", "name": "Address1", "autoWidth": true },
+                        { "data": "City", "name": "City", "autoWidth": true },
+                        {
+                            "data": "CompanyId", "width": "50px", "render": function (data) {
+                                return '<a class="popup" href="/account/AddEditCompany/' + data + '">Edit</a>';
+                            }
+                        }
+                ]
+            });
+
+            //Apply Custom search on jQuery DataTables here
+            oTable = $('#myTable').DataTable();
+            $('#btnSearch').click(function () {
+                var BElement = $("#btnSearchCategory");
+                if (BElement.html() == 'Company Name') {
+                    oTable.columns(0).search($('#txtSearch').val().trim()).draw();
+                }
+                else if (BElement.html() == 'Person Name') {
+                    oTable.columns(1).search($('#txtSearch').val().trim()).draw();
+                }
+                else if (BElement.html() == 'City') {
+                    oTable.columns(6).search($('#txtSearch').val().trim()).draw();
+                }
+                else
+                {
+                    alert("Error! try again.");
+                }
+            });
+            $('#btnRefresh').click(function () {
+                location.reload();
+            });
+            $("#ulSearchCategory").on("click", "a", function (e) {
+                e.preventDefault();
+                var $this = $(this).parent();
+                $this.addClass("select").siblings().removeClass("select");
+                $("#btnSearchCategory").html($this.data("value"));
+                
+                //$this.html('<i class="fa fa-check"></i>' + $this.data("value"));
+                //$this.addClass("active");
+            })
+            //$('#dialog_link').click(function () {
+            //    $('#dialog_simple').dialog('open');
+            //    return false;
+
+            //});
+            //$('#dialog_simple').dialog({
+            //    autoOpen: false,
+            //    width: 600,
+            //    resizable: false,
+            //    modal: true,
+            //    title: "Companies List",
+            //    buttons: [{
+            //        html: "<i class='fa fa-trash-o'></i>&nbsp; Delete all items",
+            //        "class": "btn btn-danger",
+            //        click: function () {
+            //            $(this).dialog("close");
+            //        }
+            //    }, {
+            //        html: "<i class='fa fa-times'></i>&nbsp; Cancel",
+            //        "class": "btn btn-default",
+            //        click: function () {
+            //            $(this).dialog("close");
+            //        }
+            //    }]
+            //});
+            $.widget("ui.dialog", $.extend({}, $.ui.dialog.prototype, {
+                _title: function (title) {
+                    if (!this.options.title) {
+                        title.html("&#160;");
+                    } else {
+                        title.html(this.options.title);
+                    }
+                }
+            }));
+            $('.tablecontainer').on('click', 'a.popup', function (e) {
+                e.preventDefault();
+                OpenPopup($(this).attr('href'));
+            })
+            function OpenPopup(pageUrl) {
+                var $pageContent = $('<div/>');
+                $pageContent.load(pageUrl, function () {
+                });
+
+                $dialog = $('<div id="dialog_simple" title="Dialog Simple Title"></div>')
+                          .html($pageContent)
+                          .dialog({
+                              draggable: false,
+                                  autoOpen: false,
+                                  width: 600,
+                                  height: 500,
+                                  resizable: false,
+                                  modal: true,
+                                  title: "<div class='widget-header'><h4><i class='fa fa-list'></i> Companies List</h4></div>",
+                                  close: function () {
+                                      $dialog.dialog('destroy').remove();
+                                  }
+                                  
+                          })
+
+                $('#dialog_simple').on('submit', '#popupForm', function (e) {
+                    var url = $('#popupForm')[0].action;
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: $('#popupForm').serialize(),
+                        success: function (data) {
+                            if (data.status) {
+                                $dialog.dialog('close');
+                                oTable.ajax.reload();
+                            }
+                        }
+                    })
+
+                    e.preventDefault();
+                })
+                $dialog.dialog('open');
+            }
+
+
+            /* END BASIC */
+
+            ///* COLUMN FILTER  */
+            //var otable = $('#datatable_fixed_column').DataTable({
+            //    //"bFilter": false,
+            //    //"bInfo": false,
+            //    //"bLengthChange": false,
+            //    //"bAutoWidth": false,
+            //    //"bPaginate": false,
+            //    //"bStateSave": true // saves sort state using localStorage
+            //    "sDom": "<'dt-toolbar'<'col-xs-12 col-sm-6 hidden-xs'f><'col-sm-6 col-xs-12 hidden-xs'<'toolbar'>>r>" +
+            //            "t" +
+            //            "<'dt-toolbar-footer'<'col-sm-6 col-xs-12 hidden-xs'i><'col-xs-12 col-sm-6'p>>",
+            //    "autoWidth": true,
+            //    "preDrawCallback": function () {
+            //        // Initialize the responsive datatables helper once.
+            //        if (!responsiveHelper_datatable_fixed_column) {
+            //            responsiveHelper_datatable_fixed_column = new ResponsiveDatatablesHelper($('#datatable_fixed_column'), breakpointDefinition);
+            //        }
+            //    },
+            //    "rowCallback": function (nRow) {
+            //        responsiveHelper_datatable_fixed_column.createExpandIcon(nRow);
+            //    },
+            //    "drawCallback": function (oSettings) {
+            //        responsiveHelper_datatable_fixed_column.respond();
+            //    }
+
+            //});
+
+            //// custom toolbar
+            //$("div.toolbar").html('<div class="text-right"><img src="/Content/img/logo.png" alt="SmartAdmin" style="width: 111px; margin-top: 3px; margin-right: 10px;"></div>');
+
+            //// Apply the filter
+            //$("#datatable_fixed_column thead th input[type=text]").on('keyup change', function () {
+
+            //    otable
+            //        .column($(this).parent().index() + ':visible')
+            //        .search(this.value)
+            //        .draw();
+
+            //});
+            ///* END COLUMN FILTER */
+
+            /* COLUMN SHOW - HIDE */
+            //$('#datatable_col_reorder').dataTable({
+            //    "sDom": "<'dt-toolbar'<'col-xs-12 col-sm-6'f><'col-sm-6 col-xs-6 hidden-xs'C>r>" +
+            //            "t" +
+            //            "<'dt-toolbar-footer'<'col-sm-6 col-xs-12 hidden-xs'i><'col-sm-6 col-xs-12'p>>",
+            //    "autoWidth": true,
+            //    "preDrawCallback": function () {
+            //        // Initialize the responsive datatables helper once.
+            //        if (!responsiveHelper_datatable_col_reorder) {
+            //            responsiveHelper_datatable_col_reorder = new ResponsiveDatatablesHelper($('#datatable_col_reorder'), breakpointDefinition);
+            //        }
+            //    },
+            //    "rowCallback": function (nRow) {
+            //        responsiveHelper_datatable_col_reorder.createExpandIcon(nRow);
+            //    },
+            //    "drawCallback": function (oSettings) {
+            //        responsiveHelper_datatable_col_reorder.respond();
+            //    }
+            //});
+
+            /* END COLUMN SHOW - HIDE */
+
+            /* TABLETOOLS */
+            //$('#datatable_tabletools').dataTable({
+
+            //    // Tabletools options:
+            //    //   https://datatables.net/extensions/tabletools/button_options
+            //    "sDom": "<'dt-toolbar'<'col-xs-12 col-sm-6'f><'col-sm-6 col-xs-6 hidden-xs'T>r>" +
+            //            "t" +
+            //            "<'dt-toolbar-footer'<'col-sm-6 col-xs-12 hidden-xs'i><'col-sm-6 col-xs-12'p>>",
+            //    "oTableTools": {
+            //        "aButtons": [
+            //        "copy",
+            //        "csv",
+            //        "xls",
+            //           {
+            //               "sExtends": "pdf",
+            //               "sTitle": "SmartAdmin_PDF",
+            //               "sPdfMessage": "SmartAdmin PDF Export",
+            //               "sPdfSize": "letter"
+            //           },
+            //           {
+            //               "sExtends": "print",
+            //               "sMessage": "Generated by SmartAdmin <i>(press Esc to close)</i>"
+            //           }
+            //        ],
+            //        "sSwfPath": "/Scripts/plugin/datatables/swf/copy_csv_xls_pdf.swf"
+            //    },
+            //    "autoWidth": true,
+            //    "preDrawCallback": function () {
+            //        // Initialize the responsive datatables helper once.
+            //        if (!responsiveHelper_datatable_tabletools) {
+            //            responsiveHelper_datatable_tabletools = new ResponsiveDatatablesHelper($('#datatable_tabletools'), breakpointDefinition);
+            //        }
+            //    },
+            //    "rowCallback": function (nRow) {
+            //        responsiveHelper_datatable_tabletools.createExpandIcon(nRow);
+            //    },
+            //    "drawCallback": function (oSettings) {
+            //        responsiveHelper_datatable_tabletools.respond();
+            //    }
+            //});
+
+            /* END TABLETOOLS */
+           
+        });
+        
+    </script>
+}

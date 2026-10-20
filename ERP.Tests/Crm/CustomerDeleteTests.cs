@@ -12,6 +12,7 @@ public class CustomerDeleteTests
 {
     private static readonly Guid Tenant = Guid.NewGuid();
     private static readonly Guid OtherTenant = Guid.NewGuid();
+    private static readonly Guid User = Guid.NewGuid();
 
     [Fact]
     public async Task RefusesToDeleteACustomerWithHistory_AndLeavesTheHistoryIntact()
@@ -21,7 +22,7 @@ public class CustomerDeleteTests
         context.Opportunities.Add(new Opportunity { TenantId = Tenant, CustomerId = customerId, OpportunityName = "Deal", Title = "Deal" });
         await context.SaveChangesAsync();
 
-        var ex = await Assert.ThrowsAsync<ConflictException>(() => service.DeleteAsync(customerId));
+        var ex = await Assert.ThrowsAsync<ConflictException>(() => service.DeleteAsync(customerId, Tenant));
 
         Assert.Equal("It has 1 opportunity, 2 quotes. Mark it inactive instead to keep that history.", ex.Message);
         Assert.True(await context.Customers.AnyAsync(c => c.Id == customerId));
@@ -33,7 +34,7 @@ public class CustomerDeleteTests
     {
         var (service, context, customerId) = Create();
 
-        Assert.True(await service.DeleteAsync(customerId));
+        Assert.True(await service.DeleteAsync(customerId, Tenant));
         Assert.False(await context.Customers.AnyAsync(c => c.Id == customerId));
     }
 
@@ -44,7 +45,7 @@ public class CustomerDeleteTests
         context.Quotes.Add(new Quote { TenantId = OtherTenant, CustomerId = customerId, QuoteNumber = "Q-X" });
         await context.SaveChangesAsync();
 
-        Assert.True(await service.DeleteAsync(customerId));
+        Assert.True(await service.DeleteAsync(customerId, Tenant));
     }
 
     [Fact]
@@ -52,7 +53,7 @@ public class CustomerDeleteTests
     {
         var (service, _, _) = Create();
 
-        Assert.False(await service.DeleteAsync(Guid.NewGuid()));
+        Assert.False(await service.DeleteAsync(Guid.NewGuid(), Tenant));
     }
 
     private static Quote Quote(Guid customerId) => new() { TenantId = Tenant, CustomerId = customerId, QuoteNumber = $"Q-{Guid.NewGuid():N}"[..8] };
@@ -62,7 +63,7 @@ public class CustomerDeleteTests
         var context = new ERPDbContext(new DbContextOptionsBuilder<ERPDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
-        var customer = new Customer { TenantId = Tenant, CustomerCode = "C-001", CustomerName = "Acme", CompanyName = "Acme" };
+        var customer = new Customer { TenantId = Tenant, CustomerCode = "C-001", CustomerName = "Acme", CompanyName = "Acme", Status = "Active" };
         context.Customers.Add(customer);
         context.SaveChanges();
         var repository = new CustomerRepository(context, new FixedTenantProvider(Tenant));

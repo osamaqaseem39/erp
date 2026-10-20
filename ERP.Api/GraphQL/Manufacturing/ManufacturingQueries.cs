@@ -56,5 +56,31 @@ public class ManufacturingQueries
     {
         return await service.GetAllAsync(tenantId);
     }
+
+    // Bill of Materials
+    public async Task<BillOfMaterialDto?> GetBillOfMaterial(
+        [Service] IBillOfMaterialService service,
+        Guid bomId,
+        Guid tenantId)
+        => await service.GetByIdAsync(bomId, tenantId);
+
+    public async Task<IEnumerable<BillOfMaterialDto>> GetBillOfMaterials(
+        [Service] IBillOfMaterialService service,
+        Guid tenantId,
+        Guid? finishedGoodItemId = null)
+        => await service.GetAllAsync(tenantId, finishedGoodItemId);
+
+    // Production Runs
+    public async Task<ProductionRunDto?> GetProductionRun(
+        [Service] IProductionRunService service,
+        Guid productionRunId,
+        Guid tenantId)
+        => await service.GetByIdAsync(productionRunId, tenantId);
+
+    public async Task<IEnumerable<ProductionRunDto>> GetProductionRunsByOrder(
+        [Service] IProductionRunService service,
+        Guid productionOrderId,
+        Guid tenantId)
+        => await service.GetByOrderAsync(productionOrderId, tenantId);
 }
 

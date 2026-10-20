@@ -27,7 +27,7 @@ public static class ItemVariantMapper
     {
         return new ItemVariant
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             ItemId = dto.ItemId,
             VariantCode = dto.VariantCode,
             VariantName = dto.VariantName,

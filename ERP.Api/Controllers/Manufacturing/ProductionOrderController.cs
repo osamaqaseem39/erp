@@ -1,5 +1,7 @@
 using ERP.Api.Security;
+using ERP.Api.Security.Permissions;
 using Microsoft.AspNetCore.Mvc;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Manufacturing;
 using ERP.Shared.DTOs.Manufacturing;
@@ -10,6 +12,11 @@ namespace ERP.Api.Controllers.Manufacturing;
 [ApiController]
 [Route("api/manufacturing/production-orders")]
 [Authorize]
+[PermissionResource("manufacturing.productionOrders")]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IProductionOrderService _productionOrderService;
@@ -22,6 +29,7 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateProductionOrderDto dto)
     {
         var tenantId = GetTenantId();
@@ -31,6 +39,7 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ProductionOrderDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -41,6 +50,7 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ProductionOrderDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] string? status = null, [FromQuery] Guid? workCenterId = null)
     {
         var tenantId = GetTenantId();
@@ -49,6 +59,7 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ProductionOrderDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProductionOrderDto dto)
     {
         if (id != dto.Id)
@@ -61,6 +72,7 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/start")]
+    [ProducesResponseType(typeof(ProductionOrderDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Start(Guid id)
     {
         var tenantId = GetTenantId();
@@ -70,15 +82,18 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/complete")]
+    [ProducesResponseType(typeof(ProductionOrderDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Complete(Guid id, [FromBody] CompleteProductionOrderDto dto)
     {
         var tenantId = GetTenantId();
         var userId = GetUserId();
-        var result = await _productionOrderService.CompleteAsync(id, tenantId, userId);
+        dto.ProductionOrderId = id;
+        var result = await _productionOrderService.CompleteAsync(id, dto, tenantId, userId);
         return Ok(result);
     }
 
     [HttpPost("{id}/cancel")]
+    [ProducesResponseType(typeof(ProductionOrderDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Cancel(Guid id, [FromBody] CancelProductionOrderDto dto)
     {
         var tenantId = GetTenantId();
@@ -88,6 +103,7 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

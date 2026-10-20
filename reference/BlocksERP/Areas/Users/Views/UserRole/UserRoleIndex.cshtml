@@ -1,0 +1,271 @@
+﻿@{
+    ViewBag.Title = "Assign Modules + Actions to User";
+  
+}
+<style>
+    .btn-danger{
+       box-shadow:none !important;
+       -webkit-box-shadow:none !important;
+       border-color:none !important;
+
+
+    }
+</style>
+@model List<BlocksERP.Models.clsModule>
+<!-- END Page Header -->
+<!-- BEGIN Page Content -->
+<!-- the #js-page-content id is needed for some plugins to initialize -->
+
+<main id="js-page-content" role="main" class="page-content">
+    <div class="row">
+
+        <div class="col-lg-6" style="margin-top:4px">
+
+            @*@if (Model.Any(x => x.ActionName.ToLower() == "assign module"))
+            {*@
+                <input type="hidden" id="AssignModuleRole" value="1" />
+            @*}
+            else
+            {*@
+                @*<input type="hidden" id="AssignModuleRole" value="0" />*@
+            @*}
+            @if (Model.Any(x => x.ActionName.ToLower() == "assign action"))
+            {*@
+                <input type="hidden" id="AssignActionRole" value="1" />
+            @*}
+            else
+            {*@
+                @*<input type="hidden" id="AssignActionRole" value="0" />*@
+            @*}*@
+
+
+        </div>
+        <div class="col-md-12" style="display:flex">
+            <table style="width:100%">
+                <tr>
+                    <th>
+                        <ol class="breadcrumb breadcrumb-sm breadcrumb-arrow">
+                            <li>
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-clipboard"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">Users</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-list-ol"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">Assign Modules + Actions to User</span>
+                                </a>
+                            </li>
+                        </ol>
+                    </th>
+                    <th style="text-align:right">
+                        <h6 class="js-get-date" style="margin-top: -7px;"></h6>
+                    </th>
+                </tr>
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel">
+                <div class="panel-hdr bg-primary-500 bg-info-gradient" role="heading">
+                    <h2>Assign Action To Module</h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="row" style="padding-left: 0px;padding-right: 0px;padding-top:0px">
+                           
+                            <div class="col-md-6 "></div>
+                            <div class="col-lg-6" style="margin-top:4px">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button id="btnSearchCategory" class="btn btn-outline-default dropdown-toggle btnSearchGo" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Email</button>
+                                        <div class="dropdown-menu" id="ulSearchCategory">
+                                            <a class="dropdown-item" href="#">Email</a>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="txtSearch" class="form-control" placeholder="Search here..." aria-label="Text input with dropdown button">
+                                    <div class="input-group-append">
+                                        <button id="btnSearch" class="btn btn-outline-default btnSearchGo" type="button" aria-haspopup="true" aria-expanded="false">Go</button>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <table id="myTable" class="table table-bordered table-hover table-striped w-100">
+                            <thead>
+                                <tr>
+                                    <th data-hide="" style="text-align:center">
+                                    </th>
+                                    <th class="min-desktop"> Email</th>
+                                    <th class="min-desktop"> Phone No.</th>
+                                    <th class="min-desktop"> Type</th>
+                                    <th class="min-desktop"> Status</th>
+                                    <th class="max-mobile-p">Updated Date</th>
+                                    <th class="max-mobile-p">Updated By</th>
+                                    <th class="AssignModule"> Assign Module</th>
+                                    @*<th class="AssignModule"> Assign Process</th>*@
+                                    @*<th class="AssignAction"> Assign Action</th>*@
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            @*<tfoot>
+                                </tfoot>*@
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+<!-- this overlay is activated only when mobile menu is triggered -->
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#myTable').dataTable({
+
+            "autoWidth": true,
+            "bLengthChange": false,
+            //"searching": false,
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+
+            "ajax": {
+                "url": "/UserRole/GetAllUsers",
+                "type": "POST",
+                "datatype": "json",
+                error: function (xhr, httpStatusMessage, customErrorMessage) {
+                    if (xhr.status === 410) {
+                        window.location.href = customErrorMessage;
+                    }
+                }
+            },
+            "columns": [
+                {
+                    "data": "ImagePath", "width": "45px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        return '<img src="' + data + '" style="height:45px;width:45px;" />';
+                    }
+                },
+                { "data": "Email", "name": "Email", "autoWidth": true },
+                { "data": "PhoneNumber", "name": "PhoneNumber", "autoWidth": true },
+                { "data": "Type", "name": "Type", "autoWidth": true },
+                { "data": "Status", "name": "Status", "autoWidth": true },
+                {
+                    "data": "UpdatedDate", "name": "UpdatedDate", "class": "Acenter", "orderable": true, "autoWidth": true, 'render': function (date) {
+                        return getDateTimeForDatatable(date);
+                    }
+                },
+                { "data": "UpdatedByString", "name": "UpdatedBy", "autoWidth": true },
+
+                {
+                    "data": "UserId", "width": "100px", "class": "Acenter", "orderable": false, "render": function (data) {
+                        if ($('#AssignModuleRole').val() > 0) {
+                            return '<a title="Assign Module" href="javascript:void(0)" style="width:128px;" class="btn btn-primary AssignModule" data-toggle="modal" data-target="#MyModal" data-value="' + data + '" >Assign Module</a>';
+                        }
+                        else {
+                            return '';
+                        }
+                    }
+                },
+                //{
+                //    "data": "UserId", "width": "100px", "class": "Acenter", "orderable": false, "render": function (data) {
+                //        if ($('#AssignModuleRole').val() > 0) {
+                //            return '<a title="Process" href="javascript:void(0)" style="width:128px;" class="btn btn-secondary AssignProcess" data-toggle="modal" data-target="#MyModal" data-value="' + data + '" >Process</a>';
+                //        }
+                //        else {
+                //            return '';
+                //        }
+                //    }
+                //},
+
+                     @*{
+                         "data": "UserId", "width": "100px", "class": "Acenter", "orderable": false, "render": function (data) {
+                             if ($('#AssignActionRole').val() > 0) {
+                        return '<a title="Assign" href="javascript:void(0)" style="background-color:@bgColor !important;border-color:@bgColor !important;" class="btn btn-danger AssignAction" data-toggle="modal" data-target="#MyModal" data-value="' + data + '" >Assign Action</a>';
+                    }
+                    else {
+                      return '';
+                    }
+                }
+               },*@
+
+
+            ]
+        });
+        oTable = $('#myTable').DataTable();
+
+    });
+
+
+
+    $('#btnSearch').click(function () {
+            SearchItem();
+        });
+        $('#txtSearch').on('keypress', function (event) {
+            if (event.keyCode == 13) {
+                SearchItem();
+            }
+        });
+        function SearchItem() {
+            var BElement = $("#btnSearchCategory");
+            if (BElement.html() == 'Email') {
+                oTable.columns(0).search($('#txtSearch').val().trim()).draw();
+            }
+
+            else {
+                alert("Error! try again.");
+            }
+    }
+
+    $(document).on('change', '.SelectAll', function () {
+        var check = $(this).is(':checked');
+        if (check == true) {
+            $('#myTable > tbody').find('input[type=checkbox]').prop('checked', true);
+        }
+        else {
+            $('#myTable > tbody').find('input[type=checkbox]').prop('checked', false);
+        }
+    })
+
+    $(document).on('click', '.AssignModule', function () {
+        $("#MyModal").find('.modal-dialog').removeClass("modal-lg").addClass("modal-lg");
+        $('#modalDiv').html('');
+        $('#ModelHeaderSpan').html('Assign Modules + Actions To User');
+            var id = $(this).attr("data-value");
+            $('#modalDiv').load('@Url.Action("assignmodule", "userrole")?userId='+ id + '');
+    });
+
+    $(document).on('click', '.AssignProcess', function () {
+        $("#MyModal").find('.modal-dialog').removeClass("modal-lg").addClass("modal-lg");
+        $('#modalDiv').html('');
+        $('#ModelHeaderSpan').html('Assign Process');
+        var id = $(this).attr("data-value");
+        $('#modalDiv').load('@Url.Action("AssignProcess", "userrole")?userId=' + id + '');
+    });
+
+    
+
+
+    $(document).on('click', '.AssignAction', function () {
+        $("#MyModal").find('.modal-dialog').removeClass("modal-lg").addClass("modal-lg");
+        $('#modalDiv').html('');
+        var id = $(this).attr("data-value");
+        $('#modalDiv').load('@Url.Action("assignaction", "userrole")?userId=' + id + '');
+    });
+
+
+
+</script>
+

@@ -1,10 +1,12 @@
 using ERP.Api.Errors;
+using ERP.Api.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
+using ERP.Shared.DTOs;
 using ERP.Shared.DTOs.CRM;
-using FluentValidation;
 using ERP.Api.Validators.CRM;
 
 namespace ERP.Api.Controllers.CRM;
@@ -12,6 +14,10 @@ namespace ERP.Api.Controllers.CRM;
 [Authorize]
 [ApiController]
 [Route("api/crm/campaigns")]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class CampaignController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ICampaignService _service;
@@ -30,81 +36,98 @@ public class CampaignController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        return await HandleAsync(() => _service.GetByIdAsync(id));
-    }
+    [ProducesResponseType(typeof(CampaignDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetById(Guid id) =>
+        await HandleAsync(() => _service.GetByIdAsync(id));
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        return await HandleAsync(() => _service.GetAllAsync());
-    }
+    [ProducesResponseType(typeof(IEnumerable<CampaignDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetAll() =>
+        await HandleAsync(() => _service.GetAllAsync());
 
     [HttpGet("status/{status}")]
-    public async Task<IActionResult> GetByStatus(string status)
-    {
-        return await HandleAsync(() => _service.GetByStatusAsync(status));
-    }
+    [ProducesResponseType(typeof(IEnumerable<CampaignDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByStatus(string status) =>
+        await HandleAsync(() => _service.GetByStatusAsync(status));
 
     [HttpGet("type/{campaignType}")]
-    public async Task<IActionResult> GetByType(string campaignType)
-    {
-        return await HandleAsync(() => _service.GetByTypeAsync(campaignType));
-    }
+    [ProducesResponseType(typeof(IEnumerable<CampaignDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByType(string campaignType) =>
+        await HandleAsync(() => _service.GetByTypeAsync(campaignType));
 
     [HttpGet("period")]
-    public async Task<IActionResult> GetByDateRange(DateTime startDate, DateTime endDate)
-    {
-        return await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate));
-    }
+    [ProducesResponseType(typeof(IEnumerable<CampaignDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByDateRange(DateTime startDate, DateTime endDate) =>
+        await HandleAsync(() => _service.GetByDateRangeAsync(startDate, endDate));
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateCampaignDto dto)
     {
         var validationResult = await _createValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
-        {
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
-        }
 
         return await HandleAsync(() => _service.CreateAsync(dto));
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCampaignDto dto)
     {
         dto.Id = id;
         var validationResult = await _updateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
-        {
             return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
-        }
 
         return await HandleAsync(() => _service.UpdateAsync(dto));
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
-    {
-        return await HandleAsync(() => _service.DeleteAsync(id));
-    }
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
+    public async Task<IActionResult> Delete(Guid id) =>
+        await HandleAsync(() => _service.DeleteAsync(id));
 
     [HttpPost("{id}/launch")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Launch(Guid id)
     {
-        return await HandleAsync(() => _service.LaunchAsync(id));
+        var ok = await _service.LaunchAsync(id, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to launch campaign (must be Draft or Paused)" });
+        return Ok(new MessageResponse { Message = "Campaign launched" });
     }
 
     [HttpPost("{id}/pause")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Pause(Guid id)
     {
-        return await HandleAsync(() => _service.PauseAsync(id));
+        var ok = await _service.PauseAsync(id, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to pause campaign (must be Active)" });
+        return Ok(new MessageResponse { Message = "Campaign paused" });
     }
 
     [HttpPost("{id}/complete")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Complete(Guid id)
     {
-        return await HandleAsync(() => _service.CompleteAsync(id));
+        var ok = await _service.CompleteAsync(id, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to complete campaign (must be Active or Paused)" });
+        return Ok(new MessageResponse { Message = "Campaign completed" });
     }
+
+    [HttpPost("{id}/cancel")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> Cancel(Guid id)
+    {
+        var ok = await _service.CancelAsync(id, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to cancel campaign" });
+        return Ok(new MessageResponse { Message = "Campaign cancelled" });
+    }
+
+    private Guid GetTenantId() => HttpContext.RequireTenantId();
+    private Guid GetUserId() => User.RequireUserId();
 }

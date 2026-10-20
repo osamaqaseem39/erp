@@ -1,0 +1,114 @@
+﻿@model POS.Models.clsVoucher
+@if (Model.VouchersList.Count() != 0)
+{
+    int j = 0;
+    decimal total = 0;
+    <table class="mainTable" style="margin-top: 20px; margin-bottom: 20px; ">
+        <tbody>
+            <tr class="mainTr">
+                <th style="text-align: center; width: 25px">Sr#</th>
+                <th style="text-align:center;width:90px">Date</th>
+                <th style="text-align: right;">Cash Purchase</th>
+                <th style="text-align: right;">Credit Purchase</th>
+                <th style="text-align: right;">Total Purchase</th>
+                <th style="text-align: right;">Cash Purchase Return</th>
+                <th style="text-align: right;">Credit Purchase Return</th>
+                <th style="text-align: right;">Total Purchase Return</th>
+                <th class="borderRight" style="text-align: right;">Net Purchase</th>
+            </tr>
+            @foreach (clsVoucher v in Model.VouchersList)
+            {
+                j++;
+                <tr class="mainTr">
+                    <td style="text-align: center;">@j</td>
+                    <td style="text-align:center">@Convert.ToDateTime(v.ByDate).ToString("dd/MM/yy")</td>
+                    @if (v.CashSale == 0)
+                    {
+                        <td style="text-align: center;font-size:18px">-</td>
+                    }
+                    else
+                    {
+                        <td style="text-align: right;">@Convert.ToDecimal(v.CashSale).ToString("#,##0.00")</td>
+                    }
+                    @if (v.CreditSale == 0)
+                    {
+                        <td style="text-align: center;font-size:18px">-</td>
+                    }
+                    else
+                    {
+                        <td style="text-align: right;">@Convert.ToDecimal(v.CreditSale).ToString("#,##0.00")</td>
+                    }
+                    @if (v.TotalSale == 0)
+                    {
+                        <td style="text-align: center;font-size:18px">-</td>
+                    }
+                    else
+                    {
+                        <td style="text-align: right;">@Convert.ToDecimal(v.TotalSale).ToString("#,##0.00")</td>
+                    }
+                    @if (v.CashSaleReturn == 0)
+                    {
+                        <td style="text-align: center;font-size:18px">-</td>
+                    }
+                    else
+                    {
+                        <td style="text-align: right;">@Convert.ToDecimal(v.CashSaleReturn).ToString("#,##0.00")</td>
+                    }
+                    @if (v.CreditSaleReturn == 0)
+                    {
+                        <td style="text-align: center;font-size:18px">-</td>
+                    }
+                    else
+                    {
+                        <td style="text-align: right;">@Convert.ToDecimal(v.CreditSaleReturn).ToString("#,##0.00")</td>
+                    }
+                    @if (v.TotalSaleReturn == 0)
+                    {
+                        <td style="text-align: center;font-size:18px">-</td>
+                    }
+                    else
+                    {
+                        <td style="text-align: right;">@Convert.ToDecimal(v.TotalSaleReturn).ToString("#,##0.00")</td>
+                    }
+                    @if (v.NetSale == 0)
+                    {
+                        <td class="borderRight" style="text-align: center;font-size:18px">-</td>
+                    }
+                    else
+                    {
+                        <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(v.NetSale).ToString("#,##0.00")</td>
+                    }
+                </tr>
+            }
+            @*<tr class="mainTr">
+                    <td class="borderRight" style="text-align: right; font-size: 15px; font-weight: bold; border: 1px solid #fff;" colspan="4"><span style="font-weight:normal">Closing Balance:&nbsp;</span> <span style="font-weight:bold;font-size:16px">@Convert.ToDecimal(balance).ToString("#,##0.00")</span> </td>
+                </tr>*@
+        </tbody>
+    </table>
+}
+else
+{
+    <table class="mainTable">
+        <tr class="mainTr">
+            <th style="text-align: center; width: 25px">Sr#</th>
+            <th style="text-align:center;width:90px">Date</th>
+            <th style="text-align: right;">Cash Purchase</th>
+            <th style="text-align: right;">Credit Purchase</th>
+            <th style="text-align: right;">Total Purchase</th>
+            <th style="text-align: right;">Cash Purchase Return</th>
+            <th style="text-align: right;">Credit Purchase Return</th>
+            <th style="text-align: right;">Total Purchase Return</th>
+            <th class="borderRight" style="text-align: right;">Net Purchase</th>
+        </tr>
+        <tbody>
+            <tr class="mainTr">
+                <td class="borderRight" colspan="9" style="text-align:center;padding:10px">No Record Found.</td>
+            </tr>
+        </tbody>
+    </table>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnSearch').html("Search");
+    })
+</script>

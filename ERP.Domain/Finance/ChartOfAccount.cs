@@ -10,6 +10,7 @@ public class ChartOfAccount : BaseEntity
     public string AccountType { get; set; } = string.Empty; // Asset/Liability/Equity/Revenue/Expense
     public Guid? ParentAccountId { get; set; }
     public string? CurrencyCode { get; set; }
+    public string? Remarks { get; set; }
     public bool IsPostingAllowed { get; set; } = true;
     
     // Navigation properties

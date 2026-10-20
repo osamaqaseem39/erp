@@ -15,4 +15,8 @@ public interface IBillService
     Task<BillDto> ApproveAsync(Guid id, Guid tenantId, Guid userId);
     Task<BillDto> MarkAsPaidAsync(Guid id, PaymentDto paymentDto, Guid tenantId, Guid userId);
     Task<BillDto> VoidBillAsync(Guid id, VoidBillDto dto, Guid tenantId, Guid userId);
+    /// <summary>Reduce AP bill balance (debit note / credit from vendor).</summary>
+    Task<bool> ApplyCreditToBillAsync(Guid billId, decimal amount, Guid tenantId);
+    /// <summary>Restore AP bill balance after voiding a debit note.</summary>
+    Task<bool> UnapplyCreditFromBillAsync(Guid billId, decimal amount, Guid tenantId);
 }

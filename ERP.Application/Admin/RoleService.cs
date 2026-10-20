@@ -108,12 +108,16 @@ public class RoleService : IRoleService
 
     private static PermissionDto MapToDto(Permission entity)
     {
+        var code = $"{entity.ModuleName}.{entity.ActionName}";
         return new PermissionDto
         {
             Id = entity.Id,
-            Name = $"{entity.ModuleName}.{entity.ActionName}",
+            Name = code,
             Description = entity.Description,
-            Module = entity.ModuleName,
+            Module = entity.ModuleName.Split('.')[0],
+            ModuleName = entity.ModuleName,
+            Action = entity.ActionName,
+            ActionName = entity.ActionName,
             IsActive = entity.IsActive,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt

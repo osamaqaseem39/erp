@@ -1,0 +1,1673 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    #Quantity:focus {
+        background-color: #F0FFF0 !important;
+        border-color: #7DC27D !important;
+    }
+
+    #Rate:focus {
+        background-color: #F0FFF0 !important;
+        border-color: #7DC27D !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+    .heading-1 {
+        position: relative;
+        text-align: center;
+    }
+
+        .heading-1:before {
+            content: "";
+            display: block;
+            border-top: solid 3px #03386C;
+            width: 100%;
+            height: 2px;
+            position: absolute;
+            top: 50%;
+            z-index: 0;
+        }
+
+        .heading-1 span {
+            background: #fff;
+            padding: 0 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+    input[type="text"]:disabled {
+        background-color: #ddd !important;
+    }
+
+
+    table.dataTable td {
+        border: 0.5px solid #aca9a9 !important;
+        /*padding:10px;*/
+    }
+
+    table.dataTable th {
+        /*color: black !important;*/
+        background-color: #203647 !important;
+        color: white !important;
+    }
+
+    .tableclass {
+        background-color: rgb(42,43,74) !important;
+        /*color: black !important;*/
+        font-size: 11px;
+    }
+
+    .table thead tr {
+        font-size: 11px;
+    }
+
+    div.dataTables_info {
+        color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    table.has-columns-hidden > tbody > tr.row-detail > td {
+        background-color: rgb(243,113,1) !important;
+    }
+
+
+    table.dataTable tr th {
+        border: 1px solid white;
+    }
+
+    table.dataTable tr td {
+        border: 1px solid #a8a6a6;
+        white-space: nowrap;
+    }
+
+    table.dataTable tr.even {
+        background-color: #E2E4FF;
+    }
+
+    table.dataTable tr.odd {
+        background-color: white;
+    }
+</style>
+@model POS.Models.clsInvoice
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="SaleListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Invoices List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="SaleListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="SaleHoldListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Sale Invoices List (On Hold)</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="SaleHoldListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="DocumentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Attach Documents</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="documentsDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="ItemStockListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Item Stock List (Warehouse Base) </h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="itemStockListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Invoice </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("InsertUpdateBill", "Bill", FormMethod.Post, new { id = "SaleForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                <input type="hidden" id="DefaultWarehouseId" value="@User.WarehouseId" />
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <input type="hidden" id="DisableOrNot" value="0" />
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (User.Save == 1)
+                                        {
+                                            <td style="width: 42%; padding-bottom: 5px; padding-left: 3px;text-align: right;" id="addTd">
+                                                <a title="Add New Sale Invoice" id="btnAddSale" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/plus2.png" style="width: 45px; height: 45px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveSale" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintSale" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="listTd">
+                                                <a title="Sale Invoices List" id="btnSaleList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#SaleListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshSale" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 37%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitSale" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: right; " id="holdTdDummy" hidden>
+                                                <button title="Hold" class="btnUpSave" id="btnHold" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Hold2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; text-align: right;" id="holdListTd" hidden>
+                                                <a title="Hold List" id="btnSaleHoldList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#SaleListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/HoldList.png" style="width: 44px; height: 44px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveSale" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintSale" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 41%; padding-bottom: 5px;text-align: right;" id="listTd">
+                                                <a title="Sale Invoices List" id="btnSaleList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#SaleHoldListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshSale" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 41%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitSale" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: right; " id="holdTdDummy" hidden>
+                                                <button title="Hold" class="btnUpSave" id="btnHold" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Hold2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; text-align: right;" id="holdListTd" hidden>
+                                                <a title="Hold List" id="btnSaleHoldList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#SaleListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/HoldList.png" style="width: 44px; height: 44px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                        }
+                                    </tr>
+                                </table>
+                                <div style="margin-top: 10px; margin-bottom: 10px; border: 2px solid #C0C0C0;border-radius:5px; padding: 15px;" class="smart-form">
+                                    <div class="row" style="margin-bottom:10px;padding-right:14px">
+                                        <div class="col-lg-2">
+                                        </div>
+                                        <div class="col-lg-10">
+                                            <div class="input-group input-group-sm col-lg-8 col-md-5 col-sm-6 col-xs-12 pull-right">
+                                                <div class="input-group-btn">
+                                                    <button id="btnSearchCategoryChequeDeposit" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Job No.</button>
+                                                    <ul class="dropdown-menu" id="ulSearchCategoryChequeDeposit" style="cursor:pointer">
+                                                        <li data-value="Job No.">
+                                                            <a class="ListItem">Job No.</a>
+                                                        </li>
+                                                        <li data-value="Pickup/Dropoff">
+                                                            <a class="ListItem">Pickup/Dropoff</a>
+                                                        </li>
+                                                        <li data-value="Supplier/Driver">
+                                                            <a class="ListItem">Supplier/Driver</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <input class="form-control" type="text" placeholder="Search again..." name="txtSearch" id="txtSearchChequeDeposit" style="height:18px;">
+                                                <div class="input-group-btn">
+                                                    <button type="button" id="btnSearchChequeDeposit" class="btn btn-default" style="margin-left:20px">
+                                                        &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-search fa-lg"></i>&nbsp;&nbsp;&nbsp;
+                                                    </button>
+                                                    @*<button type="button" id="btnRefreshChequeDeposit" class="btn btn-default">
+                                                            &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-refresh fa-lg"></i>&nbsp;&nbsp;&nbsp;
+                                                        </button>*@
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <table id="myTableChequeDeposit" class="table" width="100%;" style="padding-bottom:10px">
+                                        <thead>
+                                            <tr>
+                                                <th data-hide=""></th>
+                                                <th data-class=""> Job No.</th>
+                                                <th data-hide="">Supplier/Driver</th>
+                                                <th data-hide=""> Date</th>
+                                                <th data-hide=""> Service<br />Provider</th>
+                                                <th data-hide=""> SP Ref #</th>
+                                                <th data-hide=""> Pickup</th>
+                                                <th data-hide=""> Dropoff</th>
+                                                <th data-hide=""> Amount</th>
+                                                <th data-hide=""> Cab Type</th>
+                                                <th data-hide=""> Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <h3 class="heading-1" style="margin-top: 50px; margin-bottom: 20px; color: #03386C;font-weight:bold "><span>Invoice</span></h3>
+                                <div class="row" style="padding-left: 10px; padding-right: 10px; ">
+                                    <div class="col-md-12" id="" style="padding-top: 5px; padding-bottom: 10px;">
+                                        <div class="col-md-5" id="invoiceNoSection" hidden>
+                                            <input type="hidden" id="IsNewOrEdit" value="" />
+                                            <input type="hidden" id="HiddenTr" value="0" />
+                                            <input type="hidden" id="SaleInvoiceNo" value="0" />
+                                            <input type="hidden" id="LineNetRateHidden" value="0" />
+                                            <input type="hidden" id="RateHidden" value="0" />
+                                            <input type="hidden" id="ItemName" value="" />
+                                            <input type="hidden" id="Tax1Hidden" value="0" />
+                                            <input type="hidden" id="Tax2Hidden" value="0" />
+                                            <input type="hidden" id="SaleDiscountTypeHidden" value="%" />
+                                            <input type="hidden" id="SaleDiscountAmountHidden" value="0" />
+                                            <input type="hidden" id="IsEdit" value="0" />
+                                            <input type="hidden" id="HiddenStock" value="0" />
+                                            <input type="hidden" id="MainDetailCode" value="0" />
+                                            <input type="hidden" id="HiddenComputerNo" value="0" />
+                                            <input type="hidden" id="HiddenCompositeKey" value="0" />
+                                            <input type="hidden" id="HiddenInvoiceType" value="0" />
+                                            <input type="hidden" name="BiltyPending" id="BiltyPending" />
+                                            <label class="" style="font-size:16px;">
+                                                Invoice No:
+                                                <span class="badge bg-color-blue" id="SaleInvoiceNoSpan" style="font-size:16px;border-radius:4px;padding:5px;"></span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-2" hidden>
+                                            <label class="checkbox" style="">
+                                                <input id="ShowBalance" type="checkbox" name="ShowBalance" checked><i></i>
+                                                <span style="font-size:13px">Show Balance</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3 PreviousBalance" hidden>
+                                            <label class="pull-right" hidden>
+                                                <span style="font-size: 16px" id="PreviousBalanceLbl">Previous Balance:</span>
+                                                <span style="font-size: 17px; margin-left: 8px; color: green;" id="PreviousBalance">0.00</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-left: 10px; padding-right: 10px; ">
+                                    <div class="col-md-12" style="">
+                                        <div class="col-md-5">
+                                            <div style="padding: 3px">
+                                                <label>Supplier/Driver</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-user"></i>
+                                                    <input type="text" name="CustomerName" id="CustomerName" placeholder="Customer Name" autocomplete="off" disabled />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px">
+                                                <label>Date</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-calendar"></i>
+                                                    <input type="date" name="Date" id="Date" min="@ViewBag.FromDate" max="@ViewBag.ToDate" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div style="padding: 3px; ">
+                                                <label>Job No.</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-hashtag"></i>
+                                                    <input type="text" name="ReferenceNo" id="ReferenceNo" placeholder="Job No." disabled autocomplete="off" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div style="padding: 3px; ">
+                                                <label>Booking#</label>
+                                                <label class="input">
+                                                    @*<i class="icon-prepend fa fa-money-bill-alt"></i>*@
+                                                    <input type="text" name="CreditDays" id="CreditDays" class="CreditDays" disabled placeholder="" autocomplete="off" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-left: 12px; padding-right: 12px; ">
+                                    <div class="col-md-12" style="">
+                                        <div style="padding: 3px; ">
+                                            <label>Remarks</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" name="Remarks" id="Remarks" class="Remarks" placeholder="Remarks" autocomplete="off" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                
+                                <div class="row" style="padding-left: 15px; padding-right: 15px;">
+                                    <div class="col-md-12">
+                                        <div class="col-md-2 GrossTotal">
+                                            <div style="padding: 3px">
+                                                <center>
+                                                    <label style="text-align: center;">
+                                                        <span style="font-size: 14px" id="GrossTotalLbl">Job Amount</span>
+                                                        <br />
+                                                        <span style="font-size: 15px; margin-left: 8px; color: green;" id="GrossTotal">0.00</span>
+                                                    </label>
+                                                </center>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div style="padding: 3px">
+                                                <label>Commission Type</label>
+                                                <label class="select">
+                                                    <i class="append fa fa-caret-down"></i>
+                                                    <select id="DiscountType" name="DiscountType">
+                                                        <option value="%">%</option>
+                                                        <option value="Rs">Rs</option>
+                                                    </select>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div style="padding: 3px">
+                                                <label>Commission</label>
+                                                <label class="input">
+                                                    <input type="text" name="DiscountAmount" id="DiscountAmount" placeholder="Commission" autocomplete="off" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div style="padding: 3px">
+                                                <label>Net Commission</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                                    <input type="text" name="NetDiscount" id="NetDiscount" placeholder="Net Commission" disabled autocomplete="off" />
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div style="padding: 3px">
+                                                <label>Adjustment</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                                    <input type="text" name="Freight" id="Freight" placeholder="Adjustment" autocomplete="off" />
+                                                </label>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-2" hidden>
+                                            <div style="padding: 3px">
+                                                <label>Overhead</label>
+                                                <label class="input">
+                                                    <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                                    <input type="text" name="Overhead" id="Overhead" placeholder="Overhead" autocomplete="off" />
+                                                </label>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-2 NetAmount">
+                                            <div style="padding: 3px">
+                                                <center>
+                                                    <label style="text-align: center;">
+                                                        <span style="font-size: 14px" id="NetAmountLbl">Net Amount</span>
+                                                        <br />
+                                                        <span style="font-size: 15px; margin-left: 8px; color: green;" id="NetAmount">0.00</span>
+                                                    </label>
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 5px; padding-left: 15px; padding-right: 15px;">
+                                    <div class="col-md-4">
+                                        <div style="padding: 3px; ">
+                                            <label>Cash Received from Customer</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                                <input type="text" name="PaidAmount" id="PaidAmount" placeholder="Cash Received" autocomplete="off" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div style="padding: 3px; ">
+                                            <label>Balance Amount</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                                <input type="text" name="BalanceAmount" id="BalanceAmount" placeholder="Balance Amount" disabled autocomplete="off" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div style="padding: 3px; ">
+                                            <label>Cash Received Remarks</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" name="PaidRemarks" id="PaidRemarks" placeholder="Cash Received Remarks" autocomplete="off" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-bottom: 5px; padding-left: 15px; padding-right: 15px;" hidden>
+                                    <div class="col-md-12">
+                                        <div style="padding: 3px; ">
+                                            <label class="checkbox pull-left" style="">
+                                                <input id="Paid" type="checkbox" name="Paid"><i></i>
+                                                <span style="font-size:11px">Received</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-bottom: 5px; padding-left: 15px; padding-right: 15px;" id="PaidRow" hidden>
+                                    <div class="col-md-12">
+                                        <div class="col-md-4">
+                                            <div style="padding: 3px; ">
+                                                <label>Received In</label>
+                                                <label class="select">
+                                                    <i class="append fa fa-caret-down"></i>
+                                                    @Html.DropDownListFor(model => model.DetailCode, ViewBag.ReceivedDetailCode as SelectList, new { @style = "width:100%", @id = "ReceivedDetailCode" })
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                    </div>
+                                </div>
+
+                                <h1 class="heading-1" style="margin-top: 10px; margin-bottom: 20px; color: #03386C;font-weight:bold " hidden><span>Extra Information</span></h1>
+                                <div class="panel" style=" border-bottom: 1px solid #BDBDBD; border-left: 1px solid #BDBDBD; border-right: 1px solid #BDBDBD; background-color: #F7F7F7;" hidden>
+                                    <div class="panel-heading" style="height:40px;border:none">
+                                        <div class="row" style="">
+                                            <div class="col col-md-12">
+                                                <a href="#" id="togglePannel">
+                                                    <div class="alert alert-warning" style="height: 20px; background-color: #D9EDF7; border-bottom: 1px solid #BDBDBD; border-left: 1px solid #BDBDBD; border-top: 1px solid #BDBDBD; ">
+                                                        <span class="pull-left" style="color: #5094BB"><i class="fa fa-info-circle"></i> Add Extra Information</span>
+                                                        <span class="pull-right" style="color: #5094BB"><i class="fa fa-plus" id="iconToggle"></i></span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel-body" id="ExtraInformation" hidden>
+                                        <div style="padding: 15px;">
+                                            <div class="row" style="padding-left: 15px; padding-right: 15px;">
+                                                <div class="col-md-12">
+                                                    <div class="col-md-4">
+                                                        <div style="padding: 3px">
+                                                            <label>Transporter</label>
+                                                            <label class="input">
+                                                                <input id="ExtraInfoOrNot" value="0" type="hidden" />
+                                                                <i class="icon-prepend fa fa-user"></i>
+                                                                <input type="text" name="Transporter" id="Transporter" placeholder="Transporter" autocomplete="off" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div style="padding: 3px">
+                                                            <label>Bilty No.</label>
+                                                            <label class="input">
+                                                                <i class="icon-prepend fa fa-info"></i>
+                                                                <input type="text" name="BiltyNo" id="BiltyNo" placeholder="Bilty No." autocomplete="off" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div style="padding: 3px">
+                                                            <label>Bilty Nug</label>
+                                                            <label class="input">
+                                                                <i class="icon-prepend fa fa-info"></i>
+                                                                <input type="text" name="Packing" id="Packing" placeholder="Bilty Nug" autocomplete="off" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div style="padding: 3px">
+                                                            <label>Bilty Date</label>
+                                                            <label class="input">
+                                                                <i class="icon-prepend fa fa-calendar"></i>
+                                                                <input type="date" name="BiltyDate" id="BiltyDate" />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" hidden>
+                                                        <div style="padding: 3px">
+                                                            <label>Salesman</label>
+                                                            <label class="select">
+                                                                <i class="append fa fa-caret-down"></i>
+                                                                @Html.DropDownListFor(model => model.SalesmanID, ViewBag.Salesman as SelectList, new { @style = "width:100%", @id = "SalesmanID" })
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @*<div class="row" hidden>
+                                                <div class="col col-2">
+                                                </div>
+                                                <div class="col col-2">
+                                                </div>
+                                                <div class="col col-2">
+                                                </div>
+                                                <div class="col col-3">
+                                                </div>
+                                                <div class="col col-3">
+                                                    <label class="checkbox pull-right" style="margin-top:10px">
+                                                        <input id="BiltyPending" type="checkbox" name="BiltyPending"><i></i>
+                                                        <span style="font-size:11px">Bilty Pending</span>
+                                                    </label>
+                                                </div>
+                                            </div>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 DeleteSection" style="padding-bottom: 15px;" hidden>
+                                    <section class="col col-md-6"></section>
+                                    <section class="col col-md-6 deleteRow">
+                                        <table class="pull-right footer-nav" style="">
+                                            <tr>
+                                                <td></td>
+                                                <td>
+                                                    <a title="Delete Record" id="btnDeleteSale" href="javascript:void(0)" class="btn btn-danger" style="width:75px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                                        Delete
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </section>
+                                    <section class="col col-md-3"></section>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+        $(document).keypress(function (event) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                event.preventDefault();
+            }
+        });
+       
+        $('#Paid').click(function () {
+            if ($(this).is(':checked')) {
+                $('#PaidRow').removeAttr("hidden");
+            }
+            else {
+                $('#PaidRow').attr("hidden", "hidden");
+                $('#ReceivedDetailCode').val(null).trigger('change');
+                $('#PaidAmount').val('');
+                $('#PaidRemarks').val('');
+                getPaidBalanceAmount();
+            }
+        })
+        
+        $('#togglePannel').click(function () {
+            //if ($('#DisableOrNot').val() == 1) {
+
+            //    if ($('#iconToggle').hasClass('fa-plus')) {
+            //        $('#iconToggle').removeClass('fa-plus');
+            //        $('#iconToggle').addClass('fa-minus');
+            //        $('#ExtraInfoOrNot').val(1);
+            //        $('#ExtraInformation').slideDown().removeAttr("hidden");
+            //    }
+            //    else {
+            //        $('#iconToggle').removeClass('fa-minus');
+            //        $('#iconToggle').addClass('fa-plus');
+            //        $('#ExtraInfoOrNot').val(0);
+            //        $('#Transporter').val('');
+            //        $('#BiltyNo').val('');
+            //        $('#Packing').val('');
+            //        $('#SalesmanID').val(null).trigger('change');
+            //        //$('#BiltyPending').prop('checked', false);
+            //        $('#ExtraInformation').slideUp(function () { $('#ExtraInformation') });
+            //    }
+            //}
+            return false;
+        })
+        
+        function ClearFormFields() {
+            $('#HiddenComputerNo').val('0');
+            $('#HiddenCompositeKey').val('0');
+            $('#CashCustomerNameLbl').hide();
+            $('.PreviousBalance').attr("hidden", "hidden");
+            $('#IsEdit').val(0);
+
+            $('#PreviousBalance').html('0.00');
+            $('#GrossTotal').html('0.00');
+            $('#NetAmount').html('0.00');
+            $('#SaleDiscountTypeHidden').val("%");
+            $('#SaleDiscountAmountHidden').val(0);
+            $('#DisableOrNot').val(0);//
+            $('#MainDetailCode').val(0);
+            $('#CustomerName').val('');
+            $('#ReceivedDetailCode').select2().enable(false);
+            $('#ReceivedDetailCode').val(null).trigger('change');
+            $('#SalesmanID').select2().enable(false);
+            $('#SalesmanID').val(null).trigger('change');
+           
+            $('#Date').prop("disabled", true);
+            //$('#ReferenceNo').prop("disabled", true);
+            $('#CreditDays').prop("disabled", true);
+            $('#DiscountType').prop("disabled", true);
+            $('#DiscountAmount').prop("disabled", true);
+            $('#Overhead').prop("disabled", true);
+            $('#Freight').prop("disabled", true);
+            $('#Remarks').prop("disabled", true);
+            $('#Paid').prop("disabled", true);
+            $('#ShowBalance').prop("disabled", true);
+
+            $('#Transporter').prop("disabled", true);
+            $('#BiltyNo').prop("disabled", true);
+            $('#BiltyDate').prop("disabled", true);
+            //$('#BiltyPending').prop("disabled", true);
+            $('#Packing').prop("disabled", true);
+
+            GetTodayDate();
+            $('#ReferenceNo').val('');
+            $('#CreditDays').val('');
+            $('#DiscountAmount').val('');
+            $('#NetDiscount').val('');
+            $('#Overhead').val('');
+            $('#Freight').val('');
+            $('#Remarks').val('');
+            $('#Paid').prop("checked", false);
+            $('#PaidRow').attr("hidden", "hidden");
+
+            $('#PaidAmount').val('');
+            $('#PaidRemarks').val('');
+            $('#BalanceAmount').val('');
+
+            $('#ExtraInfoOrNot').val(0);
+            $('#Transporter').val('');
+            $('#BiltyNo').val('');
+            $('#Packing').val('');
+            $('#BiltyPending').val('');
+            $('#ExtraInformation').attr("hidden", "hidden");
+            
+            $('#btnSaveSale').prop('disabled', true);
+            $('#btnHold').prop('disabled', true);
+            $('#btnSaveAndPrintSale').prop('disabled', true);
+            $('#addTd').removeAttr("hidden");
+            $('#saveTd').attr("hidden", "hidden");
+            $('#holdTd').attr("hidden", "hidden");
+            $('#documentTd').attr("hidden", "hidden");
+            $('#saveAndPrintTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#invoiceNoSection').attr("hidden", "hidden");
+            $('#IsNewOrEdit').val("New");
+            $('#SaleInvoiceNo').val(0);
+            $('#SaleInvoiceNoSpan').html('0');
+            if ($('#CanSave').val() == 0) {
+                $('#listTd').css({ 'width': '44%', 'text-align': 'right' });
+                $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+                $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            }
+            $('.DeleteSection').attr("hidden", "hidden");
+        }
+        $('#btnAddSale').click(function () {
+            EnableFormFields();
+        })
+        function EnableFormFields() {
+            $('#HiddenComputerNo').val('0');
+            $('#HiddenCompositeKey').val('0');
+            $('#IsEdit').val(0);
+           
+            $('.PreviousBalance').removeAttr("hidden");
+            $('#GrossTotal').html('0.00');
+            $('#NetAmount').html('0.00');
+            $('#PreviousBalance').html('0.00');
+
+            $('#DisableOrNot').val(1);
+            $('#MainDetailCode').val(0);
+            $('#CustomerName').val('');
+            $('#ReceivedDetailCode').select2().enable(true);
+            $('#ReceivedDetailCode').val(null).trigger('change');
+            $('#SalesmanID').select2().enable(true);
+            $('#SalesmanID').val(null).trigger('change');
+            
+            $('#SaleDiscountTypeHidden').val("%");
+            $('#SaleDiscountAmountHidden').val(0);
+            $('#Date').prop("disabled", false);
+            //$('#ReferenceNo').prop("disabled", false);
+            //$('#CreditDays').prop("disabled", false);
+            $('#DiscountType').prop("disabled", false);
+            $('#DiscountAmount').prop("disabled", false);
+            $('#Overhead').prop("disabled", false);
+            $('#Freight').prop("disabled", false);
+            $('#Remarks').prop("disabled", false);
+            $('#Paid').prop("disabled", false);
+            $('#ShowBalance').prop("disabled", false);
+            $('#Transporter').prop("disabled", false);
+            $('#BiltyNo').prop("disabled", false);
+            $('#BiltyDate').prop("disabled", false);
+            //$('#BiltyPending').prop("disabled", false);
+            $('#Packing').prop("disabled", false);
+            $('#ExtraInformation').attr("hidden", "hidden");
+            
+            $('#documentTd').attr("hidden", "hidden");
+           
+            GetTodayDate();
+            $('#ReferenceNo').val('');
+            $('#CreditDays').val('');
+            $('#DiscountAmount').val('');
+            $('#NetDiscount').val('');
+            $('#Overhead').val('');
+            $('#Freight').val('');
+            $('#Remarks').val('');
+            $('#Paid').prop("checked", false);
+            $('#PaidRow').attr("hidden", "hidden");
+            $('#PaidAmount').val('');
+            $('#PaidRemarks').val('');
+            $('#BalanceAmount').val('');
+
+            $('#ExtraInfoOrNot').val(0);
+            $('#Transporter').val('');
+            $('#BiltyNo').val('');
+            $('#Packing').val('');
+            $('#BiltyPending').val('');
+
+            
+            $('#btnSaveSale').prop('disabled', false);
+            $('#btnHold').prop('disabled', false);
+            $('#btnSaveAndPrintSale').prop('disabled', false);
+            $('#saveTd').removeAttr("hidden");
+            $('#holdTd').removeAttr("hidden");
+            $('#saveAndPrintTd').removeAttr("hidden");
+            //$('#documentTd').removeAttr("hidden");
+            $('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '44%', 'text-align': 'right' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'right' });
+            $.ajax({
+                type: "POST",
+                url: "/Sale/getMaxCodeForBill/",
+                dataType: 'json',
+                success: function (response) {
+                    $('#invoiceNoSection').removeAttr("hidden");
+                    $('#IsNewOrEdit').val("New");
+                    $('#SaleInvoiceNo').val(response);
+                    $('#SaleInvoiceNoSpan').html(response);
+                }
+            })
+            $('.deleteRow').attr("hidden", "hidden");
+            $('.DeleteSection').attr("hidden", "hidden");
+        }
+        
+
+        $('#DiscountType').change(function () {
+            getMainNetAmount();
+        })
+
+        $('#DiscountAmount').keyup(function () {
+            getMainNetAmount();
+        })
+        $('#Overhead').keyup(function () {
+            getMainNetAmount();
+        })
+        $('#Freight').keyup(function () {
+            getMainNetAmount();
+        })
+        function getMainNetAmount() {
+            var grossTotal = parseFloat(ReplaceCommas($('#GrossTotal').html()));
+            var netAmount = 0;
+            var discountType = $('#DiscountType').val();
+            var discountAmount = 0;
+            var netDiscount = 0;
+            if (discountType.trim() != '') {
+                discountAmount = $('#DiscountAmount').val();
+                if (discountAmount == '' || discountAmount == null || isNaN(discountAmount)) {
+                    discountAmount = 0;
+                }
+            }
+            if (discountType.trim() == '%') {
+                netDiscount = parseFloat(discountAmount) / 100 * grossTotal;
+                netDiscount = parseFloat(netDiscount.toFixed(2));
+            }
+            else if (discountType.trim() == 'Rs') {
+                netDiscount = parseFloat(discountAmount).toFixed(2);
+            }
+            $('#NetDiscount').val(netDiscount);
+            var overHead = $('#Overhead').val();
+            var freight = $('#Freight').val();
+            if (overHead == '' || overHead == null || isNaN(overHead)) {
+                overHead = 0;
+            }
+            if (freight == '' || freight == null || isNaN(freight)) {
+                freight = 0;
+            }
+            netAmount = grossTotal - netDiscount + parseFloat(overHead) + parseFloat(freight);
+            netAmount = netAmount.toFixed(2);
+            $('#NetAmount').html(ReplaceNumberWithCommas(netAmount));
+            getPaidBalanceAmount();
+        }
+
+        $('#PaidAmount').keyup(function () {
+            getPaidBalanceAmount();
+        })
+        function getPaidBalanceAmount() {
+            var netAmount = parseFloat(ReplaceCommas($('#NetAmount').html()));
+            var balance = 0;
+            var paidAmount = $('#PaidAmount').val();
+            if (paidAmount == '' || paidAmount == null || isNaN(paidAmount)) {
+                paidAmount = 0;
+            }
+            balance = netAmount - parseFloat(paidAmount);
+            //if (balance < 0) {
+            //    balance = 0;
+            //}
+            $('#BalanceAmount').val(balance.toFixed(2));
+        }
+        
+        function getPreviousBalance(detailCode) {
+            var code = $('#SaleInvoiceNo').val();
+            var voucherNo = code;
+            $.ajax({
+                type: "POST",
+                url: "/Sale/getCreditDaysAndPreviousBalance/",
+                dataType: 'json',
+                data: { 'detailCode': detailCode, 'code': code, 'voucherNo': voucherNo },
+                success: function (response) {
+                    $('#PreviousBalance').html(ReplaceNumberWithCommas(parseFloat(response.previousBalance).toFixed(2)));
+                }
+            })
+        }
+        
+
+        $(document).ready(function () {
+
+            
+            $('#ReceivedDetailCode').select2();
+            $('#SalesmanID').select2();
+            $('#WarehouseID').select2();
+
+            
+
+            $('#SaleForm').validate({
+                ignore: [],
+                // Rules for form validation
+                rules: {
+                    Date: {
+                        required: true
+                    },
+                    //DetailCode: {
+                    //    required: true
+                    //},
+                },
+
+                // Messages for form validation
+                messages: {
+                    Date: {
+                        required: 'Date is required.'
+                    },
+                    //DetailCode: {
+                    //    required: 'Supplier/Driver is required.'
+                    //},
+                },
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+            var responsiveHelper_dt_basic1123 = undefined;
+            var responsiveHelper_datatable_fixed_column1123 = undefined;
+            var responsiveHelper_datatable_col_reorder1123 = undefined;
+            var responsiveHelper_datatable_tabletools1123 = undefined;
+
+            var breakpointDefinition1123 = {
+                desktop: 1920,
+                tablet: 924,
+                phone: 380
+            };
+
+            $('#myTableChequeDeposit').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    if (!responsiveHelper_dt_basic1123) {
+                        responsiveHelper_dt_basic1123 = new ResponsiveDatatablesHelper($('#myTableChequeDeposit'), breakpointDefinition1123);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic1123.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic1123.respond();
+                },
+                "bLengthChange": false,
+                "processing": true,
+                "serverSide": true,
+                //"scrollX": false,
+                "scrollX": 800,
+                "scrollY": 250,
+                "ajax": {
+                    "url": "/Bill/GetAllDoneJobs",
+                    "type": "POST",
+                    "datatype": "json",
+                    error: function (xhr, httpStatusMessage, CustomerrorMessage) {
+                        if (xhr.status === 410) {
+                            window.location.href = CustomerrorMessage;
+                        }
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "RecordID", "class": "Acenter", "width": "20px", "orderable": false, "render": function (data) {
+                            return '<a href="javascript:void(0);" class="btn btn-primary selectBtn2" data-value="' + data + '"  title="Select" style=" text-align: center; height: 25px;width:25px; font-size: 12px;line-height:0px;color:#fff !important;background-color:#428bca !important;border-color:#357ebd !important;border-radius:2px "><i class="fa fa-edit" style="margin-left:2px;margin-top:4px"></i></a>';
+                        }
+                    },
+                    { "data": "JobNo", "name": "JobNo", "orderable": true, "autoWidth": true, "class": "Acenter" },
+                        { "data": "DetailName", "name": "DetailName", "autoWidth": true, "orderable": true },
+                         {
+                             "data": "PickupDateTime", "orderable": false, "class": "Acenter", 'render': function (date) {
+                                 if (date != null) {
+                                     var date = new Date(parseInt(date.substr(6)));
+                                     var day = date.getDate();
+                                     var month = date.getMonth() + 1;
+                                     if (parseFloat(day) < 10) {
+                                         day = "0" + day;
+                                     }
+                                     if (parseFloat(month) < 10) {
+                                         month = "0" + month;
+                                     }
+                                     return day + "-" + month + "-" + date.getFullYear();
+                                 }
+                                 else {
+                                     return "";
+                                 }
+                             }
+                         },
+
+                         { "data": "ServierProviderName", "name": "ServierProviderName", "orderable": true, "autoWidth": true },
+                         { "data": "SPRefNo", "name": "SPRefNo", "orderable": true, "autoWidth": true },
+                         { "data": "Startpoint", "name": "Startpoint", "orderable": true, "autoWidth": true },
+                         { "data": "Endposition", "name": "Endposition", "orderable": true, "autoWidth": true },
+                         { "data": "SuppBidAmount", "name": "SuppBidAmount", "orderable": true, "autoWidth": true, "class": "Amount" },
+                         { "data": "CabTypeName", "name": "CabTypeName", "orderable": true, "autoWidth": true },
+                         { "data": "AdditionalInfo", "name": "AdditionalInfo", "orderable": true, "autoWidth": true },
+
+                ]
+            })
+            oTable = $('#myTableChequeDeposit').DataTable();
+            EnableFormFields();
+        })
+        $(document).on('click', '.selectBtn2', function (e) {
+            e.preventDefault();
+            var infoId = $(this).attr("data-value");
+            $.ajax({
+                type: "POST",
+                url: "/Bill/BookingDetail/" + infoId,
+                dataType: 'json',
+                success: function (response) {
+                    $('#HiddenInvoiceType').val(0);
+                    var detailCode = response.data.DetailCode;
+                    $('#MainDetailCode').val(response.data.DetailCode);
+                    $('#Date').val(getDateNew(response.data.PickupDateTime));
+                    $('#CustomerName').val(response.data.DetailName);
+                    $('#ReferenceNo').val(response.data.JobNo);
+                    $('#CreditDays').val(response.data.BookingId);
+                    $('#BiltyPending').val(response.data.RecordID);
+                    $('#GrossTotal').html(ReplaceNumberWithCommas(parseFloat(response.data.SuppBidAmount).toFixed(2)));
+                    $('#Freight').val();
+                    getPreviousBalance(detailCode);
+                    getMainNetAmount();
+                }
+            })
+        })
+        $('#btnSearchChequeDeposit').click(function () {
+            SearchItem2();
+        });
+        $('#txtSearchChequeDeposit').on('keypress', function (event) {
+            var BElement = $("#btnSearchCategoryChequeDeposit");
+            if (BElement.html().trim() == 'Cheque No.') {
+                NumberPostive(event, this);
+            }
+            if (event.keyCode == 13) {
+                SearchItem2();
+            }
+        });
+
+        function SearchItem2() {
+            var BElement = $("#btnSearchCategoryChequeDeposit");
+            if (BElement.html().trim() == 'Job No.') {
+                oTable.columns(0).search($('#txtSearchChequeDeposit').val().trim()).draw();
+            }
+            else if (BElement.html().trim() == 'Pickup/Dropoff') {
+                oTable.columns(1).search($('#txtSearchChequeDeposit').val().trim()).draw();
+            }
+            else if (BElement.html().trim() == 'Supplier/Driver') {
+                oTable.columns(2).search($('#txtSearchChequeDeposit').val().trim()).draw();
+            }
+            else {
+                alert("Error! try again.");
+            }
+        }
+        //$('#btnRefreshChequeDeposit').click(function () {
+        //    oTable.ajax.reload(null,false);
+        //});
+        $("#ulSearchCategoryChequeDeposit").on("click", "a", function (e) {
+            e.preventDefault();
+            var $this = $(this).parent();
+            $this.addClass("select").siblings().removeClass("select");
+            $("#btnSearchCategoryChequeDeposit").html($this.data("value"));
+            if ($("#btnSearchCategoryChequeDeposit").html() == 'Cheque No.') {
+                $('#txtSearchChequeDeposit').val('');
+            }
+        })
+        $('#btnRefreshSale').click(function () {
+            location.reload();
+        })
+        $('#btnSaleList').click(function () {
+            $('#SaleListDiv').html('');
+            $('#SaleListDiv').load('@Url.Action("billlist", "bill")')
+        })
+        
+        $('#btnAttachDocument').click(function () {
+            var SaleInvocieNo = $('#SaleInvoiceNo').val();
+            $('#documentsDiv').load('@Url.Action("attachdocument", "documents")?type=Invoice&id=' + SaleInvocieNo + '');
+        })
+        
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        function getAllData() {
+            var arrayData = [];
+            
+                var isNewOrEdit = $('#IsNewOrEdit').val();
+                var invoiceNo = $('#SaleInvoiceNo').val();
+                var CustomerCode = $('#MainDetailCode').val();
+                var date = $('#Date').val();
+                var cashCustomerName = $("#CustomerName").val();
+                var invoiceType = $('#HiddenInvoiceType').val();
+                var showBalance = $('#ShowBalance').is(':checked');
+                var showBalanceInt = 0;
+                if (showBalance == true) {
+                    showBalanceInt = 1;
+                }
+                var referenceNo = $('#ReferenceNo').val();
+                var creditDays = $('#CreditDays').val();
+                var discountType = $('#DiscountType').val();
+                var discountAmount = $('#DiscountAmount').val();
+                var netDiscount = $('#NetDiscount').val();
+                var overhead = $('#Overhead').val();
+                var freight = $('#Freight').val();
+                var remarks = $('#Remarks').val();
+                var paid = $('#Paid').is(':checked');
+                var paidFromCode = '';
+                var paidAmount = 0;
+                var paidRemarks = '';
+                var balanceAmount = $('#BalanceAmount').val();
+                var paidInt = 0;
+                //if (paid == true) {
+                    paidInt = 1;
+                    paidFromCode = 0; //$('#ReceivedDetailCode').val();
+                    paidAmount = $('#PaidAmount').val();
+                    paidRemarks = $('#PaidRemarks').val();
+                //}
+                //else {
+                //    paidInt = 0;
+                //}
+
+                var extraOrNot = 1 ; //$('#ExtraInfoOrNot').val();
+                var transporter = '';
+                var biltyNo = '';
+                var packing = '';
+                var biltyDate = null;
+                var biltyPending = $('#BiltyPending').val();
+                var SalesmanID = null;
+                //if ($('#ExtraInfoOrNot').val() == 1) {
+                    transporter = $('#Transporter').val();
+                    biltyNo = $('#BiltyNo').val();
+                    packing = $('#Packing').val();
+                    biltyDate = $('#BiltyDate').val();
+                    SalesmanID = $('#SalesmanID').val();
+                    
+                //}
+                var previousBalance = ReplaceCommas($('#PreviousBalance').html());
+                var grossTotal = ReplaceCommas($('#GrossTotal').html());
+                var netAmount = ReplaceCommas($('#NetAmount').html());
+
+                
+                var alldata = {
+                    'IsNewOrEdit': isNewOrEdit,
+                    'ComputerNo': invoiceNo,
+                    'DetailCode': CustomerCode,
+                    'RecordDate': date,
+                    'RefrenceNo': referenceNo,
+                    'CreditDays': creditDays,
+                    'DiscountType': discountType,
+                    'Discount': discountAmount,
+                    'NetDiscount': netDiscount,
+                    'Overhead': overhead,
+                    'Freight': freight,
+                    'Remarks': remarks,
+                    'Received': paidInt,
+                    'ReceivedDetailCode': paidFromCode,
+                    'ReceivedAmount': paidAmount,
+                    'ReceivedRemarks': paidRemarks,
+                    'BalanceAmount': balanceAmount,
+                    'ExtraOrNot': extraOrNot,
+                    'Transporter': transporter,
+                    'BiltyNo': biltyNo,
+                    'BiltyPacking': packing,
+                    'BiltyDate': biltyDate,
+                    'SalesmanID': SalesmanID,
+                    'BiltyPending': biltyPending,
+                    'PreviousBalance': previousBalance,
+                    'GrossTotal': grossTotal,
+                    'NetAmount': netAmount,
+                    'InvoiceType': invoiceType,
+                    'CashCustomerName': cashCustomerName,
+                    'ShowBalance': showBalanceInt,
+
+                    'ItemID': 0,
+                    'WarehouseID': 0,
+                    'Rate': 0,
+                    'CostRate': 0,
+                    'Qty': 0,
+                    'ItemNote': '',
+                    'LineDiscountType': '%',
+                    'LineDiscount': 0,
+                    'Tax1ID': 0,
+                    'Tax1Rate': 0,
+                    'Tax1Value': 0,
+                    'Tax2ID': 0,
+                    'Tax2Rate': 0,
+                    'Tax2Value': 0,
+                    'LineNetRate': 0,
+                    'LineGrossAmount': 0,
+                    'LineNetAmount': 0,
+                    'RefCompositKey': ''
+                }
+                arrayData.push(alldata);
+            
+            console.log(arrayData);
+            return arrayData;
+        }
+        $('#SaleForm').on('submit', function (e) {
+            if (!$("#SaleForm").valid()) {
+                return false;
+            }
+            var titleVal = $(this).find("button:focus").attr("title");
+            var print = 0;
+            var status = "Unpost";
+            if (titleVal.trim() == "Save" || titleVal.trim() == "Hold") {
+                print = 0;
+            }
+            else {
+                print = 1;
+            }
+            if (titleVal.trim() == "Hold") {
+                status = "Hold";
+            }
+            
+            var radioValue = $('#HiddenInvoiceType').val();
+            var netAmount = ReplaceCommas($('#NetAmount').html());
+            var paidAmount = $('#PaidAmount').val();
+            if (paidAmount == null || paidAmount == "") {
+                paidAmount = 0;
+            }
+            
+            $('#btnSaveSale').prop('disabled', true);
+            $('#btnHold').prop('disabled', true);
+            $('#btnSaveAndPrintSale').prop('disabled', true);
+            var invoiceDetailData = JSON.stringify(getAllData());
+            var url = $('#SaleForm')[0].action;
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'data': invoiceDetailData, 'invoiceStatus': status }),
+                success: function (data) {
+                    if (data.status == true) {
+                        if (print == 1) {
+                            window.location.href = "/Bill/Billreport/" + data.invoiceNo;
+                        }
+                        else {
+                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                ' <strong>Success! </strong>' +
+                                                'Sale Saved Succesfully.' +
+                                            '</div>');
+                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert").slideUp(500);
+                                $('.alertDiv').html('');
+                            });
+                            location.reload();
+                            //$.notify("First Level Saved Successfully.", "success");
+                            //EnableFormFields();
+                        }
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSaveSale').prop('disabled', false);
+                        $('#btnHold').prop('disabled', false);
+                        $('#btnSaveAndPrintSale').prop('disabled', false);
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        $('#btnDeleteSale').click(function () {
+            var invoiceNo = $('#SaleInvoiceNo').val();
+            DeleteSale(invoiceNo);
+        })
+        function DeleteSale(id) {
+            var a = $.confirm({
+                title: 'Delete Invoice',
+                content: 'Are you sure u want to delete this invoice?',
+                type: 'white',
+                buttons: {
+                    ok: {
+                        text: "Yes",
+                        btnClass: 'btnConfirm',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: '/Bill/DeleteBill/' + id,
+                                type: "POST",
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        location.reload();
+                                    }
+                                    else {
+                                        alert(data.message);
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-default',
+                        keys: ['esc'],
+                        action: function () {
+                            a.close();
+                        }
+                    },
+                }
+            });
+        }
+        $("#DiscountAmount").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#Overhead").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#Freight").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#PaidAmount").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+
+       
+        //$("#CreditDays").on('keypress', function (event) {
+        //    NumberPostive(event, this);
+        //});
+        //$('#CreditDays').on('input', function () {
+        //    this.value = this.value
+        //  .replace(/[^\d.]/g, '')             // numbers and decimals only
+        //  .replace(/(^[\d]{3})[\d]/g, '$1')   // not more than 6 digits at the beginning
+        //  .replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+        //});
+        $('#DiscountAmount').on('input', function () {
+            this.value = this.value
+          .replace(/[^\d.]/g, '')             // numbers and decimals only
+          .replace(/(^[\d]{6})[\d]/g, '$1')   // not more than 6 digits at the beginning
+          .replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+          .replace(/(\.[\d]{2})./g, '$1');    // not more than 2 digits after decimal
+        });
+        $('#Overhead').on('input', function () {
+            this.value = this.value
+          .replace(/[^\d.]/g, '')             // numbers and decimals only
+          .replace(/(^[\d]{6})[\d]/g, '$1')   // not more than 6 digits at the beginning
+          .replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+          .replace(/(\.[\d]{2})./g, '$1');    // not more than 2 digits after decimal
+        });
+        $('#Freight').on('input', function () {
+            this.value = this.value
+          .replace(/[^\d.]/g, '')             // numbers and decimals only
+          .replace(/(^[\d]{6})[\d]/g, '$1')   // not more than 6 digits at the beginning
+          .replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+          .replace(/(\.[\d]{2})./g, '$1');    // not more than 2 digits after decimal
+        });
+        $('#PaidAmount').on('input', function () {
+            this.value = this.value
+          .replace(/[^\d.]/g, '')             // numbers and decimals only
+          .replace(/(^[\d]{8})[\d]/g, '$1')   // not more than 6 digits at the beginning
+          .replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+          .replace(/(\.[\d]{2})./g, '$1');    // not more than 2 digits after decimal
+        });
+        
+        function NumberPostive(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 8) && (charCode != 127) && (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function NumberPostiveNegativeWithDecimal(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 127) &&
+                (charCode != 8) &&
+                (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#Date').val(today);
+            $('#BiltyDate').val(today);
+        }
+        function ReplaceCommas(yourNumber) {
+            var noCommas = yourNumber.replace(/,/g, ''),
+                asANumber = +noCommas;
+            return noCommas;
+        }
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber == undefined || yourNumber == null) {
+                return "0";
+            }
+            else if (yourNumber == "") {
+                return "0";
+            }
+            else if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+        function getDates(date) {
+            if (date == null) {
+                return null;
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (digits_count(day) == 1 || digits_count(day) == 0) {
+                    day = "0" + day;
+                }
+                if (digits_count(month) == 1 || digits_count(month) == 0) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+                var today = year + '-' + month + '-' + (day);
+                if (year == 1900) {
+                    return null;
+                }
+                else {
+                    return today;
+                }
+            }
+        }
+        function digits_count(n) {
+            var count = 0;
+            if (n > 1)
+                ++count;
+            while (n / 10 >= 1) {
+                n /= 10;
+                ++count;
+            }
+            return count;
+        }
+        function getDateNew(date) {
+            if (date == null) {
+                return null;
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (digits_countNew(day) == 1 || digits_countNew(day) == 0) {
+                    day = "0" + day;
+                }
+                if (digits_countNew(month) == 1 || digits_countNew(month) == 0) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+                var today = year + '-' + month + '-' + (day);
+                if (year == 1900) {
+                    return null;
+                }
+                else {
+                    return today;
+                }
+            }
+        }
+        function digits_countNew(n) {
+            var count = 0;
+            if (n > 1)
+                ++count;
+            while (n / 10 >= 1) {
+                n /= 10;
+                ++count;
+            }
+            return count;
+        }
+    </script>
+}
+

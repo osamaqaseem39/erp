@@ -1,0 +1,303 @@
+﻿
+@model BlocksERP.Models.clsCity
+<div class="mySelect" style="overflow: hidden;margin-top: -20px;padding: 0px">
+    @using (Html.BeginForm("InsertUpdateCity", "City", FormMethod.Post, new { area = "Loan", id = "popupForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+        <fieldset style="padding:1.25rem">
+            <div class="row">
+
+
+                <div class="col-md-12" style="margin-top:15px">
+                    <input type="hidden" id="CityId" name="CityId" value="@Model.CityId" />
+                    <input type="hidden" id="HiddenCountryId" name="HiddenCountryId" value="@Model.CountryId" />
+                    <input type="hidden" id="HiddenCountryName" name="HiddenCountryName" value="@Model.CountryName" />
+
+                    <label class="form-label">City Name (*)</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fal fa-building"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(a => a.CityName, new { @placeholder = "City Name", @class = "form-control num",autocomplete="off" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+
+
+                <div class="col-md-6" style="margin-top:15px">
+                    <table class="" style="width: 100%;">
+                        <tr>
+                            <td style="width: 80%;">
+                                <label class="form-label">Select Country (*)</label>
+                                <div class="input-group">
+                                    @Html.DropDownListFor(model => model.CountryId, Enumerable.Empty<SelectListItem>(), new {@class="num" })
+                                </div>
+
+                            </td>
+                            <td style="width: 2%;margin-left: -5px;padding-top:8.7px;">
+                                <a href="/loan/country/countryindex" target="_blank" class="btn btn-primary" style="margin-top:15px;color:#fff;padding:8px;margin-left: -4px;background-color:#aaaaaa !important;border-color:#aaaaaa !important;" title="Add New Event">
+                                    <i class="fal fa-plus" style="margin-left:2px"></i>
+                                </a>
+                            </td>
+
+                        </tr>
+
+
+                    </table>
+                </div>
+
+
+                <div class="col-md-6" style="margin-top:15px">
+                    <label class="form-label">Code # </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fal fa-hashtag"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(a => a.Code, new { @placeholder = "Code", @class = "form-control num", autocomplete = "off" })
+                    </div>
+                </div>
+
+            </div>
+
+            @if (Model != null && Model.CountryId > 0)
+            {
+                <div class="row" style="margin-top:20px">
+
+                    <section class="col col-md-12">
+                        <label class="form-label " style="margin-top: -7px;position:absolute;right:15px;">
+                            @if (Model.Status == 1)
+                            {
+                                <input id="Status" type="checkbox" name="Status" checked /><i></i>
+                            }
+                            else
+                            {
+                                <input id="Status" type="checkbox" name="Status" /><i></i>
+                            }
+                            Active
+                        </label>
+                    </section>
+                </div>
+            }
+
+
+        </fieldset>
+        <footer class="modal-footer" style="margin-top:11px;background-color:#F9F9F9;border-top:1px solid #ddd">
+            @if (Model.DeleteRoleId > 0)
+            {
+                <button type="button" class="btn btn-danger pull-left btnDeleteRecord">Delete</button>
+            }
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            @if (Model.CityId > 0)
+            {
+                if (Model.UpdateRoleId > 0)
+                {
+                    <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Update</button>
+                }
+            }
+            else
+            {
+                <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Save</button>
+            }
+        </footer>
+    }
+</div>
+@Scripts.Render("~/script/smartadmin")
+@Scripts.Render("/script/jqueryvalidator")
+<script type="text/javascript">
+
+
+
+    $(document).ready(function () {
+
+        //////////--------COUNTRY DROPDOWN----------------///////////////
+            var pageSize1 = 20;
+            var optionListUrl1 = '@Url.Action("GetCountryList", "Combolist", new { area = "" })';
+            $('#CountryId').select2({
+                ajax: {
+                    delay: 150,
+                    url: optionListUrl1,
+                    dataType: 'json',
+
+                    data: function (params) {
+                        params.page = params.page || 1;
+                        return {
+                            searchTerm: params.term,
+                            pageSize: pageSize1,
+                            pageNumber: params.page
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.Results,
+                            pagination: {
+                                more: (params.page * pageSize1) < data.Total
+                            }
+                        };
+                    }
+                },
+                placeholder: "-- Select Country--",
+                minimumInputLength: 0,
+                allowClear: true,
+                dropdownParent: $(".mySelect")
+            });
+
+
+        if ($('#CityId').val() > 0) {
+
+
+            if ($('#CountryId').find("option[value='" + $('#HiddenCountryId').val() + "']").length) {
+                $('#CountryId').val($('#HiddenCountryId').val()).trigger('change');
+            } else {
+                // Create a DOM Option and pre-select by default
+                var newOption = new Option($('#HiddenCountryName').val(), $('#HiddenCountryId').val(), true, true);
+                // Append it to the select
+                $('#CountryId').append(newOption).trigger('change');
+            }
+        }
+        else {
+
+            $('#CountryId').val(null).trigger("change");
+
+        }
+        //////////-------- COUNTRY DROPDOWN ENDS HERE ----------------///////////////
+
+        //========== VALIDATION ==========\\
+        var $checkoutForm = $('#popupForm').validate({
+
+            rules: {
+                CityName: {
+                    required: true
+                },
+                CountryId: {
+                    required: true
+                },
+            },
+            messages: {
+                CityName: {
+                    required: 'City Name is required.'
+                },
+                CountryId: {
+                    required: 'Country selection is required.'
+                },
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+                if (element.val() == '' || element.val() == null) {
+                    element.parents('td').siblings('td').find('.btn').css("margin-top", "-8px");
+                }
+            }
+        });
+    })
+    $(".num").keyup(function (event) {
+        if (event.keyCode == 13) {
+            textboxes = $(".num");
+            currentBoxNumber = textboxes.index(this);
+            if (currentBoxNumber == 2) {
+                $('#btn_Save').focus();
+                $('#btn_Save').click();
+            }
+            else {
+                nextBox = textboxes[currentBoxNumber + 1];
+                nextBox.focus();
+                nextBox.select();
+            }
+            event.preventDefault();
+            return false;
+        }
+    });
+    //========== FORM SUBMISSION ==========\\
+    $('#popupForm').on('submit', function (e) {
+        e.preventDefault();
+        if (!$("#popupForm").valid()) {
+            return false;
+        }
+        $('#btn_Save').attr('disabled', 'disabled');
+        $('#btn_Save').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+
+        var CityId = $('#CityId').val();
+        var CityName = $('#CityName').val();
+        var CountryId = $('#CountryId').val();
+        var Code = $('#Code').val();
+        var statusString = '';
+        if ($('#Status').is(":checked")) {
+            statusString = "Active";
+        }
+        else {
+            statusString = "Inactive";
+        }
+        var st =
+        {
+            CityId: CityId,
+            CityName: CityName,
+            CountryId: CountryId,
+            Code: Code,
+            StatusString: statusString,
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Loan/city/insertupdatecity/",
+            data: st,
+            dataType: 'json',
+            success: function (data) {
+
+                if ($('#CityId').val() > 0) {
+                    $('#btn_Save').html("Update");
+                }
+                else {
+                    $('#btn_Save').html("Save");
+                }
+
+                $('#btn_Save').prop('disabled', false);
+                if (data.status) {
+
+                    toastr.success("City Saved Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                    $('.close').click();
+                    oTable.ajax.reload(null, false);
+
+                }
+                else {
+                    toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                }
+            }
+        }
+        )
+    })
+
+    //========== FORM SUBMISSION ENDS HERE ==========\\
+
+    //
+
+    $(document).on("click", '.select2-selection__clear', function () {
+        $(this).parents("div").find('select').val(null).trigger("change");
+    })
+</script>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+</script>
+

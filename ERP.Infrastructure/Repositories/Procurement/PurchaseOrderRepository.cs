@@ -13,46 +13,52 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
         _context = context;
     }
 
-    public async Task<PurchaseOrder?> GetByIdAsync(Guid id)
+    public async Task<PurchaseOrder?> GetByIdAsync(Guid id, Guid tenantId)
     {
+        // Details only — do not Include Vendor (required nav → inner join drops orphans).
         return await _context.PurchaseOrders
-            .Include(po => po.Vendor)
             .Include(po => po.Details)
-            .FirstOrDefaultAsync(po => po.Id == id);
+            .FirstOrDefaultAsync(po => po.Id == id && po.TenantId == tenantId);
     }
 
-    public async Task<IEnumerable<PurchaseOrder>> GetAllAsync()
+    public async Task<IEnumerable<PurchaseOrder>> GetAllAsync(Guid tenantId)
     {
         return await _context.PurchaseOrders
-            .Include(po => po.Vendor)
             .Include(po => po.Details)
+            .Where(po => po.TenantId == tenantId)
+            .OrderByDescending(po => po.OrderDate)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PurchaseOrder>> GetByVendorAsync(Guid vendorId)
+    public async Task<IEnumerable<PurchaseOrder>> GetByVendorAsync(Guid vendorId, Guid tenantId)
     {
         return await _context.PurchaseOrders
-            .Include(po => po.Vendor)
             .Include(po => po.Details)
-            .Where(po => po.VendorId == vendorId)
+            .Where(po => po.VendorId == vendorId && po.TenantId == tenantId)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PurchaseOrder>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<PurchaseOrder>> GetByStatusAsync(string status, Guid tenantId)
     {
         return await _context.PurchaseOrders
-            .Include(po => po.Vendor)
             .Include(po => po.Details)
-            .Where(po => po.Status == status)
+            .Where(po => po.Status == status && po.TenantId == tenantId)
             .ToListAsync();
     }
 
-    public async Task<PurchaseOrder?> GetByNumberAsync(string purchaseOrderNumber)
+    public async Task<IEnumerable<PurchaseOrder>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
         return await _context.PurchaseOrders
-            .Include(po => po.Vendor)
             .Include(po => po.Details)
-            .FirstOrDefaultAsync(po => po.PurchaseOrderNumber == purchaseOrderNumber);
+            .Where(po => po.TenantId == tenantId && po.OrderDate >= startDate && po.OrderDate <= endDate)
+            .ToListAsync();
+    }
+
+    public async Task<PurchaseOrder?> GetByNumberAsync(string purchaseOrderNumber, Guid tenantId)
+    {
+        return await _context.PurchaseOrders
+            .Include(po => po.Details)
+            .FirstOrDefaultAsync(po => po.PurchaseOrderNumber == purchaseOrderNumber && po.TenantId == tenantId);
     }
 
     public async Task<Guid> CreateAsync(PurchaseOrder purchaseOrder)
@@ -65,17 +71,15 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
     public async Task<bool> UpdateAsync(PurchaseOrder purchaseOrder)
     {
         _context.PurchaseOrders.Update(purchaseOrder);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var purchaseOrder = await _context.PurchaseOrders.FindAsync(id);
+        var purchaseOrder = await GetByIdAsync(id, tenantId);
         if (purchaseOrder == null) return false;
 
         _context.PurchaseOrders.Remove(purchaseOrder);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 }

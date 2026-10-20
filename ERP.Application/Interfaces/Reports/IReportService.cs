@@ -22,8 +22,10 @@ public interface IReportService
     Task<ReportScheduleDto> ScheduleReportAsync(ScheduleReportDto dto, Guid tenantId, Guid userId);
     Task<ReportScheduleDto?> GetScheduledReportByIdAsync(Guid id, Guid tenantId);
     Task<bool> CancelScheduledReportAsync(Guid id, Guid tenantId);
+    /// <summary>Runs all due active schedules (NextRunTime &lt;= now). Returns count executed.</summary>
+    Task<int> ExecuteDueSchedulesAsync(CancellationToken cancellationToken = default);
     Task<IEnumerable<ReportExecutionDto>> GetReportHistoryAsync(Guid tenantId, string? reportType = null, DateTime? fromDate = null, DateTime? toDate = null);
-    Task<ReportExportDto> ExportReportAsync(Guid reportId, Guid tenantId, string format = "pdf");
+    Task<ReportExportDto> ExportReportAsync(Guid reportId, Guid tenantId, string format = "json");
     
     // Financial report methods
     Task<object> GetTrialBalanceAsync(Guid tenantId, DateTime fromDate, DateTime toDate, string? currencyCode = null);

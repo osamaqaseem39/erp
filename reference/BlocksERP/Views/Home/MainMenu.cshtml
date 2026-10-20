@@ -1,0 +1,704 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml"; ;
+    string businessName = System.Web.HttpContext.Current.Application["BusinessName"].ToString();
+    string bgLogo = System.Web.HttpContext.Current.Application["CompanyLogo"].ToString();
+    string bgColor = "#584677";
+    ViewBag.Title = "Modules";
+}
+@model List<BlocksERP.Models.clsModule>
+<style>
+    .divmenu {
+        /*padding-top: 10px;
+        padding-bottom: 20px;
+        padding-left: 10px;
+        padding-right: 0;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;*/
+        /*min-height: 410px !important;*/
+        background-image: url('../../Content/themeimages/user.png') !important;
+        background-repeat: no-repeat !important;
+        background-size: contain;
+        height: 100% !important;
+        /*padding-top: 90% !important;*/
+        background-position: center center !important;
+        /*width: 100% !important;*/
+        /*background-size: cover !important;*/
+        text-align: center !important;
+    }
+
+    .submenuspan {
+        font-weight: bold;
+    }
+
+    .menusublink {
+        color: black !important;
+    }
+
+    .imgMenu {
+        height: 250px !important;
+        /*padding-top: 10px;*/
+        /*width: 100% !important;*/
+    }
+
+    .divairporteven {
+        margin-top: 15%;
+        padding-top: 2px;
+        padding-bottom: 20px;
+        padding-left: 0px;
+        padding-right: 0;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        border-top-left-radius: 25%;
+        border-top-right-radius: 25%;
+        width: 100% !important;
+        /*background-color: #99B801;*/
+        /*border: 1px solid rgba(1, 86, 7, 1) !important;*/
+    }
+
+    .divairportevenuldiv {
+        padding: 5%;
+        width: 100% !important;
+        height: 200px !important;
+        text-align: center !important;
+    }
+
+    .divairportevenul {
+        margin-top: -10% !important;
+        padding-top: 10% !important;
+        width: 100% !important;
+        height: 150px !important;
+        background-color: #edf6db;
+        border: 2px solid #015607 !important;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        font-weight: bold;
+        font-size: 14px;
+        padding-inline-start: 25px !important;
+    }
+
+        .icon {
+            height: 45px;
+            width: 51px;
+            display: block;
+            margin: auto;
+            text-align: center;
+            font-size: 45px;
+            margin-top: 5px;
+            color: white;
+        }
+
+        .wrimagecard {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            position: relative;
+            background: #fff;
+            box-shadow: 12px 15px 20px 0px rgba(46,61,73,0.15);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+            .wrimagecard .fa {
+                position: relative;
+                font-size: 70px;
+            }
+
+        .wrimagecard-topimage_header {
+            padding: 20px;
+        }
+
+        a.wrimagecard:hover, .wrimagecard-topimage:hover {
+            box-shadow: 2px 4px 8px 0px rgba(46,61,73,0.2);
+        }
+
+        .wrimagecard-topimage a {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .wrimagecard-topimage_title {
+            padding: 20px 24px;
+            height: 80px;
+            padding-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .wrimagecard-topimage a {
+            border-bottom: none;
+            text-decoration: none;
+            color: #525C65;
+            transition: color 0.3s ease;
+        }
+
+    .card {
+        min-height: 200px;
+        padding: 10px;
+        background-color: #99B801;
+        box-shadow: none;
+        box-shadow: 6px 6px 12px #D1D1D1, -6px -6px 12px #FFFFFF;
+        border-radius: 15px;
+        transition: 0.4s ease;
+    }
+
+            .card:hover {
+                box-shadow: 14px 14px 28px #D1D1D1, -14px -14px 28px #FFFFFF;
+            }
+
+            .card .card-title {
+                color: black !important;
+            }
+
+            .card p {
+                height: 150px;
+                width: 90%;
+                border-radius: 50%;
+                margin: auto
+            }
+
+                .card p i {
+                    color: white;
+                }
+
+    @@media screen and (max-width: 1110px) {
+
+
+        h4
+        {
+            font-size:13px;
+        }
+    }
+
+    @@media screen and (max-width: 991px) {
+    
+        .card p {
+            height: 100px;
+            width: 100px;
+            border-radius: 50%;
+            margin: auto
+        }
+    }
+
+    @@media screen and (max-width: 635px) {
+
+        .card p {
+            height: 90px;
+            width: 90px;
+            border-radius: 50%;
+            margin: auto
+        }
+    }
+    @@media screen and (max-width: 574px) {
+       h4{
+           font-size:15px;
+       }
+            .card p {
+                height: 100px;
+                width: 100px;
+                border-radius: 50%;
+                margin: auto
+            }
+        }
+
+    .menuimg:hover {
+        /*box-shadow: inset 2px 2px 2px 2px white;*/
+    }
+    .menuimg {
+        /*box-shadow: inset 2px 2px 2px 2px white;*/
+        width: 75% !important;
+        height: auto !important;
+    }
+</style>
+<main id="js-page-content" role="main" class="page-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- PANEL STARTS HERE -->
+            <div class="panel" style="margin-top: 25px; border-radius: 10px !important; background-color: rgba(153, 184, 1, .5) !important; ">
+                <div role="heading" style="background-color: #015607 !important; border-radius: 10px !important; padding-left: 15px; color: white !important;">
+                    <h2>MODULES</h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="row">
+                            <!-- Team member -->
+                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuUser").ToLower()))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px; width:100%;  ">
+                                    <div class="divairporteven">
+                                        <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                                            <a href="/Users/UserDashboard/Index" style="width:100%;"><img class="imgC" src="/content/themeimages/1.png" alt="" style="width:100%;"></a>
+                                        </div>
+                                        <ul class="divairportevenul">
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmUser").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/Users/users/userindex">Users</a></li>
+                                            }
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmUserRole").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/Users/userrole/userroleindex">User Role</a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Team member -->
+                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuLoan").ToLower()))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px; width:100%;  ">
+                                    <div class="divairporteven">
+                                        <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                                            <a href="/Loan/LoanDashboard/Index" style="width:100%;"><img class="imgC" src="/content/themeimages/2.png" alt="" style="width:100%;"></a>
+                                        </div>
+                                        <ul class="divairportevenul">
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCountry").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/loan/country/countryindex">Country</a></li>
+                                            }
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCity").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/loan/city/cityindex">City</a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+
+
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuAccounts").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/Accounts/AccountsDashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/2.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCashPayment").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/accounts/vouchers/cashpaymentindex">Cash Payment</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCashReceipt").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/accounts/vouchers/cashreceiptindex">Cash Receipt</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmBankPayment").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/accounts/vouchers/bankpaymentindex">Bank Payment</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmBankReceipt").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/accounts/vouchers/bankreceiptindex">Bank Receipt</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmJournalVoucher").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/accounts/vouchers/journalvoucherindex">Journal Voucher</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+         }*@
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuCheque").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/cheque/chequedashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/3.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmChequeReceived").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/cheque/chequebook/chequereceivedindex">Received</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmChequePayment").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/cheque/chequebook/chequepaymentindex">Payment</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmChequeVerification").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/cheque/chequebook/chequecheckedindex">Verification</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmChequeDeposit").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/cheque/chequebook/chequedepositindex">Deposit</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmChequeClear").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/cheque/chequebook/chequeclearindex">Clear/Bounce</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }*@
+
+                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuInventory").ToLower()))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <div class="divairporteven">
+                                        <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                                            <a href="/inventory/inventorydashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/4.png" alt="" style="width:100%;"></a>
+                                        </div>
+                                        <ul class="divairportevenul">
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmItem").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/inventory/item/itemindex">Items</a></li>
+                                            }
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCategory").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/inventory/category/categoryindex">Category</a></li>
+                                            }
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmSubCategory").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/inventory/subcategory/subcategoryindex">Sub-Category</a></li>
+                                            }
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmBrand").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/inventory/brand/brandindex">Brand</a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuPurchase").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/Purchase/PurchaseDashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/5.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmSuppliers").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/purchase/supplier/supplierindex">Suppliers</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmImportPurchaseOrder").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/purchase/invoice/importpurchaseorderindex">Import P.O</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmImportPurchaseOrderApproval").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/purchase/invoice/importpurchaseorderapprovalindex">P.O Approval</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmImportPerformaInvoice").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/purchase/invoice/importperformainvoiceindex">Performa Invoice</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmImportCommercialInvoice").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/purchase/reports/importCommercialinvoiceindex">Commercial Invoice</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }*@
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuEmail").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/emails/emaildashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/19.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmEmail").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/emails/email/emailindex">Emails List</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmDock").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/emails/docktasks/dockindex">Dock</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmDockApprovalPending").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/emails/docktasks/dockapprovalpendingindex">Dock for Approval</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmTeamNewTask").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/emails/docktasks/TeamNewTasksIndex">Team Tasks</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmUserNewTask").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/emails/docktasks/UserNewTasksIndex">User Tasks</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }*@
+
+                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuSale").ToLower()))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <div class="divairporteven">
+                                        <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                                            <a href="/sale/saledashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/6.png" alt="" style="width:100%;"></a>
+                                        </div>
+                                        <ul class="divairportevenul">
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCustomers").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/sale/Customer/Customerindex">Distributor</a></li>
+                                            }
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmBDEmployee").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/sale/BDEmployee/BDEmployeeindex">B.D Employee</a></li>
+                                            }
+                                            @if (Model.Any(x => x.ModuleName.ToLower() == ("frmSalesman").ToLower()))
+                                            {
+                                                <li><a class="menusublink" href="/sale/salesman/salesmanindex">Salesman</a></li>
+                                            }
+                                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmSaleOrder").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/Sale/invoice/Saleorderindex">Sale Order</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmDispatchAdvice").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/Sale/invoice/DispatchAdviceindex">Dispatch Advice</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmSaleInvoice").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/Sale/invoice/Saleinvoiceindex">Sale Invoice</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmSaleReports").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/sale/reports/reportsindex">Reports</a></li>
+                        }*@
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuSale").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/distributorportal/portaldashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/8.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+
+                        <li><a class="menusublink" href="/DistributorPortal/SalesEmployee/SalesEmployeeindex">Sales Staff</a></li>
+
+                    </ul>
+                </div>
+            </div>
+        }*@
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuEmployee").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/hrm/hrmdashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/12.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("hrm employee information").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/hrm/hrmemployee/employeeinformationindex">Employee Information</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("hrm attendance by employee").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/hrm/hrm/insertupdateattendancebyemployeeindex">Attendance</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("hrm leave").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/hrm/hrm/leaveindex">Leave</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmHRMReports").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/hrm/reports/reportsindex">Reports</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }*@
+
+
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuProduction").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/production/productiondashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/11.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmIssueToProduction").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/production/invoice/IssueToProductionindex">Issue Production</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmReceivedFromProduction").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/production/invoice/ReceivedFromProductionindex">Rec. Production</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmIssueToPacking").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/production/invoice/IssueToPackingindex">Issue Packing</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmReceivedFromProduction").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/production/invoice/ReceivedFromPackingindex">Rec. Packing</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }*@
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuService").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <div class="divairporteven">
+                    <div class="row" style="width: 100% !important; margin-left: 0px !important; margin-right: 0px !important; ">
+                        <a href="/services/servicesdashboard/index" style="width:100%;"><img class="imgC" src="/content/themeimages/20.png" alt="" style="width:100%;"></a>
+                    </div>
+                    <ul class="divairportevenul">
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmServices").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/services/item/itemindex">Services</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmServicesPurchaseInvoice").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/services/invoice/servicespurchaseinvoiceindex">Purchase</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmServicesDebitNote").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/services/invoice/servicesDebitNoteindex">Debit Note</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmServicesSaleInvoice").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/services/invoice/servicessaleinvoiceindex">Sale</a></li>
+                        }
+                        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmServicesCreditNote").ToLower()))
+                        {
+                            <li><a class="menusublink" href="/services/invoice/servicescreditNoteindex">Credit Note</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }*@
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuGeneralInventory").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <a href="/generalinventory/inventorydashboard/index">
+                    <div class="text-center">
+                        <p><img class="menuimg" src="~/content/images/general.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuCylinderInventory").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <a href="/cylinderinventory/inventorydashboard/index">
+                    <div class="text-center">
+                        <p><img class="menuimg" src="~/content/images/cylinder.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+
+
+
+
+
+
+
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainBudget").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <a href="/home/budgetindex">
+                    <div class="text-center">
+                        <p><img class="menuimg" src="~/content/images/budget.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+         }*@
+
+
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainSaleDistributor").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                <a href="/home/distributorsaleindex">
+                    <div class="text-center">
+                        <p><img class="menuimg" src="~/content/images/distributorsale.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainQuality").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px;  ">
+                <a href="/home/qualityindex">
+                    <div class="text-center" style="background:none !important;vertical-align:central;text-align:center;">
+                        <p><img class="menuimg" src="~/content/mainmenu/quality.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+
+
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainGeneral").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px;  ">
+                <a href="/home/generalindex">
+                    <div class="text-center" style="background:none !important;vertical-align:central;text-align:center;">
+                        <p><img class="menuimg" src="~/content/images/general.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainAdmin").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px;  ">
+                <a href="/home/adminindex">
+                    <div class="text-center" style="background:none !important;vertical-align:central;text-align:center;">
+                        <p><img class="menuimg" src="~/content/images/admin.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainAssets").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px;  ">
+                <a href="/home/assetsindex">
+                    <div class="text-center" style="background:none !important;vertical-align:central;text-align:center;">
+                        <p><img class="menuimg" src="~/content/images/assets.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainMarketPlace").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px;  ">
+                <a href="/home/marketplaceindex">
+                    <div class="text-center" style="background:none !important;vertical-align:central;text-align:center;">
+                        <p><img class="menuimg" src="~/content/images/onlinesale.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == ("MainLease").ToLower()))
+        {
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top: 10px;  ">
+                <a href="/home/leaseindex">
+                    <div class="text-center" style="background:none !important;vertical-align:central;text-align:center;">
+                        <p><img class="menuimg" src="~/content/images/lease.png" style="" /></p>
+                    </div>
+                </a>
+            </div>
+        }*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+</script>

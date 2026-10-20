@@ -32,10 +32,15 @@ public class PurchaseOrderDto : BaseDto
 
 public class CreatePurchaseOrderDto : CreateDto
 {
+    public Guid? CompanyId { get; set; }
     public string? PurchaseOrderNumber { get; set; }
     public Guid VendorId { get; set; }
+    public Guid? RFQId { get; set; }
     public DateTime? OrderDate { get; set; }
     public DateTime? ExpectedDeliveryDate { get; set; }
+    public string? Currency { get; set; }
+    public string? PaymentTerms { get; set; }
+    public string? DeliveryTerms { get; set; }
     public decimal? SubTotal { get; set; }
     public decimal? TaxAmount { get; set; }
     public decimal? TotalAmount { get; set; }
@@ -44,16 +49,22 @@ public class CreatePurchaseOrderDto : CreateDto
     public string? Terms { get; set; }
     public string? ShippingAddress { get; set; }
     public string? BillingAddress { get; set; }
+    public List<CreatePurchaseOrderDetailDto> Details { get; set; } = new();
 }
 
 public class UpdatePurchaseOrderDto : UpdateDto
 {
     public Guid? PurchaseOrderId { get; set; }
+    public Guid? CompanyId { get; set; }
     public string? PurchaseOrderNumber { get; set; }
     public Guid? VendorId { get; set; }
+    public Guid? RFQId { get; set; }
     public DateTime? OrderDate { get; set; }
     public DateTime? ExpectedDeliveryDate { get; set; }
     public DateTime? ActualDeliveryDate { get; set; }
+    public string? Currency { get; set; }
+    public string? PaymentTerms { get; set; }
+    public string? DeliveryTerms { get; set; }
     public decimal? SubTotal { get; set; }
     public decimal? TaxAmount { get; set; }
     public decimal? TotalAmount { get; set; }
@@ -62,6 +73,7 @@ public class UpdatePurchaseOrderDto : UpdateDto
     public string? Terms { get; set; }
     public string? ShippingAddress { get; set; }
     public string? BillingAddress { get; set; }
+    public List<CreatePurchaseOrderDetailDto> Details { get; set; } = new();
 }
 
 public class PurchaseOrderDetailDto
@@ -91,6 +103,8 @@ public class CreatePurchaseOrderDetailDto
     public Guid ItemId { get; set; }
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
+    public decimal Discount { get; set; }
+    public decimal TaxRate { get; set; }
     public string? Notes { get; set; }
 }
 

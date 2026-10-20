@@ -1,0 +1,95 @@
+﻿@model List<BlocksERP.Models.clsDocument>
+
+<div style="overflow-x:hidden;margin-top:10px;padding:0px">
+    @{ 
+        int vrownum = 0;
+    }
+    <table class="table table-striped table-bordered" style="width:95%;margin-left:20px">
+        <thead style="background-color: #212121; color: white;">
+            <tr>
+                <th style="text-align:center;width:50px;">Sr#</th>
+                <th style="text-align:left;">Document Type</th>
+                <th style="text-align:center;width:100px;">Date</th>
+                <th style="text-align:center;width:100px;">Description</th>
+                <th style="text-align:center;width:60px;">Status</th>
+                <th style="text-align: center; width: 50px;">Verify</th>
+                <th style="text-align: center; width: 50px;">View</th>
+                <th style="text-align: center; width: 50px;">Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (BlocksERP.Models.clsDocument vrow in Model)
+            {
+                vrownum++;
+
+                <tr style="border-bottom: 1px solid #D8D8D8">
+                    <td style="text-align: center; padding: 3px">@vrownum</td>
+                    <td style="text-align: left; padding: 3px">@vrow.DocumentType </td>
+                    <td style="text-align: left; padding: 3px">@Convert.ToDateTime(vrow.Date).ToString("dd-MMM-yyyy")</td>
+                    <td style="text-align: left; padding: 3px">@vrow.Description </td>
+                    <td style="text-align: center; padding: 3px" id="rowStatus_@vrow.DocumentId">@vrow.Status </td>
+                    @if (vrow.Status.ToLower() != "verified")
+                    {
+                        <td style="text-align: center; padding: 3px">
+                            <a href="javascript:void(0);" id="rowBtn_@vrow.DocumentId" data-value="@vrow.DocumentId" class="btn btn-primary verifyDocument" style="padding:5px;color:#fff !important">
+                                OK
+                            </a>
+                        </td>
+                    }
+                    else
+                    {
+                        <td style="text-align: center; padding: 3px">
+                            &nbsp;
+                        </td>
+                    }
+
+                    <td style="text-align: center; padding: 3px">
+                        <a href="/FormsDocuments/UserDocument/@Convert.ToInt32(vrow.userId).ToString()/@Convert.ToInt32(vrow.DocumentId).ToString().@vrow.DocumentExtension" data-value="@vrow.DocumentId" target="_blank" class="btn btn-warning viewDocument" style="padding:5px;color:#000 !important">
+                            View
+                        </a>
+                    </td>
+                    <td style="text-align: center; padding: 3px">
+                        <a href="/FormsDocuments/UserDocument/@Convert.ToInt32(vrow.userId).ToString()/@Convert.ToInt32(vrow.DocumentId).ToString().@vrow.DocumentExtension" data-value="@vrow.DocumentId" download class="btn btn-success downloadDocument" style="padding:5px;color:#000 !important">
+                            Download
+                        </a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+    </table>
+</div>
+    <script src="~/Scripts/app.bundle.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+        });
+
+        $(document).on('click', '.verifyDocument', function () {
+            var id = $(this).attr("data-value");
+            var checkstr = confirm('Are you sure you want to verify this Record?');
+            if (checkstr == true) {
+                $.ajax({
+                    url: '/loan/loanuser/UpdateDocumentStatus/',
+                    data: { 'id': id, 'status': 'verified'},
+                    type: "POST",
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == true) {
+                            toastr.success("Record Updated Successfully", "Update", { timeOut: 3000, "closeButton": true });
+                            $('#rowStatus_' + id).html("verified");
+                            $('#rowBtn_' + id).hide();
+                        }
+                        else {
+                            alert(data.message);
+                        }
+                    }
+                })
+            }
+            else {
+                return false;
+            }
+        });
+
+
+    </script>

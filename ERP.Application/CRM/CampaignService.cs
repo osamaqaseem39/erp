@@ -1,12 +1,23 @@
+using ERP.Application.Common;
 using ERP.Application.Interfaces.CRM;
-using ERP.Shared.DTOs.CRM;
-using ERP.Infrastructure.Interfaces.CRM;
 using ERP.Domain.CRM;
+using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.DTOs.CRM;
 
 namespace ERP.Application.CRM;
 
 public class CampaignService : ICampaignService
 {
+    private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> Transitions =
+        new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Draft"] = new[] { "Active", "Cancelled" },
+            ["Active"] = new[] { "Paused", "Completed", "Cancelled" },
+            ["Paused"] = new[] { "Active", "Completed", "Cancelled" },
+            ["Completed"] = Array.Empty<string>(),
+            ["Cancelled"] = Array.Empty<string>()
+        };
+
     private readonly ICampaignRepository _repository;
 
     public CampaignService(ICampaignRepository repository)
@@ -29,6 +40,8 @@ public class CampaignService : ICampaignService
     public async Task<Guid> CreateAsync(CreateCampaignDto dto)
     {
         var entity = MapToEntity(dto);
+        // ERP-FIX-5: always start Draft
+        entity.Status = "Draft";
         return await _repository.CreateAsync(entity);
     }
 
@@ -36,13 +49,22 @@ public class CampaignService : ICampaignService
     {
         var entity = await _repository.GetByIdAsync(dto.Id);
         if (entity == null) return false;
+        if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
+            return false;
 
+        var previousStatus = entity.Status;
         MapToEntity(dto, entity);
+        // ERP-FIX-5: status only via launch/pause/complete/cancel
+        entity.Status = previousStatus;
         return await _repository.UpdateAsync(entity);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null) return false;
+        if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
+            return false;
         return await _repository.DeleteAsync(id);
     }
 
@@ -66,34 +88,67 @@ public class CampaignService : ICampaignService
             .Select(MapToDto);
     }
 
-    public async Task<bool> LaunchAsync(Guid id)
+    public async Task<bool> LaunchAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await GetScopedAsync(id, tenantId);
         if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Active", Transitions))
+            return false;
 
         entity.Status = "Active";
         entity.LaunchDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> PauseAsync(Guid id)
+    public async Task<bool> PauseAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await GetScopedAsync(id, tenantId);
         if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Paused", Transitions))
+            return false;
 
         entity.Status = "Paused";
         entity.PausedDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<bool> CompleteAsync(Guid id)
+    public async Task<bool> CompleteAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await GetScopedAsync(id, tenantId);
         if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Completed", Transitions))
+            return false;
 
         entity.Status = "Completed";
         entity.CompletedDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
+    }
+
+    public async Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        var entity = await GetScopedAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Cancelled", Transitions))
+            return false;
+
+        entity.Status = "Cancelled";
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(entity);
+    }
+
+    private async Task<Campaign?> GetScopedAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null || entity.TenantId != tenantId) return null;
+        return entity;
     }
 
     private static CampaignDto MapToDto(Campaign entity)
@@ -129,11 +184,11 @@ public class CampaignService : ICampaignService
         return new Campaign
         {
             TenantId = dto.TenantId,
-            CompanyId = dto.CompanyId.HasValue ? dto.CompanyId.Value : Guid.Empty,
+            CompanyId = dto.CompanyId ?? Guid.Empty,
             CampaignName = dto.CampaignName ?? string.Empty,
             Description = dto.Description,
             CampaignType = dto.CampaignType ?? string.Empty,
-            Status = dto.Status ?? "Draft",
+            Status = "Draft",
             StartDate = dto.StartDate ?? DateTime.UtcNow,
             EndDate = dto.EndDate,
             Budget = dto.Budget,
@@ -149,7 +204,6 @@ public class CampaignService : ICampaignService
         if (dto.CampaignName != null) entity.CampaignName = dto.CampaignName;
         entity.Description = dto.Description;
         if (dto.CampaignType != null) entity.CampaignType = dto.CampaignType;
-        if (dto.Status != null) entity.Status = dto.Status;
         if (dto.StartDate.HasValue) entity.StartDate = dto.StartDate.Value;
         entity.EndDate = dto.EndDate;
         entity.Budget = dto.Budget;
@@ -157,5 +211,6 @@ public class CampaignService : ICampaignService
         entity.TargetAudience = dto.TargetAudience;
         entity.Goals = dto.Goals;
         entity.UpdatedBy = !string.IsNullOrEmpty(dto.UpdatedBy) ? dto.UpdatedBy : null;
+        entity.UpdatedAt = DateTime.UtcNow;
     }
 }

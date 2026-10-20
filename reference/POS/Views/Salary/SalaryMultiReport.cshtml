@@ -1,0 +1,106 @@
+﻿<style>
+    .set-img {
+        font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    }
+
+    .table tr td {
+        border: 0 !important;
+    }
+
+    .custome-class-form h4 {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .custome-class-form label {
+        font-weight: bold !important;
+        color: #000;
+    }
+
+    .table tr .V__align {
+        vertical-align: bottom !important;
+    }
+
+    imgs {
+        opacity: 0.5;
+        filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
+    .dropwidth {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #03386C !important;
+        }
+</style>
+@model POS.Models.clsSalary
+@{
+    Layout = null;
+}
+<div class="widget-body no-padding" style="overflow-x:hidden;">
+    @using (Html.BeginForm("printsalaryreport", "salary", FormMethod.Post, new { id = "salaryForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+
+        <fieldset id="myField1">
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Employee</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.EmployeeId, ViewBag.Employee as SelectList, new { @id = "EmployeeId", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <div class="row">
+                <div style="padding:3px;">
+                    <section class="col col-md-12">
+                        <label>Month</label>
+                        <label class="input">
+                            <i class="icon-prepend fa fa-calendar"></i>
+                            <input type="month" id="SalaryMonth" name="SalaryMonth" required />
+                        </label>
+                    </section>
+                </div>
+            </div>
+        </fieldset>
+        <footer>
+            <button formtarget="_blank" type="submit" class="btn btn-labeled btn-primary pull-right">
+                GENERATE REPORT
+            </button>
+        </footer>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#EmployeeId').select2();
+        GetMonth();
+    });
+    function GetMonth() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm;
+        $('#SalaryMonth').val(today);
+    }
+    $('#salaryForm').on('submit', function (e) {
+        var salaryMonth = $("#SalaryMonth").val();
+        if (salaryMonth == '' || salaryMonth == null)
+        {
+            alert("Month is required.");
+            return false;
+        }
+    })
+</script>

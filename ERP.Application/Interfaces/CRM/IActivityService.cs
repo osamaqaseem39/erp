@@ -16,6 +16,7 @@ public interface IActivityService
     Task<IEnumerable<ActivityDto>> GetByAssignedToAsync(Guid assignedTo);
     Task<IEnumerable<ActivityDto>> GetByTypeAsync(string activityType);
     Task<IEnumerable<ActivityDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
-    Task<bool> CompleteAsync(Guid id);
-    Task<bool> RescheduleAsync(Guid id, DateTime newDate);
+    Task<bool> CompleteAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> RescheduleAsync(Guid id, DateTime newDate, Guid tenantId, Guid userId);
 }

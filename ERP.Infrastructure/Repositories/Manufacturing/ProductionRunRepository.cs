@@ -13,34 +13,33 @@ public class ProductionRunRepository : IProductionRunRepository
         _context = context;
     }
 
-    public async Task<ProductionRun?> GetByIdAsync(Guid id)
-    {
-        return await _context.ProductionRuns
+    private IQueryable<ProductionRun> Query(Guid tenantId) =>
+        _context.ProductionRuns
             .Include(pr => pr.ProductionOrder)
-            .FirstOrDefaultAsync(pr => pr.Id == id);
+            .Where(pr => pr.TenantId == tenantId);
+
+    public async Task<ProductionRun?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(pr => pr.Id == id);
     }
 
-    public async Task<IEnumerable<ProductionRun>> GetAllAsync()
+    public async Task<IEnumerable<ProductionRun>> GetAllAsync(Guid tenantId)
     {
-        return await _context.ProductionRuns
-            .Include(pr => pr.ProductionOrder)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionRun>();
+        return await Query(tenantId).ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductionRun>> GetByProductionOrderAsync(Guid productionOrderId)
+    public async Task<IEnumerable<ProductionRun>> GetByProductionOrderAsync(Guid productionOrderId, Guid tenantId)
     {
-        return await _context.ProductionRuns
-            .Include(pr => pr.ProductionOrder)
-            .Where(pr => pr.ProductionOrderId == productionOrderId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionRun>();
+        return await Query(tenantId).Where(pr => pr.ProductionOrderId == productionOrderId).ToListAsync();
     }
 
-    public async Task<IEnumerable<ProductionRun>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<ProductionRun>> GetByStatusAsync(string status, Guid tenantId)
     {
-        return await _context.ProductionRuns
-            .Include(pr => pr.ProductionOrder)
-            .Where(pr => pr.Status == status)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ProductionRun>();
+        return await Query(tenantId).Where(pr => pr.Status == status).ToListAsync();
     }
 
     public async Task<Guid> CreateAsync(ProductionRun productionRun)
@@ -57,9 +56,9 @@ public class ProductionRunRepository : IProductionRunRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var productionRun = await _context.ProductionRuns.FindAsync(id);
+        var productionRun = await GetByIdAsync(id, tenantId);
         if (productionRun == null) return false;
 
         _context.ProductionRuns.Remove(productionRun);

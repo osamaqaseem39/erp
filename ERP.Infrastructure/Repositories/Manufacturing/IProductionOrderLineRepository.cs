@@ -4,11 +4,11 @@ namespace ERP.Infrastructure.Repositories.Manufacturing;
 
 public interface IProductionOrderLineRepository
 {
-    Task<ProductionOrderLine?> GetByIdAsync(Guid id);
-    Task<IEnumerable<ProductionOrderLine>> GetAllAsync();
-    Task<IEnumerable<ProductionOrderLine>> GetByProductionOrderAsync(Guid productionOrderId);
-    Task<IEnumerable<ProductionOrderLine>> GetByItemAsync(Guid itemId);
+    Task<ProductionOrderLine?> GetByIdAsync(Guid id, Guid tenantId);
+    Task<IEnumerable<ProductionOrderLine>> GetAllAsync(Guid tenantId);
+    Task<IEnumerable<ProductionOrderLine>> GetByProductionOrderAsync(Guid productionOrderId, Guid tenantId);
+    Task<IEnumerable<ProductionOrderLine>> GetByItemAsync(Guid itemId, Guid tenantId);
     Task<Guid> CreateAsync(ProductionOrderLine productionOrderLine);
     Task<bool> UpdateAsync(ProductionOrderLine productionOrderLine);
-    Task<bool> DeleteAsync(Guid id);
+    Task<bool> DeleteAsync(Guid id, Guid tenantId);
 }

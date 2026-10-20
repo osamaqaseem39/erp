@@ -23,6 +23,8 @@ public class ERPDbContext : DbContext
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<Plan> Plans { get; set; }
     public DbSet<Company> Companies { get; set; }
+    public DbSet<FiscalYear> FiscalYears { get; set; }
+    public DbSet<AdminEmail> AdminEmails { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
@@ -43,6 +45,9 @@ public class ERPDbContext : DbContext
     public DbSet<PayrollLine> PayrollLines { get; set; }
     public DbSet<PayrollComponent> PayrollComponents { get; set; }
     public DbSet<TimeEntry> TimeEntries { get; set; }
+    public DbSet<Department> Departments { get; set; }
+    public DbSet<Benefit> Benefits { get; set; }
+    public DbSet<EmployeeBenefitEnrollment> EmployeeBenefitEnrollments { get; set; }
     public DbSet<Shift> Shifts { get; set; }
     public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<LeaveRequest> LeaveRequests { get; set; }
@@ -73,6 +78,7 @@ public class ERPDbContext : DbContext
     public DbSet<BankReconciliation> BankReconciliations { get; set; }
     public DbSet<Budget> Budgets { get; set; }
     public DbSet<CostCenter> CostCenters { get; set; }
+    public DbSet<AccountDefault> AccountDefaults { get; set; }
     public DbSet<FixedAsset> FixedAssets { get; set; }
     public DbSet<TaxCode> TaxCodes { get; set; }
     public DbSet<TaxRate> TaxRates { get; set; }
@@ -89,12 +95,16 @@ public class ERPDbContext : DbContext
     public DbSet<CustomerGroup> CustomerGroups { get; set; }
     public DbSet<PriceList> PriceLists { get; set; }
     public DbSet<SalesTerritory> SalesTerritories { get; set; }
+    public DbSet<Salesman> Salesmen { get; set; }
     public DbSet<ReturnOrder> ReturnOrders { get; set; }
+    public DbSet<ReturnOrderLine> ReturnOrderLines { get; set; }
     public DbSet<Contact> Contacts { get; set; }
     public DbSet<SalesOrder> SalesOrders { get; set; }
     public DbSet<SalesOrderLine> SalesOrderLines { get; set; }
     public DbSet<SalesInvoice> SalesInvoices { get; set; }
     public DbSet<SalesInvoiceLine> SalesInvoiceLines { get; set; }
+    public DbSet<SalesCreditNote> SalesCreditNotes { get; set; }
+    public DbSet<SalesCreditNoteLine> SalesCreditNoteLines { get; set; }
     public DbSet<Quote> Quotes { get; set; }
     public DbSet<QuoteLine> QuoteLines { get; set; }
     public DbSet<SystemSetting> SystemSettings { get; set; }
@@ -105,6 +115,8 @@ public class ERPDbContext : DbContext
     public DbSet<ProductionOrder> ProductionOrders { get; set; }
     public DbSet<ProductionOrderLine> ProductionOrderLines { get; set; }
     public DbSet<ProductionRun> ProductionRuns { get; set; }
+    public DbSet<BillOfMaterial> BillOfMaterials { get; set; }
+    public DbSet<BillOfMaterialLine> BillOfMaterialLines { get; set; }
 
     // Project Entities
     public DbSet<Project> Projects { get; set; }
@@ -122,6 +134,10 @@ public class ERPDbContext : DbContext
     public DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
     public DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
     public DbSet<PurchaseInvoiceDetail> PurchaseInvoiceDetails { get; set; }
+    public DbSet<PurchaseReturn> PurchaseReturns { get; set; }
+    public DbSet<PurchaseReturnLine> PurchaseReturnLines { get; set; }
+    public DbSet<PurchaseDebitNote> PurchaseDebitNotes { get; set; }
+    public DbSet<PurchaseDebitNoteLine> PurchaseDebitNoteLines { get; set; }
     public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
     public DbSet<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; }
     public DbSet<RequestForQuotation> RequestForQuotations { get; set; }
@@ -148,6 +164,8 @@ public class ERPDbContext : DbContext
     public DbSet<StockLedger> StockLedgers { get; set; }
     public DbSet<StockTransfer> StockTransfers { get; set; }
     public DbSet<StockTransferDetail> StockTransferDetails { get; set; }
+    public DbSet<StockAdjustment> StockAdjustments { get; set; }
+    public DbSet<StockAdjustmentLine> StockAdjustmentLines { get; set; }
     public DbSet<InventoryAdjustment> InventoryAdjustments { get; set; }
     public DbSet<InventoryValuationMethod> InventoryValuationMethods { get; set; }
     public DbSet<ReorderRule> ReorderRules { get; set; }
@@ -229,6 +247,8 @@ public class ERPDbContext : DbContext
             entity.Property(e => e.Country).HasMaxLength(100);
             entity.Property(e => e.ZipCode).HasMaxLength(20);
             entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.MobilePhone).HasMaxLength(30);
+            entity.Property(e => e.ContactPerson).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(200);
             entity.Property(e => e.Website).HasMaxLength(200);
             entity.Property(e => e.LogoUrl).HasMaxLength(500);
@@ -237,6 +257,25 @@ public class ERPDbContext : DbContext
             entity.Ignore(e => e.Address);
             entity.Ignore(e => e.PostalCode);
             entity.Ignore(e => e.Currency);
+        });
+
+        modelBuilder.Entity<FiscalYear>(entity =>
+        {
+            entity.ToTable("FiscalYears", "Core");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(20);
+            entity.HasIndex(e => new { e.TenantId, e.FiscalYearId });
+            entity.HasIndex(e => new { e.TenantId, e.StartDate, e.EndDate });
+        });
+
+        modelBuilder.Entity<AdminEmail>(entity =>
+        {
+            entity.ToTable("AdminEmails", "Core");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => new { e.TenantId, e.Email });
         });
 
         // Configure Role (Core schema)
@@ -269,6 +308,10 @@ public class ERPDbContext : DbContext
             entity.Property(e => e.PrimaryPhone).HasMaxLength(20);
             entity.Property(e => e.SecondaryPhone).HasMaxLength(20);
             entity.Property(e => e.MobilePhone).HasMaxLength(20);
+            entity.Property(e => e.AddressLine1).HasMaxLength(200);
+            entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.ProfilePicture).HasMaxLength(500);
+            entity.Property(e => e.Username).HasMaxLength(100);
             entity.Property(e => e.Fax).HasMaxLength(20);
             entity.Property(e => e.LinkedIn).HasMaxLength(200);
             entity.Property(e => e.Twitter).HasMaxLength(200);
@@ -280,13 +323,24 @@ public class ERPDbContext : DbContext
             entity.Property(e => e.PasswordHash).IsRequired();
             entity.Property(e => e.PasswordSalt).IsRequired();
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.TwoFactorSecret).HasMaxLength(128);
+            entity.Property(e => e.TwoFactorPendingSecret).HasMaxLength(128);
+            entity.Property(e => e.TwoFactorChallengeTokenHash).HasMaxLength(128);
             entity.HasIndex(e => e.PrimaryEmail).IsUnique();
+            entity.HasIndex(e => e.EmployeeId)
+                .IsUnique()
+                .HasFilter("[EmployeeId] IS NOT NULL");
             
             // Tenant relationship will be handled by TenantId foreign key
                 
             entity.HasOne(e => e.Company)
                 .WithMany(c => c.Users)
                 .HasForeignKey(e => e.CompanyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Employee)
+                .WithMany()
+                .HasForeignKey(e => e.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -558,6 +612,49 @@ public class ERPDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.HasIndex(e => e.TenantId);
+            entity.HasOne(e => e.ParentDepartment)
+                .WithMany(e => e.ChildDepartments)
+                .HasForeignKey(e => e.ParentDepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Manager)
+                .WithMany()
+                .HasForeignKey(e => e.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Benefit>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Cost).HasColumnType("decimal(18,2)");
+            entity.HasIndex(e => e.TenantId);
+            entity.HasMany(e => e.Enrollments)
+                .WithOne(e => e.Benefit)
+                .HasForeignKey(e => e.BenefitId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<EmployeeBenefitEnrollment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(30);
+            entity.Property(e => e.Reason).HasMaxLength(500);
+            entity.HasIndex(e => new { e.TenantId, e.EmployeeId });
+            entity.HasOne(e => e.Employee)
+                .WithMany()
+                .HasForeignKey(e => e.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         // Configure Shift
         modelBuilder.Entity<Shift>(entity =>
         {
@@ -741,6 +838,7 @@ public class ERPDbContext : DbContext
             entity.Property(e => e.AccountName).IsRequired().HasMaxLength(255);
             entity.Property(e => e.AccountType).IsRequired().HasMaxLength(50);
             entity.Property(e => e.CurrencyCode).HasMaxLength(10);
+            entity.Property(e => e.Remarks).HasMaxLength(500);
             
             entity.HasIndex(e => new { e.TenantId, e.AccountCode }).IsUnique();
             entity.HasIndex(e => new { e.TenantId, e.AccountType });
@@ -750,6 +848,57 @@ public class ERPDbContext : DbContext
                 .WithMany(e => e.ChildAccounts)
                 .HasForeignKey(e => e.ParentAccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AccountDefault>(entity =>
+        {
+            entity.HasKey(e => e.AccountDefaultId);
+            entity.Property(e => e.Purpose).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => new { e.TenantId, e.Purpose }).IsUnique();
+            entity.HasOne(e => e.Account)
+                .WithMany()
+                .HasForeignKey(e => e.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Journal>(entity =>
+        {
+            entity.Property(e => e.JournalNumber).HasMaxLength(50);
+            entity.Property(e => e.ChequeNumber).HasMaxLength(50);
+            entity.Property(e => e.ChequeStatus).HasMaxLength(30);
+            entity.Property(e => e.ChequeStatusNotes).HasMaxLength(500);
+            entity.Property(e => e.PaidBy).HasMaxLength(200);
+            entity.Property(e => e.ReceivedBy).HasMaxLength(200);
+            entity.Property(e => e.InvoiceNumber).HasMaxLength(50);
+            entity.Property(e => e.EntityReferenceTable).HasMaxLength(100);
+            entity.HasIndex(e => new { e.TenantId, e.ChequeNumber });
+            entity.HasIndex(e => new { e.TenantId, e.ChequeStatus });
+            entity.HasIndex(e => new { e.TenantId, e.InvoiceNumber });
+            entity.HasIndex(e => new { e.TenantId, e.EntityReferenceTable, e.EntityReferenceId });
+            entity.HasOne(e => e.CashOrBankAccount)
+                .WithMany()
+                .HasForeignKey(e => e.CashOrBankAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(e => e.FinancialYearId);
+            entity.HasIndex(e => new { e.TenantId, e.FinancialYearId });
+        });
+
+        modelBuilder.Entity<FiscalYear>(entity =>
+        {
+            entity.HasKey(e => e.FiscalYearId);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(20);
+            entity.HasIndex(e => new { e.TenantId, e.Id }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.Status, e.StartDate, e.EndDate });
+        });
+
+        modelBuilder.Entity<CostCenter>(entity =>
+        {
+            entity.HasKey(e => e.CostCenterId);
+            entity.Property(e => e.CostCenterCode).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.CostCenterName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.HasIndex(e => new { e.TenantId, e.CostCenterCode }).IsUnique();
         });
 
         // Configure FixedAsset
@@ -767,10 +916,15 @@ public class ERPDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.AssetCode }).IsUnique();
             entity.HasIndex(e => new { e.TenantId, e.AssetCategory });
             
-            // Relationship with ChartOfAccount
+            // Relationship with ChartOfAccount (Account + legacy GLAccount share same CoA)
             entity.HasOne(e => e.Account)
                 .WithMany(c => c.FixedAssets)
                 .HasForeignKey(e => e.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.GLAccount)
+                .WithMany()
+                .HasForeignKey(e => e.GLAccountAccountId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -926,7 +1080,15 @@ public class ERPDbContext : DbContext
     private void ConfigureRemainingEntities(ModelBuilder modelBuilder)
     {
         // CRM Entities - Basic configuration
-        modelBuilder.Entity<Customer>().HasKey(e => e.Id);
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Salesman)
+                .WithMany()
+                .HasForeignKey(e => e.SalesmanId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
         modelBuilder.Entity<Lead>().HasKey(e => e.Id);
         modelBuilder.Entity<Opportunity>().HasKey(e => e.Id);
         modelBuilder.Entity<Activity>().HasKey(e => e.Id);
@@ -937,6 +1099,15 @@ public class ERPDbContext : DbContext
         modelBuilder.Entity<SalesOrderLine>().HasKey(e => e.Id);
         modelBuilder.Entity<SalesInvoice>().HasKey(e => e.Id);
         modelBuilder.Entity<SalesInvoiceLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<SalesCreditNote>().HasKey(e => e.Id);
+        modelBuilder.Entity<SalesCreditNoteLine>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne<SalesCreditNote>()
+                .WithMany()
+                .HasForeignKey(e => e.CreditNoteId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
         modelBuilder.Entity<Quote>().HasKey(e => e.Id);
         modelBuilder.Entity<QuoteLine>().HasKey(e => e.Id);
         modelBuilder.Entity<SystemSetting>().HasKey(e => e.Id);
@@ -944,9 +1115,26 @@ public class ERPDbContext : DbContext
 
         // Manufacturing Entities
         modelBuilder.Entity<WorkCenter>().HasKey(e => e.Id);
-        modelBuilder.Entity<ProductionOrder>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProductionOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.BillOfMaterial)
+                .WithMany()
+                .HasForeignKey(e => e.BomId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
         modelBuilder.Entity<ProductionOrderLine>().HasKey(e => e.Id);
         modelBuilder.Entity<ProductionRun>().HasKey(e => e.Id);
+        modelBuilder.Entity<BillOfMaterial>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.BomNumber }).IsUnique();
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.BillOfMaterial)
+                .HasForeignKey(l => l.BillOfMaterialId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<BillOfMaterialLine>().HasKey(e => e.Id);
 
         // Project Entities
         modelBuilder.Entity<Project>().HasKey(e => e.Id);
@@ -1036,6 +1224,45 @@ public class ERPDbContext : DbContext
                 .HasForeignKey(e => e.InvoiceId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.Entity<PurchaseReturn>(entity =>
+        {
+            entity.ToTable("PurchaseReturns");
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.Vendor)
+                .WithMany()
+                .HasForeignKey(e => e.VendorId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.PurchaseOrder)
+                .WithMany()
+                .HasForeignKey(e => e.PurchaseOrderId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.PurchaseReturn)
+                .HasForeignKey(l => l.PurchaseReturnId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PurchaseDebitNote>().HasKey(e => e.Id);
+        modelBuilder.Entity<PurchaseDebitNoteLine>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne<PurchaseDebitNote>()
+                .WithMany()
+                .HasForeignKey(e => e.DebitNoteId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PurchaseReturnLine>(entity =>
+        {
+            entity.ToTable("PurchaseReturnLines");
+            entity.HasKey(e => e.Id);
+        });
         // Configure PurchaseRequisition with proper cascade settings
         modelBuilder.Entity<PurchaseRequisition>(entity =>
         {
@@ -1062,7 +1289,15 @@ public class ERPDbContext : DbContext
                 .HasForeignKey(e => e.UnitOfMeasureId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-        modelBuilder.Entity<RequestForQuotation>().HasKey(e => e.Id);
+        modelBuilder.Entity<RequestForQuotation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Company)
+                .WithMany()
+                .HasForeignKey(e => e.CompanyId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
         // Configure RFQDetail with proper cascade settings
         modelBuilder.Entity<RFQDetail>(entity =>
         {
@@ -1072,23 +1307,36 @@ public class ERPDbContext : DbContext
             entity.HasOne(e => e.RequestForQuotation)
                 .WithMany(rfq => rfq.Details)
                 .HasForeignKey(e => e.RFQId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
             
             // UnitOfMeasure relationship - use Restrict to avoid cascade path issues
             entity.HasOne(e => e.UnitOfMeasure)
                 .WithMany()
                 .HasForeignKey(e => e.UnitOfMeasureId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Item)
+                .WithMany()
+                .HasForeignKey(e => e.ItemId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         });
         // Configure RFQVendorResponse with proper cascade settings
         modelBuilder.Entity<RFQVendorResponse>(entity =>
         {
             entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.RequestForQuotation)
+                .WithMany(rfq => rfq.VendorResponses)
+                .HasForeignKey(e => e.RFQId)
+                .OnDelete(DeleteBehavior.Cascade);
             
             // Vendor relationship - use Restrict to avoid cascade path with Company
             entity.HasOne(e => e.Vendor)
                 .WithMany()
                 .HasForeignKey(e => e.VendorId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         });
         // Configure RFQVendorResponseDetail with proper cascade settings
@@ -1160,6 +1408,27 @@ public class ERPDbContext : DbContext
                 .HasForeignKey(e => e.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        modelBuilder.Entity<StockAdjustment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Warehouse)
+                .WithMany()
+                .HasForeignKey(e => e.WarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.StockAdjustment)
+                .HasForeignKey(l => l.StockAdjustmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<StockAdjustmentLine>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Item)
+                .WithMany()
+                .HasForeignKey(e => e.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
         modelBuilder.Entity<InventoryValuationMethod>().HasKey(e => e.Id);
         modelBuilder.Entity<ReorderRule>().HasKey(e => e.Id);
         modelBuilder.Entity<Barcode>().HasKey(e => e.Id);
@@ -1182,10 +1451,17 @@ public class ERPDbContext : DbContext
         modelBuilder.Entity<InvoiceLine>().HasKey(e => e.InvoiceLineId);
         modelBuilder.Entity<Bank>().HasKey(e => e.Id);
         modelBuilder.Entity<BankAccount>().HasKey(e => e.Id);
-        modelBuilder.Entity<BankTransaction>().HasKey(e => e.BankTxId);
+        modelBuilder.Entity<BankTransaction>(entity =>
+        {
+            entity.HasKey(e => e.BankTxId);
+            entity.HasOne(e => e.Reconciliation)
+                .WithMany(r => r.BankTransactions)
+                .HasForeignKey(e => e.ReconciliationId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
         modelBuilder.Entity<BankReconciliation>().HasKey(e => e.ReconciliationId);
         modelBuilder.Entity<Budget>().HasKey(e => e.Id);
-        modelBuilder.Entity<CostCenter>().HasKey(e => e.Id);
+        // CostCenter PK configured in ConfigureFinanceEntities (CostCenterId)
         modelBuilder.Entity<TaxCode>().HasKey(e => e.Id);
         modelBuilder.Entity<TaxRate>().HasKey(e => e.Id);
         modelBuilder.Entity<PaymentApplication>().HasKey(e => e.Id);
@@ -1212,6 +1488,12 @@ public class ERPDbContext : DbContext
             entity.HasKey(e => e.Id);
         });
 
+        modelBuilder.Entity<Salesman>(entity =>
+        {
+            entity.ToTable("Salesmen");
+            entity.HasKey(e => e.Id);
+        });
+
         modelBuilder.Entity<ReturnOrder>(entity =>
         {
             entity.ToTable("ReturnOrders");
@@ -1226,6 +1508,17 @@ public class ERPDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.SalesOrderId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.ReturnOrder)
+                .HasForeignKey(l => l.ReturnOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ReturnOrderLine>(entity =>
+        {
+            entity.ToTable("ReturnOrderLines");
+            entity.HasKey(e => e.Id);
         });
     }
 }

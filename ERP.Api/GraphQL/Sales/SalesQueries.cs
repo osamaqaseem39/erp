@@ -133,5 +133,37 @@ public class SalesQueries
     {
         return await service.GetByDateRangeAsync(startDate, endDate, tenantId);
     }
+
+    // Sales Credit Note Queries
+    public async Task<SalesCreditNoteDto?> GetSalesCreditNote(
+        [Service] ISalesCreditNoteService service,
+        Guid creditNoteId,
+        Guid tenantId)
+        => await service.GetByIdAsync(creditNoteId, tenantId);
+
+    public async Task<IEnumerable<SalesCreditNoteDto>> GetSalesCreditNotes(
+        [Service] ISalesCreditNoteService service,
+        Guid tenantId,
+        Guid? customerId = null,
+        string? status = null)
+    {
+        if (customerId.HasValue)
+            return await service.GetByCustomerAsync(customerId.Value, tenantId);
+        if (!string.IsNullOrEmpty(status))
+            return await service.GetByStatusAsync(status, tenantId);
+        return await service.GetAllAsync(tenantId);
+    }
+
+    public async Task<IEnumerable<SalesCreditNoteDto>> GetSalesCreditNotesByCustomer(
+        [Service] ISalesCreditNoteService service,
+        Guid customerId,
+        Guid tenantId)
+        => await service.GetByCustomerAsync(customerId, tenantId);
+
+    public async Task<IEnumerable<SalesCreditNoteDto>> GetSalesCreditNotesByStatus(
+        [Service] ISalesCreditNoteService service,
+        string status,
+        Guid tenantId)
+        => await service.GetByStatusAsync(status, tenantId);
 }
 

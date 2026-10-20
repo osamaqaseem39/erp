@@ -14,36 +14,30 @@ public class POSTransactionLineRepository : IPOSTransactionLineRepository
         _context = context;
     }
 
-    public async Task<POSTransactionLine?> GetByIdAsync(int id)
+    public async Task<IEnumerable<POSTransactionLine>> GetByTransactionIdAsync(Guid transactionId, Guid tenantId)
     {
-        return await _context.POSTransactionLines.FindAsync(id);
+        return await _context.POSTransactionLines
+            .Where(l => l.POSTransactionId == transactionId && l.TenantId == tenantId)
+            .OrderBy(l => l.LineNumber)
+            .ToListAsync();
     }
 
-    public async Task<IEnumerable<POSTransactionLine>> GetAllAsync()
+    public async Task<Guid> CreateAsync(POSTransactionLine line)
     {
-        return await _context.POSTransactionLines.ToListAsync();
-    }
-
-    public async Task<POSTransactionLine> AddAsync(POSTransactionLine entity)
-    {
-        _context.POSTransactionLines.Add(entity);
+        _context.POSTransactionLines.Add(line);
         await _context.SaveChangesAsync();
-        return entity;
+        return line.Id;
     }
 
-    public async Task UpdateAsync(POSTransactionLine entity)
+    public async Task<bool> DeleteByTransactionIdAsync(Guid transactionId, Guid tenantId)
     {
-        _context.POSTransactionLines.Update(entity);
+        var lines = await _context.POSTransactionLines
+            .Where(l => l.POSTransactionId == transactionId && l.TenantId == tenantId)
+            .ToListAsync();
+        if (lines.Count == 0) return true;
+
+        _context.POSTransactionLines.RemoveRange(lines);
         await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.POSTransactionLines.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        return true;
     }
 }

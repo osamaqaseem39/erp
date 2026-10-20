@@ -1,0 +1,311 @@
+﻿<div id="CssData">
+
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            @@page {
+                size: A4;
+                margin-left: -50px;
+            }
+
+            @@page:first {
+                size: A4;
+                margin-top: -40px;
+                margin-left: -50px;
+                margin-bottom: 10px;
+            }
+
+            .mainTable {
+                width: 97.5% !important;
+                margin-left: 16px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .CustomersDetail {
+                padding-left: 316px !important;
+            }
+
+            .customerHeadingTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            #myTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+        }
+
+        #printable-content table {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        #printable-content .heading {
+            border-width: 0px;
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        .mainTable {
+            width: 94.5%;
+            /*margin-top: -25px;*/
+            margin-bottom: 1px;
+            margin-left: 10px;
+            padding-right: 19px !important;
+        }
+
+            .mainTable td {
+                border-left: 1px solid black;
+                border-bottom: 1px solid black;
+            }
+
+        .borderRight {
+            border-right: 1px solid black;
+        }
+
+        .mainTable th {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        .mainTable th {
+            padding: 3px;
+        }
+
+        .mainTable td {
+            padding: 3px;
+        }
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }*/
+    </style>
+</div>
+
+<!-- widget content -->
+@model List<POS.Models.clsChartOfAccount>
+    <div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <h1 class="page-title txt-color-blueDark">
+                    <i class="fa fa-home fa-fw "></i>
+                    Report
+                    <span>
+                        >
+                        Chart of Account
+                    </span>
+                </h1>
+            </div>
+        </div>
+        <section>
+            <div class="panel">
+                <div class="panel-heading">
+                    @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @id = "downloadForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                    {
+                        <span class="header"> Chart of Account Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                        <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                        <input type="hidden" name="FileName" id="FileName" value="ChartOfAccount" />
+                        <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                            Print
+                        </button>
+                        <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                    }
+                </div>
+                <div class="panel-body">
+                    <div id="HtmlData">
+                        <div id="printable-content" class="panel rpt" style=" float: left;width: 800px; font-family: Arial, Helvetica, sans-serif;">
+                            <table style="padding: 30px;padding-top:0px" id="myTable">
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 12px; text-align: right;font-weight:normal" colspan="12"><strong>Print Date:&nbsp;</strong>@*<span class="LocalDate"></span>*@@Convert.ToDateTime(DateTime.Now).ToString("dd/MM/yyyy hh:mm tt")</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 20px; text-align: center; padding-bottom: 5px;padding-top:15px" colspan="6">@System.Web.HttpContext.Current.Application["BusinessName"]</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: normal; font-size: 14px; text-align: center; padding-bottom: 5px;" colspan="6">@System.Web.HttpContext.Current.Application["BusinessAddress"]</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 18px; text-align: center;" colspan="6">Chart of Account Report</th>
+                                </tr>
+                                <thead>
+                                    <tr>
+                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding-bottom: 10px" colspan="12">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="12">
+                                            @{
+    string marginTop = "";
+    if (Model.Count == 0)
+    {
+        marginTop = "5px";
+    }
+    else
+    {
+        marginTop = "-25px";
+    }
+}
+<table class="mainTable" style="@marginTop">
+    <thead>
+        <tr>
+            <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 13px;border:none;border-bottom:1px solid black" colspan="12">&nbsp;</th>
+        </tr>
+    </thead>
+    <tr class="mainTr">
+        <th style="text-align: center; width: 85px">Sr#</th>
+        <th style="text-align:left;">Description</th>
+        <th class="borderRight" style="text-align: center; width: 120px">Account Code</th>
+    </tr>
+    @if (Model.Count != 0)
+    {
+        <tbody>
+            @{
+        int j = 0;
+            }
+            @foreach (clsChartOfAccount s in Model.Where(x => x.AcLevel == 1))
+            {
+                j++;
+                int k = 0;
+                <tr class="mainTr">
+                    <td style="text-align: left; font-weight: bold;padding-left:20px">@(j)</td>
+                    <td style="text-align: left; font-weight: bold">@s.Description</td>
+                    <td class="borderRight" style="text-align: center; font-weight: bold;">@s.AccountCodeV</td>
+                </tr>
+                foreach (clsChartOfAccount t in Model.Where(x => x.AcLevel == 2 && x.RefKey == s.AccountCodeV))
+                {
+                    k++;
+                    int m = 0;
+                    <tr class="mainTr">
+                        <td style="text-align: center;">@j.@k</td>
+                        <td style="text-align: left;padding-left:30px">@t.Description</td>
+                        <td class="borderRight" style="text-align: center; ">@t.AccountCodeV</td>
+                    </tr>
+                    foreach (clsChartOfAccount r in Model.Where(x => x.AcLevel == 3 && x.RefKey == t.AccountCodeV && x.Status == "Active"))
+                    {
+                        m++;
+                        <tr class="mainTr">
+                            <td style="text-align: right;padding-right:10px">@j.@k.@m</td>
+                            <td style="text-align: left;padding-left:60px">@r.Description</td>
+                            <td class="borderRight" style="text-align: center; ">@r.AccountCodeV</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    }
+    else
+    {
+        <tbody>
+            <tr class="mainTr">
+                <td class="borderRight" colspan="3" style="text-align:center;padding:10px">No Record Found.</td>
+            </tr>
+        </tbody>
+    }
+    <tfoot>
+        <tr>
+            <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 10px;  border: none;" colspan="12">&nbsp;</th>
+        </tr>
+    </tfoot>
+</table>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- END MAIN CONTENT -->
+    @section pagespecific {
+        <script src="~/Scripts/CustomJs/ResponsivePrintScreen.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+            })
+            $('#downloadForm').on("submit", function () {
+                $("table").each(function () {
+                    $(this).css("border-collapse", "collapse");
+                    $('.mainTable').css("width", "99.8%");
+                    $('.mainTable').css("margin-top", "-15px");
+                    $('.tdd').css("border-right", "1px solid black");
+                    var cssData = $('#CssData').html();
+                    var htmlData = $('#HtmlData').html();
+                    $('#DocumentName').val(cssData + htmlData);
+                })
+                $("table").each(function () {
+                    $(this).css("border-collapse", "separate");
+                    $('.mainTable').css("width", "100%");
+                    $('.mainTable').css("margin-top", "-25px");
+                    $('.tdd').css("border-right", "0px");
+                })
+            })
+            function PrintElem(elem) {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+                mywindow.document.write('<html><head><title></title>');
+                mywindow.document.write('</head><body>');
+                //mywindow.document.write('<h1></h1>');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+            $('.report_body tr td').each(function () {
+                if (parseFloat($(this).html()) > 0) {
+                    $(this).html(ReplaceNumberWithCommas($(this).html()));
+                }
+            });
+            function ReplaceNumberWithCommas(yourNumber) {
+                if (yourNumber != "0") {
+                    //Seperates the components of the number
+                    var n = yourNumber.toString().split(".");
+                    //Comma-fies the first part
+                    n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    if (n.length == 1) {
+                        n[0] = n[0] + ".00";
+                    }
+                    else {
+                        if (n[1].toString().length == 1) {
+                            n[1] = n[1] + "0";
+                        }
+                    }
+                    //Combines the two sections
+                    n = n.join(".");
+                }
+                else {
+                    n = yourNumber;
+                }
+                return n;
+            }
+        </script>
+    }

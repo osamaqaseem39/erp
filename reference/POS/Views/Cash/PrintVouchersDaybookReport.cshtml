@@ -1,0 +1,352 @@
+﻿<div id="CssData">
+
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            /*@@page {
+                size: A4;
+                margin-top: -30px;
+                margin-left: -45px;
+                page-break-after: always;
+            }*/
+            @@page {
+                size: A4;
+                margin-top: 15px;
+                margin-left: -45px;
+                margin-bottom: 15px;
+                /*page-break-after: always;*/
+            }
+
+            @@page:first {
+                size: A4;
+                margin-top: -30px;
+                margin-left: -45px;
+                /*page-break-after: always;*/
+            }
+
+            .mainTable {
+                width: 97.5% !important;
+                margin-left: 16px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .CustomersDetail {
+                padding-left: 316px !important;
+            }
+
+            .customerHeadingTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+        }
+
+        #printable-content table {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        #printable-content .heading {
+            border-width: 0px;
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        .mainTable {
+            width: 94.5%;
+            /*margin-top: -25px;*/
+            margin-bottom: 1px;
+            margin-left: 10px;
+            padding-right: 19px !important;
+        }
+
+            .mainTable td {
+                border-left: 1px solid black;
+                border-bottom: 1px solid black;
+            }
+
+        .borderRight {
+            border-right: 1px solid black;
+        }
+
+        .mainTable th {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        .mainTable th {
+            padding: 3px;
+        }
+
+        .mainTable td {
+            padding: 3px;
+        }
+
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }*/
+        .defaultBtn:hover {
+            background-color: #557588;
+            color: white !important;
+        }
+    </style>
+</div>
+
+<!-- widget content -->
+@model POS.Models.clsVoucher
+<div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-home fa-fw "></i>
+                Report
+                <span>
+                    >
+                    Vouchers Daybook
+                </span>
+            </h1>
+        </div>
+    </div>
+    <section>
+        <div class="panel">
+            <div class="panel-heading">
+                @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @id = "downloadForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                {
+                    <span class="header"> Vouchers Daybook Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                    <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                    <input type="hidden" name="FileName" id="FileName" value="VoucherDaybook" />
+                    <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                        Print
+                    </button>
+                    <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                }
+            </div>
+            <div class="panel-body">
+                <div id="HtmlData">
+                    <div id="printable-content" class="panel rpt" style=" float: left;width: 800px; font-family: Arial, Helvetica, sans-serif;">
+                        <table style="padding: 5px" class="heading">
+                            <tr>
+                                <th style="font-weight: normal; font-size: 11px; text-align: left;padding-right:12px;padding-top:0px;border-bottom:none;" colspan="12" class="pull-right"><strong>Print Date:&nbsp;</strong>@*<span class="LocalDate"></span>*@@Convert.ToDateTime(DateTime.Now).ToString("dd/MM/yyyy hh:mm tt")</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: bold; font-size: 20px; text-align: center; padding-bottom: 5px;padding-top:15px" colspan="6">@System.Web.HttpContext.Current.Application["BusinessName"]</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: normal; font-size: 14px; text-align: center; padding-bottom: 5px;" colspan="6">@System.Web.HttpContext.Current.Application["BusinessAddress"]</th>
+                            </tr>
+                            <tr>
+                                <th style="font-weight: bold; font-size: 18px; text-align: center;" colspan="6">Vouchers Daybook</th>
+                            </tr>
+                            @if (Model.VouchersList.Count != 0)
+                            {
+                                <tr>
+                                    <th style="font-size: 12px; text-align: center; padding-bottom: 25px;" colspan="6"><strong><span style="font-size: 12px">From:</span> </strong>@Convert.ToDateTime(Model.VouchersList[0].FromDate).ToString("dd/MM/yyyy")&nbsp; <strong><span style="font-size: 12px">To:&nbsp;</span></strong>@Convert.ToDateTime(Model.VouchersList[0].ToDate).ToString("dd/MM/yyyy")</th>
+                                </tr>
+                            }
+                            <tbody class="report_body"></tbody>
+                        </table>
+                        @{
+                            decimal grandTotalDebit = 0;
+                            decimal grandTotalCredit = 0;
+                        }
+                        @if (Model.VouchersList2.Count != 0)
+                        {
+                            for (int i = 0; i < Model.VouchersList2.Count; i++)
+                            {
+                                string voucherNo = Model.VouchersList2[i].VoucherNo;
+                                int j = 0;
+
+                                if (Model.VouchersList.Where(x => x.VoucherNo == voucherNo).Count() != 0)
+                                {
+                                    <table class="mainTable" style="margin-top:-25px;">
+                                        @*<tr>
+                                                <th style="text-align:left;border:none !important;font-size:15px" colspan="4">@Model.DetailList[i].Name</th>
+                                                <th style="text-align: right; border: none !important; font-size: 11px; " colspan="3">Total Records: @Model.InvoicesList.Where(x => x.DetailCode == detailCode).Count()</th>
+                                            </tr>*@
+                                        <tr class="mainTr">
+                                            <th style="text-align: center; width: 45px">Sr#</th>
+                                            <th style="text-align: center; width:110px">Voucher No.</th>
+                                            <th style="text-align: center;width:90px">Date</th>
+                                            <th style="text-align: left; width: 150px">Account</th>
+                                            <th style="text-align: left;">Remarks</th>
+                                            <th style="text-align: right; width: 50px">Debit</th>
+                                            <th class="borderRight" style="text-align: right; width: 50px">Credit</th>
+                                        </tr>
+                                        <tbody>
+                                            @{
+                                    decimal totalDebit = 0;
+                                    decimal totalCredit = 0;
+                                            }
+                                            @foreach (clsVoucher s in Model.VouchersList.Where(x => x.VoucherNo == voucherNo))
+                                            {
+                                                j++;
+                                                totalDebit += Convert.ToDecimal(s.LineDebit);
+                                                totalCredit += Convert.ToDecimal(s.LineCredit);
+
+                                                grandTotalDebit += Convert.ToDecimal(s.LineDebit);
+                                                grandTotalCredit += Convert.ToDecimal(s.LineCredit);
+                                                <tr class="mainTr">
+                                                    <td style="text-align:center">@(j)</td>
+                                                    <td style="text-align: center">@s.VoucherNo</td>
+                                                    <td style="text-align:center">@Convert.ToDateTime(s.VoucherDate).ToString("dd/MM/yyyy")</td>
+                                                    @if (string.IsNullOrEmpty(s.CityName))
+                                                    {
+                                                        <td style="text-align: left; ">@s.LineDetailName</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="text-align: left; ">@s.LineDetailName, @s.CityName</td>
+                                                    }
+                                                    <td style="text-align: left; ">@s.LineRemarks</td>
+                                                    @if (s.LineDebit == 0)
+                                                    {
+                                                        <td style="text-align: center">-</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="text-align: right">@Convert.ToDecimal(s.LineDebit).ToString("#,##0.00")</td>
+                                                    }
+                                                    @if (s.LineCredit == 0)
+                                                    {
+                                                        <td class="borderRight" style="text-align: center">-</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="borderRight" style="text-align: right">@Convert.ToDecimal(s.LineCredit).ToString("#,##0.00")</td>
+                                                    }
+                                                </tr>
+                                            }
+                                            <tr class="mainTr">
+                                                <td class="tdd" style="text-align: right; border: 1px solid #fff;font-weight:bold" colspan="5">Total: </td>
+                                                <td style="text-align: right; font-weight: bold">@Convert.ToDecimal(totalDebit).ToString("#,##0.00")</td>
+                                                <td class="borderRight" style="text-align: right; font-weight: bold">@Convert.ToDecimal(totalCredit).ToString("#,##0.00")</td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                    <br />
+                                    <br />
+                                }
+                            }
+                            <table class="mainTable">
+                                <tr class="mainTr">
+                                    <th class="tdd" style="text-align: right; border: 1px solid #fff;font-weight:bold" colspan="5">Grand Total: </th>
+                                    <th style="text-align: center;width:50px">@Convert.ToDecimal(grandTotalDebit).ToString("#,##0.00")</th>
+                                    <th class="borderRight" style="text-align: right; width: 50px">@Convert.ToDecimal(grandTotalCredit).ToString("#,##0.00")</th>
+                                </tr>
+                            </table>
+                        }
+                        else
+                        {
+                            <table class="mainTable" style="margin-top:5px">
+                                <tr class="mainTr">
+                                    <th style="text-align: center; width: 45px">Sr#</th>
+                                    <th style="text-align: left; width: 110px">Voucher No.</th>
+                                    <th style="text-align: center;width:80px">Date</th>
+                                    <th style="text-align: left; width: 100px">Account</th>
+                                    <th style="text-align: left; width: 50px">Remarks</th>
+                                    <th style="text-align: right; width: 50px">Debit</th>
+                                    <th class="borderRight" style="text-align: right; width: 50px">Credit</th>
+                                </tr>
+                                <tbody>
+                                    <tr class="mainTr">
+                                        <td class="borderRight" colspan="7" style="text-align:center;padding:10px">No Record Found.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END MAIN CONTENT -->
+@section pagespecific {
+<script src="~/Scripts/CustomJs/ResponsivePrintScreen.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+        })
+        $('#downloadForm').on("submit", function () {
+            $("table").each(function () {
+                $(this).css("border-collapse", "collapse");
+                $('.mainTable').css("width", "99.8%");
+                $('.mainTable').css("margin-top", "-15px");
+                $('.tdd').css("border-right", "1px solid black");
+                var cssData = $('#CssData').html();
+                var htmlData = $('#HtmlData').html();
+                $('#DocumentName').val(cssData + htmlData);
+            })
+            $("table").each(function () {
+                $(this).css("border-collapse", "separate");
+                $('.mainTable').css("width", "100%");
+                $('.mainTable').css("margin-top", "-25px");
+                $('.tdd').css("border-right", "0px");
+            })
+        })
+        function PrintElem(elem) {
+            var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+            mywindow.document.write('<html><head><title></title>');
+            mywindow.document.write('</head><body>');
+            //mywindow.document.write('<h1></h1>');
+            mywindow.document.write(document.getElementById(elem).innerHTML);
+            mywindow.document.write('</body></html>');
+
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            mywindow.print();
+            mywindow.close();
+
+            return true;
+        }
+        $('.report_body tr td').each(function () {
+            if (parseFloat($(this).html()) > 0) {
+                $(this).html(ReplaceNumberWithCommas($(this).html()));
+            }
+        });
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+    </script>
+}

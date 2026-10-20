@@ -9,41 +9,42 @@ public class RFQVendorResponseRepository : IRFQVendorResponseRepository
 {
     private readonly ERPDbContext _context;
 
-    public RFQVendorResponseRepository(ERPDbContext context)
+    public RFQVendorResponseRepository(ERPDbContext context) => _context = context;
+
+    private IQueryable<RFQVendorResponse> Query(Guid tenantId) =>
+        _context.RFQVendorResponses.Where(r => r.TenantId == tenantId);
+
+    public async Task<RFQVendorResponse?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        _context = context;
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(r => r.Id == id);
     }
 
-    public async Task<RFQVendorResponse?> GetByIdAsync(int id)
+    public async Task<IEnumerable<RFQVendorResponse>> GetByRfqIdAsync(Guid rfqId, Guid tenantId)
     {
-        return await _context.RFQVendorResponses.FindAsync(id);
+        if (tenantId == Guid.Empty) return Array.Empty<RFQVendorResponse>();
+        return await Query(tenantId).Where(r => r.RFQId == rfqId).ToListAsync();
     }
 
-    public async Task<IEnumerable<RFQVendorResponse>> GetAllAsync()
+    public async Task<Guid> CreateAsync(RFQVendorResponse entity)
     {
-        return await _context.RFQVendorResponses.ToListAsync();
-    }
-
-    public async Task<RFQVendorResponse> AddAsync(RFQVendorResponse entity)
-    {
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         _context.RFQVendorResponses.Add(entity);
         await _context.SaveChangesAsync();
-        return entity;
+        return entity.Id;
     }
 
-    public async Task UpdateAsync(RFQVendorResponse entity)
+    public async Task<bool> UpdateAsync(RFQVendorResponse entity)
     {
         _context.RFQVendorResponses.Update(entity);
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.RFQVendorResponses.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        var entity = await GetByIdAsync(id, tenantId);
+        if (entity == null) return false;
+        _context.RFQVendorResponses.Remove(entity);
+        return await _context.SaveChangesAsync() > 0;
     }
 }

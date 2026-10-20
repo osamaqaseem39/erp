@@ -1,4 +1,5 @@
 using ERP.Application.Interfaces.Procurement;
+using ERP.Infrastructure.Interfaces.Procurement;
 using ERP.Infrastructure.Repositories.Procurement;
 using ERP.Shared.DTOs.Procurement;
 using ERP.Shared.Mappers.Procurement;
@@ -8,11 +9,16 @@ namespace ERP.Application.Services.Procurement;
 public class VendorService : IVendorService
 {
     private readonly IVendorRepository _vendorRepository;
+    private readonly IVendorBankAccountRepository _bankAccounts;
     private readonly VendorMapper _mapper;
 
-    public VendorService(IVendorRepository vendorRepository, VendorMapper mapper)
+    public VendorService(
+        IVendorRepository vendorRepository,
+        IVendorBankAccountRepository bankAccounts,
+        VendorMapper mapper)
     {
         _vendorRepository = vendorRepository;
+        _bankAccounts = bankAccounts;
         _mapper = mapper;
     }
 
@@ -33,6 +39,12 @@ public class VendorService : IVendorService
             CompanyId = dto.CompanyId,
             PaymentTerms = dto.PaymentTerms,
             CreditLimit = dto.CreditLimit,
+            CreditDays = dto.CreditDays,
+            TaxNumber = dto.TaxNumber,
+            TaxType = dto.TaxType,
+            Ntn = dto.Ntn,
+            Strn = dto.Strn,
+            Cnic = dto.Cnic,
             IsActive = dto.IsActive
         };
 
@@ -76,6 +88,12 @@ public class VendorService : IVendorService
             PostalCode = dto.PostalCode,
             PaymentTerms = dto.PaymentTerms,
             CreditLimit = dto.CreditLimit,
+            CreditDays = dto.CreditDays,
+            TaxNumber = dto.TaxNumber,
+            TaxType = dto.TaxType,
+            Ntn = dto.Ntn,
+            Strn = dto.Strn,
+            Cnic = dto.Cnic,
             IsActive = dto.IsActive
         };
 
@@ -83,24 +101,30 @@ public class VendorService : IVendorService
         return new VendorDto { Id = dto.Id };
     }
 
-    public async Task<VendorDto> ApproveAsync(Guid id, Guid tenantId, Guid userId)
+    public async Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var vendor = await _vendorRepository.GetByIdAsync(id, tenantId);
-        if (vendor == null)
-            throw new KeyNotFoundException($"Vendor with ID '{id}' not found.");
+        if (vendor == null) return false;
 
-        // Add approval logic here
-        return new VendorDto { Id = id };
+        vendor.IsActive = true;
+        vendor.UpdatedBy = userId.ToString();
+        vendor.UpdatedAt = DateTime.UtcNow;
+        return await _vendorRepository.UpdateAsync(vendor);
     }
 
-    public async Task<VendorDto> SuspendAsync(Guid id, SuspendVendorDto dto, Guid tenantId, Guid userId)
+    public async Task<bool> SuspendAsync(Guid id, SuspendVendorDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var vendor = await _vendorRepository.GetByIdAsync(id, tenantId);
-        if (vendor == null)
-            throw new KeyNotFoundException($"Vendor with ID '{id}' not found.");
+        if (vendor == null) return false;
 
-        // Add suspension logic here
-        return new VendorDto { Id = id };
+        vendor.IsActive = false;
+        vendor.UpdatedBy = userId.ToString();
+        vendor.UpdatedAt = DateTime.UtcNow;
+        // Reason is audit-only for now (no Status/Notes column on Vendor).
+        _ = dto;
+        return await _vendorRepository.UpdateAsync(vendor);
     }
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
@@ -185,33 +209,69 @@ public class VendorService : IVendorService
 
     public async Task<Guid> AddVendorBankAccountAsync(CreateVendorBankAccountDto dto, Guid vendorId, Guid tenantId, Guid userId)
     {
-        var vendor = await _vendorRepository.GetByIdAsync(vendorId, tenantId);
-        if (vendor == null)
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.", nameof(tenantId));
+
+        var vendor = await _vendorRepository.GetByIdAsync(vendorId, tenantId)
+            ?? throw new KeyNotFoundException($"Vendor with ID '{vendorId}' not found.");
+
+        var bankAccount = _mapper.MapToBankAccountEntity(dto, vendor.Id, tenantId, userId.ToString());
+        if (bankAccount.IsPrimary)
         {
-            throw new KeyNotFoundException($"Vendor with ID '{vendorId}' not found.");
+            foreach (var existing in await _bankAccounts.GetByVendorAsync(vendor.Id, tenantId))
+            {
+                if (!existing.IsPrimary) continue;
+                existing.IsPrimary = false;
+                existing.UpdatedAt = DateTime.UtcNow;
+                existing.UpdatedBy = userId.ToString();
+                await _bankAccounts.UpdateAsync(existing);
+            }
         }
 
-        var bankAccount = _mapper.MapToBankAccountEntity(dto, vendorId, tenantId, userId.ToString());
-        // Implementation for adding bank account would go here
-        return Guid.NewGuid(); // Placeholder
+        return await _bankAccounts.CreateAsync(bankAccount);
     }
 
     public async Task<Guid> UpdateVendorBankAccountAsync(UpdateVendorBankAccountDto dto, Guid tenantId, Guid userId)
     {
-        // Implementation for updating bank account would go here
-        return dto.Id;
+        var entity = await _bankAccounts.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Bank account with ID '{dto.Id}' not found.");
+
+        if (dto.BankName != null) entity.BankName = dto.BankName;
+        if (dto.AccountNumber != null) entity.AccountNumber = dto.AccountNumber;
+        if (dto.IBAN != null) entity.IBAN = dto.IBAN;
+        if (dto.SWIFTCode != null || dto.SwiftCode != null)
+            entity.SWIFTCode = dto.SWIFTCode ?? dto.SwiftCode ?? entity.SWIFTCode;
+        if (dto.Currency != null || dto.CurrencyCode != null)
+            entity.Currency = dto.CurrencyCode ?? dto.Currency ?? entity.Currency;
+        if (dto.IsPrimary.HasValue) entity.IsPrimary = dto.IsPrimary.Value;
+        if (dto.IsActive.HasValue) entity.IsActive = dto.IsActive.Value;
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
+
+        if (entity.IsPrimary)
+        {
+            foreach (var other in await _bankAccounts.GetByVendorAsync(entity.VendorId, tenantId))
+            {
+                if (other.Id == entity.Id || !other.IsPrimary) continue;
+                other.IsPrimary = false;
+                other.UpdatedAt = DateTime.UtcNow;
+                other.UpdatedBy = userId.ToString();
+                await _bankAccounts.UpdateAsync(other);
+            }
+        }
+
+        await _bankAccounts.UpdateAsync(entity);
+        return entity.Id;
     }
 
     public async Task<bool> DeleteVendorBankAccountAsync(Guid bankAccountId, Guid tenantId)
-    {
-        // Implementation for deleting bank account would go here
-        return true;
-    }
+        => await _bankAccounts.DeleteAsync(bankAccountId, tenantId);
 
     public async Task<IEnumerable<VendorBankAccountDto>> GetVendorBankAccountsAsync(Guid vendorId, Guid tenantId)
     {
-        // Implementation for getting bank accounts would go here
-        return new List<VendorBankAccountDto>();
+        var vendor = await _vendorRepository.GetByIdAsync(vendorId, tenantId);
+        if (vendor == null) return Array.Empty<VendorBankAccountDto>();
+        return (await _bankAccounts.GetByVendorAsync(vendorId, tenantId)).Select(_mapper.MapToBankAccountDto);
     }
 
     public async Task<bool> ValidateVendorCodeAsync(string vendorCode, Guid companyId, Guid tenantId, Guid? excludeVendorId = null)

@@ -1,0 +1,322 @@
+﻿@{
+    string businessName = System.Web.HttpContext.Current.Application["BusinessName"].ToString();
+    string adminImageSrc = System.Web.HttpContext.Current.Application["UserImage"].ToString();
+    string bgImageSrc = ""; // "/Content/pos.jpg";
+    string adminName = User.Identity.Name;
+    string bgLogo = System.Web.HttpContext.Current.Application["CompanyLogo"].ToString();
+    string bgColor = "#584677";
+}
+
+
+<style>
+    .nav-function-minify .page-logo img {
+        width: 90% !important;
+    }
+
+    .page-logo img {
+        width: auto !important;
+    }
+</style>
+@model List<BlocksERP.Models.clsModule>
+<aside class="page-sidebar">
+    <div class="page-logo" style="display:block !important;">
+        <a href="#" style="display:block !important;padding-top:10px;" class="page-logo-link press-scale-down d-flex align-items-center position-relative" data-toggle="modal" data-target="#modal-shortcut">
+            <img src="@bgLogo" alt="@businessName" aria-roledescription="logo" style="height:50px !important"><br />
+            @*<span class="page-logo-text mr-1" style="margin-left: 0.2rem !important;">@businessName</span>*@
+            <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+            <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+        </a>
+    </div>
+    <!-- BEGIN PRIMARY NAVIGATION -->
+    <nav id="js-primary-nav" class="primary-nav" role="navigation">
+        <div class="nav-filter">
+            <div class="position-relative">
+                <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control" tabindex="0">
+                <a href="#" onclick="return false;" class="btn-primary btn-search-close js-waves-off" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar">
+                    <i class="fal fa-chevron-up"></i>
+                </a>
+            </div>
+        </div>
+        <div class="info-card" style="background-color: #99B801;color:black;">
+            <img src="@adminImageSrc" class="profile-image rounded-circle" alt="@adminName">
+            <div class="info-card-text" >
+                <a href="#" class="d-flex align-items-center text-white">
+                    <span class="text-truncate text-truncate-sm d-inline-block" style="color:black;">
+                        @adminName
+                    </span>
+                </a>
+                @*<span class="d-inline-block text-truncate text-truncate-sm">Pakistan</span>*@
+            </div>
+            @*<img src="@bgImageSrc" class="cover" style="width:100%" alt="cover">*@
+            <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                <i class="fal fa-angle-down"></i>
+            </a>
+        </div>
+        @*<div class="info-card">
+                <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                    <i class="fal fa-angle-down"></i>
+                </a>
+            </div>*@
+    <ul id="js-nav-menu" class="nav-menu">
+        @*<li class="nav-title">Dashboard</li>*@
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuLoan").ToLower()))
+        {
+
+            <li>
+                <a href="/sale/saledashboard/index" title="Sale Dashboard" data-filter-tags="dashboard">
+                    <i class="fal fa-tachometer"></i>
+                    <span class="nav-link-text" data-i18n="nav.Dashboard">Dashboard</span>
+                </a>
+            </li>
+
+        }
+
+
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCountry").ToLower()
+            || x.ModuleName.ToLower() == ("frmCity").ToLower()
+            || x.ModuleName.ToLower() == ("frmAdminEmail").ToLower()
+            || x.ModuleName.ToLower() == ("frmCompany").ToLower()
+            || x.ModuleName.ToLower() == ("frmEducation").ToLower()
+            || x.ModuleName.ToLower() == ("frmEmploymentStatus").ToLower()
+            || x.ModuleName.ToLower() == ("frmGender").ToLower()
+            || x.ModuleName.ToLower() == ("frmIncomeSource").ToLower()
+            || x.ModuleName.ToLower() == ("frmReferralRelation").ToLower()
+            || x.ModuleName.ToLower() == ("frmDocumentType").ToLower()
+            || x.ModuleName.ToLower() == ("frmLoanPurpose").ToLower()
+            || x.ModuleName.ToLower() == ("frmLoanCategory").ToLower()
+            || x.ModuleName.ToLower() == ("frmBank").ToLower()
+            || x.ModuleName.ToLower() == ("frmCompanyBankAccount").ToLower()
+
+
+
+            ))
+
+
+        {
+            <li>
+                <a href="#" title="Setup" data-filter-tags="country city customer Trade">
+                    <i class="fal fa-cogs"></i>
+                    <span class="nav-link-text" data-i18n="nav.Setup">Setup</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCompany").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/company/companyindex" title="Company" data-filter-tags="Company">
+                                <span class="nav-link-text" data-i18n="nav.Company">Company</span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCountry").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/country/countryindex" title="Country" data-filter-tags="country">
+                                <span class="nav-link-text" data-i18n="nav.Country">Country</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCity").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/city/cityindex" title="City" data-filter-tags="city">
+                                <span class="nav-link-text" data-i18n="nav.City">City</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmAdminEmail").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/adminemail/adminemailindex" title="Admin Email" data-filter-tags="Admin Email">
+                                <span class="nav-link-text" data-i18n="nav.Admin Email">Admin Email</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmEducation").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/education/educationindex" title="Education" data-filter-tags="Education">
+                                <span class="nav-link-text" data-i18n="nav.Education">Education</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmEmploymentStatus").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/EmploymentStatus/EmploymentStatusindex" title="Employment Status" data-filter-tags="Employment Status">
+                                <span class="nav-link-text" data-i18n="nav.Employment Status">Employment Status</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmIncomeSource").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/incomesource/incomesourceindex" title="Income Source" data-filter-tags="Income Source">
+                                <span class="nav-link-text" data-i18n="nav.Income Source">Income Source</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmReferralRelation").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/ReferralRelation/ReferralRelationindex" title="Referral Relation" data-filter-tags="Referral Relation">
+                                <span class="nav-link-text" data-i18n="nav.Referral Relation">Referral Relation</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmDocumentType").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/DocumentType/DocumentTypeindex" title="Document Type" data-filter-tags="Document Type">
+                                <span class="nav-link-text" data-i18n="nav.Document Type">Document Type</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmLoanPurpose").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/loanpurpose/loanpurposeindex" title="Loan Purpose" data-filter-tags="Loan Purpose">
+                                <span class="nav-link-text" data-i18n="nav.Loan Purpose">Loan Purpose</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmLoanCategory").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/loancategory/loancategoryindex" title="Loan Category" data-filter-tags="Loan Category">
+                                <span class="nav-link-text" data-i18n="nav.Loan Category">Loan Category</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmBank").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/bank/bankindex" title="Bank" data-filter-tags="Bank">
+                                <span class="nav-link-text" data-i18n="nav.Bank">Bank</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCompanyBankAccount").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/CompanyBankAccount/CompanyBankAccountindex" title="Company Bank Account" data-filter-tags="Company Bank Account">
+                                <span class="nav-link-text" data-i18n="nav.Company Bank Account">Company Bank Account</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmGender").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/gender/genderindex" title="Gender" data-filter-tags="Gender">
+                                <span class="nav-link-text" data-i18n="nav.Gender">Gender</span>
+                            </a>
+                        </li>
+                    }*@
+                </ul>
+            </li>
+        }
+
+
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmPendingLoanUser").ToLower()
+            || x.ModuleName.ToLower() == ("frmLoanUser").ToLower()
+
+            ))
+
+
+        {
+            <li>
+                <a href="#" title="Loan Users" data-filter-tags="Loan Users">
+                    <i class="fal fa-users"></i>
+                    <span class="nav-link-text" data-i18n="nav.Loan Users">Loan Users</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmPendingLoanUser").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/loanuser/newloanuserindex" title="New Users" data-filter-tags="New Users">
+                                <span class="nav-link-text" data-i18n="nav.New Users">New Users</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmLoanUser").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/loanuser/loanuserindex" title="Active Users" data-filter-tags="Active Users">
+                                <span class="nav-link-text" data-i18n="nav.Active Users">Active Users</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmPendingLoanApplication").ToLower()
+            || x.ModuleName.ToLower() == ("frmConfirmLoanApplication").ToLower()
+            || x.ModuleName.ToLower() == ("frmLoanApplication").ToLower()
+
+            ))
+
+
+        {
+            <li>
+                <a href="#" title="Loan Application" data-filter-tags="Loan Application">
+                    <i class="fal fa-usd-circle"></i>
+                    <span class="nav-link-text" data-i18n="nav.Loan Users">Loan Application</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmPendingLoanApplication").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/loanapplication/newloanapplicationindex" title="New Application" data-filter-tags="New Application">
+                                <span class="nav-link-text" data-i18n="nav.New Application">New Application</span>
+                            </a>
+                        </li>
+                    }
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmConfirmLoanApplication").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/loanapplication/confirmloanapplicationindex" title="Confirm Application" data-filter-tags="Confirm Application">
+                                <span class="nav-link-text" data-i18n="nav.Confirm Application">Confirm Application</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmLoanApplication").ToLower()))
+                    {
+                        <li>
+                            <a href="/loan/loanapplication/loanapplicationindex" title="Active Loan" data-filter-tags="Active Loan">
+                                <span class="nav-link-text" data-i18n="nav.Active Loan">Active Loan</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+
+        
+
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmSaleReports").ToLower()))
+        {
+            <li>
+                <a href="/sale/reports/reportsindex" title="Reports" data-filter-tags="reports">
+                    <i class="fal fa-print"></i>
+                    <span class="nav-link-text" data-i18n="nav.Reports">Reports</span>
+                </a>
+            </li>
+        }*@
+
+        <li>
+            <a href="/home/mainmenu" title="Main Menu" data-filter-tags="main menu">
+                <i class="fal fa-home"></i>
+                <span class="nav-link-text" data-i18n="nav.Main Menu">Main Menu</span>
+            </a>
+        </li>
+
+    </ul>
+        <div class="filter-message js-filter-message bg-success-600"></div>
+    </nav>
+</aside>

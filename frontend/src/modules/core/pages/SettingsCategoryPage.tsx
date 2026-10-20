@@ -18,7 +18,7 @@ import { coreApi, type SettingValue } from "../services/coreApi";
 import { refreshTenantContext } from "../tenantContext";
 
 export interface SettingsCategoryPageProps {
-  category: "preferences" | "security" | "email";
+  category: "preferences" | "security" | "email" | "finance";
   title: string;
   description: string;
   /** Honest note about what the settings do today (e.g. "stored now, enforced in Checkpoint 2"). */

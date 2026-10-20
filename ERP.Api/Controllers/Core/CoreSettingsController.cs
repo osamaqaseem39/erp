@@ -1,3 +1,4 @@
+using ERP.Api.OpenApi;
 using ERP.Application.Core.Settings;
 using ERP.Shared.DTOs.Core;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,10 @@ namespace ERP.Api.Controllers.Core;
 [ApiController]
 [Route("api/core/settings")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class CoreSettingsController : ControllerBase
 {
     private readonly ICoreSettingsService _settings;
@@ -19,9 +24,11 @@ public class CoreSettingsController : ControllerBase
     }
 
     [HttpGet("{category}")]
+    [ProducesResponseType(typeof(SettingsCategoryDto), OpenApiResponseTypes.Ok)]
     public async Task<ActionResult<SettingsCategoryDto>> Get(string category) => Ok(await _settings.GetCategoryAsync(category));
 
     [HttpPut("{category}")]
+    [ProducesResponseType(typeof(SettingsCategoryDto), OpenApiResponseTypes.Ok)]
     public async Task<ActionResult<SettingsCategoryDto>> Update(string category, [FromBody] UpdateSettingsCategoryDto dto) =>
         Ok(await _settings.UpdateCategoryAsync(category, dto));
 }

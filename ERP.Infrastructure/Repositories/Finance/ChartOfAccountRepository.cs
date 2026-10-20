@@ -16,9 +16,7 @@ public class ChartOfAccountRepository : IChartOfAccountRepository
     public async Task<ChartOfAccount?> GetByIdAsync(Guid id)
     {
         return await _context.ChartOfAccounts
-            .Include(c => c.ParentAccount)
-            .Include(c => c.ChildAccounts)
-            .FirstOrDefaultAsync(c => c.AccountId == id);
+            .FirstOrDefaultAsync(c => c.AccountId == id || c.Id == id);
     }
 
     public async Task<IEnumerable<ChartOfAccount>> GetAllAsync()
@@ -66,6 +64,8 @@ public class ChartOfAccountRepository : IChartOfAccountRepository
 
     public async Task<Guid> CreateAsync(ChartOfAccount chartOfAccount)
     {
+        if (chartOfAccount.Id == Guid.Empty) chartOfAccount.Id = Guid.NewGuid();
+        if (chartOfAccount.AccountId == Guid.Empty) chartOfAccount.AccountId = chartOfAccount.Id;
         _context.ChartOfAccounts.Add(chartOfAccount);
         await _context.SaveChangesAsync();
         return chartOfAccount.AccountId;
@@ -80,7 +80,7 @@ public class ChartOfAccountRepository : IChartOfAccountRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var chartOfAccount = await _context.ChartOfAccounts.FindAsync(id);
+        var chartOfAccount = await GetByIdAsync(id);
         if (chartOfAccount == null) return false;
 
         _context.ChartOfAccounts.Remove(chartOfAccount);

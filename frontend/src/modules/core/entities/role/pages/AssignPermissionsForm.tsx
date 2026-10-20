@@ -1,8 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { PageBreadcrumb } from "../../../../../components";
 import { roleService, type PermissionDto, type AssignPermissionsDto } from "../services";
 import Swal from "sweetalert2";
+
+const PRIMARY_ACTIONS = ["view", "create", "update", "delete"] as const;
+
+type ResourceRow = {
+  resource: string;
+  label: string;
+  byAction: Record<string, PermissionDto>;
+  extra: PermissionDto[];
+};
+
+function parsePermission(p: PermissionDto): { resource: string; action: string; module: string } {
+  const action = (p.actionName || p.action || "").toLowerCase();
+  const resource = p.moduleName || p.module || "";
+  if (action && resource) {
+    return { resource, action, module: resource.split(".")[0] || "other" };
+  }
+  const name = p.name || "";
+  const lastDot = name.lastIndexOf(".");
+  if (lastDot <= 0) return { resource: name || "other", action: "other", module: "other" };
+  const res = name.slice(0, lastDot);
+  return { resource: res, action: name.slice(lastDot + 1).toLowerCase(), module: res.split(".")[0] || "other" };
+}
+
+function humanize(code: string): string {
+  const leaf = code.includes(".") ? code.slice(code.lastIndexOf(".") + 1) : code;
+  return leaf.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[-_]/g, " ");
+}
 
 const AssignPermissionsForm: React.FC = () => {
   const navigate = useNavigate();
@@ -15,9 +42,7 @@ const AssignPermissionsForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id) {
-      void loadData();
-    }
+    if (id) void loadData();
   }, [id]);
 
   const loadData = async () => {
@@ -70,23 +95,53 @@ const AssignPermissionsForm: React.FC = () => {
 
   const togglePermission = (permissionId: string) => {
     setSelectedPermissions((prev) =>
-      prev.includes(permissionId)
-        ? prev.filter((pid) => pid !== permissionId)
-        : [...prev, permissionId]
+      prev.includes(permissionId) ? prev.filter((pid) => pid !== permissionId) : [...prev, permissionId]
     );
   };
 
   const selectAll = () => setSelectedPermissions(permissions.map((p) => p.id));
   const clearAll = () => setSelectedPermissions([]);
 
-  const groupedPermissions = permissions.reduce<Record<string, PermissionDto[]>>((groups, permission) => {
-    const moduleName = permission.module || permission.moduleName || "Other";
-    if (!groups[moduleName]) {
-      groups[moduleName] = [];
+  const groupedByModule = useMemo(() => {
+    const byResource = new Map<string, ResourceRow>();
+    for (const p of permissions) {
+      const { resource, action, module } = parsePermission(p);
+      let row = byResource.get(resource);
+      if (!row) {
+        row = { resource, label: humanize(resource), byAction: {}, extra: [] };
+        byResource.set(resource, row);
+      }
+      if ((PRIMARY_ACTIONS as readonly string[]).includes(action)) {
+        row.byAction[action] = p;
+      } else {
+        row.extra.push(p);
+      }
+      // stash module on row via resource prefix — regroup below
+      (row as ResourceRow & { module?: string }).module = module;
     }
-    groups[moduleName].push(permission);
-    return groups;
-  }, {});
+
+    const modules: Record<string, ResourceRow[]> = {};
+    for (const row of byResource.values()) {
+      const module = (row as ResourceRow & { module?: string }).module || row.resource.split(".")[0] || "other";
+      if (!modules[module]) modules[module] = [];
+      modules[module].push(row);
+    }
+    for (const rows of Object.values(modules)) {
+      rows.sort((a, b) => a.resource.localeCompare(b.resource));
+    }
+    return Object.entries(modules).sort(([a], [b]) => a.localeCompare(b));
+  }, [permissions]);
+
+  const toggleResourceActions = (row: ResourceRow, on: boolean) => {
+    const ids = [
+      ...PRIMARY_ACTIONS.map((a) => row.byAction[a]?.id).filter(Boolean),
+      ...row.extra.map((p) => p.id),
+    ] as string[];
+    setSelectedPermissions((prev) => {
+      if (on) return Array.from(new Set([...prev, ...ids]));
+      return prev.filter((id) => !ids.includes(id));
+    });
+  };
 
   return (
     <>
@@ -135,30 +190,97 @@ const AssignPermissionsForm: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {Object.entries(groupedPermissions).map(([moduleName, modulePermissions]) => (
+                <div className="space-y-8">
+                  {groupedByModule.map(([moduleName, rows]) => (
                     <div key={moduleName}>
-                      <h5 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">{moduleName}</h5>
-                      <div className="space-y-2">
-                        {modulePermissions.map((permission) => (
-                          <div key={permission.id} className="flex items-center p-3 border rounded">
-                            <input
-                              type="checkbox"
-                              id={`perm-${permission.id}`}
-                              checked={selectedPermissions.includes(permission.id)}
-                              onChange={() => togglePermission(permission.id)}
-                              className="form-checkbox rounded me-3"
-                            />
-                            <label htmlFor={`perm-${permission.id}`} className="flex-1 cursor-pointer">
-                              <div className="font-medium">{permission.name}</div>
-                              {(permission.description || permission.actionName) && (
-                                <div className="text-sm text-gray-500">
-                                  {permission.description || permission.actionName}
-                                </div>
-                              )}
-                            </label>
-                          </div>
-                        ))}
+                      <h5 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 uppercase tracking-wide text-sm">
+                        {moduleName}
+                      </h5>
+                      <div className="table-responsive">
+                        <table className="table table-sm table-hover mb-0">
+                          <thead>
+                            <tr>
+                              <th className="w-1/3">Resource</th>
+                              {PRIMARY_ACTIONS.map((a) => (
+                                <th key={a} className="text-center capitalize">
+                                  {a === "view" ? "View" : a === "create" ? "Create" : a === "update" ? "Update" : "Delete"}
+                                </th>
+                              ))}
+                              <th>Other</th>
+                              <th className="text-center">All</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map((row) => {
+                              const allIds = [
+                                ...PRIMARY_ACTIONS.map((a) => row.byAction[a]?.id).filter(Boolean),
+                                ...row.extra.map((p) => p.id),
+                              ] as string[];
+                              const allOn = allIds.length > 0 && allIds.every((pid) => selectedPermissions.includes(pid));
+                              return (
+                                <tr key={row.resource}>
+                                  <td>
+                                    <div className="font-medium">{row.label}</div>
+                                    <div className="text-xs text-gray-500">{row.resource}</div>
+                                  </td>
+                                  {PRIMARY_ACTIONS.map((action) => {
+                                    const perm = row.byAction[action];
+                                    if (!perm) {
+                                      return (
+                                        <td key={action} className="text-center text-gray-300">
+                                          —
+                                        </td>
+                                      );
+                                    }
+                                    return (
+                                      <td key={action} className="text-center">
+                                        <input
+                                          type="checkbox"
+                                          className="form-checkbox rounded"
+                                          checked={selectedPermissions.includes(perm.id)}
+                                          onChange={() => togglePermission(perm.id)}
+                                          title={perm.name}
+                                          aria-label={`${row.resource}.${action}`}
+                                        />
+                                      </td>
+                                    );
+                                  })}
+                                  <td>
+                                    {row.extra.length === 0 ? (
+                                      <span className="text-gray-300">—</span>
+                                    ) : (
+                                      <div className="flex flex-wrap gap-2">
+                                        {row.extra.map((perm) => {
+                                          const { action } = parsePermission(perm);
+                                          return (
+                                            <label key={perm.id} className="inline-flex items-center gap-1 text-sm">
+                                              <input
+                                                type="checkbox"
+                                                className="form-checkbox rounded"
+                                                checked={selectedPermissions.includes(perm.id)}
+                                                onChange={() => togglePermission(perm.id)}
+                                              />
+                                              <span>{action}</span>
+                                            </label>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="text-center">
+                                    <input
+                                      type="checkbox"
+                                      className="form-checkbox rounded"
+                                      checked={allOn}
+                                      onChange={(e) => toggleResourceActions(row, e.target.checked)}
+                                      aria-label={`Toggle all for ${row.resource}`}
+                                    />
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   ))}

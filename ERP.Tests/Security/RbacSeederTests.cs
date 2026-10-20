@@ -65,11 +65,15 @@ public class RbacSeederTests
         var result = await Seeder(db).SeedTenantAsync(Tenant);
 
         Assert.Equal(4, result.PermissionsAdded);
-        Assert.Equal(6, result.RolesCreated);
+        // Administrator + Read-only + Sales/Finance/Accountant/HR/Operations/Warehouse/Production
+        Assert.Equal(9, result.RolesCreated);
         var roles = await db.Roles.Where(r => r.TenantId == Tenant).ToListAsync();
         Assert.True(roles.Single(r => r.RoleName == RbacSeeder.Administrator).IsSystemRole);
         Assert.True(roles.Single(r => r.RoleName == RbacSeeder.ReadOnly).IsSystemRole);
         Assert.False(roles.Single(r => r.RoleName == "Sales").IsSystemRole);
+        Assert.Contains(roles, r => r.RoleName == "Accountant");
+        Assert.Contains(roles, r => r.RoleName == "Warehouse");
+        Assert.Contains(roles, r => r.RoleName == "Production");
         Assert.Empty(await db.Permissions.Where(p => p.TenantId == OtherTenant).ToListAsync());
     }
 
@@ -82,7 +86,7 @@ public class RbacSeederTests
 
         Assert.Equal(new RbacSeedResult(0, 0, 0), again);
         Assert.Equal(4, await db.Permissions.CountAsync());
-        Assert.Equal(6, await db.Roles.CountAsync());
+        Assert.Equal(9, await db.Roles.CountAsync());
     }
 
     [Fact]

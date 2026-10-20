@@ -1,0 +1,43 @@
+﻿@model Tickets.Models.clsTicket
+@using (Html.BeginForm("index", "home", FormMethod.Post, new { id = "serviceSelectionForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+{
+    <div class="row">
+        <section class="col col-md-12 col-lg-12">
+            <label>Select Service</label>
+            <label class="select">
+                <i class="append fa fa-caret-down"></i>
+                @Html.DropDownListFor(model => model.ServiceId, ViewBag.Service as SelectList, new { @style = "width:100%" })
+            </label>
+        </section>
+    </div>
+    <div class="row">
+        <section class="col col-md-12  col-lg-12">
+            <table class="pull-right footer-nav" style="">
+                <tr>
+                    <td>
+                        <a id="btnSave" class="btn" style="background-color: #015778; width: 95px; height: 30px; margin-left: 10px; margin-bottom: 8px; color: white;line-height:27px">
+                            Submit
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </section>
+    </div>
+}
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript">
+    $(document).keypress(function (e) {
+        if (e.which == 13) {
+            var ServiceId = $('#ServiceId').val();
+            var href = "/home/index/" + ServiceId;
+            window.location.href = href;
+        }
+    });
+    $('#btnSave').on('click', function (e) {
+            e.preventDefault();
+            var ServiceId = $('#ServiceId').val();
+            var href = "/home/index/" + ServiceId;
+            window.location.href = href;
+        })
+</script>

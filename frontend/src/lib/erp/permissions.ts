@@ -18,6 +18,7 @@ interface SessionShape {
   token?: string;
   roleNames?: string[];
   permissions?: string[];
+  isSuperAdmin?: boolean;
 }
 
 export interface PermissionContext {
@@ -31,7 +32,9 @@ export function readPermissionContext(session: SessionShape | null | undefined):
   const roles = session?.roleNames ?? [];
   return {
     isAuthenticated: !!session?.token,
-    isSuperAdmin: roles.some((r) => r.toLowerCase() === SUPER_ADMIN_ROLE.toLowerCase()),
+    isSuperAdmin:
+      !!session?.isSuperAdmin ||
+      roles.some((r) => r.toLowerCase() === SUPER_ADMIN_ROLE.toLowerCase()),
     permissions: Array.isArray(session?.permissions)
       ? new Set(session.permissions.map((p) => p.toLowerCase()))
       : undefined,

@@ -13,6 +13,7 @@ namespace ERP.Shared.DTOs.Finance
         public decimal SubTotal { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal TotalAmount { get; set; }
+        public decimal Balance { get; set; }
         public string Status { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
         public DateTime? ApprovedDate { get; set; }
@@ -35,6 +36,8 @@ namespace ERP.Shared.DTOs.Finance
         public string? CurrencyCode { get; set; }
         public decimal? ExchangeRate { get; set; }
         public string? Reference { get; set; }
+        public Guid? PurchaseOrderId { get; set; }
+        public Guid? PurchaseInvoiceId { get; set; }
         public new bool IsActive { get; set; } = true;
     }
 

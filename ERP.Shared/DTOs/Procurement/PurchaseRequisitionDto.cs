@@ -27,6 +27,7 @@ public class PurchaseRequisitionDto : BaseDto
 
 public class CreatePurchaseRequisitionDto : CreateDto
 {
+    public Guid? CompanyId { get; set; }
     public string? RequisitionNumber { get; set; }
     public Guid RequestedById { get; set; }
     public Guid? DepartmentId { get; set; }
@@ -37,10 +38,13 @@ public class CreatePurchaseRequisitionDto : CreateDto
     public string? Priority { get; set; } = "Medium";
     public string? Justification { get; set; }
     public string? Notes { get; set; }
+    public string? Remarks { get; set; }
+    public List<CreatePurchaseRequisitionDetailDto> Details { get; set; } = new();
 }
 
 public class UpdatePurchaseRequisitionDto : UpdateDto
 {
+    public Guid? CompanyId { get; set; }
     public string? RequisitionNumber { get; set; }
     public Guid? RequestedById { get; set; }
     public Guid? DepartmentId { get; set; }
@@ -51,6 +55,8 @@ public class UpdatePurchaseRequisitionDto : UpdateDto
     public string? Priority { get; set; }
     public string? Justification { get; set; }
     public string? Notes { get; set; }
+    public string? Remarks { get; set; }
+    public List<CreatePurchaseRequisitionDetailDto> Details { get; set; } = new();
 }
 
 public class PurchaseRequisitionDetailDto : BaseDto
@@ -73,10 +79,11 @@ public class PurchaseRequisitionDetailDto : BaseDto
     public string? Notes { get; set; }
 }
 
-public class CreatePurchaseRequisitionDetailDto : CreateDto
+public class CreatePurchaseRequisitionDetailDto
 {
     public Guid ItemId { get; set; }
     public decimal Quantity { get; set; }
+    public Guid? UnitOfMeasureId { get; set; }
     public decimal? EstimatedUnitPrice { get; set; }
     public string? Specifications { get; set; }
     public string? Notes { get; set; }

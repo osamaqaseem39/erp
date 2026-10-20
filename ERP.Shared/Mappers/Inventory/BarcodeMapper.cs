@@ -27,9 +27,9 @@ public class BarcodeMapper : IMapper<Barcode, BarcodeDto>
     {
         return new Barcode
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             ItemId = dto.ItemId,
-            VariantId = dto.VariantId ?? Guid.Empty,
+            VariantId = dto.VariantId,
             BarcodeValue = dto.Barcode,
             BarcodeType = dto.BarcodeType,
             IsPrimary = dto.IsPrimary,

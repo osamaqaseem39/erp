@@ -17,6 +17,8 @@ public class SalesOrder : BaseEntity
     public DateTime? InvoicedDate { get; set; }
     public string Status { get; set; } = "Draft"; // Draft, Confirmed, Shipped, Delivered, Cancelled
     public decimal SubTotal { get; set; }
+    public decimal Tax1Amount { get; set; }
+    public decimal Tax2Amount { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal TotalAmount { get; set; }
     public string? Currency { get; set; }

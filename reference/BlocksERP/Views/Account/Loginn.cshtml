@@ -1,0 +1,276 @@
+﻿@model clsChangePassword
+@{
+    ViewBag.PageId = "extr-page";
+    ViewBag.PageClass = "animated fadeInDown";
+    Layout = "";
+}
+
+<!DOCTYPE html>
+<html lang="en-us" id="@ViewBag.PageId" class="@Settings.CurrentTheme">
+<head>
+    <meta charset=" utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title> Glow- Student Information Management System </title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Basic Styles -->
+    @Styles.Render("~/content/smartadmin")
+    <!-- FAVICONS -->
+    <link rel="shortcut icon" href="~/Glow-resources/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="~/Glow-resources/favicon.ico" type="image/x-icon">
+    <!-- GOOGLE FONT -->
+    <!-- Specifying a Webpage Icon for Web Clip
+         Ref: https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html -->
+    <link rel="apple-touch-icon" href="~/content/img/splash/sptouch-icon-iphone.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="~/content/img/splash/touch-icon-ipad.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="~/content/img/splash/touch-icon-iphone-retina.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="~/content/img/splash/touch-icon-ipad-retina.png">
+
+    <!-- iOS web-app metas : hides Safari UI Components and Changes Status Bar Appearance -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <!-- Startup image for web apps -->
+    <link rel="apple-touch-startup-image" href="~/content/img/splash/ipad-landscape.png" media="screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:landscape)">
+    <link rel="apple-touch-startup-image" href="~/content/img/splash/ipad-portrait.png" media="screen and (min-device-width: 481px) and (max-device-width: 1024px) and (orientation:portrait)">
+    <link rel="apple-touch-startup-image" href="~/content/img/splash/iphone.png" media="screen and (max-device-width: 320px)">
+    <!-- #GOOGLE FONT -->
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700">
+    <!-- Glow Fonts By Google  -->
+    <link href="https://fonts.googleapis.com/css?family=Aclonica|Merienda|Poiret+One" rel="stylesheet">
+    <style>
+        body {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #FFF;
+            color: #232428;
+            line-height: 1.5;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+
+        .mrs-white {
+            background-color: #FFF;
+            color: #232428;
+        }
+
+        .in-times-container, .in-times-social-column {
+            width: 100%;
+        }
+
+        #geometric {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .canvas_overley {
+            background-color: #fff;
+            bottom: 0;
+            left: 0;
+            opacity: 0.93;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="in-times-container">
+        <canvas id="geometric" width="1349" height="430"></canvas>
+        <div class="canvas_overley"></div>
+        <div class="lg-mn-con-sch">
+            <form action="@Url.Action("ChangePassword", "Account")" method="POST" id="login-form" class="form-lg-in brd-btm-rw" style="margin-top:100px">
+                @Html.AntiForgeryToken()
+                @Html.ValidationBootstrap()
+                <div class="row">
+                    <div class=" col-lg-10 col-md-10" style="">
+                        <h6 class="panel-heading" style="font-size:30px;text-align:center;margin-right:40px">Change Password</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3">
+                    </div>
+                    <div class="col-xs-6">
+                        <span class="frm-flds new">
+                            <input type="password" required id="password" size="40" aria-invalid="false" placeholder="New Password">
+                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "error" })
+                        </span>
+                        <span class="frm-flds confirm">
+                            <input type="password" required id="confirmPassword" size="40" aria-invalid="false" placeholder="Confirm Password">
+                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "error" })
+                        </span>
+                    </div>
+                    <div class="col-xs-3">
+                    </div>
+                </div>
+
+
+            </form>
+            <div class="row buttons">
+                <div class="col-xs-3 lnk-sec">
+                </div>
+                <div class="col-xs-6">
+                    <span class="frm-flds">
+                        <a class="btn btn-primary pull-right" id="btnSubmit" style="background-color:#000000;color:white;width:100px;margin-left:5px">
+                            Change
+                        </a>
+                    </span>
+                    <span class="frm-flds">
+                        <a class="btn btn-primary pull-right" id="btnBack" style="background-color:#000000;color:white;width:120px;text-align:center">
+                            Back
+                        </a>
+                    </span>
+                </div>
+                <div class="col-xs-3 lnk-sec">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="ft" class="hidden-sm hidden-xs">
+        <div class="ft-ln-mn">
+            <div class="footer-bd">
+                <a class="ft-lg-g"></a>
+                <a href="#">Terms of use</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">&copy; Dynamic Analyzer</a>
+                <a class="pull-right" href="#"><b>Powerd by: codehex</b></a>
+                <div class="ft-brd-lft-ex"></div>
+                <div class="ft-brd-right-btm"></div>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
+<script src="~/Scripts/plugin/spc-scrpt/jquery-3.1.1.min.js"></script>
+<script src="~/Scripts/plugin/spc-scrpt/paricles-shapify.js"></script>
+<script type="text/javascript">
+    $(function () {
+        // Validation
+        $("#login-form").validate({
+            // Rules for form validation
+            rules: {
+                Password: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 20
+                },
+                ConfirmPassword: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 20,
+                    equalTo: "#Password",
+                }
+            },
+
+            // Messages for form validation
+            messages: {
+                Password: {
+                    required: 'Please enter your password'
+                }
+            },
+
+            // Do not change code below
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+            }
+        });
+    });
+    $(document).keypress(function (e) {
+        if (e.which == 13) {
+            submit();
+        }
+    });
+    $('#btnSubmit').click(function () {
+        submit();
+    })
+    function submit() {
+        if ($('#password').val() == "" || $('#confirmPassword').val() == "") {
+            if ($('#password').val() == "" && $('#confirmPassword').val() == "") {
+                $('#password').css('border-color', '#cf564a');
+                $('#confirmPassword').css('border-color', '#cf564a');
+                $('.invalid-newpassword').remove();
+                $('.new').addClass('state-error');
+                $('.new').append('<p style="color:#cf564a;" for="oldPassword" class="invalid-newpassword pull-right">This field is required</p>');
+                $('.invalid-confirmpassword').remove();
+                $('.confirm').addClass('state-error');
+                $('.confirm').append('<p style="color:#cf564a;" for="oldPassword" class="invalid-confirmpassword pull-right">This field is required</p>');
+                $(".buttons").css('margin-top', '7px');
+            }
+            else if ($('#password').val() == "") {
+                $('#password').css('border-color', '#cf564a');
+                $('#confirmPassword').css('border-color', '');
+                $('.invalid-confirmpassword').remove();
+                $('.invalid-newpassword').remove();
+                $('.new').addClass('state-error');
+                $('.new').append('<p style="color:#cf564a;" for="oldPassword" class="invalid-newpassword pull-right">This field is required</p>');
+            }
+            else if ($('#confirmPassword').val() == "") {
+                $('#confirmPassword').css('border-color', '#cf564a');
+                $('#password').css('border-color', '');
+                $('.invalid-newpassword').remove();
+                $('.invalid-confirmpassword').remove();
+                $('.confirm').addClass('state-error');
+                $('.confirm').append('<p style="color:#cf564a;" for="oldPassword" class="invalid-confirmpassword pull-right">This field is required</p>');
+            }
+            return false;
+        }
+        else {
+            if ($('#password').val() == $('#confirmPassword').val()) {
+                $('#password').css('border-color', '');
+                $('.invalid-newpassword').remove();
+                $('#confirmPassword').css('border-color', '');
+                $('.invalid-confirmpassword').remove();
+                var v = {
+                    Password: $("#password").val()
+                }
+                $.ajax({
+                    url: "/Account/ChangePassword",
+                    type: "POST",
+                    data: v,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data) {
+                            window.location.href = "/Account/Login"
+                        }
+                        else {
+                            alert("Error!Password could not changed");
+                            return false;
+                        }
+                    }
+                })
+            }
+            else {
+                $('#confirmPassword').css('border-color', '#cf564a');
+                $('#password').css('border-color', '#cf564a');
+                $('.invalid-confirmpassword').remove();
+                $('.confirm').addClass('state-error');
+                $('.confirm').append('<p style="color:#cf564a;" for="oldPassword" class="invalid-confirmpassword pull-right">Password does not matches</p>');
+            }
+
+        }
+    }
+    $('#password').keydown(function () {
+        if ($(this).val() != '') {
+            $('.invalid-newpassword').remove();
+            $('#password').css('border-color', '');
+        }
+    })
+    $('#confirmPassword').keydown(function () {
+        if ($(this).val() != '') {
+            $('.invalid-confirmpassword').remove();
+            $('#confirmPassword').css('border-color', '');
+        }
+    })
+    $('#btnBack').click(function () {
+        parent.history.back();
+    })
+</script>

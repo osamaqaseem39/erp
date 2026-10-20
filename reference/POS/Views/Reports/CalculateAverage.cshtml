@@ -1,0 +1,121 @@
+﻿@model POS.Models.clsFinancialReports
+@using (Html.BeginForm("index", "home", FormMethod.Post, new { id = "averageForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(x => x.ByDate, new { @id = "HiddenFomrDate" });
+    <div class="row">
+        <section class="col col-md-6 col-lg-6">
+            <label>From</label>
+            <label class="input">
+                <i class="icon-prepend fa fa-calendar"></i>
+                @Html.TextBoxFor(m => m.FromDate, new { @type = "date", @disabled = "disabled", @Value = Model.FromDate.HasValue ? Model.FromDate.GetValueOrDefault().ToString("yyyy/MM/dd") : "" })
+            </label>
+        </section>
+        <section class="col col-md-6 col-lg-6">
+            <label>To</label>
+            <label class="input">
+                <i class="icon-prepend fa fa-calendar"></i>
+                <input type="date" name="ToDate" id="ToDate" min="" max="" required />
+            </label>
+        </section>
+    </div>
+    <div class="row" hidden>
+        <section class="col col-md-12 col-lg-12">
+            <label class="checkbox pull-right" style="">
+                <input id="Permanent" type="checkbox" name="Permanent"><i></i>
+                Permanent
+            </label>
+        </section>
+    </div>
+    <div class="row">
+        <section class="col col-md-12  col-lg-12">
+            <table class="pull-right footer-nav" style="">
+                <tr>
+                    <td>
+                        <a id="btnSave" class="btn" style="background-color: #015778; width: 95px; height: 30px; margin-left: 10px;color: white;line-height:27px">
+                            Save
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </section>
+    </div>
+}
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        GetTodayDate();
+    })
+    $('#btnSave').on('click', function (e) {
+        e.preventDefault();
+        var fromDate = $('#FromDate').val();
+        var toDate = $('#ToDate').val();
+        var dueDaysAlert = $('#DueDaysAlert').val();
+        var permanent = $('#Permanent').is(':checked');
+        var permanentInt = 0;
+        if (permanent == true) {
+            permanentInt = 1;
+        }
+        if (toDate == null || toDate == '') {
+            $('#ToDate').css('border-color', '#A90329');
+            $('#ToDate').css('background-color', '#FFF0F0');
+            return false;
+        }
+        if (fromDate >= toDate) {
+            alert("To Date cannot be less than or equal to From Date.");
+            return false;
+        }
+        $('#btnSave').html("<i class='fa fa-spin fa-refresh'></i> Processing...");
+        var myForm =
+            {
+                FromDate: fromDate,
+                ToDate: toDate,
+                Permanent: permanentInt,
+            }
+        $.ajax({
+            type: 'POST',
+            url: '/reports/CalculateAveragePost/',
+            dataType: 'json',
+            data: { 'reminder': myForm },
+            success: function (response) {
+                location.reload();
+            }
+        })
+    })
+    $('#ToDate').keydown(function () {
+        $('#ToDate').css('border-color', '#bdbdbd');
+        $('#ToDate').css('background-color', '#fff');
+    }).mousedown(function () {
+        $('#ToDate').css('border-color', '#bdbdbd');
+        $('#ToDate').css('background-color', '#fff');
+    })
+    function GetTodayDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm + '-' + dd;
+        $('#ToDate').val(today);
+
+        var today2 = new Date($("#HiddenFomrDate").val());
+        var dd = today2.getDate();
+        var mm = today2.getMonth() + 1; //January is 0!
+
+        var yyyy = today2.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today2 = yyyy + '-' + mm + '-' + dd;
+        $('#FromDate').val(today2);
+    }
+</script>

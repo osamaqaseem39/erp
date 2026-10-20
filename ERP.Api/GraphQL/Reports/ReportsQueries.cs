@@ -1,4 +1,6 @@
+using ERP.Application.Interfaces.Finance;
 using ERP.Application.Interfaces.Reports;
+using ERP.Shared.DTOs.Finance;
 using ERP.Shared.DTOs.Reports;
 using HotChocolate;
 
@@ -129,5 +131,82 @@ public class ReportsQueries
     {
         return await service.GetCashFlowAsync(tenantId, fromDate, toDate, currencyCode);
     }
+
+    // Operational reports (REST parity: /api/reports/operational/*)
+    public async Task<PendingSalesOrderReportDto> GetPendingSalesOrdersReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime? asOfDate = null)
+        => await service.GetPendingSalesOrdersAsync(tenantId, asOfDate);
+
+    public async Task<SalesInvoiceSummaryReportDto> GetSalesInvoiceSummaryReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime fromDate,
+        DateTime toDate)
+        => await service.GetSalesInvoiceSummaryAsync(tenantId, fromDate, toDate);
+
+    public async Task<SalesSummaryByItemReportDto> GetSalesSummaryByItemReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime fromDate,
+        DateTime toDate)
+        => await service.GetSalesSummaryByItemAsync(tenantId, fromDate, toDate);
+
+    public async Task<SalesCustomerItemReportDto> GetSalesSummaryCustomerItemReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime fromDate,
+        DateTime toDate)
+        => await service.GetSalesSummaryCustomerItemAsync(tenantId, fromDate, toDate);
+
+    public async Task<SalesCustomerItemReportDto> GetSalesSummaryItemCustomerReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime fromDate,
+        DateTime toDate)
+        => await service.GetSalesSummaryItemCustomerAsync(tenantId, fromDate, toDate);
+
+    public async Task<SalesItemRateDetailReportDto> GetSalesItemRateDetailReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime fromDate,
+        DateTime toDate,
+        Guid? itemId = null,
+        Guid? customerId = null)
+        => await service.GetSalesItemRateDetailAsync(tenantId, fromDate, toDate, itemId, customerId);
+
+    public async Task<CustomerInfoReportDto> GetCustomerInformationReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        string? status = null)
+        => await service.GetCustomerInformationAsync(tenantId, status);
+
+    public async Task<CreditNoteReportDto> GetCreditNoteReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime fromDate,
+        DateTime toDate)
+        => await service.GetCreditNoteReportAsync(tenantId, fromDate, toDate);
+
+    public async Task<PurchaseInvoiceSummaryReportDto> GetPurchaseInvoiceSummaryReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        DateTime fromDate,
+        DateTime toDate)
+        => await service.GetPurchaseInvoiceSummaryAsync(tenantId, fromDate, toDate);
+
+    public async Task<StockBalanceReportDto> GetStockBalanceReport(
+        [Service] IOperationalReportService service,
+        Guid tenantId,
+        Guid? warehouseId = null)
+        => await service.GetStockBalanceReportAsync(tenantId, warehouseId);
+
+    public async Task<AgingReportDto> GetSaleAgingReport(
+        [Service] IInvoiceService invoices,
+        Guid tenantId,
+        DateTime asOfDate,
+        int[]? agingBuckets = null)
+        => await invoices.GetAgedReceivablesAsync(tenantId, asOfDate, agingBuckets);
 }
 

@@ -1,0 +1,527 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="LuggageListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Offers List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="LuggageListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Price List </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("UpdateCabPrice", "CabPriceList", FormMethod.Post, new { id = "CabOfferFrom", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (User.Save == 1)
+{
+    <td style="width: 44%; padding-bottom: 5px; padding-left: 3px;text-align: right;" id="addTd" hidden>
+        <a title="Add New Luggage" id="btnAddLuggage" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+            <img class="btnUp" src="~/Content/img/plus2.png" style="width: 45px; height: 45px; color: white; " />
+        </a>
+    </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd">
+                                                <button title="Save" class="btnUpSave" id="btnSaveLuggage" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="listTd">
+                                                <a title="Offers List" id="btnLuggageList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#LuggageListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; " hidden>
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshLuggage" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 44%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitLuggage" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveLuggage" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px;text-align: right;" id="listTd">
+                                                <a title="Offers List" id="btnLuggageList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#LuggageListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; " hidden>
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshLuggage" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitLuggage" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                    </tr>
+                                </table>
+                                <div class="col-md-12" style="padding-top: 10px; padding-bottom: 15px;">
+                                    <div class="col-md-5">
+                                        <div class="row" style="padding-top: 15px; padding-bottom: 15px;padding-left:10px;padding-right:10px">
+                                            <div class="col-md-12">
+                                                <div class="col-md-6">
+                                                    <div style="padding: 3px">
+                                                        <label>From Post Code</label>
+                                                        <label class="input">
+                                                            <input type="text" name="CarModel" id="CarModel" placeholder="Post Code" autocomplete="off" />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <center>
+                                            <a title="Add Detail" id="btnAddModelDetail" href="javascript:void(0)" class="btn btn-primary" style="width:95px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                                                <i class="fa fa-plus"></i> Add
+                                            </a>
+                                        </center>
+                                        <div class="col-md-12" style="margin-top:10px;margin-bottom:40px">
+                                            <table id="ModelDetailTable" class="display nowrap cell-border table table-bordered table-striped" style="width:100%;">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-class="" style="width: 20px; background-color: #03386C; color: white; padding: 7px; text-align: center; border-left: none; "></th>
+                                                        <th data-hide="" style="width: 250px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Post Code</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" style="padding:3px;">
+                                        <label>To Post Code</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-pound-sign"></i>
+                                            <input type="text" placeholder="To PostCode" name="ToPostCode" id="ToPostCode" />
+                                        </label>
+                                    </div>
+                                    <div class="col-md-2" style="padding:3px;">
+                                        <label>Percentage</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-pound-sign"></i>
+                                            <input type="text" placeholder="Percentage" name="BasePrice" id="BasePrice" />
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                               
+                            }
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+
+
+        $('#btnAddModelDetail').click(function () {
+
+            var check = 0;
+            var carmodel = $('#CarModel').val();
+            if (carmodel == '' || carmodel == null) {
+                check = 1;
+            }
+            if (check == 1) {
+                return false;
+            }
+
+            var vtable = $('#ModelDetailTable').DataTable();
+            if ($(this).html().trim() == '<i class="fa fa-plus"></i> Add') {
+                vtable.row.add([
+                "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtnM' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                "<span><input type='hidden' class='ItemID01' value=" + carmodel + " />" + carmodel + "</span>",
+                ]).draw(false);
+            }
+            else {
+                $('#btnAddModelDetail').html('<i class="fa fa-plus"></i> Add');
+                $('#btnCancelModelDetail').hide();
+                var tr = $('#HiddenTrM').val();
+                vtable.row(tr).data([
+                "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtnM' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                "<span><input type='hidden' class='ItemID01' value=" + carmodel + " />" + carmodel + "</span>",
+                ]).draw(false);
+            }
+
+            $('#CarModel').val('');
+        })
+        $(document).on('click', '.deleteRowBtnM', function () {
+            var vtable = $('#ModelDetailTable').DataTable();
+            var tr = vtable.row($(this).parents('tr')).index();
+            vtable.row(tr).remove().draw(false);
+            $('#CarModel').val('');
+            $('#btnAddModelDetail').html('<i class="fa fa-plus"></i> Add');
+        })
+
+
+        $(document).ready(function () {
+            $('.arrow-box-up-right').append('<li></li>');
+            $('#CabOfferFrom').validate({
+                ignore: [],
+                // Rules for form validation
+                //rules: {
+                //    Description: {
+                //        required: true
+                //    },
+                //},
+
+                // Messages for form validation
+                //messages: {
+                //    Description: {
+                //        required: 'From Location is required.'
+                //    },
+                //},
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+
+            var responsiveHelper_dt_basic_mod = undefined;
+            var responsiveHelper_datatable_fixed_column_mod = undefined;
+            var responsiveHelper_datatable_col_reorder_mod = undefined;
+            var responsiveHelper_datatable_tabletools_mod = undefined;
+
+            var breakpointDefinition_mod = {
+                tablet: 1024,
+                phone: 480
+            };
+            $('#ModelDetailTable').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    if (!responsiveHelper_dt_basic_mod) {
+                        responsiveHelper_dt_basic_mod = new ResponsiveDatatablesHelper($('#ModelDetailTable'), breakpointDefinition_mod);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic_mod.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic_mod.respond();
+                },
+                "bPaginate": false,
+                "serverSide": false,
+                "bLengthChange": false,
+                "processing": false,
+                "searching": false,
+                "bInfo": false,
+                "ordering": false,
+                "scrollX": true,
+                //"scrollY": 200
+            });
+
+            var vtablem = $('#ModelDetailTable').DataTable();
+            vtablem.clear().draw();
+
+
+            EnableFormFields();
+        })
+
+
+
+        $('#btnAddLuggage').click(function () {
+            EnableFormFields();
+        })
+        function EnableFormFields() {
+            $('#LuggageID').val(0);
+            $('#CarModel').val('');
+            //$('#ToPostCode').val('');
+            //$('#BasePrice').val('');
+            
+
+            $('#btnSaveLuggage').prop('disabled', false);
+            //$('#saveTd').removeAttr("hidden");
+            //$('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '47%', 'text-align': 'right' });
+            $('.deleteRow').attr("hidden", "hidden");
+            $('.StatusSection').attr("hidden", "hidden");
+        }
+        
+        
+        $('#btnRefreshLuggage').click(function () {
+            location.reload();
+        })
+        $('#btnLuggageList').click(function () {
+            $('#LuggageListDiv').load('@Url.Action("CabPriceListList", "CabPriceList")')
+        })
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        function ClearFormFields() {
+            $('#LuggageID').val(0);
+            $('#CarModel').val('');
+            //$('#ToPostCode').val('');
+            //$('#BasePrice').val('');
+
+
+            $('#btnSaveLuggage').prop('disabled', true);
+            //$('#addTd').removeAttr("hidden");
+            //$('#saveTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            //if ($('#CanSave').val() == 0) {
+            //    $('#listTd').css({ 'width': '47%', 'text-align': 'right' });
+            //    $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            //}
+            $('.StatusSection').attr("hidden", "hidden");
+        }
+
+
+        function getAllDataModel() {
+            var arrayData = [];
+            var count = 0;
+            $('#ModelDetailTable tr[role="row"]').each(function () {
+                count++;
+            });
+            var rowsCount = count - 1;
+            var vtable = $('#ModelDetailTable').DataTable();
+            for (irow = 0; irow < rowsCount; irow++) {
+                var data = vtable.row(irow).data();
+                var carmodel = data[1].split('value=')[1].split('/>')[0].trim();
+                var alldata = {
+                    'CarModel': carmodel,
+                }
+                arrayData.push(alldata);
+            }
+            console.log(arrayData);
+            return arrayData;
+        }
+
+
+
+        $('#CabOfferFrom').on('submit', function (e) {
+            if (!$("#CabOfferFrom").valid()) {
+                return false;
+            }
+            $('#btnSaveLuggage').prop('disabled', true);
+            var ToPostCode = $('#ToPostCode').val();
+            var vbaseprice = $('#BasePrice').val();
+            if (vbaseprice == null || vbaseprice == "" || isNaN(vbaseprice)) { vbaseprice = 0; }
+
+            var FairDetail = JSON.stringify(getAllDataModel());
+
+            var url = $('#CabOfferFrom')[0].action;
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'ToPostCode': ToPostCode, vPers: vbaseprice, FareList: FairDetail }),
+                success: function (data) {
+                    if (data.status == true) {
+                        $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                ' <strong>Success! </strong>' +
+                                                'Record Saved Succesfully.' +
+                                            '</div>');
+                        $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                            $("#success-alert").slideUp(500);
+                            $('.alertDiv').html('');
+                        });
+                        //$.notify("First Level Saved Successfully.", "success");
+                        EnableFormFields();
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSaveLuggage').prop('disabled', false);
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        $('#btnDeleteLuggage').click(function () {
+            var LuggageID = $('#LuggageID').val();
+            DeleteLuggage(LuggageID);
+        })
+        function DeleteLuggage(id) {
+            var a = $.confirm({
+                title: 'Delete Record',
+                content: 'Are you sure u want to delete this Record?',
+                type: 'white',
+                buttons: {
+                    ok: {
+                        text: "Yes",
+                        btnClass: 'btnConfirm',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: '/CabPriceList/DeleteCabPriceList/' + id,
+                                type: "POST",
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        location.reload();
+                                    }
+                                    else {
+                                        alert(data.message);
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-default',
+                        keys: ['esc'],
+                        action: function () {
+                            a.close();
+                        }
+                    },
+                }
+            });
+        }
+    </script>
+}

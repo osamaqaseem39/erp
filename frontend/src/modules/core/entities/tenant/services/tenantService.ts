@@ -11,7 +11,6 @@ export interface TenantDto {
   country: string;
   status: string;
   databaseName: string;
-  connectionString: string;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -24,8 +23,6 @@ export interface CreateTenantDto {
   industry: string;
   country: string;
   status: string;
-  databaseName: string;
-  connectionString: string;
   isActive: boolean;
 }
 
@@ -37,8 +34,6 @@ export interface UpdateTenantDto {
   industry?: string;
   country?: string;
   status?: string;
-  databaseName?: string;
-  connectionString?: string;
   isActive?: boolean;
 }
 
@@ -60,7 +55,6 @@ class TenantService {
       country: '',
       status: 'Active',
       databaseName: '',
-      connectionString: '',
       isActive: true,
     }));
   };
@@ -91,4 +85,3 @@ class TenantService {
 }
 
 export const tenantService = new TenantService();
-

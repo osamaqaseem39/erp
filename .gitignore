@@ -493,3 +493,9 @@ temp_batch_*.sql
 
 # Data Protection key ring (encrypts sensitive settings) - never commit
 **/App_Data/keys/
+# Project document binary store
+**/App_Data/project-docs/
+
+# Local NuGet cache used when sandbox packages are corrupt
+.nuget-packages/
+

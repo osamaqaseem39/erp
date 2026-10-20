@@ -126,5 +126,49 @@ public class SalesMutations
     {
         return await service.DeleteAsync(transactionId, tenantId);
     }
+
+    // Sales Credit Note Mutations
+    public async Task<SalesCreditNoteDto> AddSalesCreditNote(
+        [Service] ISalesCreditNoteService service,
+        CreateSalesCreditNoteDto input,
+        Guid tenantId,
+        Guid userId)
+    {
+        var id = await service.CreateAsync(input, tenantId, userId);
+        return await service.GetByIdAsync(id, tenantId) ?? throw new Exception("Failed to create sales credit note");
+    }
+
+    public async Task<SalesCreditNoteDto> UpdateSalesCreditNote(
+        [Service] ISalesCreditNoteService service,
+        UpdateSalesCreditNoteDto input,
+        Guid tenantId,
+        Guid userId)
+    {
+        var success = await service.UpdateAsync(input, tenantId, userId);
+        if (!success)
+            throw new Exception("Failed to update sales credit note");
+        return await service.GetByIdAsync(input.Id, tenantId) ?? throw new Exception("Sales credit note not found");
+    }
+
+    public async Task<bool> DeleteSalesCreditNote(
+        [Service] ISalesCreditNoteService service,
+        Guid creditNoteId,
+        Guid tenantId)
+        => await service.DeleteAsync(creditNoteId, tenantId);
+
+    public async Task<bool> PostSalesCreditNote(
+        [Service] ISalesCreditNoteService service,
+        Guid creditNoteId,
+        Guid tenantId,
+        Guid postedBy)
+        => await service.PostAsync(creditNoteId, tenantId, postedBy);
+
+    public async Task<bool> VoidSalesCreditNote(
+        [Service] ISalesCreditNoteService service,
+        Guid creditNoteId,
+        VoidSalesCreditNoteDto? input,
+        Guid tenantId,
+        Guid voidedBy)
+        => await service.VoidAsync(creditNoteId, input ?? new VoidSalesCreditNoteDto(), tenantId, voidedBy);
 }
 

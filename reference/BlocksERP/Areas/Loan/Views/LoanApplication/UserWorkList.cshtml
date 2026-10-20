@@ -1,0 +1,47 @@
+﻿@model List<BlocksERP.Models.clsWork>
+
+<div style="overflow-x:hidden;margin-top:10px;padding:0px">
+    @{ 
+        int vrownum = 0;
+    }
+    <table class="table table-striped table-bordered" style="width:95%;margin-left:20px">
+        <thead style="background-color: #212121; color: white;">
+            <tr>
+                <th style="text-align:center;width:50px;">Sr#</th>
+                <th style="text-align:left;">Income Source</th>
+                <th style="text-align:center;width:100px;">D.O.J</th>
+                <th style="text-align:center;width:100px;">Status</th>
+                <th style="text-align: center; width: 100px;">Organization<br />Name</th>
+                <th style="text-align: center; width: 100px;">Phone No.</th>
+                <th style="text-align: center; width: 100px;">Address</th>
+                <th style="text-align: center; width: 50px;">Monthly<br />Income</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (BlocksERP.Models.clsWork vrow in Model)
+            {
+                vrownum++;
+
+                <tr style="border-bottom: 1px solid #D8D8D8">
+                    <td style="text-align: center; padding: 3px">@vrownum</td>
+                    <td style="text-align: left; padding: 3px">@vrow.IncomeSourceName</td>
+                    <td style="text-align: left; padding: 3px">@Convert.ToDateTime(vrow.DOJ).ToString("dd-MMM-yyyy")</td>
+                    <td style="text-align: left; padding: 3px">@vrow.EmploymentStatusName </td>
+                    <td style="text-align: left; padding: 3px">@vrow.OrganizationName </td>
+                    <td style="text-align: left; padding: 3px">@vrow.OrganizationPhoneNumber </td>
+                    <td style="text-align: left; padding: 3px">@vrow.OrganizationAddress </td>
+                    <td style="text-align: left; padding: 3px">@Convert.ToInt32(vrow.MonthlyIncome)</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+    <script src="~/Scripts/app.bundle.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+        });
+
+    </script>

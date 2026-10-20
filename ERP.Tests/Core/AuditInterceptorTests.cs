@@ -2,8 +2,12 @@ using System.Text.Json;
 using ERP.Domain.Admin;
 using ERP.Domain.Core;
 using ERP.Domain.CRM;
+using ERP.Domain.Procurement;
+using ERP.Domain.SCM;
 using ERP.Infrastructure.Auditing;
 using ERP.Infrastructure.Database;
+using ERP.Infrastructure.Repositories.Procurement;
+using ERP.Infrastructure.Repositories.SCM;
 using ERP.Shared.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +17,7 @@ public class AuditInterceptorTests
 {
     private static readonly Guid Tenant = Guid.NewGuid();
     private static readonly Guid Actor = Guid.NewGuid();
+    private static readonly Guid Company = Guid.NewGuid();
     private readonly string _dbName = Guid.NewGuid().ToString();
 
     private ERPDbContext Db(Guid? userId = null) => new(new DbContextOptionsBuilder<ERPDbContext>()
@@ -131,6 +136,121 @@ public class AuditInterceptorTests
         Assert.Empty(read.AuditLogs);
     }
 
+    [Fact]
+    public async Task VendorRepository_Create_IsAudited()
+    {
+        await using (var db = Signed())
+        {
+            var repo = new VendorRepository(db);
+            await repo.AddAsync(new Vendor
+            {
+                TenantId = Tenant,
+                CompanyId = Company,
+                VendorCode = "V-001",
+                VendorName = "Steel Co"
+            });
+        }
+
+        await using var read = Db();
+        var log = Assert.Single(read.AuditLogs.Where(a => a.EntityName == "Vendor"));
+        Assert.Equal(("Created", Actor, Tenant), (log.Action, log.UserId, log.TenantId));
+        Assert.Contains("V-001", log.NewValues);
+    }
+
+    [Fact]
+    public async Task VendorRepository_Update_IsAudited()
+    {
+        var id = await SeedVendorAsync();
+        await using (var db = Signed())
+        {
+            var repo = new VendorRepository(db);
+            var vendor = await repo.GetByIdAsync(id, Tenant);
+            Assert.NotNull(vendor);
+            vendor!.VendorName = "Steel Co Renamed";
+            await repo.UpdateAsync(vendor);
+        }
+
+        await using var read = Db();
+        var log = await read.AuditLogs.SingleAsync(a => a.Action == "Updated" && a.EntityName == "Vendor");
+        Assert.Contains("Steel Co Renamed", log.NewValues);
+    }
+
+    [Fact]
+    public async Task VendorRepository_Delete_IsAudited()
+    {
+        var id = await SeedVendorAsync();
+        await using (var db = Signed())
+        {
+            var repo = new VendorRepository(db);
+            Assert.True(await repo.DeleteAsync(id, Tenant));
+        }
+
+        await using var read = Db();
+        var log = await read.AuditLogs.SingleAsync(a => a.Action == "Deleted" && a.EntityName == "Vendor");
+        Assert.Contains("Steel Co", log.OldValues);
+    }
+
+    [Fact]
+    public async Task WarehouseRepository_Create_IsAudited()
+    {
+        await using (var db = Signed())
+        {
+            var repo = new WarehouseRepository(db);
+            await repo.AddAsync(new Warehouse
+            {
+                TenantId = Tenant,
+                CompanyId = Company,
+                WarehouseCode = "WH-001",
+                WarehouseName = "Main Depot",
+                Name = "Main Depot",
+                City = "Karachi",
+                State = "SD",
+                Country = "PK",
+                PostalCode = "74000",
+                AddressLine1 = "1 Dock Rd"
+            });
+        }
+
+        await using var read = Db();
+        var log = Assert.Single(read.AuditLogs.Where(a => a.EntityName == "Warehouse"));
+        Assert.Equal(("Created", Actor, Tenant), (log.Action, log.UserId, log.TenantId));
+        Assert.Contains("WH-001", log.NewValues);
+    }
+
+    [Fact]
+    public async Task WarehouseRepository_Update_IsAudited()
+    {
+        var id = await SeedWarehouseAsync();
+        await using (var db = Signed())
+        {
+            var repo = new WarehouseRepository(db);
+            var warehouse = await repo.GetByIdAsync(id, Tenant);
+            Assert.NotNull(warehouse);
+            warehouse!.WarehouseName = "Main Depot Renamed";
+            warehouse.Name = "Main Depot Renamed";
+            await repo.UpdateAsync(warehouse);
+        }
+
+        await using var read = Db();
+        var log = await read.AuditLogs.SingleAsync(a => a.Action == "Updated" && a.EntityName == "Warehouse");
+        Assert.Contains("Main Depot Renamed", log.NewValues);
+    }
+
+    [Fact]
+    public async Task WarehouseRepository_Delete_IsAudited()
+    {
+        var id = await SeedWarehouseAsync();
+        await using (var db = Signed())
+        {
+            var repo = new WarehouseRepository(db);
+            Assert.True(await repo.DeleteAsync(id, Tenant));
+        }
+
+        await using var read = Db();
+        var log = await read.AuditLogs.SingleAsync(a => a.Action == "Deleted" && a.EntityName == "Warehouse");
+        Assert.Contains("Main Depot", log.OldValues);
+    }
+
     private async Task<Guid> SeedCustomerAsync()
     {
         await using var db = Db(userId: null);
@@ -138,6 +258,42 @@ public class AuditInterceptorTests
         db.Customers.Add(customer);
         await db.SaveChangesAsync();
         return customer.Id;
+    }
+
+    private async Task<Guid> SeedVendorAsync()
+    {
+        await using var db = Db(userId: null);
+        var vendor = new Vendor
+        {
+            TenantId = Tenant,
+            CompanyId = Company,
+            VendorCode = "V-001",
+            VendorName = "Steel Co"
+        };
+        db.Vendors.Add(vendor);
+        await db.SaveChangesAsync();
+        return vendor.Id;
+    }
+
+    private async Task<Guid> SeedWarehouseAsync()
+    {
+        await using var db = Db(userId: null);
+        var warehouse = new Warehouse
+        {
+            TenantId = Tenant,
+            CompanyId = Company,
+            WarehouseCode = "WH-001",
+            WarehouseName = "Main Depot",
+            Name = "Main Depot",
+            City = "Karachi",
+            State = "SD",
+            Country = "PK",
+            PostalCode = "74000",
+            AddressLine1 = "1 Dock Rd"
+        };
+        db.Warehouses.Add(warehouse);
+        await db.SaveChangesAsync();
+        return warehouse.Id;
     }
 
     private sealed class FixedAudit(Guid? userId, Guid tenantId) : IAuditContext

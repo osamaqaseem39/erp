@@ -1,8 +1,8 @@
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Database;
+using ERP.Infrastructure.Extensions;
 using ERP.Infrastructure.Interfaces.CRM;
 using ERP.Shared.Abstractions;
-using ERP.Infrastructure.Extensions;
 using ERP.Shared.DTOs;
 using ERP.Shared.DTOs.CRM;
 using Microsoft.EntityFrameworkCore;
@@ -16,20 +16,30 @@ public class CustomerRepository : CrmRepositoryBase, ICustomerRepository
     {
     }
 
-    private IQueryable<Customer> CustomersQuery() =>
-        ApplyTenant(Context.Customers
-            .Include(c => c.Opportunities)
-            .Include(c => c.Quotes)
-            .Include(c => c.SalesOrders));
-
-    public async Task<Customer?> GetByIdAsync(Guid id)
+    private IQueryable<Customer> ForTenant(Guid tenantId)
     {
-        return await CustomersQuery().FirstOrDefaultAsync(c => c.Id == id);
+        if (tenantId == Guid.Empty)
+            return Context.Customers.Where(_ => false);
+        return Context.Customers.Where(c => c.TenantId == tenantId);
     }
 
-    public async Task<IEnumerable<Customer>> GetAllAsync()
+    private IQueryable<Customer> DetailQuery(Guid tenantId) =>
+        ForTenant(tenantId)
+            .Include(c => c.Salesman)
+            .Include(c => c.Opportunities)
+            .Include(c => c.Quotes)
+            .Include(c => c.SalesOrders);
+
+    public async Task<Customer?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        return await CustomersQuery().ToListAsync();
+        if (tenantId == Guid.Empty) return null;
+        return await DetailQuery(tenantId).FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task<IEnumerable<Customer>> GetAllAsync(Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return [];
+        return await DetailQuery(tenantId).ToListAsync();
     }
 
     internal static readonly SortMap<Customer> SortFields = new SortMap<Customer>("customerName")
@@ -43,10 +53,15 @@ public class CustomerRepository : CrmRepositoryBase, ICustomerRepository
         .Add("creditLimit", c => c.CreditLimit)
         .Add("createdAt", c => c.CreatedAt);
 
-    public async Task<PagedResult<Customer>> GetPagedAsync(CustomerPagedQuery query, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<Customer>> GetPagedAsync(
+        CustomerPagedQuery query,
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
     {
-        // List rows need no navigation collections, so skip the Includes used by the detail query.
-        var customers = ApplyTenant(Context.Customers.AsNoTracking());
+        if (tenantId == Guid.Empty)
+            return new PagedResult<Customer>();
+
+        var customers = ForTenant(tenantId).AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(query.Status))
             customers = customers.Where(c => c.Status == query.Status);
@@ -69,42 +84,53 @@ public class CustomerRepository : CrmRepositoryBase, ICustomerRepository
         return await customers.ToPagedResultAsync(query, SortFields, cancellationToken);
     }
 
-    public async Task<IEnumerable<Customer>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<Customer>> GetByStatusAsync(string status, Guid tenantId)
     {
-        return await CustomersQuery().Where(c => c.Status == status).ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        return await DetailQuery(tenantId).Where(c => c.Status == status).ToListAsync();
     }
 
-    public async Task<IEnumerable<Customer>> GetByIndustryAsync(string industry)
+    public async Task<IEnumerable<Customer>> GetByIndustryAsync(string industry, Guid tenantId)
     {
-        return await CustomersQuery().Where(c => c.Industry == industry).ToListAsync();
+        if (tenantId == Guid.Empty) return [];
+        return await DetailQuery(tenantId).Where(c => c.Industry == industry).ToListAsync();
     }
 
-    public async Task<IReadOnlyDictionary<string, int>> GetDependentCountsAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyDictionary<string, int>> GetDependentCountsAsync(
+        Guid id,
+        Guid tenantId,
+        CancellationToken cancellationToken = default)
     {
-        // Counted separately (not via the Includes on the detail query) so nothing is loaded into the change tracker.
+        if (tenantId == Guid.Empty)
+            return new Dictionary<string, int>();
+
         var counts = new Dictionary<string, int>
         {
-            ["contacts"] = await ApplyTenant(Context.Contacts).CountAsync(x => x.CustomerId == id, cancellationToken),
-            ["opportunities"] = await ApplyTenant(Context.Opportunities).CountAsync(x => x.CustomerId == id, cancellationToken),
-            ["quotes"] = await ApplyTenant(Context.Quotes).CountAsync(x => x.CustomerId == id, cancellationToken),
-            ["sales orders"] = await ApplyTenant(Context.SalesOrders).CountAsync(x => x.CustomerId == id, cancellationToken),
-            ["activities"] = await ApplyTenant(Context.Activities).CountAsync(x => x.CustomerId == id, cancellationToken),
-            ["return orders"] = await ApplyTenant(Context.ReturnOrders).CountAsync(x => x.CustomerId == id, cancellationToken),
-            ["projects"] = await ApplyTenant(Context.Projects).CountAsync(x => x.ClientId == id, cancellationToken),
+            ["contacts"] = await ForTenantContacts(tenantId).CountAsync(x => x.CustomerId == id, cancellationToken),
+            ["opportunities"] = await Context.Opportunities.CountAsync(x => x.TenantId == tenantId && x.CustomerId == id, cancellationToken),
+            ["quotes"] = await Context.Quotes.CountAsync(x => x.TenantId == tenantId && x.CustomerId == id, cancellationToken),
+            ["sales orders"] = await Context.SalesOrders.CountAsync(x => x.TenantId == tenantId && x.CustomerId == id, cancellationToken),
+            ["activities"] = await Context.Activities.CountAsync(x => x.TenantId == tenantId && x.CustomerId == id, cancellationToken),
+            ["return orders"] = await Context.ReturnOrders.CountAsync(x => x.TenantId == tenantId && x.CustomerId == id, cancellationToken),
+            ["projects"] = await Context.Projects.CountAsync(x => x.TenantId == tenantId && x.ClientId == id, cancellationToken),
         };
         return counts.Where(kv => kv.Value > 0).ToDictionary(kv => kv.Key, kv => kv.Value);
     }
 
-    public async Task<Customer?> GetByCodeAsync(string customerCode)
+    private IQueryable<Contact> ForTenantContacts(Guid tenantId) =>
+        Context.Contacts.Where(c => c.TenantId == tenantId);
+
+    public async Task<Customer?> GetByCodeAsync(string customerCode, Guid tenantId)
     {
-        return await CustomersQuery().FirstOrDefaultAsync(c => c.CustomerCode == customerCode);
+        if (tenantId == Guid.Empty) return null;
+        return await DetailQuery(tenantId).FirstOrDefaultAsync(c => c.CustomerCode == customerCode);
     }
 
     public async Task<Guid> CreateAsync(Customer customer)
     {
-        if (TenantId.HasValue && TenantId != Guid.Empty)
-            customer.TenantId = TenantId.Value;
-
+        if (customer.TenantId == Guid.Empty) return Guid.Empty;
+        if (customer.Id == Guid.Empty) customer.Id = Guid.NewGuid();
+        if (customer.CreatedAt == default) customer.CreatedAt = DateTime.UtcNow;
         Context.Customers.Add(customer);
         await Context.SaveChangesAsync();
         return customer.Id;
@@ -112,17 +138,18 @@ public class CustomerRepository : CrmRepositoryBase, ICustomerRepository
 
     public async Task<bool> UpdateAsync(Customer customer)
     {
-        if (!MatchesTenant(customer)) return false;
-
+        if (customer.TenantId == Guid.Empty) return false;
+        customer.UpdatedAt = DateTime.UtcNow;
         Context.Customers.Update(customer);
         return await Context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty) return false;
         // Load without navigation collections: with them tracked, EF would null out CustomerId on the
         // customer's opportunities/quotes/orders (ClientSetNull) instead of letting the delete be refused.
-        var customer = await ApplyTenant(Context.Customers).FirstOrDefaultAsync(c => c.Id == id);
+        var customer = await ForTenant(tenantId).FirstOrDefaultAsync(c => c.Id == id);
         if (customer == null) return false;
 
         Context.Customers.Remove(customer);

@@ -9,7 +9,7 @@ public class ReorderRuleService : IReorderRuleService
 {
     private readonly IReorderRuleRepository _repository;
     private readonly ReorderRuleMapper _mapper = new();
-    
+
     public ReorderRuleService(IReorderRuleRepository repository)
     {
         _repository = repository;
@@ -30,20 +30,30 @@ public class ReorderRuleService : IReorderRuleService
     public async Task<ReorderRuleDto> CreateAsync(ReorderRuleDto dto, Guid tenantId, string createdBy)
     {
         var entity = _mapper.ToEntity(dto);
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         entity.TenantId = tenantId;
         entity.CreatedBy = createdBy;
-        
+
         var created = await _repository.CreateAsync(entity);
         return _mapper.ToDto(created);
     }
 
     public async Task<ReorderRuleDto> UpdateAsync(ReorderRuleDto dto, Guid tenantId, string updatedBy)
     {
-        var entity = _mapper.ToEntity(dto);
-        entity.TenantId = tenantId;
-        entity.UpdatedBy = updatedBy;
-        
-        var updated = await _repository.UpdateAsync(entity);
+        var existing = await _repository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Reorder rule '{dto.Id}' not found.");
+
+        existing.ItemId = dto.ItemId;
+        existing.WarehouseId = dto.WarehouseId;
+        existing.MinStockLevel = dto.MinStockLevel;
+        existing.MaxStockLevel = dto.MaxStockLevel;
+        existing.ReorderPoint = dto.ReorderPoint;
+        existing.ReorderQuantity = dto.ReorderQuantity;
+        existing.LeadTimeDays = dto.LeadTimeDays;
+        existing.IsActive = dto.IsActive;
+        existing.UpdatedBy = updatedBy;
+
+        var updated = await _repository.UpdateAsync(existing);
         return _mapper.ToDto(updated);
     }
 

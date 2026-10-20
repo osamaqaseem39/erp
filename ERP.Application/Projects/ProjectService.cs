@@ -1,7 +1,7 @@
 using ERP.Application.Interfaces.Projects;
+using ERP.Domain.Projects;
 using ERP.Infrastructure.Repositories.Projects;
 using ERP.Shared.DTOs.Projects;
-using ERP.Domain.Projects;
 
 namespace ERP.Application.Projects;
 
@@ -16,15 +16,14 @@ public class ProjectService : IProjectService
 
     public async Task<ProjectDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var project = await _projectRepository.GetByIdAsync(id);
+        var project = await _projectRepository.GetByIdAsync(id, tenantId);
         return project != null ? MapToDto(project) : null;
     }
 
     public async Task<IEnumerable<ProjectDto>> GetAllAsync(Guid tenantId, string? status = null, Guid? managerId = null, Guid? customerId = null)
     {
-        var projects = await _projectRepository.GetAllAsync();
-        
-        // Apply filters
+        IEnumerable<Project> projects = await _projectRepository.GetAllAsync(tenantId);
+
         if (status != null)
             projects = projects.Where(p => p.Status == status);
         if (managerId.HasValue)
@@ -35,29 +34,33 @@ public class ProjectService : IProjectService
         return projects.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ProjectDto>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<ProjectDto>> GetByStatusAsync(string status, Guid tenantId)
     {
-        var projects = await _projectRepository.GetByStatusAsync(status);
+        var projects = await _projectRepository.GetByStatusAsync(status, tenantId);
         return projects.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ProjectDto>> GetByManagerAsync(Guid managerId)
+    public async Task<IEnumerable<ProjectDto>> GetByManagerAsync(Guid managerId, Guid tenantId)
     {
-        var projects = await _projectRepository.GetByManagerAsync(managerId);
+        var projects = await _projectRepository.GetByManagerAsync(managerId, tenantId);
         return projects.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ProjectDto>> GetByClientAsync(Guid clientId)
+    public async Task<IEnumerable<ProjectDto>> GetByClientAsync(Guid clientId, Guid tenantId)
     {
-        var projects = await _projectRepository.GetByClientAsync(clientId);
+        var projects = await _projectRepository.GetByClientAsync(clientId, tenantId);
         return projects.Select(MapToDto);
     }
 
     public async Task<ProjectCreateResult> CreateAsync(CreateProjectDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.", nameof(tenantId));
+
         var project = new Project
         {
             Id = Guid.NewGuid(),
+            TenantId = tenantId,
             ProjectCode = dto.ProjectCode,
             ProjectName = dto.ProjectName,
             Description = dto.Description,
@@ -79,7 +82,7 @@ public class ProjectService : IProjectService
 
     public async Task<bool> UpdateAsync(UpdateProjectDto dto, Guid tenantId, Guid userId)
     {
-        var project = await _projectRepository.GetByIdAsync(dto.Id);
+        var project = await _projectRepository.GetByIdAsync(dto.Id, tenantId);
         if (project == null) return false;
 
         project.ProjectCode = dto.ProjectCode;
@@ -104,13 +107,11 @@ public class ProjectService : IProjectService
     }
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
-    {
-        return await _projectRepository.DeleteAsync(id);
-    }
+        => await _projectRepository.DeleteAsync(id, tenantId);
 
     public async Task<bool> StartAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var project = await _projectRepository.GetByIdAsync(id);
+        var project = await _projectRepository.GetByIdAsync(id, tenantId);
         if (project == null) return false;
 
         project.Status = "In Progress";
@@ -123,7 +124,7 @@ public class ProjectService : IProjectService
 
     public async Task<bool> CompleteAsync(Guid id, CompleteProjectDto dto, Guid tenantId, Guid userId)
     {
-        var project = await _projectRepository.GetByIdAsync(id);
+        var project = await _projectRepository.GetByIdAsync(id, tenantId);
         if (project == null) return false;
 
         project.Status = "Completed";
@@ -137,7 +138,7 @@ public class ProjectService : IProjectService
 
     public async Task<bool> PauseAsync(Guid id, PauseProjectDto dto, Guid tenantId, Guid userId)
     {
-        var project = await _projectRepository.GetByIdAsync(id);
+        var project = await _projectRepository.GetByIdAsync(id, tenantId);
         if (project == null) return false;
 
         project.Status = "Paused";
@@ -150,7 +151,7 @@ public class ProjectService : IProjectService
 
     public async Task<bool> CancelAsync(Guid id, CancelProjectDto dto, Guid tenantId, Guid userId)
     {
-        var project = await _projectRepository.GetByIdAsync(id);
+        var project = await _projectRepository.GetByIdAsync(id, tenantId);
         if (project == null) return false;
 
         project.Status = "Cancelled";

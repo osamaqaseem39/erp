@@ -12,6 +12,8 @@ public interface ICoreSettingsService
     Task<SettingsCategoryDto> UpdateCategoryAsync(string category, UpdateSettingsCategoryDto dto);
     /// <summary>Server-side read of a single value (decrypted for secrets), falling back to the catalog default.</summary>
     Task<string?> GetValueAsync(string key);
+    /// <summary>Server-side write of a single catalog key (e.g. last-used voucher defaults).</summary>
+    Task SetValueAsync(string key, string? value);
 }
 
 /// <summary>Typed tenant settings backed by the SystemSettings table and validated against <see cref="SettingsCatalog"/>.</summary>
@@ -94,6 +96,39 @@ public class CoreSettingsService : ICoreSettingsService
         var stored = await _repository.GetByKeyAsync(definition.Key);
         if (stored is null || string.IsNullOrEmpty(stored.SettingValue)) return definition.IsSecret ? null : definition.Default;
         return stored.IsEncrypted ? _protector.Unprotect(stored.SettingValue) : stored.SettingValue;
+    }
+
+    public async Task SetValueAsync(string key, string? value)
+    {
+        var definition = SettingsCatalog.Find(key) ?? throw new KeyNotFoundException($"Unknown setting '{key}'.");
+        if (definition.ReadOnly) throw new ConflictException($"{definition.Label} is read-only.");
+
+        var trimmed = value?.Trim() ?? string.Empty;
+        var error = definition.Validate(string.IsNullOrEmpty(trimmed) ? null : trimmed);
+        if (error != null) throw new ValidationException("Some settings are not valid.", [error]);
+
+        var toStore = definition.IsSecret && trimmed.Length > 0 ? _protector.Protect(trimmed) : trimmed;
+        var existing = await _repository.GetByKeyAsync(definition.Key);
+        if (existing is not null)
+        {
+            if (existing.IsReadOnly) throw new ConflictException($"{definition.Label} is read-only.");
+            existing.SettingValue = toStore;
+            existing.IsEncrypted = definition.IsSecret;
+            existing.UpdatedAt = DateTime.UtcNow;
+            await _repository.UpdateAsync(existing);
+            return;
+        }
+
+        await _repository.CreateAsync(new SystemSetting
+        {
+            SettingKey = definition.Key,
+            SettingValue = toStore,
+            Category = CategoryKey(definition.Category),
+            SettingType = definition.Type.ToString(),
+            Description = definition.Label,
+            IsEncrypted = definition.IsSecret,
+            IsReadOnly = definition.ReadOnly,
+        });
     }
 
     private static IReadOnlyList<SettingDefinition> Definitions(string category)

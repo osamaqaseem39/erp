@@ -12,6 +12,7 @@ public class BankTransactionDto : BaseDto
     public string? Description { get; set; }
     public DateTime ImportedAt { get; set; }
     public Guid? MatchedPaymentId { get; set; }
+    public Guid? ReconciliationId { get; set; }
     public bool IsReconciled { get; set; }
     public string? BankAccountName { get; set; }
     public string? MatchedPaymentNumber { get; set; }

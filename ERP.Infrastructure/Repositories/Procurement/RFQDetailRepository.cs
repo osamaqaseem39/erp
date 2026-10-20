@@ -9,41 +9,51 @@ public class RFQDetailRepository : IRFQDetailRepository
 {
     private readonly ERPDbContext _context;
 
-    public RFQDetailRepository(ERPDbContext context)
+    public RFQDetailRepository(ERPDbContext context) => _context = context;
+
+    private IQueryable<RFQDetail> Query(Guid tenantId) =>
+        _context.RFQDetails.Where(d => d.TenantId == tenantId);
+
+    public async Task<RFQDetail?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        _context = context;
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(d => d.Id == id);
     }
 
-    public async Task<RFQDetail?> GetByIdAsync(int id)
+    public async Task<IEnumerable<RFQDetail>> GetByRfqIdAsync(Guid rfqId, Guid tenantId)
     {
-        return await _context.RFQDetails.FindAsync(id);
+        if (tenantId == Guid.Empty) return Array.Empty<RFQDetail>();
+        return await Query(tenantId).Where(d => d.RFQId == rfqId).ToListAsync();
     }
 
-    public async Task<IEnumerable<RFQDetail>> GetAllAsync()
+    public async Task<Guid> CreateAsync(RFQDetail entity)
     {
-        return await _context.RFQDetails.ToListAsync();
-    }
-
-    public async Task<RFQDetail> AddAsync(RFQDetail entity)
-    {
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         _context.RFQDetails.Add(entity);
         await _context.SaveChangesAsync();
-        return entity;
+        return entity.Id;
     }
 
-    public async Task UpdateAsync(RFQDetail entity)
+    public async Task<bool> UpdateAsync(RFQDetail entity)
     {
         _context.RFQDetails.Update(entity);
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.RFQDetails.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        var entity = await GetByIdAsync(id, tenantId);
+        if (entity == null) return false;
+        _context.RFQDetails.Remove(entity);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> DeleteByRfqIdAsync(Guid rfqId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return false;
+        var rows = await Query(tenantId).Where(d => d.RFQId == rfqId).ToListAsync();
+        if (rows.Count == 0) return true;
+        _context.RFQDetails.RemoveRange(rows);
+        return await _context.SaveChangesAsync() > 0;
     }
 }

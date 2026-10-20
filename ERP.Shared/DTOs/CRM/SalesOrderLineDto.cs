@@ -14,8 +14,13 @@ public class SalesOrderLineDto
     public decimal UnitPrice { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
+    /// <summary>Legacy alias for Tax1Rate.</summary>
     public decimal TaxRate { get; set; }
     public decimal TaxAmount { get; set; }
+    public decimal Tax1Rate { get; set; }
+    public decimal Tax1Amount { get; set; }
+    public decimal Tax2Rate { get; set; }
+    public decimal Tax2Amount { get; set; }
     public decimal TotalPrice { get; set; }
     public string? Notes { get; set; }
 }
@@ -27,7 +32,10 @@ public class CreateSalesOrderLineDto
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal? DiscountPercent { get; set; }
+    /// <summary>Legacy alias for Tax1Rate.</summary>
     public decimal? TaxRate { get; set; }
+    public decimal? Tax1Rate { get; set; }
+    public decimal? Tax2Rate { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -39,5 +47,7 @@ public class UpdateSalesOrderLineDto
     public decimal? UnitPrice { get; set; }
     public decimal? DiscountPercent { get; set; }
     public decimal? TaxRate { get; set; }
+    public decimal? Tax1Rate { get; set; }
+    public decimal? Tax2Rate { get; set; }
     public string? Notes { get; set; }
 }

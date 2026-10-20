@@ -24,8 +24,13 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
             Country = entity.Country,
             PostalCode = entity.PostalCode,
             TaxNumber = entity.TaxNumber,
+            TaxType = entity.TaxType,
+            Ntn = entity.Ntn,
+            Strn = entity.Strn,
+            Cnic = entity.Cnic,
             PaymentTerms = entity.PaymentTerms,
             CreditLimit = entity.CreditLimit,
+            CreditDays = entity.CreditDays,
             IsActive = entity.IsActive,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
@@ -52,9 +57,14 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
             State = dto.State,
             Country = dto.Country,
             PostalCode = dto.PostalCode,
-            TaxNumber = dto.TaxNumber,
-            PaymentTerms = dto.PaymentTerms,
+            TaxNumber = dto.TaxNumber ?? string.Empty,
+            TaxType = dto.TaxType,
+            Ntn = dto.Ntn,
+            Strn = dto.Strn,
+            Cnic = dto.Cnic,
+            PaymentTerms = dto.PaymentTerms ?? string.Empty,
             CreditLimit = dto.CreditLimit ?? 0m,
+            CreditDays = dto.CreditDays,
             IsActive = dto.IsActive,
             CreatedAt = dto.CreatedAt,
             UpdatedAt = dto.UpdatedAt,
@@ -65,6 +75,7 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
 
     public Vendor MapToEntity(CreateVendorDto dto, Guid tenantId, string createdBy)
     {
+        var ntn = dto.Ntn ?? dto.TaxNumber;
         return new Vendor
         {
             TenantId = tenantId,
@@ -80,9 +91,14 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
             State = dto.State,
             Country = dto.Country,
             PostalCode = dto.PostalCode,
-            TaxNumber = dto.TaxNumber,
+            TaxNumber = ntn ?? string.Empty,
+            TaxType = dto.TaxType,
+            Ntn = ntn,
+            Strn = dto.Strn,
+            Cnic = dto.Cnic,
             PaymentTerms = dto.PaymentTerms,
             CreditLimit = dto.CreditLimit ?? 0m,
+            CreditDays = dto.CreditDays,
             IsActive = dto.IsActive,
             CreatedBy = createdBy
         };
@@ -102,8 +118,17 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
         if (dto.Country != null) existingVendor.Country = dto.Country;
         if (dto.PostalCode != null) existingVendor.PostalCode = dto.PostalCode;
         if (dto.TaxNumber != null) existingVendor.TaxNumber = dto.TaxNumber;
+        if (dto.TaxType != null) existingVendor.TaxType = dto.TaxType;
+        if (dto.Ntn != null)
+        {
+            existingVendor.Ntn = dto.Ntn;
+            if (string.IsNullOrWhiteSpace(existingVendor.TaxNumber)) existingVendor.TaxNumber = dto.Ntn;
+        }
+        if (dto.Strn != null) existingVendor.Strn = dto.Strn;
+        if (dto.Cnic != null) existingVendor.Cnic = dto.Cnic;
         if (dto.PaymentTerms != null) existingVendor.PaymentTerms = dto.PaymentTerms;
         if (dto.CreditLimit.HasValue) existingVendor.CreditLimit = dto.CreditLimit.Value;
+        if (dto.CreditDays.HasValue) existingVendor.CreditDays = dto.CreditDays.Value;
         if (dto.IsActive.HasValue) existingVendor.IsActive = dto.IsActive.Value;
         existingVendor.UpdatedBy = updatedBy;
         existingVendor.UpdatedAt = DateTime.UtcNow;
@@ -119,16 +144,38 @@ public class VendorMapper : IMapper<Vendor, VendorDto>
     {
         return new VendorBankAccount
         {
+            Id = Guid.NewGuid(),
             VendorId = vendorId,
             TenantId = tenantId,
             BankName = dto.BankName,
             AccountNumber = dto.AccountNumber,
-            IBAN = dto.IBAN,
-            SWIFTCode = dto.SwiftCode,
-            Currency = dto.Currency,
+            IBAN = dto.IBAN ?? string.Empty,
+            SWIFTCode = dto.SWIFTCode ?? dto.SwiftCode ?? string.Empty,
+            Currency = dto.CurrencyCode ?? dto.Currency ?? "USD",
             IsPrimary = dto.IsPrimary,
             IsActive = true,
-            CreatedBy = createdBy
+            CreatedBy = createdBy,
+            CreatedAt = DateTime.UtcNow
         };
     }
+
+    public VendorBankAccountDto MapToBankAccountDto(VendorBankAccount entity) => new()
+    {
+        Id = entity.Id,
+        TenantId = entity.TenantId,
+        VendorId = entity.VendorId,
+        BankName = entity.BankName,
+        AccountNumber = entity.AccountNumber,
+        IBAN = entity.IBAN,
+        SwiftCode = entity.SWIFTCode,
+        SWIFTCode = entity.SWIFTCode,
+        Currency = entity.Currency,
+        CurrencyCode = entity.Currency,
+        IsPrimary = entity.IsPrimary,
+        IsActive = entity.IsActive,
+        CreatedAt = entity.CreatedAt,
+        CreatedBy = entity.CreatedBy,
+        UpdatedAt = entity.UpdatedAt,
+        UpdatedBy = entity.UpdatedBy
+    };
 }

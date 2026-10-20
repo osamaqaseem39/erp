@@ -1,0 +1,368 @@
+﻿<div id="CssData">
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <script src="~/Scripts/libs/jquery-2.1.1.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+        @@media print {
+            @@page {
+                size: A4;
+                margin-top: 6px;
+                margin-left: -45px;
+                page-break-after: always;
+            }
+
+            @@page:first {
+                size: A4;
+                margin-top: -30px;
+                margin-left: -45px;
+                page-break-after: always;
+            }
+
+            #MainDiv {
+                margin-top: -20px !important;
+            }
+
+            .headTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .InvoiceNoTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .InvoiceNoTableData {
+                margin-top: -27px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .myTable {
+                width: 97.5% !important;
+                margin-left: 16px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .businssName {
+                margin-right: -21px !important;
+            }
+
+            .businssName22 {
+                border-bottom: 0px !important;
+            }
+
+            .accountName {
+                margin-right: -21px !important;
+                margin-top: -2px;
+            }
+
+            .InventoryDetail {
+                padding-left: 301px !important;
+            }
+
+            .purchaseHeading {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .remainingHeading {
+                margin-top: -105px;
+                padding-top: 100px;
+            }
+
+            .borderLineTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                margin-top: -28px !important;
+            }
+
+            .borderLineTable2 {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                margin-top: -15px !important;
+            }
+
+            .description {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                margin-top: -20px !important;
+            }
+
+            .mainTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                /*margin-top: -11px !important;*/
+            }
+
+            .AccountNameTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .paymentAmount {
+                margin-top: -20px !important;
+            }
+        }
+
+        #printable-content table {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        #printable-content td, #printable-content th {
+            padding: 0px;
+            vertical-align: top;
+            font-weight: normal;
+        }
+
+        /*#printable-content * {
+                border-width: 0px;
+                border-color: #000;
+                border-style: solid;
+            }*/
+
+        .rpt {
+            background: #fff !important;
+        }
+
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }*/
+
+        .Purchasedescription {
+            padding-left: 2px;
+        }
+
+        .PageEnd {
+            page-break-after: always;
+        }
+
+        .myTable {
+            margin-top: -15px;
+            margin-left: 7px;
+            padding-right: 15px;
+        }
+
+        .styletrr td {
+            border-bottom: 2px solid black;
+            margin-top: -10px;
+        }
+
+        .styletr th {
+            border-bottom: 1px solid black;
+        }
+
+        .defaultBtn:hover {
+            background-color: #557588;
+            color: white !important;
+        }
+    </style>
+</div>
+
+<!-- widget content -->
+@model List<POS.Models.clsSalaryPayment>
+    @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+    <div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <h1 class="page-title txt-color-blueDark">
+                    <i class="fa fa-shopping-cart fa-fw "></i>
+                    Salary Payment
+                    <span>
+                        >
+                        Salary Payment Report
+                    </span>
+                </h1>
+            </div>
+        </div>
+        <section>
+            <div class="panel">
+                <div class="panel-heading">
+                    @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                    {
+                        <span class="header"> Salary Payment Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                        <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                        <input type="hidden" name="FileName" id="FileName" value="SalaryPayment" />
+                        if (Model.Count != 0 && Model[0].ReportType == "Single")
+                        {
+                            <a id="backBtn" class="btn btn-labeled  btn-default defaultBtn" href="@Url.Action("salarypaymentindex", "salarypayment")" style="color: #000 !important; background-color: #fff !important; height: 34px; width: 65px;line-height:31px">
+                                Back
+                            </a>
+                        }
+                        <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                            Print
+                        </button>
+                        <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                    }
+                </div>
+                <div class="panel-body">
+                    <div id="HtmlData">
+                        @for (int k = 0; k < Model.Count; k++)
+                        {
+                            <div id="printable-content" class="panel rpt" style="width: 800px; font-size: 12px; padding: 1px; border-radius: 0px;">
+                                <table style="padding-top: 37px;padding-left: 37px;padding-right: 37px" class="headTable">
+                                    <tr>
+                                        <td colspan="99">
+                                            @if (!(string.IsNullOrEmpty(System.Web.HttpContext.Current.Application["BusinessName"].ToString()))
+                                        || !(string.IsNullOrEmpty(System.Web.HttpContext.Current.Application["BusinessAddress"].ToString())))
+                                            {
+                                                <table class="purchaseHeading">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th style="  text-align: left; padding-bottom: 15px;padding-left:5px;padding-top:10px;" colspan="12" class="pull-left businssName businssName22">
+                                                                <div style="font-weight: bold;font-size: 20px;">@System.Web.HttpContext.Current.Application["BusinessName"]</div>
+                                                                <div style="font-size: 14px;margin-left:2px">
+                                                                    @System.Web.HttpContext.Current.Application["BusinessAddress"]
+                                                                </div>
+                                                                @*<div style="font-size: 15px;margin-left:2px;margin-top:15px;font-weight:bold">
+                                                                        Cheque Payment
+                                                                    </div>*@
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            }
+                                            @*<table style="" class="borderLineTable">
+                                                    <tr>
+                                                        <td style="border-bottom:1px solid black;"></td>
+                                                    </tr>
+                                                </table>*@
+                                            <center>
+                                                @{decimal remainingBalance = 0;
+                                                decimal prevBalance = Convert.ToDecimal(Model[k].Balance);
+                                                decimal amountPaid = Convert.ToDecimal(Model[k].Amount);
+                                                remainingBalance = prevBalance - amountPaid;
+                                                }
+                                                <div style="border:1px solid black; padding:5px;width:100%;border-radius:10px;margin-top:-5px" id="MainDiv">
+                                                    <table class="mainTable" id="" style="margin-top:5px;">
+                                                        <tr>
+                                                            <th style="text-align:center;font-size:20px;width:100%;border-bottom:1px solid black" colspan="4"><b>Salary Payment</b></th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="padding-top:5px;padding-bottom:5px;text-align:left;font-size:16px;width:18%;border-bottom:1px solid black" colspan="1"><b>Payment No. </b></th>
+                                                            <th style="padding-top: 5px; padding-bottom: 5px; text-align: left; font-size: 16px; width: 32%; border-bottom: 1px solid black" colspan="1">@Model[k].PaymentNo</th>
+                                                            <th style="padding-top: 5px; padding-bottom: 5px; text-align: right; font-size: 16px; width: 50%; border-bottom: 1px solid black" colspan="2"><b>Salary Month, Year: </b>&nbsp;&nbsp;@Convert.ToDateTime(Model[k].ForMonth).ToString("MMMM") , @Convert.ToDateTime(Model[k].ForMonth).ToString("yyyy")</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left; font-size: 14px; width: 20%; padding-top: 10px" colspan="1"><b>Employee : </b></th>
+                                                            <th style="text-align: left; font-size: 14px; width: 30%; padding-top: 10px" colspan="1">@Model[k].EmployeeName</th>
+                                                            <th style="text-align: left; font-size: 14px; width: 20%; padding-top: 10px; " colspan="1"><b>Total Salary : </b></th>
+                                                            <th style="text-align: left; font-size: 14px; width: 30%; padding-top: 10px; " colspan="1">@Convert.ToDecimal(Model[k].TotalSalary).ToString("#,##0.00")</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left; font-size: 14px; width: 20%; padding-top: 5px" colspan="1"><b>Paid From : </b></th>
+                                                            <th style="text-align: left; font-size: 14px; width: 30%; padding-top: 5px" colspan="1">@Model[k].DetailName</th>
+                                                            <th style="text-align: left; font-size: 14px; width: 20%; padding-top: 5px; " colspan="1"><b>Amount Paid : </b></th>
+                                                            <th style="text-align: left; font-size: 14px; width: 30%; padding-top: 5px; " colspan="1">@Convert.ToDecimal(Model[k].Amount).ToString("#,##0.00")</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left; font-size: 14px; width: 20%; padding-top: 5px" colspan="1"><b>Payment Date : </b></th>
+                                                            <th style="text-align: left; font-size: 14px; width: 30%; padding-top: 5px" colspan="1">@Convert.ToDateTime(Model[k].RecordDate).ToString("dd/MM/yyyy")</th>
+                                                            <th style="text-align: left; font-size: 14px; width: 20%; padding-top: 5px; " colspan="1"><b>Balance : </b></th>
+                                                            <th style="text-align: left; font-size: 14px; width: 30%; padding-top: 5px; " colspan="1">@remainingBalance.ToString("#,##0.00")</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left; font-size: 14px; width: 20%; padding-top: 5px" colspan="1"><b>Remarks : </b></th>
+                                                            <th style="text-align: left; font-size: 14px; width: 80%; padding-top: 5px" colspan="3">@Html.Raw(Model[k].Remarks)</th>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </center>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            if (Model.Count > 1)
+                            {
+                                <div class="PageEnd"></div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- END MAIN CONTENT -->
+    @section pagespecific {
+        <script src="~/Scripts/CustomJs/ResponsivePrintScreen.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var cssData = $('#CssData').html();
+                var htmlData = $('#HtmlData').html();
+                $('#DocumentName').val(cssData + htmlData);
+            })
+            //function getPaymentDetail() {
+            //    $.ajax({
+            //        type: "POST",
+            //        url: "/sale/getPaymentDetail/" + $('.SaleInvoiceId').val(),
+            //        dataType: "json",
+            //        success: function (data) {
+            //            if (data.RemainingDays > 0) {
+            //                var append = '<tr  ><td colspan="99" ><div style="text-align: center; margin-top: 40px;margin-bottom:35px;"><span style="color: #FF0000; border-width: 5px; border-color: #FF0000; padding: 10px; font-size: 20px">OVERDUE</span></div></td></tr>';
+            //                $('.mainTableBody').append(append);
+            //            }
+            //        }
+            //    })
+            //}
+            function PrintElem(elem) {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+                mywindow.document.write('<html><head><title></title>');
+                mywindow.document.write('</head><body>');
+                //mywindow.document.write('<h1></h1>');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+            $('.report_body tr td').each(function () {
+                if (parseFloat($(this).html()) > 0) {
+                    $(this).html(ReplaceNumberWithCommas($(this).html()));
+                }
+            });
+            function ReplaceNumberWithCommas(yourNumber) {
+                if (yourNumber != "0") {
+                    //Seperates the components of the number
+                    var n = yourNumber.toString().split(".");
+                    //Comma-fies the first part
+                    n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    if (n.length == 1) {
+                        n[0] = n[0] + ".00";
+                    }
+                    else {
+                        if (n[1].toString().length == 1) {
+                            n[1] = n[1] + "0";
+                        }
+                    }
+                    //Combines the two sections
+                    n = n.join(".");
+                }
+                else {
+                    n = yourNumber;
+                }
+                return n;
+            }
+        </script>
+    }

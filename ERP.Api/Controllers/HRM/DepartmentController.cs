@@ -1,5 +1,6 @@
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.HRM;
 using ERP.Shared.DTOs.HRM;
@@ -10,18 +11,21 @@ namespace ERP.Api.Controllers.HRM;
 [ApiController]
 [Route("api/hrm/departments")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class DepartmentController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IDepartmentService _departmentService;
-    private readonly ILogger<DepartmentController> _logger;
 
     public DepartmentController(IDepartmentService departmentService, ILogger<DepartmentController> logger) : base(logger)
     {
         _departmentService = departmentService;
-        _logger = logger;
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(DepartmentDto), OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateDepartmentDto dto)
     {
         var tenantId = GetTenantId();
@@ -31,6 +35,7 @@ public class DepartmentController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(DepartmentDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -41,6 +46,7 @@ public class DepartmentController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] Guid? companyId = null)
     {
         var tenantId = GetTenantId();
@@ -49,6 +55,7 @@ public class DepartmentController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(DepartmentDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDepartmentDto dto)
     {
         if (id != dto.Id)
@@ -61,6 +68,7 @@ public class DepartmentController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

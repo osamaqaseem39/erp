@@ -15,6 +15,9 @@ public interface IInvoiceRepository
     Task<bool> IsLockedAsync(Guid invoiceId, Guid tenantId);
     Task<bool> PostInvoiceAsync(Guid invoiceId, Guid tenantId, Guid postedBy);
     Task<bool> ApplyPaymentAsync(Guid invoiceId, decimal amount, Guid tenantId);
+    Task<bool> UnapplyPaymentAsync(Guid invoiceId, decimal amount, Guid tenantId);
+    /// <summary>Customer email for AR send, or null when missing / wrong tenant.</summary>
+    Task<string?> GetCustomerEmailAsync(Guid customerId, Guid tenantId);
     
     // Invoice Lines
     Task<IEnumerable<InvoiceLine>> GetLinesByInvoiceIdAsync(Guid invoiceId, Guid tenantId);
@@ -37,6 +40,7 @@ public interface IInvoiceRepository
     Task<bool> IsBillLockedAsync(Guid billId, Guid tenantId);
     Task<bool> PostBillAsync(Guid billId, Guid tenantId, Guid postedBy);
     Task<bool> ApplyPaymentToBillAsync(Guid billId, decimal amount, Guid tenantId);
+    Task<bool> UnapplyPaymentFromBillAsync(Guid billId, decimal amount, Guid tenantId);
     
     // Bill Lines
     Task<IEnumerable<BillLine>> GetBillLinesByBillIdAsync(Guid billId, Guid tenantId);

@@ -18,8 +18,6 @@ const TenantForm: React.FC = () => {
     industry: yup.string(),
     country: yup.string(),
     status: yup.string(),
-    databaseName: yup.string(),
-    connectionString: yup.string(),
     isActive: yup.boolean(),
   });
 
@@ -55,8 +53,6 @@ const TenantForm: React.FC = () => {
           industry: data.industry,
           country: data.country,
           status: data.status || "Active",
-          databaseName: data.databaseName,
-          connectionString: data.connectionString,
           isActive: data.isActive ?? true,
         };
         await tenantService.update(id, updateData);
@@ -68,8 +64,6 @@ const TenantForm: React.FC = () => {
           industry: data.industry,
           country: data.country,
           status: data.status || "Active",
-          databaseName: data.databaseName,
-          connectionString: data.connectionString,
           isActive: data.isActive ?? true,
         };
         await tenantService.create(createData);
@@ -111,8 +105,6 @@ const TenantForm: React.FC = () => {
               industry: "",
               country: "",
               status: "Active",
-              databaseName: "",
-              connectionString: "",
               isActive: true,
             }}
           >
@@ -181,26 +173,6 @@ const TenantForm: React.FC = () => {
                 <option value="Inactive">Inactive</option>
                 <option value="Suspended">Suspended</option>
               </FormInput>
-
-              <FormInput
-                label="Database Name"
-                type="text"
-                name="databaseName"
-                placeholder="Enter database name"
-                containerClass="mb-4"
-                className="form-input"
-                labelClassName="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2"
-              />
-
-              <FormInput
-                label="Connection String"
-                type="text"
-                name="connectionString"
-                placeholder="Enter connection string"
-                containerClass="mb-4"
-                className="form-input"
-                labelClassName="block text-sm font-medium text-gray-600 dark:text-gray-200 mb-2"
-              />
             </div>
 
             <div className="flex items-center gap-4 mb-6">
@@ -219,7 +191,7 @@ const TenantForm: React.FC = () => {
                 Cancel
               </Link>
               <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? "Saving…" : isEdit ? "Save changes" : "Add Tenant"}
+                {loading ? "Saving" : isEdit ? "Save changes" : "Add Tenant"}
               </button>
             </div>
           </VerticalForm>

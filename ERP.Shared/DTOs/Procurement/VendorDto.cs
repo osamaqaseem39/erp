@@ -23,9 +23,14 @@ public class VendorDto : BaseDto
     public string? Country { get; set; }
     public string? PostalCode { get; set; }
     public string? TaxNumber { get; set; }
+    public string? TaxType { get; set; }
+    public string? Ntn { get; set; }
+    public string? Strn { get; set; }
+    public string? Cnic { get; set; }
     public string? Website { get; set; }
     public string? PaymentTerms { get; set; }
     public decimal? CreditLimit { get; set; }
+    public int CreditDays { get; set; }
     public string? Category { get; set; }
     public string? Notes { get; set; }
     public bool IsApproved { get; set; }
@@ -50,9 +55,14 @@ public class CreateVendorDto : CreateDto
     public string? Country { get; set; }
     public string? PostalCode { get; set; }
     public string? TaxNumber { get; set; }
+    public string? TaxType { get; set; }
+    public string? Ntn { get; set; }
+    public string? Strn { get; set; }
+    public string? Cnic { get; set; }
     public string? Website { get; set; }
     public string? PaymentTerms { get; set; }
     public decimal? CreditLimit { get; set; }
+    public int CreditDays { get; set; }
     public string? Status { get; set; } = "Active";
     public string? Category { get; set; }
     public string? Notes { get; set; }
@@ -77,9 +87,14 @@ public class UpdateVendorDto : UpdateDto
     public string? Country { get; set; }
     public string? PostalCode { get; set; }
     public string? TaxNumber { get; set; }
+    public string? TaxType { get; set; }
+    public string? Ntn { get; set; }
+    public string? Strn { get; set; }
+    public string? Cnic { get; set; }
     public string? Website { get; set; }
     public string? PaymentTerms { get; set; }
     public decimal? CreditLimit { get; set; }
+    public int? CreditDays { get; set; }
     public string? Status { get; set; }
     public string? Category { get; set; }
     public string? Notes { get; set; }

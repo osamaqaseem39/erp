@@ -33,6 +33,7 @@ public class BarcodeService : IBarcodeService
     public async Task<BarcodeDto> CreateAsync(BarcodeDto dto, Guid tenantId, string createdBy)
     {
         var entity = _mapper.ToEntity(dto);
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         entity.TenantId = tenantId;
         entity.CreatedBy = createdBy;
         
@@ -42,11 +43,18 @@ public class BarcodeService : IBarcodeService
 
     public async Task<BarcodeDto> UpdateAsync(BarcodeDto dto, Guid tenantId, string updatedBy)
     {
-        var entity = _mapper.ToEntity(dto);
-        entity.TenantId = tenantId;
-        entity.UpdatedBy = updatedBy;
-        
-        var updated = await _repository.UpdateAsync(entity);
+        var existing = await _repository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Barcode '{dto.Id}' not found.");
+
+        existing.ItemId = dto.ItemId;
+        existing.VariantId = dto.VariantId;
+        existing.BarcodeValue = dto.Barcode;
+        existing.BarcodeType = dto.BarcodeType;
+        existing.IsPrimary = dto.IsPrimary;
+        existing.IsActive = dto.IsActive;
+        existing.UpdatedBy = updatedBy;
+
+        var updated = await _repository.UpdateAsync(existing);
         return _mapper.ToDto(updated);
     }
 

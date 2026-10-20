@@ -1,0 +1,179 @@
+﻿
+@model BlocksERP.Models.clsIncomeSource
+<div style="overflow-x:hidden;margin-top:-20px;padding:0px">
+    @using (Html.BeginForm("InsertUpdateIncomeSource", "IncomeSource", FormMethod.Post, new { area = "Loan", id = "popupForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+        <fieldset style="padding:1.25rem">
+
+            <input type="hidden" id="IncomeSourceID" name="IncomeSourceID" value="@Model.IncomeSourceID" />
+            @* =============ROW1================= *@
+            <div class="row" style="margin-top:15px">
+                <section class="col col-md-12">
+                    <label class="form-label">IncomeSource Name (*)</label>
+
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fal fa-flag"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(a => a.SourceName, new { @placeholder = "IncomeSource Name", @class = "form-control num", @maxlength = "50", autocomplete = "off" })
+                    </div>
+                </section>
+            </div>
+            @* =============ROW3================= *@
+
+            @if (Model != null && Model.IncomeSourceID > 0)
+            {
+                <div class="row" style="margin-top:20px">
+
+                    <section class="col col-md-12">
+                        <label class="form-label " style="margin-top: -7px;position:absolute;right:15px;">
+                            @if (Model.Status == 1)
+                            {
+                                <input id="Status" type="checkbox" name="Status" checked /><i></i>
+                            }
+                            else
+                            {
+                                <input id="Status" type="checkbox" name="Status" /><i></i>
+                            }
+                            Active
+                        </label>
+                    </section>
+                </div>
+            }
+
+        </fieldset>
+        <footer class="modal-footer" style="margin-top:11px;background-color:#F9F9F9;border-top:1px solid #ddd">
+            @if (Model.DeleteRoleId > 0)
+            {
+                <button type="button" class="btn btn-danger pull-left btnDeleteRecord">Delete</button>
+            }
+
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            @if (Model.IncomeSourceID>0)
+            {
+                if (Model.UpdateRoleId > 0)
+                {
+                    <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Update</button>
+                }
+            }
+            else
+            {
+                <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Save</button>
+            }
+        </footer>
+    }
+</div>
+@Scripts.Render("~/script/smartadmin")
+@Scripts.Render("/script/jqueryvalidator")
+<script type="text/javascript">
+    $(document).ready(function () {
+        var $checkoutForm = $('#popupForm').validate({
+            rules: {
+                SourceName: {
+                    required: true
+                },
+            },
+            messages: {
+                SourceName: {
+                    required: 'IncomeSource Name is required.'
+                },
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+            }
+        });
+    })
+    $(".num").keyup(function (event) {
+        if (event.keyCode == 13) {
+            textboxes = $(".num");
+            currentBoxNumber = textboxes.index(this);
+            if (currentBoxNumber == 1) {
+                $('#btn_Save').focus();
+                $('#btn_Save').click();
+            }
+            else {
+                nextBox = textboxes[currentBoxNumber + 1];
+                nextBox.focus();
+                nextBox.select();
+            }
+            event.preventDefault();
+            return false;
+        }
+    });
+    $('#popupForm').on('submit', function (e) {
+        e.preventDefault();
+        if (!$("#popupForm").valid()) {
+            return false;
+        }
+
+        $('#btn_Save').attr('disabled', 'disabled');
+        $('#btn_Save').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+
+
+        var IncomeSourceID = $('#IncomeSourceID').val();
+        var SourceName = $('#SourceName').val();
+
+        var statusString = '';
+        if ($('#Status').is(":checked")) {
+            statusString = "Active";
+        }
+        else {
+            statusString = "Inactive";
+        }
+        var st =
+        {
+            IncomeSourceID: IncomeSourceID,
+            SourceName: SourceName,
+            StatusString: statusString,
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Loan/IncomeSource/InsertUpdateIncomeSource/",
+            data: st,
+            dataType: 'json',
+            success: function (data) {
+
+                if ($('#IncomeSourceID').val() > 0) {
+                    $('#btn_Save').html("Update");
+                }
+                else {
+                    $('#btn_Save').html("Save");
+                }
+
+                $('#btn_Save').prop('disabled', false);
+                if (data.status) {
+                    toastr.success("IncomeSource Saved Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                    $('.close').click();
+                    oTable.ajax.reload(null, false);
+                }
+                else {
+                    toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                }
+            }
+        })
+    })
+</script>
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+</script>

@@ -13,16 +13,17 @@ public class StockBalanceRepository : IStockBalanceRepository
 
     public async Task<StockBalance?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var q = _context.StockBalances.AsQueryable();
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.FirstOrDefaultAsync(x => x.Id == id);
+        if (tenantId == Guid.Empty) return null;
+        return await _context.StockBalances
+            .FirstOrDefaultAsync(x => x.Id == id && x.TenantId == tenantId);
     }
 
     public async Task<IEnumerable<StockBalance>> GetAllAsync(Guid tenantId)
     {
-        var q = _context.StockBalances.AsQueryable();
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<StockBalance>();
+        return await _context.StockBalances
+            .Where(x => x.TenantId == tenantId)
+            .ToListAsync();
     }
 
     public async Task<StockBalance> CreateAsync(StockBalance entity)
@@ -53,23 +54,25 @@ public class StockBalanceRepository : IStockBalanceRepository
 
     public async Task<StockBalance?> GetByItemAndWarehouseAsync(Guid itemId, Guid warehouseId, Guid tenantId)
     {
-        var q = _context.StockBalances.Where(x => x.ItemId == itemId && x.WarehouseId == warehouseId);
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.FirstOrDefaultAsync();
+        if (tenantId == Guid.Empty) return null;
+        return await _context.StockBalances
+            .FirstOrDefaultAsync(x => x.ItemId == itemId && x.WarehouseId == warehouseId && x.TenantId == tenantId);
     }
 
     public async Task<IEnumerable<StockBalance>> GetByItemAsync(Guid itemId, Guid tenantId)
     {
-        var q = _context.StockBalances.Where(x => x.ItemId == itemId);
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<StockBalance>();
+        return await _context.StockBalances
+            .Where(x => x.ItemId == itemId && x.TenantId == tenantId)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<StockBalance>> GetByWarehouseAsync(Guid warehouseId, Guid tenantId)
     {
-        var q = _context.StockBalances.Where(x => x.WarehouseId == warehouseId);
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<StockBalance>();
+        return await _context.StockBalances
+            .Where(x => x.WarehouseId == warehouseId && x.TenantId == tenantId)
+            .ToListAsync();
     }
 }
 
@@ -81,22 +84,41 @@ public class StockTransferRepository : IStockTransferRepository
 
     public async Task<StockTransfer?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        var q = _context.StockTransfers.AsQueryable();
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.FirstOrDefaultAsync(x => x.Id == id);
+        if (tenantId == Guid.Empty) return null;
+        // Avoid Include() on required warehouse/company FKs — missing related rows
+        // become INNER JOINs and hide the transfer. Load details separately.
+        var entity = await _context.StockTransfers
+            .FirstOrDefaultAsync(x => x.Id == id && x.TenantId == tenantId);
+        if (entity == null) return null;
+
+        await _context.Entry(entity).Collection(x => x.StockTransferDetails).LoadAsync();
+        await _context.Entry(entity).Reference(x => x.FromWarehouse).LoadAsync();
+        await _context.Entry(entity).Reference(x => x.ToWarehouse).LoadAsync();
+        foreach (var line in entity.StockTransferDetails)
+            await _context.Entry(line).Reference(d => d.Item).LoadAsync();
+        return entity;
     }
 
     public async Task<IEnumerable<StockTransfer>> GetAllAsync(Guid tenantId)
     {
-        var q = _context.StockTransfers.AsQueryable();
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<StockTransfer>();
+        return await _context.StockTransfers
+            .Include(x => x.StockTransferDetails)
+            .Where(x => x.TenantId == tenantId)
+            .ToListAsync();
     }
 
     public async Task<StockTransfer> CreateAsync(StockTransfer entity)
     {
         if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         entity.CreatedAt = DateTime.UtcNow;
+        foreach (var line in entity.StockTransferDetails)
+        {
+            if (line.Id == Guid.Empty) line.Id = Guid.NewGuid();
+            line.TransferId = entity.Id;
+            line.TenantId = entity.TenantId;
+            line.CreatedAt = DateTime.UtcNow;
+        }
         _context.StockTransfers.Add(entity);
         await _context.SaveChangesAsync();
         return entity;
@@ -105,9 +127,31 @@ public class StockTransferRepository : IStockTransferRepository
     public async Task<StockTransfer> UpdateAsync(StockTransfer entity)
     {
         entity.UpdatedAt = DateTime.UtcNow;
-        _context.StockTransfers.Update(entity);
         await _context.SaveChangesAsync();
         return entity;
+    }
+
+    /// <summary>Replace transfer lines (Draft edits). Caller must not keep stale detail instances tracked.</summary>
+    public async Task ReplaceDetailsAsync(Guid transferId, Guid tenantId, IReadOnlyList<StockTransferDetail> lines)
+    {
+        if (tenantId == Guid.Empty) return;
+
+        var existing = await _context.StockTransferDetails
+            .Where(d => d.TransferId == transferId && d.TenantId == tenantId)
+            .ToListAsync();
+        _context.StockTransferDetails.RemoveRange(existing);
+        await _context.SaveChangesAsync();
+
+        foreach (var line in lines)
+        {
+            if (line.Id == Guid.Empty) line.Id = Guid.NewGuid();
+            line.TransferId = transferId;
+            line.TenantId = tenantId;
+            if (line.CreatedAt == default) line.CreatedAt = DateTime.UtcNow;
+            line.IsActive = true;
+            _context.StockTransferDetails.Add(line);
+        }
+        await _context.SaveChangesAsync();
     }
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
@@ -121,16 +165,18 @@ public class StockTransferRepository : IStockTransferRepository
 
     public async Task<IEnumerable<StockTransfer>> GetByWarehouseAsync(Guid warehouseId, Guid tenantId)
     {
-        var q = _context.StockTransfers
-            .Where(x => x.FromWarehouseId == warehouseId || x.ToWarehouseId == warehouseId);
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<StockTransfer>();
+        return await _context.StockTransfers
+            .Where(x => x.TenantId == tenantId
+                        && (x.FromWarehouseId == warehouseId || x.ToWarehouseId == warehouseId))
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<StockTransfer>> GetByStatusAsync(string status, Guid tenantId)
     {
-        var q = _context.StockTransfers.Where(x => x.Status == status);
-        if (tenantId != Guid.Empty) q = q.Where(x => x.TenantId == tenantId);
-        return await q.ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<StockTransfer>();
+        return await _context.StockTransfers
+            .Where(x => x.TenantId == tenantId && x.Status == status)
+            .ToListAsync();
     }
 }

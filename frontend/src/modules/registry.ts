@@ -86,7 +86,7 @@ export const MODULES: ErpModule[] = [
     description: "Users, roles and permissions.",
     icon: "mgc_user_setting_line",
     home: "/core/settings/users",
-    paths: ["/core/settings/users", "/core/settings/roles"],
+    paths: ["/core/settings/users", "/core/settings/roles", "/core/settings/admin-emails"],
     dashboardCheckpoint: "Checkpoint 2",
     sections: [
       {
@@ -94,6 +94,14 @@ export const MODULES: ErpModule[] = [
         entries: [
           entry("users", "Users", "/core/settings/users", "mgc_user_3_line", "People who can sign in.", "core.users.view"),
           entry("roles", "Roles", "/core/settings/roles", "mgc_key_2_line", "Roles and their permissions.", "core.roles.view"),
+          entry(
+            "admin-emails",
+            "Admin emails",
+            "/core/settings/admin-emails",
+            "mgc_mail_line",
+            "Notification email directory.",
+            "admin.emails.view"
+          ),
         ],
       },
     ],
@@ -199,10 +207,42 @@ export const MODULES: ErpModule[] = [
         ],
       },
       {
-        title: "Accounting",
+        title: "Account setup",
         entries: [
-          entry("coa", "Chart of accounts", "/finance/chart-of-accounts", "mgc_list_check_line", undefined, "finance.accounts.view"),
+          entry("coa-setup", "Setup configuration", "/finance/accounts/setup", "mgc_settings_3_line", "Decimals, max depth, posting rules.", "finance.accounts.view"),
+          entry("coa-l1", "First level", "/finance/accounts/levels/1", "mgc_list_check_line", undefined, "finance.accounts.view"),
+          entry("coa-l2", "Second level", "/finance/accounts/levels/2", "mgc_list_check_line", undefined, "finance.accounts.view"),
+          entry("coa-l3", "Third level", "/finance/accounts/levels/3", "mgc_list_check_line", undefined, "finance.accounts.view"),
+          entry("coa-l4", "Fourth level", "/finance/accounts/levels/4", "mgc_list_check_line", undefined, "finance.accounts.view"),
+          entry("coa-info", "Account information", "/finance/accounts/information", "mgc_tree_line", "Posting / leaf accounts.", "finance.accounts.view"),
+          entry("coa", "Chart of accounts", "/finance/chart-of-accounts", "mgc_list_check_line", "Full CoA list.", "finance.accounts.view"),
+          entry("cost-centers", "Cost centers", "/finance/cost-centers", "mgc_building_1_line", undefined, "finance.accounts.view"),
+          entry("account-defaults", "Default accounts", "/finance/account-defaults", "mgc_bookmark_line", "System posting accounts (Cash, AR, AP…).", "finance.accounts.view"),
+        ],
+      },
+      {
+        title: "Vouchers",
+        entries: [
+          entry("cpv", "Cash payment", "/finance/vouchers/cash-payment", "mgc_wallet_2_line", undefined, "finance.journals.view"),
+          entry("crv", "Cash receipt", "/finance/vouchers/cash-receipt", "mgc_wallet_3_line", undefined, "finance.journals.view"),
+          entry("bpv", "Bank payment", "/finance/vouchers/bank-payment", "mgc_bank_card_line", undefined, "finance.journals.view"),
+          entry("brv", "Bank receipt", "/finance/vouchers/bank-receipt", "mgc_bank_line", undefined, "finance.journals.view"),
+          entry("jv", "Journal voucher", "/finance/journals/new", "mgc_book_2_line", "Manual balanced JV.", "finance.journals.view"),
+          entry("approve-voucher", "Approve voucher", "/finance/vouchers/approve", "mgc_check_circle_line", "Draft vouchers awaiting approval.", "finance.journals.view"),
+          entry("closed-voucher", "Closed vouchers", "/finance/vouchers/closed", "mgc_folder_check_line", "Approved vouchers (post to GL).", "finance.journals.view"),
+          entry("posted-voucher", "Posted vouchers", "/finance/vouchers/posted", "mgc_file_check_line", "Posted to GL — unpost if needed.", "finance.journals.view"),
           entry("journals", "Journals", "/finance/journals", "mgc_book_3_line", undefined, "finance.journals.view"),
+        ],
+      },
+      {
+        title: "Accounts reports",
+        entries: [
+          entry("acct-reports", "Accounts reports", "/finance/reports", "mgc_chart_bar_line", "TB, running TB, ledger, P&L, BS, vouchers, CoA.", "finance.reports.view"),
+        ],
+      },
+      {
+        title: "Banking & FX",
+        entries: [
           entry("banks", "Banks", "/finance/banks", "mgc_bank_line", undefined, "finance.banks.view"),
           entry("currencies", "Currencies", "/finance/currencies", "mgc_coin_line", undefined, "finance.currencies.view"),
         ],

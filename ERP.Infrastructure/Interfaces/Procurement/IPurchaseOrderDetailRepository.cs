@@ -4,9 +4,8 @@ namespace ERP.Infrastructure.Interfaces.Procurement;
 
 public interface IPurchaseOrderDetailRepository
 {
-    Task<PurchaseOrderDetail?> GetByIdAsync(int id);
-    Task<IEnumerable<PurchaseOrderDetail>> GetAllAsync();
-    Task<PurchaseOrderDetail> AddAsync(PurchaseOrderDetail entity);
-    Task UpdateAsync(PurchaseOrderDetail entity);
-    Task DeleteAsync(int id);
+    Task<IEnumerable<PurchaseOrderDetail>> GetByPurchaseOrderIdAsync(Guid poId, Guid tenantId);
+    Task<Guid> CreateAsync(PurchaseOrderDetail detail);
+    Task<bool> UpdateAsync(PurchaseOrderDetail detail);
+    Task<bool> DeleteByPurchaseOrderIdAsync(Guid poId, Guid tenantId);
 }

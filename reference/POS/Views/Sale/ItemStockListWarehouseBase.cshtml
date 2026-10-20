@@ -1,0 +1,32 @@
+﻿@model List<POS.Models.clsItem>
+<table class="table table-bordered table-striped" style="width:100%">
+    <tr class="headingRowBilling">
+        <th style=" text-align: left; padding: 5px; padding-left:10px; ">
+            Warehouse
+        </th>
+        <th style="width: 100px !important; text-align: right; padding: 5px; padding-right: 10px; ">
+            Stock
+        </th>
+    </tr>
+    @if (Model.Count == 0)
+    {
+        <tr style="" class="rowsListBilling">
+            <th colspan="2" style="width:100%;text-align: center;padding:15px;">
+                <span style="font-size: 16px; font-weight: normal">No record found.</span>
+            </th>
+        </tr>
+    }
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        <tr class="categoryRows">
+            <th style="text-align: left; padding: 5px; padding-left: 10px; ">
+                <span style="font-size:14px;font-weight:normal"> @Model[i].WarehouseName </span>
+            </th>
+            <th style="width: 100px !important; text-align: right; padding: 5px; padding-right: 10px;">
+                <span style="font-size:14px;font-weight:normal;text-align:right"> @Model[i].Stock </span>
+            </th>
+        </tr>
+    }
+</table>
+<script type="text/javascript">
+</script>

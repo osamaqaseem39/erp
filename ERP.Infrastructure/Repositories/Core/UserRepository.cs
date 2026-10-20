@@ -64,6 +64,9 @@ public class UserRepository : TenantScopedRepositoryBase, IUserRepository
     public async Task<User?> GetByEmailAndTenantAsync(string email, Guid tenantId) =>
         tenantId == CurrentTenantId ? await GetByEmailAsync(email) : null;
 
+    public async Task<User?> GetByUsernameAsync(string username) =>
+        await Users.FirstOrDefaultAsync(u => u.Username == username);
+
     public async Task<IEnumerable<User>> GetByCompanyAsync(Guid companyId) =>
         await Users.AsNoTracking().Where(u => u.CompanyId == companyId).ToListAsync();
 

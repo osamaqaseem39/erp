@@ -54,6 +54,13 @@ public class ReportsMutations
         return await service.GenerateReportAsync(input, tenantId, userId);
     }
 
+    public async Task<ReportExportDto> ExportReport(
+        [Service] IReportService service,
+        Guid reportId,
+        Guid tenantId,
+        string format = "json")
+        => await service.ExportReportAsync(reportId, tenantId, format);
+
     // Report Schedule Mutations
     public async Task<ReportScheduleDto> ScheduleReport(
         [Service] IReportService service,

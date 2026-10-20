@@ -1,0 +1,386 @@
+﻿<!-- Left panel : Navigation area -->
+<!-- Note: This width of the aside area can be adjusted through LESS variables -->
+<style>
+    nav ul ul {
+        background: rgb(243,113,1);
+    }
+
+    em {
+        color: white;
+    }
+
+    .minifyme {
+        border-bottom: 1px solid #999999;
+        background: #fff;
+    }
+
+        .minifyme:hover {
+            border-bottom: 1px solid #999999;
+            background: #ffffff;
+        }
+
+    .minified nav > ul > li > a > .menu-item-parent {
+        left: 45px;
+        top: -1px;
+        background-color: rgb(243,113,1);
+        height: 35px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .minified nav > ul > li > ul {
+        left: 45px;
+        top: 39px;
+        width: 201px;
+        background: rgb(243,113,1);
+    }
+
+    .minified nav > ul > li {
+        border-bottom: 1px solid #ffffff;
+        border-top: 1px solid #ffffff;
+    }
+
+        .minified nav > ul > li > ul > li {
+            background-color: rgb(243,113,1);
+        }
+
+    .minified nav ul ul ul li {
+        background-color: rgb(243,113,1) !important;
+    }
+
+    nav ul .active {
+        background-color: #293955;
+    }
+
+    #DueNotificationSpan {
+        padding: .2em;
+        border-radius: 50%;
+        line-height: 1em;
+        color: white;
+        background-color: #ca0707;
+        text-align: center;
+        min-width: 1em;
+        font-size: 14px;
+    }
+    #UnPaidNotificationSpan {
+        padding: .2em;
+        border-radius: 50%;
+        line-height: 1em;
+        color: white;
+        background-color: #ca0707;
+        text-align: center;
+        min-width: 1em;
+        font-size: 14px;
+    }
+    #NoPayNotificationSpan {
+        padding: .2em;
+        border-radius: 50%;
+        line-height: 1em;
+        color: white;
+        background-color: #ca0707;
+        text-align: center;
+        min-width: 1em;
+        font-size: 14px;
+    }
+
+    #DueNotificationForEmail {
+        padding: .2em;
+        border-radius: 50%;
+        line-height: 1em;
+        color: white;
+        background-color: #ca0707;
+        text-align: center;
+        min-width: 1em;
+        font-size: 14px;
+    }
+
+    #DueNotificationForUp {
+        padding: .2em;
+        border-radius: 50%;
+        line-height: 1em;
+        color: white;
+        background-color: #ca0707;
+        text-align: center;
+        min-width: 1em;
+        font-size: 14px;
+    }
+
+     
+</style>
+<aside id="left-panel" class="nav-main-ul custom-scroll" style="padding-top: 66px; position: fixed; background-color: #203647 !important; ">
+
+    <!-- User info -->
+    @*@{ Html.RenderPartial("_CurrentUser"); }*@
+    <!-- end user info -->
+    <!-- NAVIGATION : This navigation is also responsive
+
+    To make this navigation dynamic please make sure to link the node
+    (the reference to the nav > ul) after page load. Or the navigation
+    will not initialize.
+    -->
+    @*<ul class="side__shimmer__wrapper" style="padding:0;">
+            <li class="lb01"></li>
+            <li class="lb02__50"></li>
+            <li class="lb_dot"></li>
+            <li class="lb02__70"></li>
+            <li class="height__50"></li>
+            <li class="lb01"></li>
+            <li class="lb02__50"></li>
+            <li class="lb_dot"></li>
+            <li class="lb02__70"></li>
+        </ul>*@
+    <nav>
+        <!-- NOTE: Notice the gaps after each icon usage <i></i>..
+        Please note that these links work a bit different than
+        traditional href="" links. See documentation for details.
+        -->
+        @*Start Owner Aside*@
+
+        <ul>
+            <li class="@Html.RouteIf("index", "active")">
+                <a href="@Url.Action("index", "home")" title="Dashboard"><i class="fa fa-lg fa-fw fa-home" style="color: white; "></i> <span class="menu-item-parent" style="color:white">Dashboard</span></a>
+            </li>
+            <li class="@Html.RouteIf("", "active")">
+                <a href="#" title="Setup"><i class="fa fa-lg fa-money-bill-alt" style="color: white;margin-left:-3px"></i> <span class="menu-item-parent" style="color: white; ">&nbsp;&nbsp;Setup</span></a>
+                <ul>
+                    <li class="@Html.RouteIf("adminsettingindex", "active")">
+                        <a href="@Url.Action("adminsettingindex", "adminsetting")" title="Admin Settings"> <span style="color: white; "> Admin Settings</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("setupcontentindex", "active")">
+                        <a href="@Url.Action("setupcontentindex", "setupcontent")" title="Content"> <span style="color: white; "> Content</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("setupcontentpagesindex", "active")">
+                        <a href="@Url.Action("setupcontentpagesindex", "setupcontentpages")" title="Content Pages"> <span style="color: white; "> Content Pages</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("setupcontentfaqindex", "active")">
+                        <a href="@Url.Action("setupcontentfaqindex", "setupcontentfaq")" title="Frequently Asked Questions"> <span style="color: white; "> Frequently Asked Questions</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("setupcontentblogsindex", "active")">
+                        <a href="@Url.Action("setupcontentblogsindex", "setupcontentblogs")" title="Blogs"> <span style="color: white; "> Blogs</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("setupemailindex", "active")">
+                        <a href="@Url.Action("setupemailindex", "setupemail")" title="Email Address"> <span style="color: white; "> Email Address</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("setupemailmessageindex", "active")">
+                        <a href="@Url.Action("setupemailmessageindex", "setupemailmessage")" title="Email Message"> <span style="color: white; "> Email Message</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cabtypeindex", "active")">
+                        <a href="@Url.Action("cabtypeindex", "cabtype")" title="Cab Type"> <span style="color: white; "> Cab Type</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cabzoneindex", "active")">
+                        <a href="@Url.Action("cabzoneindex", "cabzone")" title="Cab Zone"> <span style="color: white; "> Zone</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cabpricelistindex", "active")">
+                        <a href="@Url.Action("cabpricelistindex", "cabpricelist")" title="Price List"> <span style="color: white; "> Price List</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cabpriceupdatenew", "active")">
+                        <a href="@Url.Action("cabpriceupdatenew", "cabpricelist")" title="Price Update"> <span style="color: white; "> Price Update</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("CabTimePriceIndex", "active")">
+                        <a href="@Url.Action("CabTimePriceIndex", "CabTimePrice")" title="Special Time Price"> <span style="color: white; "> Special Time Price</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("CabSpecialPriceIndex", "active")">
+                        <a href="@Url.Action("CabSpecialPriceIndex", "CabSpecialPrice")" title="Special Price"> <span style="color: white; "> Special Price</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("CabServicePauseIndex", "active")">
+                        <a href="@Url.Action("CabServicePauseIndex", "CabServicePause")" title="Service Pause"> <span style="color: white; "> Service Pause</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("CabLocationChargesIndex", "active")">
+                        <a href="@Url.Action("CabLocationChargesIndex", "CabLocationCharges")" title="Extra Charges"> <span style="color: white; "> Extra Charges</span></a>
+                    </li>
+
+                    <li class="@Html.RouteIf("caboffermainindex", "active")">
+                        <a href="@Url.Action("caboffermainindex", "caboffermain")" title="Special Offer From Location"> <span style="color: white; "> Special Offer From Location</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cabofferdetailindex", "active")">
+                        <a href="@Url.Action("cabofferdetailindex", "cabofferdetail")" title="Special Offer To Location"> <span style="color: white; "> Special Offer To Location</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("supplierdetail", "active")">
+                        <a href="@Url.Action("supplierdetail", "chartofaccount")" title="Partners /Suppliers"> <span style="color: white; "> Partners /Suppliers</span></a>
+                    </li>
+
+                    <li class="@Html.RouteIf("documentssetupindex", "active")">
+                        <a href="@Url.Action("documentssetupindex", "documentssetup")" title="Documents Type Setup"> <span style="color: white; "> Documents Types</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("driverdetail", "active")">
+                        <a href="@Url.Action("driverdetail", "chartofaccount")" title="Drivers"> <span style="color: white; "> Drivers</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cabluggageindex", "active")">
+                        <a href="@Url.Action("cabluggageindex", "cabluggage")" title="Luggage"> <span style="color: white; "> Luggage</span></a>
+                    </li>
+                </ul>
+            </li>
+            @*
+           
+            <li class="@Html.RouteIf("", "active")">
+                <a href="#" title="Vouchers"><i class="fa fa-lg fa-money-bill-alt" style="color: white;margin-left:-3px"></i> <span class="menu-item-parent" style="color: white; ">&nbsp;&nbsp;Cheque</span></a>
+                <ul>
+                    <li class="@Html.RouteIf("chequebook", "active")">
+                        <a href="@Url.Action("chequebook", "cheque")" title="Cheque Book"> <span style="color: white; "> Cheque Book</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("chequepayment", "active") @Html.RouteIf("chequepaymentreport", "active")">
+                        <a href="@Url.Action("chequepayment", "cheque")" title="Cheque Payment"> <span style="color: white; "> Cheque Payment</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("chequereceived", "active")  @Html.RouteIf("chequereceivereport", "active")">
+                        <a href="@Url.Action("chequereceived", "cheque")" title="Cheque Receive"> <span style="color: white; "> Cheque Receive</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("chequedeposit", "active")">
+                        <a href="@Url.Action("chequedeposit", "cheque")" title="Cheque Deposit"> <span style="color: white; "> Cheque Deposit</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("chequepaymentclearance", "active")">
+                        <a href="@Url.Action("chequepaymentclearance", "cheque")" title="Clear Cheque"> <span style="color: white; "> Clear Cheque</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("chequeduedatesalert", "active")">
+                        <a href="@Url.Action("chequeduedatesalert", "cheque")" title="Cheque Due Date Alert"> <span style="color: white; "> Cheque Due Date Alert</span></a>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.RouteIf("salesmanindex", "active")" style="margin-right:3px">
+                <a href="@Url.Action("salesmanindex", "salesman")" title="Salesman" style="margin-left:-3px"><i class="fa fa-lg fa-fw fa-user" style="color: white; "></i> <span class="menu-item-parent" style="color:white">Salesman</span></a>
+            </li>            
+            *@
+
+            <li class="@Html.RouteIf("", "active")">
+                <a href="#" title="Manual Booking"><i class="fa fa-lg fa-file-alt" style="color: white;"></i> <span class="menu-item-parent" style="color: white; ">&nbsp;Manual Booking</span></a>
+                <ul>
+                    <li class="@Html.RouteIf("ManualBooking", "active")">
+                        <a href="@Url.Action("ManualBooking", "CabBooking")" title="Manual Booking"> <span style="color: white; "> Manual Booking</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("AllBookingDetail", "active")">
+                        <a href="@Url.Action("AllBookingDetail", "CabBooking")" title="All Booking"> <span style="color: white; "> All Booking</span></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="@Html.RouteIf("NoPayBookingList", "active")">
+                <a href="@Url.Action("NoPayBookingList", "CabBooking")" title="No Pay Booking" style="margin-left:-5px"><i class="menu-icon fa fa-bell" style="color: #fff; font-size: 20px; margin-left: 1px" id="NoPayNotificationSpanMain"></i><sup style="font-size: 14px; margin-left: -10px;" id="NoPayNotificationSpan"></sup><span class="menu-item-parent" style="color:white">No Pay Booking</span></a>
+            </li>
+            <li class="@Html.RouteIf("UnPaidBookingList", "active")">
+                <a href="@Url.Action("UnPaidBookingList", "CabBooking")" title="Unpaid Booking" style="margin-left:-5px"><i class="menu-icon fa fa-bell" style="color: #fff; font-size: 20px; margin-left: 1px" id="UnPaidNotificationSpanMain"></i><sup style="font-size: 14px; margin-left: -10px;" id="UnPaidNotificationSpan"></sup><span class="menu-item-parent" style="color:white">Unpaid Booking</span></a>
+            </li>
+            <li class="@Html.RouteIf("PendingBookingList", "active")">
+                <a href="@Url.Action("PendingBookingList", "CabBooking")" title="New Booking" style="margin-left:-5px"><i class="menu-icon fa fa-bell" style="color: #fff; font-size: 20px; margin-left: 1px" id="DueNotificationSpanMain"></i><sup style="font-size: 14px; margin-left: -10px;" id="DueNotificationSpan"></sup> <span class="menu-item-parent" style="color:white;">New Booking</span></a>
+            </li>
+            <li class="@Html.RouteIf("BookingList", "active")">
+                <a href="@Url.Action("BookingList", "CabBooking")" title="Active For Bidding" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">Active For Bidding</span></a>
+            </li>
+
+
+            @*<li class="@Html.RouteIf("BidList", "active")">
+                <a href="@Url.Action("BidList", "CabBooking")" title="Bid List" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">Bid List</span></a>
+            </li>*@
+
+            <li class="@Html.RouteIf("BookingComarisonList", "active")">
+                <a href="@Url.Action("BookingComarisonList", "CabBooking")" title="Compare Bid" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">Compare Bid</span></a>
+            </li>
+            <li class="@Html.RouteIf("AssignedList", "active")">
+                <a href="@Url.Action("AssignedList", "CabBooking")" title="Assigned Job" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">Assigned Job</span></a>
+            </li>
+            
+            <li class="@Html.RouteIf("ConfirmForEmailList", "active")">
+                <a href="@Url.Action("ConfirmForEmailList", "CabBooking")" title="Confirm Job" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i><sup style="font-size: 14px; margin-left: -10px;" id="DueNotificationForEmail"></sup> <span class="menu-item-parent" style="color:white">Confirm Job</span></a>
+            </li>
+            <li class="@Html.RouteIf("ConfirmList", "active")">
+                <a href="@Url.Action("ConfirmList", "CabBooking")" title="Upcomming Jobs" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i><sup style="font-size: 14px; margin-left: -10px;" id="DueNotificationForUp" hidden></sup> <span class="menu-item-parent" style="color:white">Upcomming Jobs</span></a>
+            </li>
+
+            <li class="@Html.RouteIf("AllBookingDetailInProcess", "active")">
+                <a href="@Url.Action("AllBookingDetailInProcess", "CabBooking")" title="In Process Jobs" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i><sup style="font-size: 14px; margin-left: -10px;" id="DueNotificationForUp" hidden></sup> <span class="menu-item-parent" style="color:white">Upcoming/In-Process</span></a>
+            </li>
+
+            <li class="@Html.RouteIf("AllBookingList", "active")">
+                <a href="@Url.Action("AllBookingList", "CabBooking")" title="All Jobs List" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i><sup style="font-size: 14px; margin-left: -10px;" id="DueNotificationForUp" hidden></sup> <span class="menu-item-parent" style="color:white">All Jobs List</span></a>
+            </li>
+            
+
+            @*
+            <li class="@Html.RouteIf("CancelList", "active")">
+                <a href="@Url.Action("CancelList", "CabBooking")" title="Cancel List" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-list" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">Cancel List</span></a>
+            </li>*@
+            
+            <li class="@Html.RouteIf("", "active")">
+                <a href="#" title="Account Setup"><i class="fa fa-lg fa-user" style="color: white;"></i> <span class="menu-item-parent" style="color: white; ">&nbsp;Account Setup</span></a>
+                <ul>
+                    <li class="@Html.RouteIf("firstlevel", "active")">
+                        <a href="@Url.Action("firstlevel", "chartofaccount")" title="1st Level"> <span style="color: white; "> 1st Level</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("secondlevel", "active")">
+                        <a href="@Url.Action("secondlevel", "chartofaccount")" title="2nd Level"> <span style="color: white; "> 2nd Level</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("thirdlevel", "active")">
+                        <a href="@Url.Action("thirdlevel", "chartofaccount")" title="3rd Level"> <span style="color: white; "> 3rd Level</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("accountdetail", "active")">
+                        <a href="@Url.Action("accountdetail", "chartofaccount")" title="Account"> <span style="color: white; "> Account</span></a>
+                    </li>
+                    @*<li class="@Html.RouteIf("customersupplierdetail", "active")">
+                        <a href="@Url.Action("customersupplierdetail", "chartofaccount")" title="Customer / Supplier Account"> <span style="color: white; "> Customer / Supplier Account</span></a>
+                    </li>*@
+                    <li class="@Html.RouteIf("countryindex", "active")">
+                        <a href="@Url.Action("countryindex", "country")" title="Country"> <span style="color: white; "> Country</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cityindex", "active")">
+                        <a href="@Url.Action("cityindex", "city")" title="City"> <span style="color: white; "> City</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("defaultglindex", "active")">
+                        <a href="@Url.Action("defaultglindex", "defaultgl")" title="Default GL"> <span style="color: white; "> Default GL</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("defaultdetailindex", "active")">
+                        <a href="@Url.Action("defaultdetailindex", "defaultdetail")" title="Default Detail"> <span style="color: white; "> Default Detail</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("defaultaccountopeningbalanceindex", "active")">
+                        <a href="@Url.Action("defaultaccountopeningbalanceindex", "defaultaccountopeningbalance")" title="Account Opening Balance"> <span style="color: white; "> A/C Opening Balance</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("fiscalyearindex", "active")">
+                        <a href="@Url.Action("fiscalyearindex", "fiscalyear")" title="Fiscal Year"> <span style="color: white; "> Fiscal Year</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("taxrateindex", "active")">
+                        <a href="@Url.Action("taxrateindex", "taxrate")" title="Tax Rate"> <span style="color: white; "> Tax Rate</span></a>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.RouteIf("DriversList", "active")">
+                <a href="@Url.Action("DriversList", "DriversLocation")" title="Drivers Tracking" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-map-marker" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">Drivers Tracking</span></a>
+            </li>
+            <li class="@Html.RouteIf("", "active")">
+                <a href="#" title="Vouchers"><i class="fa fa-lg fa-file-alt" style="color: white;"></i> <span class="menu-item-parent" style="color: white; ">&nbsp;Vouchers</span></a>
+                <ul>
+                    <li class="@Html.RouteIf("cashpaymentindex", "active") @Html.RouteIf("cashpaymentreport", "active")">
+                        <a href="@Url.Action("cashpaymentindex", "cash")" title="Cash Payment"> <span style="color: white; "> Cash Payment</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("cashreceiptindex", "active") @Html.RouteIf("cashreceiptreport", "active")">
+                        <a href="@Url.Action("cashreceiptindex", "cash")" title="Cash Receipt"> <span style="color: white; "> Cash Receipt</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("bankpaymentindex", "active") @Html.RouteIf("bankpaymentreport", "active")">
+                        <a href="@Url.Action("bankpaymentindex", "bank")" title="Bank Payment"> <span style="color: white; "> Bank Payment</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("bankreceiptindex", "active") @Html.RouteIf("bankreceiptreport", "active")">
+                        <a href="@Url.Action("bankreceiptindex", "bank")" title="Bank Receipt"> <span style="color: white; "> Bank Receipt</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("journalvoucherindex", "active")  @Html.RouteIf("journalvoucherreport", "active")">
+                        <a href="@Url.Action("journalvoucherindex", "journalvoucher")" title="Journal Voucher"> <span style="color: white; "> Journal Voucher</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("BillIndex", "active")  @Html.RouteIf("billreport", "active")">
+                        <a href="@Url.Action("BillIndex", "bill")" title="Invoice"> <span style="color: white; "> Invoice</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("ledger", "active")">
+                        <a href="@Url.Action("ledger", "sale")" title="Ledger"> <span style="color: white; "> Ledger</span></a>
+                    </li>
+                    @*<li class="@Html.RouteIf("ledgervoucherindex", "active")  @Html.RouteIf("ledgervoucherreport", "active")" hidden>
+                        <a href="@Url.Action("ledgervoucherindex", "journalvoucher")" title="Ledger Voucher"> <span style="color: white; "> Ledger Voucher</span></a>
+                    </li>*@
+                </ul>
+            </li>
+            <li class="@Html.RouteIf("userindex", "active")">
+                <a href="@Url.Action("userindex", "user")" title="User" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-user" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">User</span></a>
+            </li>
+            <li class="@Html.RouteIf("ReportsIndex", "active")">
+                <a href="@Url.Action("ReportsIndex", "reports")" title="Reports" style="margin-left:-5px"><i class="fa fa-lg  fa-fw fa-print" style="color: #fff;font-size:20px;margin-left:1px"></i> <span class="menu-item-parent" style="color:white">Reports</span></a>
+            </li>
+        </ul>
+    </nav>
+    <span class="minifyme" data-action="minifyMenu">
+        <i class="fa fa-arrow-circle-left hit"></i>
+    </span>
+
+</aside>
+<!-- END NAVIGATION -->

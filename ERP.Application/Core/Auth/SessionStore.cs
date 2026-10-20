@@ -27,7 +27,21 @@ public interface ISessionStore
 
     /// <summary>Ends every open session of the user; returns how many there were.</summary>
     Task<int> EndAllAsync(Guid userId, string reason);
+
+    /// <summary>Open sessions for the user (one row per SessionId, latest token metadata).</summary>
+    Task<IReadOnlyList<ActiveSession>> ListActiveAsync(Guid userId);
+
+    /// <summary>Ends one session belonging to the user. Returns false if not found / already ended.</summary>
+    Task<bool> EndSessionAsync(Guid userId, Guid sessionId, string reason);
 }
+
+public sealed record ActiveSession(
+    Guid SessionId,
+    DateTime CreatedAt,
+    DateTime IdleExpiresAt,
+    DateTime SessionExpiresAt,
+    string? IpAddress,
+    string? UserAgent);
 
 /// <summary>
 /// Refresh tokens stored as hashes, one row per token, grouped by session (see <see cref="RefreshToken"/>).
@@ -46,6 +60,7 @@ public sealed class SessionStore : ISessionStore
     public const string ReasonReuse = "Old token reused";
     public const string ReasonPasswordChanged = "Password changed";
     public const string ReasonSignOutEverywhere = "Signed out everywhere";
+    public const string ReasonRevokedByUser = "Revoked by user";
 
     private readonly ERPDbContext _db;
     private readonly ISecurityPolicyProvider _policies;
@@ -111,6 +126,43 @@ public sealed class SessionStore : ISessionStore
         foreach (var row in open) Revoke(row, reason);
         await _db.SaveChangesAsync();
         return open.Select(t => t.SessionId).Distinct().Count();
+    }
+
+    public async Task<IReadOnlyList<ActiveSession>> ListActiveAsync(Guid userId)
+    {
+        var now = Now;
+        var open = await _db.RefreshTokens.AsNoTracking()
+            .Where(t => t.UserId == userId && t.RevokedAt == null && t.SessionExpiresAt > now)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync();
+
+        return open
+            .GroupBy(t => t.SessionId)
+            .Select(g =>
+            {
+                var latest = g.First();
+                var oldest = g.Last();
+                return new ActiveSession(
+                    g.Key,
+                    oldest.CreatedAt,
+                    latest.ExpiresAt,
+                    latest.SessionExpiresAt,
+                    latest.IpAddress,
+                    latest.UserAgent);
+            })
+            .OrderByDescending(s => s.CreatedAt)
+            .ToList();
+    }
+
+    public async Task<bool> EndSessionAsync(Guid userId, Guid sessionId, string reason)
+    {
+        var rows = await _db.RefreshTokens
+            .Where(t => t.UserId == userId && t.SessionId == sessionId && t.RevokedAt == null)
+            .ToListAsync();
+        if (rows.Count == 0) return false;
+        foreach (var row in rows) Revoke(row, reason);
+        await _db.SaveChangesAsync();
+        return true;
     }
 
     private async Task RevokeSessionAsync(Guid userId, Guid sessionId, string reason)

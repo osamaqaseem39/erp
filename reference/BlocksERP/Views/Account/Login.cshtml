@@ -1,0 +1,161 @@
+﻿@{
+    Layout = null;
+    string businessName = System.Web.HttpContext.Current.Application["BusinessName"].ToString();
+    string bgLogo = System.Web.HttpContext.Current.Application["CompanyLogo"].ToString();
+    string bgColor = "#015607";
+}
+<style>
+    .page-logo, .page-sidebar, .nav-footer, .bg-brand-gradient {
+        background-color: @bgColor !important;
+    }
+    .toggle-password {
+        float: right;
+        margin-top: -31px;
+        padding-right: 27px;
+    }
+    .custom-control-input:checked ~ .custom-control-label::before {
+        border-color: @bgColor !important;
+        background-color: @bgColor !important;
+    }
+</style>
+<!DOCTYPE html>
+<!--
+Template Name:  SmartAdmin Responsive WebApp - Template build with Twitter Bootstrap 4
+Version: 4.0.0
+Author: Sunnyat Ahmmed
+Website: http://gootbootstrap.com
+Purchase: https://wrapbootstrap.com/theme/smartadmin-responsive-webapp-WB0573SK0
+License: You must have a valid license purchased only from wrapbootstrap.com (link above) in order to legally use this theme for your project.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>
+        Login - @businessName
+    </title>
+    <meta name="description" content="Login">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, minimal-ui">
+    <!-- Call App Mode on ios devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Remove Tap Highlight on Windows Phone IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+    <!-- base css -->
+    <link rel="stylesheet" media="screen, print" href="~/Content/vendors.bundle.css">
+    <link rel="stylesheet" media="screen, print" href="~/Content/app.bundle.css">
+    <!-- Place favicon.ico in the root directory -->
+    <link rel="apple-touch-icon" sizes="180x180" href="~/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon.ico">
+    <link rel="mask-icon" href="~/favicon.ico" color="#5bbad5">
+    <!-- Optional: page related CSS-->
+    <link rel="stylesheet" media="screen, print" href="~/Content/fa-brands.css">
+    <style>
+        .bg-faded {
+            background-color: rgb(193 183 80 / 60%) !important;
+            color: black !important;
+        }
+    </style>
+</head>
+<body style="background-image: url('../../Content/themeimages/loginbackground.png') !important; background-position: center; background-repeat: no-repeat; background-size: cover; height: 100%; ">
+
+    <div class="container-fluid" style="padding-top:2%;text-align:center;">
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                &nbsp;
+            </div>
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="text-align:center;">
+                <img src="@bgLogo" alt="@businessName" alt="logo" style="max-height:100px !important;">
+            </div>
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                &nbsp;
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" >
+                <div class="col-md-12 rounded-plus bg-faded" style="padding: 5%; padding-top: 25% !important; padding-bottom: 20% !important; text-align: center; height: 100% !important; background-color: #99B801 !important; ">
+                    @*<img src="~/Content/themeimages/loginleftpic.png" alt="Left Picture" style="max-width: 100%;">*@
+                </div>
+                
+                @*<img src="~/Content/themeimages/loginleftpic.png" alt="Left Picture" style="width:100% !important">*@
+            </div>
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                @{Html.RenderAction("LoginPartial", "account");}
+            </div>
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <div class="col-md-12 rounded-plus bg-faded" style="padding: 5%; padding-top: 25% !important; padding-bottom: 20% !important; text-align: center; height: 100% !important; background-color: #99B801 !important; ">
+                    @*<img src="~/Content/themeimages/loginrightpic.png" alt="Left Picture" style="max-width:100%;">*@
+                </div>
+                @*<img src="~/Content/themeimages/loginrightpic.png" alt="Right Picture" style="width:100% !important">*@
+            </div>
+        </div>
+    </div>
+
+    <script src="~/Scripts/vendors.bundle.js"></script>
+    <script src="~/Scripts/app.bundle.js"></script>
+    <script type="text/javascript">
+        $("#btnLogin").click(function (event) {
+
+            // Fetch form to apply custom Bootstrap validation
+            var form = $("#loginForm")
+
+            if (form[0].checkValidity() === false) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+
+            form.addClass('was-validated');
+            // Perform ajax submit here...
+        });
+        $('#loginForm').on('submit', function (e) {
+
+            e.preventDefault();
+            $('.important').html('');
+            $('#btnLogin').attr('disabled', 'disabled');
+            $('#btnLogin').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+            var password = $('#Password').val();
+            var username = $('#Email').val();
+            var login =
+            {
+                Username: username,
+                Password: password,
+                //IPAddress: ip
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/account/login/",
+                data: login,
+                dataType: 'json',
+                success: function (data) {
+                    $('#btnLogin').prop('disabled', false);
+                    $('#btnLogin').html("Secure login");
+                    if (data.status) {
+                        // LoadFiscalYearPartial(data.userId);
+                        window.location.href = "/home/MainMenu";
+                    }
+                    else {
+                        $("#loginForm").removeClass('was-validated');
+                        $('.important').html('<span style="color:#AF0001;font-size:16px;">Oops !! Incorrect Username or Password.</span>');
+                    }
+                }
+            })
+        })
+
+        $('#eyeIcon').on('click', function () {
+            if ($(this).hasClass('fa-eye-slash')) {
+                $(this).removeClass('fa-eye-slash');
+            }
+            else {
+                $(this).addClass('fa-eye-slash');
+            }
+            var input = $("#Password");
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+</body>
+
+</html>

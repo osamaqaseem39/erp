@@ -40,4 +40,5 @@ public class BankReconciliation
     
     // Navigation properties
     public BankAccount BankAccount { get; set; } = null!;
+    public ICollection<BankTransaction> BankTransactions { get; set; } = new List<BankTransaction>();
 }

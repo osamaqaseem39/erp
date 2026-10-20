@@ -1,27 +1,32 @@
 using ERP.Api.Security;
-using Microsoft.AspNetCore.Mvc;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Finance;
+using ERP.Shared.DTOs;
 using ERP.Shared.DTOs.Finance;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ERP.Api.Controllers.Finance;
 
 [ApiController]
 [Route("api/finance/invoices")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class InvoicesController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IInvoiceService _invoiceService;
-    private readonly ILogger<InvoicesController> _logger;
 
     public InvoicesController(IInvoiceService invoiceService, ILogger<InvoicesController> logger) : base(logger)
     {
         _invoiceService = invoiceService;
-        _logger = logger;
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] InvoiceCreateDto dto)
     {
         var tenantId = GetTenantId();
@@ -31,6 +36,7 @@ public class InvoicesController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(InvoiceDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -41,6 +47,7 @@ public class InvoicesController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<InvoiceDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] Guid? customerId = null, [FromQuery] string? status = null, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
         var tenantId = GetTenantId();
@@ -54,12 +61,13 @@ public class InvoicesController : ERP.Api.Abstractions.ControllerBase
             PageNumber = 1,
             PageSize = 1000
         };
-        
-        var (invoices, totalCount) = await _invoiceService.SearchInvoicesAsync(query);
+
+        var (invoices, _) = await _invoiceService.SearchInvoicesAsync(query);
         return Ok(invoices);
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] InvoiceUpdateDto dto)
     {
         dto.InvoiceId = id;
@@ -70,14 +78,22 @@ public class InvoicesController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/send")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> SendInvoice(Guid id)
     {
-        // Note: IInvoiceService doesn't have SendInvoiceAsync method
-        // This would need to be implemented or use a different approach
-        return BadRequest(new { Error = "Send invoice functionality not yet implemented" });
+        var ok = await _invoiceService.SendInvoiceAsync(id, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError
+            {
+                Status = 400,
+                ErrorCode = ApiErrorCodes.BusinessRule,
+                Message = "Could not send invoice (missing, cancelled/voided, or customer has no email)."
+            });
+        return Ok(new MessageResponse { Message = "Invoice send queued." });
     }
 
     [HttpPost("{id}/mark-paid")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> MarkAsPaid(Guid id, [FromBody] PaymentDto paymentDto)
     {
         var tenantId = GetTenantId();
@@ -93,14 +109,24 @@ public class InvoicesController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/void")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> VoidInvoice(Guid id, [FromBody] VoidInvoiceDto dto)
     {
-        // Note: IInvoiceService doesn't have VoidInvoiceAsync method
-        // This would need to be implemented or use a different approach
-        return BadRequest(new { Error = "Void functionality not yet implemented" });
+        dto ??= new VoidInvoiceDto();
+        dto.InvoiceId = id;
+        var ok = await _invoiceService.VoidInvoiceAsync(id, dto, GetTenantId(), GetUserId());
+        if (!ok)
+            return BadRequest(new ApiError
+            {
+                Status = 400,
+                ErrorCode = ApiErrorCodes.BusinessRule,
+                Message = "Could not void invoice (missing, already cancelled, or payments still applied)."
+            });
+        return Ok(new { Success = true });
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

@@ -16,6 +16,9 @@ public class ItemGroupRepository : IItemGroupRepository
 
     public async Task<IEnumerable<ItemGroup>> GetAllAsync(Guid tenantId, bool? isActive = null)
     {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<ItemGroup>();
+
         var query = _context.Set<ItemGroup>()
             .Include(ig => ig.ParentGroup)
             .Where(ig => ig.TenantId == tenantId);
@@ -28,6 +31,9 @@ public class ItemGroupRepository : IItemGroupRepository
 
     public async Task<ItemGroup?> GetByIdAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return null;
+
         return await _context.Set<ItemGroup>()
             .Include(ig => ig.ParentGroup)
             .FirstOrDefaultAsync(ig => ig.Id == id && ig.TenantId == tenantId);
@@ -51,6 +57,9 @@ public class ItemGroupRepository : IItemGroupRepository
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return false;
+
         var entity = await _context.Set<ItemGroup>()
             .FirstOrDefaultAsync(ig => ig.Id == id && ig.TenantId == tenantId);
 

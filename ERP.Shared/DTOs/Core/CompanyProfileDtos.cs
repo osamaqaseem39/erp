@@ -18,6 +18,8 @@ public class CompanyProfileDto
     public string? PostalCode { get; set; }
     public string? Country { get; set; }
     public string? Phone { get; set; }
+    public string? MobilePhone { get; set; }
+    public string? ContactPerson { get; set; }
     public string? Email { get; set; }
     public string? Website { get; set; }
     public string? LogoUrl { get; set; }
@@ -40,6 +42,8 @@ public class UpdateCompanyProfileDto
     public string? PostalCode { get; set; }
     public string? Country { get; set; }
     public string? Phone { get; set; }
+    public string? MobilePhone { get; set; }
+    public string? ContactPerson { get; set; }
     public string? Email { get; set; }
     public string? Website { get; set; }
     public string? LogoUrl { get; set; }

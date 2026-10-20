@@ -62,8 +62,8 @@ Controllers marked **Not DI-wired** will not resolve dependencies with the curre
 | `/api/crm/contacts` | by customer, search |
 | `/api/crm/leads` | `.../convert`, `.../convert-to-opportunity` |
 | `/api/crm/opportunities` | filters; `.../convert` |
-| `/api/crm/quotes` | filters; `.../send`, `.../convert` |
-| `/api/crm/sales-orders` | filters; `.../approve`, `.../ship`, `.../invoice` |
+| `/api/crm/quotes` | filters; `.../send`, `.../approve`, `.../reject`, `.../convert` |
+| `/api/crm/sales-orders` | filters; `.../approve`, `.../reject`, `.../ship`, `.../invoice` |
 | `/api/crm/activities` | filters; `.../complete`, `.../reschedule` |
 | `/api/crm/campaigns` | filters; `.../launch`, `.../pause`, `.../complete` |
 | `/api/crm/customer-groups` | CRUD |
@@ -83,7 +83,7 @@ Prefixes include: `/api/hrm/employees` (action-style `addEmployee`, `getAllEmplo
 
 ## Inventory — Not DI-wired
 
-Prefixes under `/api/inventory` and nested resources: categories, items, item-groups, item-attributes, item-variants, item-pricing, warehouses, units-of-measure, stock, stock-transfers, adjustments, barcodes, batch-numbers, serial-numbers, reorder-rules, valuation-methods, plus aggregate inventory transfer/valuation endpoints.
+Prefixes under `/api/inventory` and nested resources: categories, items, item-groups, item-attributes, item-variants, item-pricing, warehouses, units-of-measure, stock, stock-transfers (`approve` / `complete` / `cancel`), adjustments, barcodes, batch-numbers, serial-numbers, reorder-rules, valuation-methods, plus aggregate inventory transfer/valuation endpoints.
 
 ## Procurement / Manufacturing / Projects / Reports — Not DI-wired
 

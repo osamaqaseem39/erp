@@ -30,7 +30,7 @@ public class ItemPricingMapper : IMapper<ItemPricing, ItemPricingDto>
     {
         return new ItemPricing
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             ItemId = dto.ItemId,
             PriceListName = dto.PriceListName,
             UnitPrice = dto.UnitPrice,

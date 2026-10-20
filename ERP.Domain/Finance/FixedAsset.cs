@@ -8,6 +8,8 @@ public class FixedAsset : BaseEntity
     public string AssetName { get; set; } = string.Empty;
     public string AssetCategory { get; set; } = string.Empty;
     public Guid AccountId { get; set; }
+    /// <summary>EF shadow formerly; kept in sync with AccountId for dual CoA navigations.</summary>
+    public Guid GLAccountAccountId { get; set; }
     public Guid AssetId { get; set; }
     public decimal PurchaseCost { get; set; }
     public decimal CurrentValue { get; set; }

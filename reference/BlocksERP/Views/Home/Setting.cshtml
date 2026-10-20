@@ -1,0 +1,344 @@
+﻿@*===== CITY INDEX ========*@
+@*===== XP-02 ========*@
+@{
+    MvcHtmlString businessName = Html.Action("GetCompanyName", "account");
+    string adminImageSrc = "/Content/dummy.png";
+    string bgImageSrc = "/Content/img/download.jpg";
+    string adminName = "Admin";
+    string bgLogo = Url.Action("GetCompanyLogo", "account");
+    string bgColor = "#584677";
+    ViewBag.Title = "Settings";
+}
+@model List<BlocksERP.Models.clsModule>
+<style>
+        .icon {
+            height: 45px;
+            width: 51px;
+            display: block;
+            margin: auto;
+            text-align: center;
+            font-size: 45px;
+            margin-top: 5px;
+            color: white;
+        }
+
+        .wrimagecard {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            position: relative;
+            background: #fff;
+            box-shadow: 12px 15px 20px 0px rgba(46,61,73,0.15);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+            .wrimagecard .fa {
+                position: relative;
+                font-size: 70px;
+            }
+
+        .wrimagecard-topimage_header {
+            padding: 20px;
+        }
+
+        a.wrimagecard:hover, .wrimagecard-topimage:hover {
+            box-shadow: 2px 4px 8px 0px rgba(46,61,73,0.2);
+        }
+
+        .wrimagecard-topimage a {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .wrimagecard-topimage_title {
+            padding: 20px 24px;
+            height: 80px;
+            padding-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .wrimagecard-topimage a {
+            border-bottom: none;
+            text-decoration: none;
+            color: #525C65;
+            transition: color 0.3s ease;
+        }
+
+        .card {
+            min-height: 166px;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: none;
+            box-shadow: 6px 6px 12px #D1D1D1, -6px -6px 12px #FFFFFF;
+            border-radius: 15px;
+            transition: 0.4s ease;
+        }
+
+            .card:hover {
+                box-shadow: 14px 14px 28px #D1D1D1, -14px -14px 28px #FFFFFF;
+            }
+
+            .card .card-title {
+                color: black !important;
+            }
+
+            .card p {
+                height: 100px;
+                width: 90%;
+                border-radius: 50%;
+                margin: auto
+            }
+
+                .card p i {
+                    color: white;
+                }
+
+    @@media screen and (max-width: 1110px) {
+
+
+        h4
+        {
+            font-size:13px;
+        }
+    }
+
+    @@media screen and (max-width: 991px) {
+    
+        .card p {
+            height: 100px;
+            width: 100px;
+            border-radius: 50%;
+            margin: auto
+        }
+    }
+
+    @@media screen and (max-width: 635px) {
+
+        .card p {
+            height: 90px;
+            width: 90px;
+            border-radius: 50%;
+            margin: auto
+        }
+    }
+    @@media screen and (max-width: 574px) {
+       h4{
+           font-size:15px;
+       }
+            .card p {
+                height: 100px;
+                width: 100px;
+                border-radius: 50%;
+                margin: auto
+            }
+        }
+</style>
+<main id="js-page-content" role="main" class="page-content">
+    <!-- BREADCRUMB -->
+    <div class="row">
+        <div class="col-md-12" style="display:flex">
+            <table style="width:100%">
+                <tr>
+                    <th>
+                        <ol class="breadcrumb breadcrumb-sm breadcrumb-arrow">
+                            <li>
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-home"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">POS</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="javascript:void(0)">
+                                    <i class="fal fa-cog"></i>
+                                    &nbsp;
+                                    <span class="hidden-md-down">System Settings</span>
+                                </a>
+                            </li>
+                        </ol>
+                    </th>
+                    <th style="text-align:right">
+                        <h6 class="js-get-date" style="margin-top: -7px;"></h6>
+                    </th>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- PANEL STARTS HERE -->
+            <div class="panel">
+                <div class="panel-hdr bg-primary-500 bg-info-gradient" role="heading">
+                    <h2>Settings</h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div class="row">
+                            <!-- Team member -->
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == "brand"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/brand/brandindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #197278;"><i class="fal fa-briefcase fa-4x" style="margin-top:20px;"></i></p>
+                                            <h4 style="color:black">Brand</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }*@
+                            <!-- Team member -->
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == "category"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/category/categoryindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #023047;"><i class="fal fa-scrubber fa-4x " style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Category</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }*@
+                            <!-- Team member -->
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "salesman"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/salesman/salesmanindex">
+                                        <div class="card text-center">
+                                            <p style="background-color:#1a4301"><i class="fal fa-user fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Salesman</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            <!-- Team member -->
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == "unit"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/unit/unitindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #540B0E"><i class="fal fa-badge fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Unit</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }*@
+                            <!-- Team member -->
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == "user type"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/usertype/usertypeindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #2D232E"><i class="fal fa-users fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black" class="tree">User Type</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }*@
+                           
+                            <!-- Team member -->
+                            @*@if (Model.Any(x => x.ModuleName.ToLower() == "region"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/region/regionindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #004851"><i class="fal fa-globe fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Region</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }*@
+                            <!-- Team member -->
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "company"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/company/companyindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #213F42"><i class="fal fa-warehouse fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Company</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            <!-- Team member -->
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "warehouse"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/warehouse/warehouseindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #5d6b99"><i class="fal fa-home fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Warehouse</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            <!-- Team member -->
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "city"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/city/cityindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #5d6b99"><i class="fal fa-building fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">City</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            <!-- Team member -->
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "country"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/country/countryindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #5d6b99"><i class="fal fa-flag fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Country</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "employee"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/employee/employeeindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #2C6E49"><i class="fal fa-user fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Employee</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "department"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/department/departmentindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #9A031E"><i class="fal fa-briefcase fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Department</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            @if (Model.Any(x => x.ModuleName.ToLower() == "designation"))
+                            {
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-2" style="margin-top:10px">
+                                    <a href="/designation/designationindex">
+                                        <div class="card text-center">
+                                            <p style="background-color: #2C6E49"><i class="fal fa-badge fa-4x" style="margin-top:20px"></i></p>
+                                            <h4 style="color:black">Designation</h4>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+</script>

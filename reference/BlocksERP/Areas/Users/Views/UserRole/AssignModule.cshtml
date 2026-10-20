@@ -1,0 +1,347 @@
+﻿@using BlocksERP.Models
+@model List<BlocksERP.Models.clsModule>
+
+@{
+    string blackColor = "#212121";
+    string bgColor = "#015607";
+    string hoverColor = "#92C99F";
+}
+<style>
+
+    .actionCheckbox, .moduleCheckbox {
+        width: 20px;
+        height: 20px;
+    }
+
+    .tree li {
+        list-style-type: none;
+        margin: 0;
+        padding: 10px 5px 0 5px;
+        position: relative
+    }
+
+        .tree li::before,
+        .tree li::after {
+            content: '';
+            left: -20px;
+            position: absolute;
+            right: auto
+        }
+
+        .tree li::before {
+            border-left: 2px solid @blackColor;
+            bottom: 50px;
+            height: 100%;
+            top: 0;
+            width: 1px
+        }
+
+        .tree li::after {
+            border-top: 2px solid @blackColor;
+            height: 20px;
+            top: 25px;
+            width: 25px
+        }
+
+        .tree li span {
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border-radius: 3px;
+            display: inline-block;
+            padding: 3px 8px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .tree > ul > li::before,
+    .tree > ul > li::after {
+        border: 0
+    }
+
+    .tree li:last-child::before {
+        height: 27px
+    }
+
+    .tree li span:hover {
+        border: 2px solid green;
+    }
+
+    [aria-expanded="false"] > .expanded,
+    [aria-expanded="true"] > .collapsed {
+        display: none;
+    }
+</style>
+<div class="alertDiv2">
+
+</div>
+
+
+<div class="row">
+
+
+    <div class="col col-md-12" style="margin-top:13px;">
+        <table class="" style="width:100%;margin-top:5px !important;margin-bottom:5px !important;">
+            <tr>
+                <td style="width: 100%; padding-right: 3px; padding-left: 3px" id="">
+                    <a href="javascript:void(0);" class="btn btn-primary  selectAllBtn" style="margin-left:11px;" title="Select All" @*style=" text-align: center;font-size: 15px;margin-bottom:10px;padding:4px;color:#fff !important;border-radius:2px*@ ">
+                        Select All
+                    </a>
+
+                    <a href="javascript:void(0);" class="btn btn-secondary waves-effect waves-themed clearAllBtn" title="Clear All" style="">
+                        Clear All
+                    </a>
+                </td>
+
+                <td>
+                    <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm saveRoleBtn" style="margin-right:11px;">Save</button>
+
+
+                </td>
+            </tr>
+
+
+        </table>
+
+    </div>
+
+</div>
+
+<div class="AllModules" style="">
+    <section class="tree">
+        <ul>
+            @{
+                int i = 0;
+            }
+            @foreach (clsModule u in Model)
+            {
+               
+                <li>
+                    <span class="col-md-12 col-sm-12" style="padding: 15px; background-color: @blackColor; margin-bottom: 32px;font-size:17px;margin-left:-20px">
+                        <a style="color:whitesmoke;margin-left: 8px; text-decoration:none;" data-toggle="collapse" href="#Web" aria-expanded="true" aria-controls="Web">                      
+                             @u.SectionName
+                        </a>
+                    </span>
+                    <ul style="margin-top:-31px;margin-left:35px">
+
+                        @foreach (clsModule m in u.ModuleList.Where(x => x.SectionName == u.SectionName).OrderBy(x => x.ModuleName).ToList())
+                        {
+                            i++;
+                            string checkModule = "";
+
+                            if (!String.IsNullOrEmpty(m.UserRoleId))
+                            {
+                                checkModule = "checked";
+                            }
+
+
+                            string id = "module" + i;
+                            int j = 0;
+
+
+                            <li style="display:none" class="ModuleList">
+                                <span style="background-color:@bgColor;color:white;padding:18px;height:50px" class="col-md-8">
+                                    @*<input type="hidden" class="ActionId" value="@m.ActionId" />*@
+                                    <input type="hidden" class="UserId" value="@m.UserId" />
+                                    <input type="hidden" class="ModuleId" value="@m.ModuleID" />
+                                    <input type="checkbox" id="@id" class="moduleCheckbox" @checkModule style="margin-top:-3px" />
+                                    <label for="@id" style="margin-right: 3px;float: left;"></label>
+                                    <b style="font-size:15px;margin-top:6px;text-decoration:none!important;">@m.DisplayName </b>
+
+                                </span>
+                                <ul style="margin-left:35px">
+                                    @foreach (clsModule s in u.ActionList.Where(x => x.ModuleID == m.ModuleID).OrderBy(x => x.ActionName).ToList())
+                                    {
+                                        j++;
+                                        string checkAction = "";
+                                        if (!String.IsNullOrEmpty(s.UserRoleId))
+                                        {
+                                            checkAction = "checked";
+                                        }
+
+                                        string id2 = "action" + i + j;
+                                        <li style="display:none" class="ActionList">
+                                            <span style="background-color:@hoverColor;color:white;padding:5px;" class="col-md-6">
+                                                <input type="hidden" class="ActionId" value="@s.ActionID" />
+                                                <input type="checkbox" id="@id2" class="actionCheckbox" @checkAction />
+                                                <label for="@id2" style="margin-right: 3px;"></label>
+                                                <b style="font-size:15px;margin-top:6px;text-decoration:none!important;">@s.ActionName</b>
+                                            </span>
+                                        </li>
+                                    }
+
+                                </ul>
+                            </li>
+                        }
+
+                    </ul>
+
+                </li>
+            }
+        </ul>
+    </section>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.tree > ul').attr('role', 'tree').find('ul').attr('role', 'group');
+        $('.tree').find('li:has(ul)').addClass('parent_li').attr('role', 'treeitem').find(' > span').attr('title', 'Collapse this branch').on('click', function (e) {
+            var children = $(this).parent('li.parent_li').find(' > ul > li');
+            if (children.is(':visible')) {
+                children.hide('fast');
+                $(this).attr('title', 'Expand this branch').find(' > i').removeClass().addClass('fa fa-lg fa-plus-circle');
+            } else {
+                children.show('fast');
+                $(this).attr('title', 'Collapse this branch').find(' > i').removeClass().addClass('fa fa-lg fa-minus-circle');
+            }
+            e.stopPropagation();
+        });
+
+    })
+    $(document).on('change', '.moduleCheckbox', function () {
+        var check = $(this).is(':checked');
+        if (check == true) {
+            $(this).parents('.ModuleList').find('input[type=checkbox]').prop('checked', true);
+        }
+        else {
+            $(this).parents('.ModuleList').find('input[type=checkbox]').prop('checked', false);
+        }
+    })
+    $(document).on('change', '.actionCheckbox', function () {
+        var checkCampus = $(this).is(':checked');
+        if (checkCampus == true) {
+            $(this).parents('.ActionList').find('input[type=checkbox]').prop('checked', true);
+        }
+        else {
+            $(this).parents('.ActionList').find('input[type=checkbox]').prop('checked', false);
+        }
+        var checked = 0;
+        $(this).parents('.ModuleList').find('.actionCheckbox').each(function () {
+            var check = $(this).is(':checked');
+            if (check == false) {
+                checked += 1;
+            }
+        })
+        if (checked > 0) {
+            $(this).parents('.ModuleList').find('.moduleCheckbox').prop('checked', false);
+        }
+        else {
+            $(this).parents('.ModuleList').find('.moduleCheckbox').prop('checked', true);
+        }
+    })
+    $('.selectAllBtn').click(function () {
+        $('.AllModules').find('input[type=checkbox]').prop('checked', true);
+    })
+    $('.clearAllBtn').click(function () {
+        $('.AllModules').find('input[type=checkbox]').prop('checked', false);
+    })
+    function getData() {
+
+    }
+    $('.saveRoleBtn').click(function () {
+        //$('.saveRoleBtn').attr('disabled', 'disabled');
+        //$('.saveRoleBtn').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+        var moduleData = [];
+        var mainUserId = 0;
+        $('.ModuleList').each(function () {
+            var userId = $(this).find('.UserId').val();
+            mainUserId = userId;
+            var moduleId = $(this).find('.ModuleId').val();
+            var moduleCheckbox = $(this).find('.moduleCheckbox').is(':checked');
+
+            var actionData = new Array();
+            var check = 0;
+            var checkActionList = 0;
+            //Loop on all actions of module
+            $(this).find('.ActionList').each(function () {
+                //this will be incremented if module has any action. Otherwise it will remain zero.
+                checkActionList++;
+                ///
+                var actionId = $(this).find('.ActionId').val();
+                var actionCheckbox = $(this).find('.actionCheckbox').is(':checked');
+                //if action checkbox is checked then add it into array
+                if (actionCheckbox == true) {
+                    check++;
+                    var action =
+                    {
+                        ActionID: actionId,
+                    }
+                    actionData.push(action);
+                }
+            });
+            //This condition will check if module has any action or not.
+            if (checkActionList > 0) {
+                //If any action of module is checked
+                if (check > 0) {
+                    var alldata = {
+                        UserId: userId,
+                        ModuleID: moduleId,
+                        ActionList: actionData
+                    }
+                    moduleData.push(alldata);
+                }
+            }
+            else {
+                if (moduleCheckbox == true) {
+                    var emptyArray = new Array();
+                    var action =
+                    {
+                        ActionID: 0,
+                    }
+                    emptyArray.push(action);
+                    var alldata = {
+                        UserId: userId,
+                        ModuleID: moduleId,
+                        ActionList: emptyArray
+                    }
+                    moduleData.push(alldata);
+                }
+            }
+
+        });
+        var allData2 = JSON.stringify(moduleData);
+        $.ajax({
+            type: "POST",
+            url: "/UserRole/InsertUpdateAssignModule/",
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ 'userId': mainUserId, 'assignType': 'Module', 'data': allData2 }),
+            success: function (data) {
+                if (data.status == true) {
+
+                    toastr.success("Module Assigned  Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                    $('.close').click();
+                    oTable.ajax.reload(null, false);
+
+                    //$('.alertDiv2').html('<div class="alert alert-success success-alert2" style="margin-top:10px;margin-bottom:-12px;">' +
+                    //    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                    //    ' <strong>Success! </strong>' +
+                    //    'Module Assigned Succesfully.' +
+                    //    '</div>');
+                    //$(".success-alert2").fadeTo(1000, 500).slideUp(500, function () {
+                    //    $(".success-alert2").slideUp(500);
+                    //    $('.alertDiv2').html('');
+                    //    //$('.close').click();
+                    //    location.reload();
+                    //});
+                }
+                else {
+                    alert(data.message);
+                }
+            }
+        })
+    })
+
+
+
+
+
+    $(document).keypress(function (event) {
+        var keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == '13') {
+            event.preventDefault();
+        }
+    });
+</script>
+

@@ -1,0 +1,147 @@
+﻿@{
+    MvcHtmlString businessName = Html.Action("GetCompanyName", "account");
+    string adminImageSrc = Url.Action("GetUserPicture", "account", new
+    {
+        id = Convert.ToInt32(User.UserId)
+    }); ;
+    string bgImageSrc = ""; // "/Content/pos.jpg";
+    string adminName = User.Name;
+    string bgLogo = Url.Action("GetCompanyLogo", "account");
+    string bgColor = "#584677";
+    // string businessName = "Pharmaceutical ERP";
+    //string adminImageSrc = "/Content/dummy.png";
+    //string bgImageSrc = "/Content/img/download.jpg";
+    //string adminName = "Admin";
+    //string bgLogo = Url.Action("GetCompanyLogo", "account");
+    //string bgColor = "#584677";
+
+    //ViewBag.Title = "Dashboard";
+    //ViewBag.BusinessName = businessName;
+    //ViewBag.AdminPicture = adminImageSrc;
+    //ViewBag.BusinessBgImageSideBar = bgImageSrc;
+    //ViewBag.Admin = adminName;
+    //ViewBag.BusinessLogo = bgLogo;
+    //ViewBag.BgColor = bgColor;
+}
+
+
+<style>
+    .nav-function-minify .page-logo img {
+        width: 90% !important;
+    }
+
+    .page-logo img {
+        width: auto !important;
+    }
+</style>
+@model List<BlocksERP.Models.clsModule>
+<aside class="page-sidebar">
+    <div class="page-logo" style="display:block !important;">
+        <a href="#" style="display:block !important;padding-top:10px;" class="page-logo-link press-scale-down d-flex align-items-center position-relative" data-toggle="modal" data-target="#modal-shortcut">
+            <img src="@bgLogo" alt="@businessName" aria-roledescription="logo"><br />
+            @*<span class="page-logo-text mr-1" style="margin-left: 0.2rem !important;">@businessName</span>*@
+            <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+            <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+        </a>
+    </div>
+    <!-- BEGIN PRIMARY NAVIGATION -->
+    <nav id="js-primary-nav" class="primary-nav" role="navigation">
+        <div class="nav-filter">
+            <div class="position-relative">
+                <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control" tabindex="0">
+                <a href="#" onclick="return false;" class="btn-primary btn-search-close js-waves-off" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar">
+                    <i class="fal fa-chevron-up"></i>
+                </a>
+            </div>
+        </div>
+        <div class="info-card" style="background-color: #99B801;color:black;">
+            <img src="@adminImageSrc" class="profile-image rounded-circle" alt="@adminName">
+            <div class="info-card-text" >
+                <a href="#" class="d-flex align-items-center text-white">
+                    <span class="text-truncate text-truncate-sm d-inline-block" style="color:black;">
+                        @adminName
+                    </span>
+                </a>
+                <span class="d-inline-block text-truncate text-truncate-sm">Pakistan</span>
+            </div>
+            @*<img src="@bgImageSrc" class="cover" style="width:100%" alt="cover">*@
+            <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                <i class="fal fa-angle-down"></i>
+            </a>
+        </div>
+        @*<div class="info-card">
+                <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                    <i class="fal fa-angle-down"></i>
+                </a>
+            </div>*@
+    <ul id="js-nav-menu" class="nav-menu">
+        @*<li class="nav-title">Dashboard</li>*@
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("MainAdmin").ToLower()))
+        {
+
+            <li>
+                <a href="/home/adminindex" title="Dashboard" data-filter-tags="dashboard">
+                    <i class="fal fa-home"></i>
+                    <span class="nav-link-text" data-i18n="nav.Dashboard">Dashboard</span>
+                </a>
+            </li>
+
+        }
+
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "accountsreports"))
+        {
+            <li>
+                <a href="/ReportsAccounts/AccountsReportsIndex" title="Reports" data-filter-tags="Reports">
+                    <i class="fal fa-print"></i>
+                    <span class="nav-link-text">Reports</span>
+                </a>
+            </li>
+        }*@
+        
+        
+
+        <li>
+            <a href="/home/mainmenu" title="Setting" data-filter-tags="setting">
+                <i class="fal fa-home"></i>
+                <span class="nav-link-text" data-i18n="nav.Setting">Main Menu</span>
+            </a>
+        </li>
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == "setting"))
+        {
+            <li>
+                <a href="/home/setting" title="Setting" data-filter-tags="setting">
+                    <i class="fal fa-cog"></i>
+                    <span class="nav-link-text" data-i18n="nav.Setting">Settings</span>
+                </a>
+            </li>
+        }*@
+
+    </ul>
+        <div class="filter-message js-filter-message bg-success-600"></div>
+    </nav>
+    @*<div class="nav-footer shadow-top">
+            <a href="#" onclick="return false;" data-action="toggle" data-class="nav-function-minify" class="hidden-md-down">
+                <i class="ni ni-chevron-right"></i>
+                <i class="ni ni-chevron-right"></i>
+            </a>
+            <ul class="list-table m-auto nav-footer-buttons">
+                <li>
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Chat logs">
+                        <i class="fal fa-comments"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Support Chat">
+                        <i class="fal fa-life-ring"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" title="Make a call">
+                        <i class="fal fa-phone"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>*@
+</aside>

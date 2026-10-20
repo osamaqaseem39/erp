@@ -1,13 +1,25 @@
-using ERP.Infrastructure.Numbering;
+using ERP.Application.Common;
 using ERP.Application.Interfaces.CRM;
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Infrastructure.Numbering;
 using ERP.Shared.DTOs.CRM;
 
 namespace ERP.Application.CRM;
 
 public class QuoteService : IQuoteService
 {
+    private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> Transitions =
+        new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Draft"] = new[] { "Sent", "Accepted", "Rejected" },
+            ["Sent"] = new[] { "Accepted", "Rejected" },
+            ["Accepted"] = new[] { "Converted" },
+            ["Rejected"] = Array.Empty<string>(),
+            ["Converted"] = Array.Empty<string>(),
+            ["Expired"] = Array.Empty<string>()
+        };
+
     private readonly IDocumentNumberService _numbers;
     private readonly IQuoteRepository _repository;
     private readonly IQuoteLineRepository _lineRepository;
@@ -43,6 +55,8 @@ public class QuoteService : IQuoteService
     public async Task<Guid> CreateAsync(CreateQuoteDto dto)
     {
         var entity = MapToEntity(dto);
+        // ERP-FIX-5: always start Draft
+        entity.Status = "Draft";
         if (string.IsNullOrWhiteSpace(entity.QuoteNumber))
             entity.QuoteNumber = await _numbers.NextAsync("crm.quote");
 
@@ -56,8 +70,13 @@ public class QuoteService : IQuoteService
     {
         var entity = await _repository.GetByIdAsync(dto.Id);
         if (entity == null) return false;
+        if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
+            return false;
 
+        var previousStatus = entity.Status;
         MapToEntity(dto, entity);
+        // ERP-FIX-5: status only via send/approve/reject/convert
+        entity.Status = previousStatus;
         ApplyLineTotals(entity, dto.QuoteLines);
         await _lineRepository.DeleteByQuoteIdAsync(entity.Id);
         await SaveLinesAsync(entity.Id, entity.TenantId, dto.QuoteLines);
@@ -66,6 +85,11 @@ public class QuoteService : IQuoteService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null) return false;
+        if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
+            return false;
+
         await _lineRepository.DeleteByQuoteIdAsync(id);
         return await _repository.DeleteAsync(id);
     }
@@ -88,20 +112,55 @@ public class QuoteService : IQuoteService
         return entities.Select(MapToDto);
     }
 
-    public async Task<bool> SendQuoteAsync(Guid id)
+    public async Task<bool> SendQuoteAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await GetScopedAsync(id, tenantId);
         if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Sent", Transitions))
+            return false;
 
         entity.Status = "Sent";
         entity.SentDate = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
     }
 
-    public async Task<Guid> ConvertToSalesOrderAsync(Guid id)
+    public async Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var quote = await _repository.GetByIdAsync(id);
+        var entity = await GetScopedAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Accepted", Transitions))
+            return false;
+        // ERP-FIX-6: creator cannot final-approve
+        if (DocumentWorkflow.IsSameActor(entity.CreatedBy, userId))
+            return false;
+
+        entity.Status = "Accepted";
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(entity);
+    }
+
+    public async Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        var entity = await GetScopedAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Rejected", Transitions))
+            return false;
+
+        entity.Status = "Rejected";
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
+        return await _repository.UpdateAsync(entity);
+    }
+
+    public async Task<Guid> ConvertToSalesOrderAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        var quote = await GetScopedAsync(id, tenantId);
         if (quote == null) return Guid.Empty;
+        if (!DocumentWorkflow.CanTransition(quote.Status, "Converted", Transitions))
+            return Guid.Empty;
 
         var lines = quote.QuoteLines.Any()
             ? quote.QuoteLines
@@ -125,7 +184,7 @@ public class QuoteService : IQuoteService
             Notes = quote.Notes,
             Terms = quote.Terms,
             AssignedToUserId = quote.AssignedToUserId,
-            CreatedBy = quote.CreatedBy
+            CreatedBy = userId == Guid.Empty ? quote.CreatedBy : userId.ToString()
         };
 
         var salesOrderId = await _salesOrderRepository.CreateAsync(salesOrder);
@@ -149,9 +208,19 @@ public class QuoteService : IQuoteService
 
         quote.Status = "Converted";
         quote.ConvertedDate = DateTime.UtcNow;
+        quote.UpdatedBy = userId.ToString();
+        quote.UpdatedAt = DateTime.UtcNow;
         await _repository.UpdateAsync(quote);
 
         return salesOrderId;
+    }
+
+    private async Task<Quote?> GetScopedAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByIdAsync(id);
+        if (entity == null || entity.TenantId != tenantId) return null;
+        return entity;
     }
 
     private async Task SaveLinesAsync(Guid quoteId, Guid tenantId, IEnumerable<CreateQuoteLineDto> lines)
@@ -214,7 +283,7 @@ public class QuoteService : IQuoteService
         QuoteDate = dto.QuoteDate ?? DateTime.UtcNow,
         ValidUntil = dto.ValidUntil ?? DateTime.UtcNow.AddDays(30),
         ExpiryDate = dto.ValidUntil ?? DateTime.UtcNow.AddDays(30),
-        Status = dto.Status ?? "Draft",
+        Status = "Draft",
         SubTotal = dto.SubTotal ?? 0m,
         TaxAmount = dto.TaxAmount ?? 0m,
         TotalAmount = dto.TotalAmount ?? 0m,
@@ -232,7 +301,6 @@ public class QuoteService : IQuoteService
         entity.QuoteDate = dto.QuoteDate ?? entity.QuoteDate;
         entity.ValidUntil = dto.ValidUntil ?? entity.ValidUntil;
         entity.ExpiryDate = dto.ValidUntil ?? entity.ExpiryDate;
-        entity.Status = dto.Status ?? entity.Status;
         entity.SubTotal = dto.SubTotal ?? entity.SubTotal;
         entity.TaxAmount = dto.TaxAmount ?? entity.TaxAmount;
         entity.TotalAmount = dto.TotalAmount ?? entity.TotalAmount;

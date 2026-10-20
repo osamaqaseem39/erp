@@ -29,6 +29,7 @@ public class ItemVariantService : IItemVariantService
     public async Task<ItemVariantDto> CreateAsync(ItemVariantDto dto, Guid tenantId, string createdBy)
     {
         var entity = ItemVariantMapper.ToEntity(dto);
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         entity.TenantId = tenantId;
         entity.CreatedBy = createdBy;
         
@@ -38,11 +39,19 @@ public class ItemVariantService : IItemVariantService
 
     public async Task<ItemVariantDto> UpdateAsync(ItemVariantDto dto, Guid tenantId, string updatedBy)
     {
-        var entity = ItemVariantMapper.ToEntity(dto);
-        entity.TenantId = tenantId;
-        entity.UpdatedBy = updatedBy;
-        
-        var updated = await _repository.UpdateAsync(entity);
+        var existing = await _repository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Item variant '{dto.Id}' not found.");
+
+        existing.ItemId = dto.ItemId;
+        existing.VariantCode = dto.VariantCode;
+        existing.VariantName = dto.VariantName;
+        existing.SKU = dto.SKU;
+        existing.CostPrice = dto.CostPrice;
+        existing.SellingPrice = dto.SellingPrice;
+        existing.IsActive = dto.IsActive;
+        existing.UpdatedBy = updatedBy;
+
+        var updated = await _repository.UpdateAsync(existing);
         return ItemVariantMapper.ToDto(updated);
     }
 

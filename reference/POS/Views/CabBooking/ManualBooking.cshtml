@@ -1,0 +1,2076 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+@model POS.Models.clsBooking
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="AccountDetailListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Supplier Accounts List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="accountDetailListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="CategoriesListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Items List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="categoriesListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ACDetailSubListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Sub Customers</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="ACDetailSubListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Manual Booking</h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("", "CabBooking", FormMethod.Post, new { id = "accountDetailForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (ViewBag.ID.ToString() == "0")
+                                        {
+                                            if (User.Save == 1)
+                                            {
+                                                <td style="width: 3%; padding-bottom: 5px; padding-right: 5px; text-align: left; " id="saveTd" hidden>
+                                                    <button title="Save" class="btnUpSave" id="btnSaveAccountDetail" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                        <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                    </button>
+                                                </td>
+                                           
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (User.Change == 1)
+                                            {
+                                                <td style="width: 3%; padding-bottom: 5px; padding-right: 5px; text-align: left; " id="saveTd" hidden>
+                                                    <button title="Save" class="btnUpSave" id="btnEditAccountDetail" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                        <img src="~/Content/img/edit.png" style="width: 43px; height: 43px; color: white; " />
+                                                    </button>
+                                                </td>
+                                           
+                                            }
+                                        }
+                                        
+
+
+                                        <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                            <a title="Refresh" id="btnRefreshAccountDetail" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                            </a>
+                                        </td>
+                                        <td style="width: 44%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                            <a title="Exit" id="btnExitAccountDetail" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div class="col-md-12" id="accountCodeSection" style="padding-top: 15px; padding-bottom: 15px; " hidden>
+                                    <div class="col-md-8">
+                                        <input type="hidden" id="IsNewOrEdit" value="" />
+                                        <input type="hidden" id="AccountCode" value="0" />
+                                        <input type="hidden" id="HiddenTr" value="0" />
+                                        <input type="hidden" id="HiddenTrM" value="0" />
+
+
+
+
+
+                                        
+                                        <input type="hidden" id="PostCodeStart" name="PostCodeStart">
+                                        <input type="hidden" id="PostCodeStart1" name="PostCodeStart1">
+                                        <input type="hidden" id="PostCodeStart2" name="PostCodeStart2">
+                                        <input type="hidden" id="PostCodeStart3" name="PostCodeStart3">
+                                        <input type="hidden" id="LatStart" name="LatStart">
+                                        <input type="hidden" id="LatStart1" name="LatStart1">
+                                        <input type="hidden" id="LatStart2" name="LatStart2">
+                                        <input type="hidden" id="LatStart3" name="LatStart3">
+                                        <input type="hidden" id="LonStart" name="LonStart">
+                                        <input type="hidden" id="LonStart1" name="LonStart1">
+                                        <input type="hidden" id="LonStart2" name="LonStart2">
+                                        <input type="hidden" id="LonStart3" name="LonStart3">
+                                        <input type="hidden" id="PostCodeEnd" name="PostCodeEnd">
+                                        <input type="hidden" id="PostCodeEnd1" name="PostCodeEnd1">
+                                        <input type="hidden" id="PostCodeEnd2" name="PostCodeEnd2">
+                                        <input type="hidden" id="PostCodeEnd3" name="PostCodeEnd3">
+                                        <input type="hidden" id="LatEnd" name="LatEnd">
+                                        <input type="hidden" id="LatEnd1" name="LatEnd1">
+                                        <input type="hidden" id="LatEnd2" name="LatEnd2">
+                                        <input type="hidden" id="LatEnd3" name="LatEnd3">
+                                        <input type="hidden" id="LonEnd" name="LonEnd">
+                                        <input type="hidden" id="LonEnd1" name="LonEnd1">
+                                        <input type="hidden" id="LonEnd2" name="LonEnd2">
+                                        <input type="hidden" id="LonEnd3" name="LonEnd3">
+                                        <input type="hidden" id="calculatedfaremain" />
+
+                                        <label class="" style="font-size:16px;">
+                                            Computer No.:
+                                            <span class="badge bg-color-blue" id="AccountCodeSpan" style="font-size:16px;border-radius:4px;padding:5px;"></span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-2"></div>
+                                    <div class="col-md-2"></div>
+                                </div>
+                                <div class="row" style="padding-top: 10px; padding-bottom: 15px; padding-left: 15px; padding-right: 15px;">
+                                    
+                                    <div class="row" style="padding-bottom: 15px;">
+                                        <div class="col col-6">
+                                            <label>Pickup From *</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-map-marker"></i>
+                                                <input type="text" placeholder="Pickup From" name="startfrom" id="startfrom" onfocus="geolocate(autocomplete);" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-6">
+                                            <label>Via 1</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-location-arrow"></i>
+                                                <input type="text" placeholder="Via 1" name="startfrom1" id="startfrom1" onfocus="geolocate(autocomplete1);" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-6">
+                                            <label>Via 2</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-location-arrow"></i>
+                                                <input type="text" placeholder="Via 2" name="startfrom2" id="startfrom2" onfocus="geolocate(autocomplete2);" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-6">
+                                            <label>Via 3</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-location-arrow"></i>
+                                                <input type="text" placeholder="Via 3" name="startfrom3" id="startfrom3" onfocus="geolocate(autocomplete3);" />
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col col-6">
+                                            <label>Dropoff at *</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-map-marker"></i>
+                                                <input type="text" placeholder="Dropoff at" name="endposition" id="endposition" onfocus="geolocate(autocompleteend);" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-6">
+                                            <label>Via 1</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-location-arrow"></i>
+                                                <input type="text" placeholder="Via 1" name="endposition1" id="endposition1" onfocus="geolocate(autocompleteend1);" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-6">
+                                            <label>Via 2</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-location-arrow"></i>
+                                                <input type="text" placeholder="Via 2" name="endposition2" id="endposition2" onfocus="geolocate(autocompleteend2);" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-6">
+                                            <label>Via 3</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-location-arrow"></i>
+                                                <input type="text" placeholder="Via 3" name="endposition3" id="endposition3" onfocus="geolocate(autocompleteend3);" />
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                    
+                                    <div class="row" style="padding-bottom: 15px;">
+                                        <div class="col col-3">
+                                            <label>Service Provider *</label>
+                                            <label class="select">
+                                                <i class="append fa fa-caret-down"></i>
+                                                @Html.DropDownListFor(model => model.ServiceProviderID, ViewBag.ServiceProvider as SelectList, new { @style = "width:100%" })
+                                            </label>
+                                        </div>
+                                        <div class="col col-3">
+                                            <label>Payment Mode</label>
+                                            <label class="select">
+                                                <i class="append fa fa-caret-down"></i>
+                                                <select id="PaymentMode" name="PaymentMode">
+                                                    <option value=""></option>
+                                                    <option value="Account" selected>Account</option>
+                                                    <option value="Cash">Cash</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="col col-4">
+                                            <label>Service Provider Ref. No.</label>
+                                            <label class="input">
+                                                <input type="text" placeholder="Service Provider Ref. No." name="SPRefNo" id="SPRefNo" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2">
+                                            <label>S.P Amount</label>
+                                            <label class="input">
+                                                <input type="text" placeholder="Amount" name="SPAmount" id="SPAmount" />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    
+
+                                    <div class="row" style="padding-bottom: 15px;">
+                                        <div class="col col-3">
+                                            <label>Pickup Date</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-calendar"></i>
+                                                <input type="date" name="PickUpDate" id="PickUpDate" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2">
+                                            <label>Pickup Time</label>
+                                            <label class="input">
+                                                @*<i class="icon-prepend fa fa-calendar"></i>*@
+                                                <input type="time" name="PickUpTime" id="PickUpTime" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2">
+                                            <label>Cab Type *</label>
+                                            <label class="select">
+                                                <i class="append fa fa-caret-down"></i>
+                                                @Html.DropDownListFor(model => model.CabTypeID, ViewBag.CabType as SelectList, new { @style = "width:100%" })
+                                            </label>
+                                        </div>
+                                        <div class="col col-1">
+                                            <input type="button" id="booknow" class="btn btn-primary" style="margin-top:8px;height:28px;" value="Calculate" />
+                                        </div>
+                                        <div class="col col-2">
+                                            <label>Fare *</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-pound-sign"></i>
+                                                <input type="text" placeholder="Fare" name="EstimateFareNet" id="EstimateFareNet" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2">
+                                            <label>Dist. *</label>
+                                            <label class="input">
+                                                <input type="text" placeholder="Distance" name="vdistance" id="vdistance" />
+                                            </label>
+                                        </div>
+                                        
+                                    </div>
+
+                                    <div class="row" style="padding: 15px;">
+                                        <div class="gmap carlist" id="map-canvas" style="height:300px;"></div>
+                                        <div id="map-canvas-dist" hidden></div>
+                                    </div>
+
+                                    <div class="row" style="">
+                                        <div class="col col-3" hidden>
+                                            <label>Surname</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Surname" name="Surname" id="Surname" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-3">
+                                            <label>Lead Passenger Name *</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Lead Passenger Name" name="Name" id="Name" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-3">
+                                            <label>Mobile No. *</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-phone"></i>
+                                                <input type="text" placeholder="Mobile No." name="Cell" id="Cell" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-6">
+                                            <label>Email *</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-envelope"></i>
+                                                <input type="text" placeholder="Email" name="Email" id="Email" />
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col col-6">
+                                            <label>Luggage</label>
+                                            <label class="select">
+                                                <i class="append fa fa-caret-down"></i>
+                                                @Html.DropDownListFor(model => model.LuggageID, ViewBag.Luggage as SelectList, new { @style = "width:100%", @multiple = "multiple" })
+                                            </label>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="row" style="padding-bottom: 15px;">
+                                        <div class="col col-3">
+                                            <label>No. of Passengers(s)</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                <input type="text" placeholder="No. of Passengers(s)" name="NoOfAdult" id="NoOfAdult" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2" hidden>
+                                            <label>No. of Child(s)</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                <input type="text" placeholder="No. of Child(s)" name="NoOfChild" id="NoOfChild" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-3">
+                                            <label>Door No.</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Door No." name="DoorNo" id="DoorNo" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2">
+                                            <label class="checkbox pull-left" style="margin-top:22px">
+                                                <input id="ChildSeat" type="checkbox" name="ChildSeat"><i></i>
+                                                Child Seat
+                                            </label>
+                                        </div>
+                                        <div class="col col-2">
+                                            <label class="checkbox pull-left" style="margin-top:22px">
+                                                <input id="MeetnGreet" type="checkbox" name="MeetnGreet"><i></i>
+                                                Meet & Greet
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row returncompdiv" style="padding-bottom: 15px;">
+                                        <div class="col col-2">
+                                            <label class="checkbox pull-left" style="margin-top:22px">
+                                                <input id="Return" type="checkbox" name="Return"><i></i>
+                                                Return Trip
+                                            </label>
+                                        </div>
+                                        <div class="col col-3 returndiv">
+                                            <label>Return Date</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-calendar"></i>
+                                                <input type="date" name="ReturnDate" id="ReturnDate" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-3 returndiv">
+                                            <label>Return Time</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-calendar"></i>
+                                                <input type="time" name="ReturnTime" id="ReturnTime" />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row" style="padding-bottom: 15px;">
+                                        <div class="col col-3">
+                                            <label>Arrival From</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Arrival From" name="ArrivalFrom" id="ArrivalFrom" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-3">
+                                            <label>Flight No.</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Flight No." name="FlightNo" id="FlightNo" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-3">
+                                            <label>Terminal</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-info"></i>
+                                                <input type="text" placeholder="Terminal" name="Terminal" id="Terminal" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-3" hidden>
+                                            <label>Flight Time</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-calendar"></i>
+                                                <input type="time" name="FlightTime" id="FlightTime" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row" style="padding-bottom: 15px;">
+                                        <div class="col col-9">
+                                            <label>Additional Information</label>
+                                            <label class="input">
+                                                <textarea rows="3" id="AdditionalInfo" class="form-control" style="width:100%"></textarea>
+                                            </label>
+                                        </div>
+                                        <div class="col col-3">
+                                            <label>Payment Status</label>
+                                            <label class="select">
+                                                <i class="append fa fa-caret-down"></i>
+                                                <select id="PaymentStatus" name="PaymentStatus">
+                                                    <option value="Pending" selected>Pending</option>
+                                                    <option value="Supplier Pending">Supplier Pending</option>
+                                                    <option value="Paid">Paid</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+
+        function ConvertDate(dateStr) {
+            var parts = dateStr.split("-");
+            return parts[1] + "-" + parts[0] + "-" + parts[2];
+        }
+
+        function getFormattedDate(date) {
+            var utc = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+            var year = utc.getFullYear();
+
+            var month = (1 + utc.getMonth()).toString();
+            month = month.length > 1 ? month : '0' + month;
+
+            var day = utc.getDate().toString();
+            day = day.length > 1 ? day : '0' + day;
+
+            return day + '-' + month + '-' + year;
+        }
+
+        var directionsDisplay;
+        var directionsService;
+        var map;
+        var placeSearch, vend, vwaypoint;
+        var autocomplete, autocomplete1, autocomplete2, autocomplete3;
+        var autocompleteend, autocompleteend1, autocompleteend2, autocompleteend3;
+        var autocompletempa, autocompletemda;
+
+        var componentForm = {
+            street_number: 'short_name',
+            route: 'long_name',
+            locality: 'long_name',
+            administrative_area_level_1: 'short_name',
+            country: 'long_name',
+            postal_code: 'short_name'
+        };
+
+        function initialize() {
+            directionsService = new google.maps.DirectionsService();
+            directionsDisplay = new google.maps.DirectionsRenderer();
+
+            var goptions = {
+                //fields: ["formatted_address", "geometry", "name","plus_code"],
+                //fields: ["ALL"],
+                //types: ['geocode'],
+                //types: ['geocode'],
+                componentRestrictions: { country: "uk" }
+            };
+
+
+            autocomplete = new google.maps.places.Autocomplete((document.getElementById('startfrom')), goptions);
+            google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                fillAddress(autocomplete, 0, "PostCodeStart");
+            });
+
+            var autocomplete1 = new google.maps.places.Autocomplete((document.getElementById('startfrom1')), goptions);
+            google.maps.event.addListener(autocomplete1, 'place_changed', function () {
+                fillAddress(autocomplete1, 1, "PostCodeStart");
+            });
+
+            var autocomplete2 = new google.maps.places.Autocomplete((document.getElementById('startfrom2')), goptions);
+            google.maps.event.addListener(autocomplete2, 'place_changed', function () {
+                fillAddress(autocomplete1, 2, "PostCodeStart");
+            });
+
+            var autocomplete3 = new google.maps.places.Autocomplete((document.getElementById('startfrom3')), goptions);
+            google.maps.event.addListener(autocomplete3, 'place_changed', function () {
+                fillAddress(autocomplete1, 3, "PostCodeStart");
+            });
+
+
+            var autocompleteend = new google.maps.places.Autocomplete((document.getElementById('endposition')), goptions);
+            google.maps.event.addListener(autocompleteend, 'place_changed', function () {
+                fillAddress(autocompleteend, 0, "PostCodeEnd");
+            });
+
+            var autocompleteend1 = new google.maps.places.Autocomplete((document.getElementById('endposition1')), goptions);
+            google.maps.event.addListener(autocompleteend1, 'place_changed', function () {
+                fillAddress(autocompleteend1, 1, "PostCodeEnd");
+            });
+
+            var autocompleteend2 = new google.maps.places.Autocomplete((document.getElementById('endposition2')), goptions);
+            google.maps.event.addListener(autocompleteend2, 'place_changed', function () {
+                fillAddress(autocompleteend2, 2, "PostCodeEnd");
+            });
+
+            var autocompleteend3 = new google.maps.places.Autocomplete((document.getElementById('endposition3')), goptions);
+            google.maps.event.addListener(autocompleteend3, 'place_changed', function () {
+                fillAddress(autocompleteend3, 3, "PostCodeEnd");
+            });
+
+        }
+
+        function fillAddress(vautocomplete, vNum, vTextType) {
+            var place = vautocomplete.getPlace();
+            var place_id = place.place_id;
+
+            //var geocoder = new google.maps.Geocoder();
+            //geocoder.geocode({ 'placeId': place.place_id }, function (results, status) {
+            //    debugger
+            //    if (status == google.maps.GeocoderStatus.OK) {
+            //        console.log(results);
+            //    } else {
+            //        alert('Geocode was not successful for the following reason: ' + status);
+            //    }
+            //});
+
+            for (var i = 0; i < place.address_components.length; i++) {
+                var addressType = place.address_components[i].types[0];
+                var vlat = place.geometry.location.lat();
+                var vlng = place.geometry.location.lng();
+
+
+                //var vgeocode = getGeoCodeFromLonLat(vlng, vlat);
+                //alert(vgeocode);
+
+
+                if (vTextType == "PostCodeStart") {
+                    if (vNum == 0) {
+                        $('#LatStart').val(vlat);
+                        $('#LonStart').val(vlng);
+                    } else {
+                        $('#LatStart' + vNum).val(vlat);
+                        $('#LonStart' + vNum).val(vlng);
+                    }
+                } else {
+                    if (vNum == 0) {
+                        $('#LatEnd').val(vlat);
+                        $('#LonEnd').val(vlng);
+                    } else {
+                        $('#LatEnd' + vNum).val(vlat);
+                        $('#LonEnd' + vNum).val(vlng);
+                    }
+                }
+
+                // var vurlgeo = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + vlat + "," + vlng + "&key=AIzaSyC7W4MIjUl-83OZv1Coz7gfzxNEiipTipM";
+                $.ajax({
+                    type: "POST",
+                    url: "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + vlat + "," + vlng + "&key=AIzaSyC7W4MIjUl-83OZv1Coz7gfzxNEiipTipM",
+                    //url: "https://maps.googleapis.com/maps/api/geocode/json?place_id=" + place.place_id + "&key=AIzaSyC7W4MIjUl-83OZv1Coz7gfzxNEiipTipM",
+                    dataType: 'json',
+                    success: function (response) {
+                        var vpostcoden = "";
+                        for (var mcode = 0; mcode < response.results.length; mcode++) {
+                            for (var macode = 0; macode < response.results[mcode].address_components.length; macode++) {
+                                if (response.results[mcode].address_components[macode].types.length == 1) {
+                                    if (response.results[mcode].address_components[macode].types[0] == "postal_code") {
+                                        if (vpostcoden == "") {
+                                            vpostcoden = response.results[mcode].address_components[macode].short_name;
+                                            //alert(response.results[mcode].address_components[macode].short_name);
+                                            //if (i == 0) {
+                                            if (vNum == 0) {
+                                                $('#' + vTextType).val(vpostcoden);
+                                            } else {
+                                                $('#' + vTextType + vNum).val(vpostcoden);
+                                            }
+                                            //}
+                                        }
+                                    }
+                                }
+                            }
+                            //alert(response.results[1].address_components[6].short_name);
+                        }
+
+                    }
+                })
+
+                //if (i == 0) {
+                //    if (vNum == 0) {
+                //        $('#' + vTextType).val(place.address_components[0].long_name);
+                //    } else {
+                //        $('#' + vTextType + vNum).val(place.address_components[0].long_name);
+                //    }
+                //}
+            }
+        }
+
+
+        function geolocate(vautocomplete) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var geolocation = new google.maps.LatLng(
+                        position.coords.latitude, position.coords.longitude);
+                    var circle = new google.maps.Circle({
+                        center: geolocation,
+                        radius: position.coords.accuracy
+                    });
+                    vautocomplete.setBounds(circle.getBounds());
+                });
+            }
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+
+
+
+
+
+        $(document).ready(function () {
+            
+            //var vdate = getFormattedDate(new Date());
+            //$("#PickUpDate").val(vdate);
+
+            var date = new Date();
+            var vhour = date.getHours();
+            if (vhour.toString().length == 1) { vhour = '0' + vhour; }
+            var vmint = date.getMinutes();
+            if (vmint.toString().length == 1) { vmint = '0' + vmint; }
+            var currentTime = vhour + ':' + vmint;
+            $("#PickUpTime").val(currentTime);
+            $("#ReturnTime").val(currentTime);
+            $("#FlightTime").val(currentTime);
+
+            $('#ServiceProviderID').select2();
+            $('#ServiceProviderID').val(null).trigger('change');
+            $('#CabTypeID').select2();
+            $('#CabTypeID').val(null).trigger('change');
+            $('#LuggageID').select2();
+            $('#LuggageID').val(null).trigger('change');
+
+            $('#accountDetailForm').validate({
+                ignore: [],
+                // Rules for form validation
+                rules: {
+                    Name: {
+                        required: true
+                    },
+                    //ThirdLevelAccountCode: {
+                    //    required: true
+                    //},
+                    //Type: {
+                    //    required: true
+                    //},
+                    CabTypeID: {
+                        required: true
+                    },
+                    //Email:{
+                    //    email: true
+                    //}
+                },
+                // Messages for form validation
+                messages: {
+                    Name: {
+                        required: 'Name is required.'
+                    },
+                    //ThirdLevelAccountCode: {
+                    //    required: 'Reference is required.'
+                    //},
+                    //Type: {
+                    //    required: 'Type is required.'
+                    //},
+                    CabTypeID: {
+                        required: 'CabType is required.'
+                    },
+                },
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+
+            var oldid = '@ViewBag.ID';
+            if (oldid == "0" || oldid == null || isNaN(oldid)) {
+                EnableFormFields();
+            } else {
+                LoadExistingRecord();
+            }
+            
+        })
+        $('#btnAddAccountDetail').click(function () {
+            EnableFormFields();
+        })
+        function EnableFormFields() {
+
+            GetTodayDate();
+            $('#CabTypeID').select().enable(true);
+            $('#CabTypeID').val(null).trigger('change');
+            $('#LuggageID').select().enable(true);
+            $('#LuggageID').val(null).trigger('change');
+            $('#Name').prop("disabled", false);
+
+            $('#ServiceProviderID').select2();
+            $('#ServiceProviderID').val(null).trigger('change');
+            $('#PaymentMode').val('Account');
+            $('#SPRefNo').val('');
+            $('#SPAmount').val('');
+                       
+
+            $('#startfrom').val('');
+            $('#startfrom1').val('');
+            $('#startfrom2').val('');
+            $('#startfrom3').val('');
+            $('#endposition').val('');
+            $('#endposition1').val('');
+            $('#endposition2').val('');
+            $('#endposition3').val('');
+
+            $('#PostCodeStart').val('');
+            $('#PostCodeStart1').val('');
+            $('#PostCodeStart2').val('');
+            $('#PostCodeStart3').val('');
+            $('#LatStart').val('');
+            $('#LatStart1').val('');
+            $('#LatStart2').val('');
+            $('#LatStart3').val('');
+            $('#LonStart').val('');
+            $('#LonStart1').val('');
+            $('#LonStart2').val('');
+            $('#LonStart3').val('');
+
+            $('#EstimateFareNet').val('');
+            $('#vdistance').val('');
+            $('#Surname').val('');
+            $('#Name').val('');
+            $('#Email').val('');
+            $('#Cell').val('');
+            $('#DoorNo').val('');
+            $('#NoOfAdult').val('');
+            $('#NoOfChild').val('');
+            $('#ArrivalFrom').val('');
+            $('#FlightNo').val('');
+            $('#Terminal').val('');
+            $('#AdditionalInfo').val('');
+            $('#PaymentStatus').val('Pending');
+            
+            $('#ChildSeat').prop("checked", false);
+            $('#MeetnGreet').prop("checked", false);
+            $('#Return').prop("checked", false);
+            $('.returndiv').attr("hidden", "hidden");
+            $('.returncompdiv').removeAttr("hidden");
+            
+
+            $('#IsNewOrEdit').val("New");
+            $('#AccountCode').val('');
+            $('#AccountCodeSpan').html('');
+
+            $('#btnSaveAccountDetail').prop('disabled', false);
+            $('#saveTd').removeAttr("hidden");
+            $('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '47%', 'text-align': 'right' });
+            
+            $('.deleteRow').attr("hidden", "hidden");
+        }
+        $('#btnRefreshAccountDetail').click(function () {
+            location.reload();
+        })
+        $('#btnAccountDetailList').click(function () {
+            $('#accountDetailListDiv').load('@Url.Action("SupplierDetailsList", "chartofaccount")')
+        })
+        
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        function ClearFormFields() {
+            
+            $('#CabTypeID').select().enable(false);
+            $('#CabTypeID').val(null).trigger('change');
+            $('#LuggageID').select().enable(false);
+            $('#LuggageID').val(null).trigger('change');
+            $('#Name').prop("disabled", true);
+            
+
+            $('#ServiceProviderID').select2();
+            $('#ServiceProviderID').val(null).trigger('change');
+            $('#PaymentMode').val('Account');
+            $('#SPRefNo').val('');
+            $('#SPAmount').val('');
+
+            $('#startfrom').val('');
+            $('#startfrom1').val('');
+            $('#startfrom2').val('');
+            $('#startfrom3').val('');
+            $('#endposition').val('');
+            $('#endposition1').val('');
+            $('#endposition2').val('');
+            $('#endposition3').val('');
+            $('#EstimateFareNet').val('');
+            $('#vdistance').val('');
+            $('#Surname').val('');
+            $('#Name').val('');
+            $('#Email').val('');
+            $('#Cell').val('');
+            $('#DoorNo').val('');
+            $('#NoOfAdult').val('');
+            $('#NoOfChild').val('');
+            $('#ArrivalFrom').val('');
+            $('#FlightNo').val('');
+            $('#Terminal').val('');
+            $('#AdditionalInfo').val('');
+            $('#PaymentStatus').val('Pending');
+            $('#ChildSeat').prop("checked", false);
+            $('#MeetnGreet').prop("checked", false);
+            $('#Return').prop("checked", false);
+            $('.returndiv').attr("hidden", "hidden");
+            $('.returncompdiv').removeAttr("hidden");
+
+            $('#btnSaveAccountDetail').prop('disabled', true);
+            $('#addTd').removeAttr("hidden");
+            $('#saveTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#accountCodeSection').attr("hidden", "hidden");
+            $('#IsNewOrEdit').val("New");
+            $('#AccountCode').val(0);
+            $('#AccountCodeSpan').html('0');
+            if ($('#CanSave').val() == 0) {
+                $('#listTd').css({ 'width': '47%', 'text-align': 'right' });
+                $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            }
+        }
+
+        $('#Return').click(function () {
+            if ($(this).is(':checked')) {
+                $('.returndiv').removeAttr("hidden");
+            }
+            else {
+                $('.returndiv').attr("hidden", "hidden");
+            }
+        })
+
+        
+        function saveBooking() {
+
+            //var newdate = ConvertDate($('#PickUpDate').val());
+            var PickupDate = $('#PickUpDate').val();
+            var PickupTime = $('#PickUpTime').val();
+
+            var ReturnDate = "01-01-2030";
+            if ($('#Return').is(':checked')) {
+                //ReturnDate = ConvertDate($('#ReturnDate').val());
+                ReturnDate = $('#ReturnDate').val();
+            }
+            var ReturnTime = $('#ReturnTime').val();
+            var Startpoint = $('#startfrom').val();
+            var Startpoint1 = $('#startfrom1').val();
+            var Startpoint2 = $('#startfrom2').val();
+            var Startpoint3 = $('#startfrom3').val();
+            var Endposition = $('#endposition').val();
+            var Endposition1 = $('#endposition1').val();
+            var Endposition2 = $('#endposition2').val();
+            var Endposition3 = $('#endposition3').val();
+
+            var PostCodeStart = $('#PostCodeStart').val();
+            var PostCodeStart1 = $('#PostCodeStart1').val();
+            var PostCodeStart2 = $('#PostCodeStart2').val();
+            var PostCodeStart3 = $('#PostCodeStart3').val();
+            var LatStart = $('#LatStart').val();
+            var LatStart1 = $('#LatStart1').val();
+            var LatStart2 = $('#LatStart2').val();
+            var LatStart3 = $('#LatStart3').val();
+            var LonStart = $('#LonStart').val();
+            var LonStart1 = $('#LonStart1').val();
+            var LonStart2 = $('#LonStart2').val();
+            var LonStart3 = $('#LonStart3').val();
+            var PostCodeEnd = $('#PostCodeEnd').val();
+            var PostCodeEnd1 = $('#PostCodeEnd1').val();
+            var PostCodeEnd2 = $('#PostCodeEnd2').val();
+            var PostCodeEnd3 = $('#PostCodeEnd3').val();
+            var LatEnd = $('#LatEnd').val();
+            var LatEnd1 = $('#LatEnd1').val();
+            var LatEnd2 = $('#LatEnd2').val();
+            var LatEnd3 = $('#LatEnd3').val();
+            var LonEnd = $('#LonEnd').val();
+            var LonEnd1 = $('#LonEnd1').val();
+            var LonEnd2 = $('#LonEnd2').val();
+            var LonEnd3 = $('#LonEnd3').val();
+
+            var surname = $('#Surname').val();
+            var FirstName = $('#Name').val();
+            var PhoneNum = $('#Cell').val();
+            var Email = $('#Email').val();
+            var Carid = $('#CabTypeID').val();
+
+            var ServiceProviderID = $('#ServiceProviderID').val();
+            if (ServiceProviderID == 0 || ServiceProviderID == null || isNaN(ServiceProviderID)) { ServiceProviderID = 0;}
+            var PaymentMode = $('#PaymentMode').val();
+            var SPRefNo = $('#SPRefNo').val();
+            var SPAmount = $('#SPAmount').val();
+            if (SPAmount == 0 || SPAmount == null || isNaN(SPAmount)) { SPAmount = 0; }
+
+            var SeatingCapacity = 0;
+             
+            var Childseat = $('#ChildSeat').val();
+            var Disableseat = 0;
+            var Luggagekg = 0;
+            var PaymentType = 0;
+            var PaybalEmail = '';
+            var PaymentYear = '0';
+            var PaymentMonth = '0';
+            var CVVCode = '';
+            var FirstNameForPayment = '';
+            var CreditCardNo = '';
+            var TotalKm = $('#vdistance').val();
+
+            var ReturnTripVal = 0;
+            var ChildSeatVal = 0;
+            var DisabledSeatVal = 0;
+            var MeetGreetVal = 0;
+            var TermsCheckVal = 0;
+            var ReturnTrip = $('#Return').is(':checked');
+            if (ReturnTrip == true) { ReturnTripVal = 1; }
+            var ChildSeat = $('#ChildSeat').is(':checked');
+            if (ChildSeat == true) { ChildSeatVal = 1; }
+            //var DisabledSeat = $('#DisabledSeat').is(':checked');
+            //if (DisabledSeat == true) { DisabledSeatVal = 1; }
+
+            var MeetGreet = $('#MeetnGreet').is(':checked');
+            if (MeetGreet == true) { MeetGreetVal = 1; }
+            //var TermsCheck = $('#TermsCheck').is(':checked');
+            //if (TermsCheck == true) { TermsCheckVal = 1; }
+            TermsCheckVal = 1;
+
+            var NoOfAdult = $('#NoOfAdult').val();
+            var NoOfChild = $('#NoOfChild').val();
+            var ArrivalFrom = $('#ArrivalFrom').val();
+            var FlightNo = $('#FlightNo').val();
+            var Baggage = '';
+            var LuggageID = "0";
+            if ($('#LuggageID').val() == "" || $('#LuggageID').val() == undefined) {
+                LuggageID = "0";
+            } else {
+                LuggageID = $('#LuggageID').val().toString().replace(",", "^");
+            }
+
+            var FlightTime = $('#FlightTime').val();
+            var Terminal = $('#Terminal').val();
+            var DoorNo = $('#DoorNo').val();
+            var AdditionalInfo = $('#AdditionalInfo').val();
+            var calculatedfare = $('#EstimateFareNet').val();
+            var EstimateFareNet = $('#EstimateFareNet').val();
+            var ManualPickupAddress = $('#startfrom').val();
+            var ManualDropOffAddress = $('#endposition').val();
+            var PromotionID = 0;
+            var PaymentStatus =$('#PaymentStatus').val();
+
+            var obj = {
+                PickupDateTime: PickupDate,
+                PickupTime: PickupTime,
+
+                ReturnDate: ReturnDate,
+                ReturnTime: ReturnTime,
+
+                PickupPostalCode: PostCodeStart,
+                PickupLongitude: LonStart,
+                PickupLatitude: LatStart,
+                PickupPostalCode1: Startpoint1,
+                PickupPostalCode2: Startpoint2,
+                PickupPostalCode3: Startpoint3,
+                PickupLongitude1: LonStart1,
+                PickupLongitude2: LonStart2,
+                PickupLongitude3: LonStart3,
+                PickupLatitude1: LatStart1,
+                PickupLatitude2: LatStart2,
+                PickupLatitude3: LatStart3,
+
+                Startpoint: Startpoint,
+                Startpoint1: Startpoint1,
+                Startpoint2: Startpoint2,
+                Startpoint3: Startpoint3,
+                Endposition: Endposition,
+                Endposition1: Endposition1,
+                Endposition2: Endposition2,
+                Endposition3: Endposition3,
+
+                DropoffPostalCode: PostCodeEnd,
+                DropoffLongitude: LonEnd,
+                DropoffLatitude: LatEnd,
+                DropoffPostalCode1: PostCodeEnd1,
+                DropoffPostalCode2: PostCodeEnd2,
+                DropoffPostalCode3: PostCodeEnd3,
+                DropoffLongitude1: LonEnd1,
+                DropoffLongitude2: LonEnd2,
+                DropoffLongitude3: LonEnd3,
+                DropoffLatitude1: LatEnd1,
+                DropoffLatitude2: LatEnd2,
+                DropoffLatitude3: LatEnd3,
+
+                CabId: Carid,
+                SurName: surname,
+                PasengerName: FirstName,
+                Cellno: PhoneNum,
+                Email: Email,
+                Payment: PaymentType,
+                PaybalEmail: PaybalEmail,
+                CreditCvvCode: CVVCode,
+                CardFirstName: FirstNameForPayment,
+                CreditCardNo: CreditCardNo,
+                CreditMonth: PaymentMonth,
+                CreditYear: PaymentYear,
+
+                ServiceProviderID:ServiceProviderID,
+                PaymentMode:PaymentMode,
+                SPRefNo:SPRefNo,
+                SPAmount: SPAmount,
+
+                TotalKm: TotalKm,
+
+                NoofPassenger: NoOfAdult,
+                Childseat: ChildSeatVal,
+                Disableseat: DisabledSeatVal,
+                Luggagekg: Baggage,
+                LuggageID: 0,
+                LuggageDetail: LuggageID,
+                ReturnTrip: ReturnTripVal,
+                MeetGreet: MeetGreetVal,
+                TermsCheck: TermsCheckVal,
+                NoOfChild: NoOfChild,
+                ArrivalFrom: ArrivalFrom,
+                FlightNo: FlightNo,
+                FlightTime: FlightTime,
+                Terminal: Terminal,
+                DoorNo: DoorNo,
+                AdditionalInfo: AdditionalInfo,
+                calculatedfare: calculatedfare,
+                EstimateFareNet: EstimateFareNet,
+                ManualPickupAddress: ManualPickupAddress,
+                ManualDropOffAddress: ManualDropOffAddress,
+                PromotionID: PromotionID,
+                PaymentStatus: PaymentStatus
+            }
+            var vobj = JSON.stringify(obj);
+            var state = 'Save';
+            $.ajax({
+                url: '/CabBooking/InsertUpdateBooking',
+                method: 'POST',
+                dataType: 'JSON',
+                data: {
+                    'model': vobj, 'type': state
+                },
+                success: function (data) {
+                    if (data != null) {
+                        $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                ' <strong>Success! </strong>' +
+                                                'Record Saved Succesfully.' +
+                                            '</div>');
+                        $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                            $("#success-alert").slideUp(500);
+                            $('.alertDiv').html('');
+                            location.reload();
+                        });
+                     } else {
+                        alert(data.message);
+                        $('#btnSaveAccountDetail').prop('disabled', false);
+                    }
+                },
+                error: function (err) {
+                    alert("Error accord")
+                },
+            });
+        }
+
+
+        $('#btnSaveAccountDetail').click(function (e) {
+            e.preventDefault();
+            if (!$("#accountDetailForm").valid()) {
+                return false;
+            }
+
+            if ($('#startfrom').val() == null || $('#startfrom').val() == "") {
+                alert('Enter Pickup From');
+            } else if ($('#endposition').val() == null || $('#endposition').val() == "") {
+                alert('Enter Dropoff at');
+            } else if ($('#EstimateFareNet').val() == null || $('#EstimateFareNet').val() == "") {
+                alert('Enter Fare');
+            //} else if ($('#SurName').val() == null || $('#SurName').val() == "") {
+            //    alert('Enter Surname');
+            } else if ($('#Name').val() == null || $('#Name').val() == "") {
+                alert('Enter Full Name');
+            } else if ($('#Cell').val() == null || $('#Cell').val() == "") {
+                alert('Enter Mobile NO.');
+            } else if ($('#Email').val() == null || $('#Email').val() == "") {
+                alert('Enter Email');
+            } else {
+                $('#btnSaveAccountDetail').prop('disabled', true);
+                saveBooking();
+            }
+            e.preventDefault();
+        })
+        $('#btnDeleteAccountDetail').click(function () {
+            var accCode = $('#AccountCode').val();
+            DeleteAccountDetail(accCode);
+        })
+        function DeleteAccountDetail(id) {
+            //var a = $.confirm({
+            //    title: 'Delete Detail',
+            //    content: 'Are you sure u want to delete this detail?',
+            //    type: 'white',
+            //    buttons: {
+            //        ok: {
+            //            text: "Yes",
+            //            btnClass: 'btnConfirm',
+            //            keys: ['enter'],
+            //            action: function () {
+            //                $.ajax({
+            //                    url: '/chartofaccount/deleteaccountdetail/' + id,
+            //                    type: "POST",
+            //                    dataType: 'json',
+            //                    success: function (data) {
+            //                        if (data.status == true) {
+            //                            location.reload();
+            //                        }
+            //                        else {
+            //                            alert(data.message);
+            //                        }
+            //                    }
+            //                })
+            //            }
+            //        },
+            //        cancel: {
+            //            text: "No",
+            //            btnClass: 'btn-default',
+            //            keys: ['esc'],
+            //            action: function () {
+            //                a.close();
+            //            }
+            //        },
+            //    }
+            //});
+        }
+        
+
+
+
+
+
+        $('#btnEditAccountDetail').click(function (e) {
+            e.preventDefault();
+            if (!$("#accountDetailForm").valid()) {
+                return false;
+            }
+
+            if ($('#startfrom').val() == null || $('#startfrom').val() == "") {
+                alert('Enter Pickup From');
+            } else if ($('#endposition').val() == null || $('#endposition').val() == "") {
+                alert('Enter Dropoff at');
+            } else if ($('#EstimateFareNet').val() == null || $('#EstimateFareNet').val() == "") {
+                alert('Enter Fare');
+                //} else if ($('#SurName').val() == null || $('#SurName').val() == "") {
+                //    alert('Enter Surname');
+            } else if ($('#Name').val() == null || $('#Name').val() == "") {
+                alert('Enter Full Name');
+            } else if ($('#Cell').val() == null || $('#Cell').val() == "") {
+                alert('Enter Mobile NO.');
+            } else if ($('#Email').val() == null || $('#Email').val() == "") {
+                alert('Enter Email');
+            } else {
+                $('#btnEditAccountDetail').prop('disabled', true);
+                updateBooking();
+            }
+            e.preventDefault();
+        })
+
+
+
+
+
+        function LoadExistingRecord() {
+
+            var id = '@ViewBag.ID';
+            $.ajax({
+                type: "POST",
+                url: "/cabbooking/BookingDetailByID/" + id,
+                dataType: 'json',
+                success: function (response) {
+                    
+                    $('#AccountCode').val(response.data.BookingId);
+                    $('#startfrom').val(response.data.Startpoint);
+                    $('#startfrom1').val(response.data.Startpoint1);
+                    $('#startfrom2').val(response.data.Startpoint2);
+                    $('#startfrom3').val(response.data.Startpoint3);
+                    $('#endposition').val(response.data.Endposition);
+                    $('#endposition1').val(response.data.Endposition1);
+                    $('#endposition2').val(response.data.Endposition2);
+                    $('#endposition3').val(response.data.Endposition3);
+
+                    $('#PostCodeStart').val(response.data.PickupPostalCode);
+                    $('#PostCodeStart1').val(response.data.PickupPostalCode1);
+                    $('#PostCodeStart2').val(response.data.PickupPostalCode2);
+                    $('#PostCodeStart3').val(response.data.PickupPostalCode3);
+                    $('#LatStart').val(response.data.PickupLatitude);
+                    $('#LatStart1').val(response.data.PickupLatitude1);
+                    $('#LatStart2').val(response.data.PickupLatitude2);
+                    $('#LatStart3').val(response.data.PickupLatitude3);
+                    $('#LonStart').val(response.data.PickupLongitude);
+                    $('#LonStart1').val(response.data.PickupLongitude1);
+                    $('#LonStart2').val(response.data.PickupLongitude2);
+                    $('#LonStart3').val(response.data.PickupLongitude3);
+                    $('#PostCodeEnd').val(response.data.DropoffPostalCode);
+                    $('#PostCodeEnd1').val(response.data.DropoffPostalCode1);
+                    $('#PostCodeEnd2').val(response.data.DropoffPostalCode2);
+                    $('#PostCodeEnd3').val(response.data.DropoffPostalCode3);
+                    $('#LatEnd').val(response.data.DropoffLatitude);
+                    $('#LatEnd1').val(response.data.DropoffLatitude1);
+                    $('#LatEnd2').val(response.data.DropoffLatitude2);
+                    $('#LatEnd3').val(response.data.DropoffLatitude3);
+                    $('#LonEnd').val(response.data.DropoffLongitude);
+                    $('#LonEnd1').val(response.data.DropoffLongitude1);
+                    $('#LonEnd2').val(response.data.DropoffLongitude2);
+                    $('#LonEnd3').val(response.data.DropoffLongitude3);
+
+                    $('#Surname').val(response.data.SurName);
+                    $('#Name').val(response.data.PasengerName);
+                    $('#Cell').val(response.data.Cellno);
+                    $('#Email').val(response.data.Email);
+                    $('#CabTypeID').val(response.data.CabId).trigger('change');
+
+                    $('#NoOfAdult').val(response.data.NoOfAdult);
+                    $('#NoOfChild').val(response.data.NoOfChild);
+                    $('#ArrivalFrom').val(response.data.ArrivalFrom);
+                    $('#FlightNo').val(response.data.FlightNo);
+                    $('#Terminal').val(response.data.Terminal);
+                    $('#FlightTime').val(response.data.FlightTimeString);
+                    $('#DoorNo').val(response.data.DoorNo);
+                    $('#AdditionalInfo').val(response.data.AdditionalInfo);
+                    $('#EstimateFareNet').val(response.data.EstimateFareNet);
+                    $('#PaymentStatus').val(response.data.PaymentStatus);
+                    $('#vdistance').val(response.data.TotalKm);
+
+                    $('#ServiceProviderID').val(response.data.ServiceProviderID).trigger('change');
+                    $('#PaymentMode').val(response.data.PaymentMode);
+                    $('#SPRefNo').val(response.data.SPRefNo);
+                    $('#SPAmount').val(response.data.SPAmount);
+                    
+                    if (response.data.ChildSeat == 1) {
+                        $('#ChildSeat').prop("checked", true);
+                    }
+                    else {
+                        $('#ChildSeat').prop("checked", false);
+                    }
+                    if (response.data.MeetGreet == 1) {
+                        $('#MeetnGreet').prop("checked", true);
+                    }
+                    else {
+                        $('#MeetnGreet').prop("checked", false);
+                    }
+                    if (response.data.DisableSeat == 1) {
+                        $('#DisabledSeat').prop("checked", true);
+                    }
+                    else {
+                        $('#DisabledSeat').prop("checked", false);
+                    }
+
+                    $('#PickUpDate').val(getDate(response.data.PickupDateTime));
+                    //PickupTimeString
+                    $('#PickUpTime').val(response.data.PickupTimeString);
+
+                    $('.returncompdiv').attr("hidden", "hidden");
+                    $('#Return').prop("checked", false);
+                    $('#ReturnDate').val(getDate(response.data.ReturnDate));
+                    $('#ReturnTime').val(response.data.ReturnTimeStr);
+                    
+                    if (response.data.LuggageDesc != "") {
+                        var vlug = response.data.LuggageDesc;
+                        var vDetailD = vlug.split(',');
+                        var selectedValues = new Array();
+                        for (var i = 0; i < vDetailD.length; i++) {
+                            selectedValues[i] = vDetailD[i];
+                        }
+                        $('#LuggageID').val(selectedValues).trigger('change');
+                    }
+                    
+                    //$('#LuggageID').val(response.data.LuggageDesc).trigger('change');
+                    
+                    $('#btnEditAccountDetail').prop('disabled', false);
+                    $('#saveTd').removeAttr("hidden");
+                    $('#addTd').attr("hidden", "hidden");
+                    $('#saveTd').css({ 'width': '47%', 'text-align': 'right' });
+                    $('.deleteRow').attr("hidden", "hidden");
+
+                    calcRoute(1);
+                }
+            })
+
+        }
+
+
+
+        function updateBooking() {
+
+            //var newdate = ConvertDate($('#PickUpDate').val());
+            var bookingid = $('#AccountCode').val();
+            var PickupDate = $('#PickUpDate').val();
+            var PickupTime = $('#PickUpTime').val();
+
+            var ReturnDate = "01-01-2030";
+            if ($('#Return').is(':checked')) {
+                //ReturnDate = ConvertDate($('#ReturnDate').val());
+                ReturnDate = $('#ReturnDate').val();
+            }
+            var ReturnTime = $('#ReturnTime').val();
+            var Startpoint = $('#startfrom').val();
+            var Startpoint1 = $('#startfrom1').val();
+            var Startpoint2 = $('#startfrom2').val();
+            var Startpoint3 = $('#startfrom3').val();
+            var Endposition = $('#endposition').val();
+            var Endposition1 = $('#endposition1').val();
+            var Endposition2 = $('#endposition2').val();
+            var Endposition3 = $('#endposition3').val();
+
+            var PostCodeStart = $('#PostCodeStart').val();
+            var PostCodeStart1 = $('#PostCodeStart1').val();
+            var PostCodeStart2 = $('#PostCodeStart2').val();
+            var PostCodeStart3 = $('#PostCodeStart3').val();
+            var LatStart = $('#LatStart').val();
+            var LatStart1 = $('#LatStart1').val();
+            var LatStart2 = $('#LatStart2').val();
+            var LatStart3 = $('#LatStart3').val();
+            var LonStart = $('#LonStart').val();
+            var LonStart1 = $('#LonStart1').val();
+            var LonStart2 = $('#LonStart2').val();
+            var LonStart3 = $('#LonStart3').val();
+            var PostCodeEnd = $('#PostCodeEnd').val();
+            var PostCodeEnd1 = $('#PostCodeEnd1').val();
+            var PostCodeEnd2 = $('#PostCodeEnd2').val();
+            var PostCodeEnd3 = $('#PostCodeEnd3').val();
+            var LatEnd = $('#LatEnd').val();
+            var LatEnd1 = $('#LatEnd1').val();
+            var LatEnd2 = $('#LatEnd2').val();
+            var LatEnd3 = $('#LatEnd3').val();
+            var LonEnd = $('#LonEnd').val();
+            var LonEnd1 = $('#LonEnd1').val();
+            var LonEnd2 = $('#LonEnd2').val();
+            var LonEnd3 = $('#LonEnd3').val();
+
+            var surname = $('#Surname').val();
+            var FirstName = $('#Name').val();
+            var PhoneNum = $('#Cell').val();
+            var Email = $('#Email').val();
+            var Carid = $('#CabTypeID').val();
+
+            var ServiceProviderID = $('#ServiceProviderID').val();
+            if (ServiceProviderID == 0 || ServiceProviderID == null || isNaN(ServiceProviderID)) { ServiceProviderID = 0; }
+            var PaymentMode = $('#PaymentMode').val();
+            var SPRefNo = $('#SPRefNo').val();
+            var SPAmount = $('#SPAmount').val();
+            if (SPAmount == 0 || SPAmount == null || isNaN(SPAmount)) { SPAmount = 0; }
+
+            var SeatingCapacity = 0;
+
+            var Childseat = $('#ChildSeat').val();
+            var Disableseat = 0;
+            var Luggagekg = 0;
+            var PaymentType = 0;
+            var PaybalEmail = '';
+            var PaymentYear = '0';
+            var PaymentMonth = '0';
+            var CVVCode = '';
+            var FirstNameForPayment = '';
+            var CreditCardNo = '';
+            var TotalKm = $('#vdistance').val();
+
+            var ReturnTripVal = 0;
+            var ChildSeatVal = 0;
+            var DisabledSeatVal = 0;
+            var MeetGreetVal = 0;
+            var TermsCheckVal = 0;
+            var ReturnTrip = $('#Return').is(':checked');
+            if (ReturnTrip == true) { ReturnTripVal = 1; }
+            var ChildSeat = $('#ChildSeat').is(':checked');
+            if (ChildSeat == true) { ChildSeatVal = 1; }
+            //var DisabledSeat = $('#DisabledSeat').is(':checked');
+            //if (DisabledSeat == true) { DisabledSeatVal = 1; }
+
+            var MeetGreet = $('#MeetnGreet').is(':checked');
+            if (MeetGreet == true) { MeetGreetVal = 1; }
+            //var TermsCheck = $('#TermsCheck').is(':checked');
+            //if (TermsCheck == true) { TermsCheckVal = 1; }
+            TermsCheckVal = 1;
+
+            var NoOfAdult = $('#NoOfAdult').val();
+            var NoOfChild = $('#NoOfChild').val();
+            var ArrivalFrom = $('#ArrivalFrom').val();
+            var FlightNo = $('#FlightNo').val();
+            var Baggage = '';
+            var LuggageID = "0";
+            if ($('#LuggageID').val() == "" || $('#LuggageID').val() == undefined) {
+                LuggageID = "0";
+            } else {
+                LuggageID = $('#LuggageID').val().toString().replace(",", "^");
+            }
+
+            var FlightTime = $('#FlightTime').val();
+            var Terminal = $('#Terminal').val();
+            var DoorNo = $('#DoorNo').val();
+            var AdditionalInfo = $('#AdditionalInfo').val();
+            var calculatedfare = $('#EstimateFareNet').val();
+            var EstimateFareNet = $('#EstimateFareNet').val();
+            var ManualPickupAddress = $('#startfrom').val();
+            var ManualDropOffAddress = $('#endposition').val();
+            var PromotionID = 0;
+            var PaymentStatus = $('#PaymentStatus').val();
+
+            var obj = {
+                BookingId : bookingid,
+                PickupDateTime: PickupDate,
+                PickupTime: PickupTime,
+
+                ReturnDate: ReturnDate,
+                ReturnTime: ReturnTime,
+
+                PickupPostalCode: PostCodeStart,
+                PickupLongitude: LonStart,
+                PickupLatitude: LatStart,
+                PickupPostalCode1: Startpoint1,
+                PickupPostalCode2: Startpoint2,
+                PickupPostalCode3: Startpoint3,
+                PickupLongitude1: LonStart1,
+                PickupLongitude2: LonStart2,
+                PickupLongitude3: LonStart3,
+                PickupLatitude1: LatStart1,
+                PickupLatitude2: LatStart2,
+                PickupLatitude3: LatStart3,
+
+                Startpoint: Startpoint,
+                Startpoint1: Startpoint1,
+                Startpoint2: Startpoint2,
+                Startpoint3: Startpoint3,
+                Endposition: Endposition,
+                Endposition1: Endposition1,
+                Endposition2: Endposition2,
+                Endposition3: Endposition3,
+
+                DropoffPostalCode: PostCodeEnd,
+                DropoffLongitude: LonEnd,
+                DropoffLatitude: LatEnd,
+                DropoffPostalCode1: PostCodeEnd1,
+                DropoffPostalCode2: PostCodeEnd2,
+                DropoffPostalCode3: PostCodeEnd3,
+                DropoffLongitude1: LonEnd1,
+                DropoffLongitude2: LonEnd2,
+                DropoffLongitude3: LonEnd3,
+                DropoffLatitude1: LatEnd1,
+                DropoffLatitude2: LatEnd2,
+                DropoffLatitude3: LatEnd3,
+
+                CabId: Carid,
+                SurName: surname,
+                PasengerName: FirstName,
+                Cellno: PhoneNum,
+                Email: Email,
+                Payment: PaymentType,
+                PaybalEmail: PaybalEmail,
+                CreditCvvCode: CVVCode,
+                CardFirstName: FirstNameForPayment,
+                CreditCardNo: CreditCardNo,
+                CreditMonth: PaymentMonth,
+                CreditYear: PaymentYear,
+
+                ServiceProviderID: ServiceProviderID,
+                PaymentMode: PaymentMode,
+                SPRefNo: SPRefNo,
+                SPAmount: SPAmount,
+
+                TotalKm: TotalKm,
+
+                NoofPassenger: NoOfAdult,
+                Childseat: ChildSeatVal,
+                Disableseat: DisabledSeatVal,
+                Luggagekg: Baggage,
+                LuggageID: 0,
+                LuggageDetail: LuggageID,
+                ReturnTrip: ReturnTripVal,
+                MeetGreet: MeetGreetVal,
+                TermsCheck: TermsCheckVal,
+                NoOfChild: NoOfChild,
+                ArrivalFrom: ArrivalFrom,
+                FlightNo: FlightNo,
+                FlightTime: FlightTime,
+                Terminal: Terminal,
+                DoorNo: DoorNo,
+                AdditionalInfo: AdditionalInfo,
+                calculatedfare: calculatedfare,
+                EstimateFareNet: EstimateFareNet,
+                ManualPickupAddress: ManualPickupAddress,
+                ManualDropOffAddress: ManualDropOffAddress,
+                PromotionID: PromotionID,
+                PaymentStatus: PaymentStatus
+            }
+            var vobj = JSON.stringify(obj);
+            var state = 'Save';
+            $.ajax({
+                url: '/CabBooking/UpdateBooking',
+                method: 'POST',
+                dataType: 'JSON',
+                data: {
+                    'model': vobj, 'type': state
+                },
+                success: function (data) {
+                    if (data != null) {
+                        $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                ' <strong>Success! </strong>' +
+                                                'Record Edit Succesfully.' +
+                                            '</div>');
+                        $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                            $("#success-alert").slideUp(500);
+                            $('.alertDiv').html('');
+                            //location.reload();
+                            window.location = 'allbookingdetail';
+                        });
+                    } else {
+                        alert(data.message);
+                        $('#btnEditAccountDetail').prop('disabled', false);
+                    }
+                },
+                error: function (err) {
+                    alert("Error accord")
+                },
+            });
+        }
+
+
+
+
+        $("#CreditLimit").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#CreditDays").on('keypress', function (event) {
+            NumberPostive(event, this);
+        });
+        function NumberPostive(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 8) && (charCode != 127) && (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function NumberPostiveNegativeWithDecimal(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+
+
+
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#PickUpDate').val(today);
+            $('#ReturnDate').val(today);
+        }
+
+
+
+
+        function calcRoute(showfare) {
+            var vret = 0;
+            var tdist = 0;
+            var geocoder = new google.maps.Geocoder();
+
+
+            //var start = document.getElementById('startfrom').value;
+            //var start1 = document.getElementById('startfrom1').value;
+            //var start2 = document.getElementById('startfrom2').value;
+            //var start3 = document.getElementById('startfrom3').value;
+
+            //var end = document.getElementById('endposition').value;
+            //var end1 = document.getElementById('endposition1').value;
+            //var end2 = document.getElementById('endposition2').value;
+            //var end3 = document.getElementById('endposition3').value;
+
+
+            var start = document.getElementById('PostCodeStart').value;
+            var start1 = document.getElementById('PostCodeStart1').value;
+            var start2 = document.getElementById('PostCodeStart2').value;
+            var start3 = document.getElementById('PostCodeStart3').value;
+
+            var end = document.getElementById('PostCodeEnd').value;
+            var end1 = document.getElementById('PostCodeEnd1').value;
+            var end2 = document.getElementById('PostCodeEnd2').value;
+            var end3 = document.getElementById('PostCodeEnd3').value;
+
+            var waypts = [];
+
+            geocoder.geocode({ 'address': start }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    document.getElementById('LatStart').value = results[0].geometry.location.lat().toString();
+                    document.getElementById('LonStart').value = results[0].geometry.location.lng().toString();
+                }
+            });
+
+            geocoder.geocode({ 'address': end }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    document.getElementById('LatEnd').value = results[0].geometry.location.lat().toString();
+                    document.getElementById('LonEnd').value = results[0].geometry.location.lng().toString();
+                }
+            });
+
+
+
+            if (start1 != null && start1 != "") {
+                waypts.push({
+                    location: start1,
+                    stopover: true
+                });
+
+                geocoder.geocode({ 'address': start1 }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        document.getElementById('LatStart1').value = results[0].geometry.location.lat().toString();
+                        document.getElementById('LonStart1').value = results[0].geometry.location.lng().toString();
+                    }
+                });
+            }
+
+            if (start2 != null && start2 != "") {
+                waypts.push({
+                    location: start2,
+                    stopover: true
+                });
+
+                geocoder.geocode({ 'address': start2 }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        document.getElementById('LatStart2').value = results[0].geometry.location.lat().toString();
+                        document.getElementById('LonStart2').value = results[0].geometry.location.lng().toString();
+                    }
+                });
+            }
+
+            if (start3 != null && start3 != "") {
+                waypts.push({
+                    location: start3,
+                    stopover: true
+                });
+
+                geocoder.geocode({ 'address': start3 }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        document.getElementById('LatStart3').value = results[0].geometry.location.lat().toString();
+                        document.getElementById('LonStart3').value = results[0].geometry.location.lng().toString();
+                    }
+                });
+            }
+
+            if (end1 != null && end1 != "") {
+                waypts.push({
+                    location: end1,
+                    stopover: true
+                });
+
+                geocoder.geocode({ 'address': end1 }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        document.getElementById('LatEnd1').value = results[0].geometry.location.lat().toString();
+                        document.getElementById('LonEnd1').value = results[0].geometry.location.lng().toString();
+                    }
+                });
+            }
+
+            if (end2 != null && end2 != "") {
+                waypts.push({
+                    location: end2,
+                    stopover: true
+                });
+
+
+                geocoder.geocode({ 'address': end2 }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        document.getElementById('LatEnd2').value = results[0].geometry.location.lat().toString();
+                        document.getElementById('LonEnd2').value = results[0].geometry.location.lng().toString();
+                    }
+                });
+            }
+
+            if (end3 != null && end3 != "") {
+                waypts.push({
+                    location: end3,
+                    stopover: true
+                });
+
+                geocoder.geocode({ 'address': end3 }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        document.getElementById('LatEnd3').value = results[0].geometry.location.lat().toString();
+                        document.getElementById('LonEnd3').value = results[0].geometry.location.lng().toString();
+                    }
+                });
+            }
+
+
+            var request = {
+                origin: start,
+                destination: end,
+                waypoints: waypts,
+                //optimizeWaypoints: true,
+                //transit_routing_preference: less_driving,
+                provideRouteAlternatives: true,
+                travelMode: google.maps.DirectionsTravelMode.DRIVING
+            };
+
+            directionsService.route(request, function (response, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+
+                    var fastest = Number.MAX_VALUE, shortest = Number.MAX_VALUE;
+                    var routeno = 0;
+                    response.routes.forEach(function (rou, index) {
+                        //console.log("distance of route " + index + ": ", rou.legs[0].distance.value);
+                        //console.log("duration of route " + index + ": ", rou.legs[0].duration.value);
+                        if (rou.legs[0].distance.value < shortest) {
+                            shortest = rou.legs[0].distance.value;
+                            routeno = index;
+                        }
+                        if (rou.legs[0].duration.value < fastest) {
+                            fastest = rou.legs[0].duration.value;
+                        }
+                        //alert(rou.legs[0].distance.value);
+                        //alert(rou.legs[0].duration.value);
+
+                    })
+
+                    directionsDisplay = new google.maps.DirectionsRenderer({
+                        routeIndex: routeno
+                    });
+
+                    var mapOptions = {
+                        zoom: 10
+                    }
+                    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+                    directionsDisplay.setMap(map);
+                    directionsDisplay.setDirections(response);
+
+
+                    var route = response.routes[routeno];
+                    var vtotal = 0;
+                    for (var i = 0; i < route.legs.length; i++) {
+                        var routeSegment = i + 1;
+                        var subdist = parseFloat(route.legs[i].distance.value) / 1000;
+                        subdist = parseFloat(subdist).toFixed(2);
+                        vtotal = parseFloat(vtotal) + parseFloat(subdist);
+                    }
+                    tdist = parseFloat(vtotal) * 0.62137;
+
+                    tdist = parseFloat(tdist).toFixed(2);
+
+
+                    if (showfare == 0) {
+                        document.getElementById('vdistance').value = tdist;
+                        var cabtypeid = $('#CabTypeID').val();
+                        $.ajax({
+                            type: "POST",
+                            url: "/CabBooking/CalcCabFare/",
+                            dataType: 'json',
+                            data: { 'CabTypeID': cabtypeid, 'vDistance': tdist },
+                            success: function (response) {
+                                $('#EstimateFareNet').val(response.vFare);
+                            }
+                        })
+                    }
+                    
+                }
+
+                
+
+                //$('#divmile').show();
+                //$('#spTotalMiles').html(tdist);
+
+
+                //$('.carlist').show();
+
+                @*$('#carlistdetail').load('@Url.Action("CabList", "Home")?vdistance=' + tdist);*@
+                //$('html,body').animate({ scrollTop: $(".carlist").offset().top - 100 }, 'slow');
+
+
+
+                //$("#lbldistance").html(tdist + " Miles");
+                //$(".fareclass").each(function () {
+                //    var vcabid = $(this).attr("data-val");
+                //    EstimateFare(vcabid, tdist, this);
+                //});
+            });
+        }
+
+
+
+        function calcAreaMiles(customerpoint, centerpoint) {
+
+            var vret = 0;
+            var tdist = 0;
+            var geocoder = new google.maps.Geocoder();
+
+
+            //var vlatinfo = '';
+            //var vloninfo = '';
+            //geocoder.geocode({ 'address': start }, function (results, status) {
+            //    if (status == google.maps.GeocoderStatus.OK) {
+            //        vlatinfo = results[0].geometry.location.lat().toString();
+            //        vloninfo = results[0].geometry.location.lng().toString();
+            //    }
+            //});
+            debugger
+            var request = {
+                origin: customerpoint,
+                destination: centerpoint,
+                optimizeWaypoints: true,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+
+            directionsService.route(request, function (response, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    directionsDisplay = new google.maps.DirectionsRenderer();
+
+                    var mapOptions = {
+                        zoom: 20
+                    }
+                    map = new google.maps.Map(document.getElementById('map-canvas-dist'), mapOptions);
+                    directionsDisplay.setMap(map);
+                    directionsDisplay.setDirections(response);
+
+                    var route = response.routes[0];
+                    var vtotal = 0;
+                    for (var i = 0; i < route.legs.length; i++) {
+                        var routeSegment = i + 1;
+                        vtotal = vtotal + parseFloat(route.legs[i].distance.text);
+                    }
+                    tdist = parseFloat(vtotal) * 0.621371;
+                    alert(tdist);
+                    return tdist;
+                } else {
+                    return 0;
+                }
+
+            });
+        }
+
+        $(document).on('click', '#booknow', function () {
+            if ($('#startfrom').val() == null || $('#startfrom').val() == "") {
+                alert('Enter Pickup From');
+            } else if ($('#endposition').val() == null || $('#endposition').val() == "") {
+                alert('Enter Dropoff at');
+            }else if ($('#CabTypeID').val() == "" || $('#CabTypeID').val() == null) {
+                alert('Select Cab Type');
+            } else {
+                calcRoute(0);
+            }
+            
+        });
+
+
+
+        function getDate(date) {
+            if (date == null) {
+                return null;
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (digits_count(day) == 1 || digits_count(day) == 0) {
+                    day = "0" + day;
+                }
+                if (digits_count(month) == 1 || digits_count(month) == 0) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+                var today = year + '-' + month + '-' + (day);
+                if (year == 1900) {
+                    return null;
+                }
+                else {
+                    return today;
+                }
+            }
+        }
+        function digits_count(n) {
+            var count = 0;
+            if (n > 1)
+                ++count;
+            while (n / 10 >= 1) {
+                n /= 10;
+                ++count;
+            }
+            return count;
+        }
+    </script>
+}

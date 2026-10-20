@@ -49,3 +49,9 @@ public class UpdateInterviewDto : UpdateDto
     public string? Location { get; set; }
     public string? Notes { get; set; }
 }
+
+public class CompleteInterviewDto
+{
+    public int Rating { get; set; }
+    public string? Feedback { get; set; }
+}

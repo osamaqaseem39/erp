@@ -12,6 +12,10 @@ public class ChartOfAccountDto : BaseDto
     public Guid? ParentAccountId { get; set; }
     public string? ParentAccountName { get; set; }
     public string? CurrencyCode { get; set; }
+    public string? Remarks { get; set; }
+    /// <summary>1-based depth from root (computed).</summary>
+    public int? Level { get; set; }
+    public bool? HasChildren { get; set; }
     public bool? IsActive { get; set; }
     public bool? IsPostingAllowed { get; set; }
     public new DateTime? CreatedAt { get; set; }
@@ -27,6 +31,7 @@ public class CreateChartOfAccountDto : CreateDto
     public string AccountType { get; set; } = string.Empty;
     public Guid? ParentAccountId { get; set; }
     public string? CurrencyCode { get; set; }
+    public string? Remarks { get; set; }
     public new bool IsActive { get; set; } = true;
     public bool IsPostingAllowed { get; set; } = true;
 }
@@ -39,6 +44,17 @@ public class UpdateChartOfAccountDto : UpdateDto
     public string? AccountType { get; set; }
     public Guid? ParentAccountId { get; set; }
     public string? CurrencyCode { get; set; }
+    public string? Remarks { get; set; }
     public bool? IsActive { get; set; }
     public bool? IsPostingAllowed { get; set; }
+}
+
+public class ChartOfAccountQuery
+{
+    public Guid TenantId { get; set; }
+    public string? AccountType { get; set; }
+    public bool? IsActive { get; set; }
+    public int? Level { get; set; }
+    public Guid? ParentAccountId { get; set; }
+    public bool? PostingOnly { get; set; }
 }

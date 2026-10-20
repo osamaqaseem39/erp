@@ -1,0 +1,458 @@
+﻿<div id="CssData">
+
+
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <script src="~/Scripts/libs/jquery-2.1.1.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+        @@media print {
+            /*@@page:first {
+                size: A4;
+                width: 5.67in;
+                height: 8.6in;
+                margin-top: -30px;
+                margin-left: 80px;
+                margin-bottom: 0mm;
+            }
+
+            @@page {
+                size: A4;
+                width: 5.67in;
+                height: 8.6in;
+                margin-top: 5px;
+                margin-bottom: 0mm;
+                margin-left: 80px;
+            }*/
+            @@page:first {
+                size: A4;
+                width: 6.67in;
+                height: 9.6in;
+                margin-top: -30px;
+                margin-left: -45px;
+                margin-bottom: 0mm;
+            }
+
+            @@page {
+                size: A4;
+                width: 6.67in;
+                height: 9.6in;
+                margin-top: 5px;
+                margin-bottom: 0mm;
+                margin-left: -45px;
+            }
+
+            .Font17 {
+                font-size: 17px !important;
+            }
+
+            .Font18 {
+                font-size: 18px !important;
+            }
+
+            .headTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .InvoiceNoTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .InvoiceNoTableData {
+                margin-top: -27px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .myTable {
+                width: 95% !important;
+                margin-left: 16px !important;
+            }
+
+            .countRecords {
+                padding-right: 20px !important;
+            }
+
+            .businssName {
+                margin-right: -21px !important;
+            }
+
+            .businssName22 {
+                border-bottom: 0px !important;
+            }
+
+            .accountName {
+                margin-right: -21px !important;
+                margin-top: -2px;
+            }
+
+            .InventoryDetail {
+                padding-left: 301px !important;
+            }
+
+            .purchaseHeading {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .remainingHeading {
+                margin-top: -105px;
+                padding-top: 100px;
+            }
+
+            .borderLineTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                margin-top: -28px !important;
+            }
+
+            .borderLineTable2 {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                margin-top: -15px !important;
+            }
+
+            .description {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                margin-top: -20px !important;
+            }
+
+            .mainTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+                margin-top: -11px !important;
+            }
+
+            .AccountNameTable {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .paymentAmount {
+                margin-top: -20px !important;
+            }
+        }
+
+
+        #printable-content td, #printable-content th {
+            padding: 0px;
+            vertical-align: top;
+            font-weight: normal;
+        }
+
+        .oldCss {
+            width: 100%;
+            border-collapse: separate;
+        }
+
+        .newCss {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        /*#printable-content * {
+            border-width: 0px;
+            border-color: #000;
+            border-style: solid;
+        }*/
+
+        .rpt {
+            background: #fff !important;
+        }
+
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }
+
+        .downloadBtn:hover {
+            margin-bottom: -4px;
+        }*/
+
+        .Purchasedescription {
+            padding-left: 2px;
+        }
+
+        .myTable {
+            margin-top: -15px;
+            margin-left: 7px;
+            padding-right: 15px;
+        }
+
+        .styletrr td {
+            border-bottom: 2px solid black;
+            margin-top: -10px;
+        }
+
+        .styletr th {
+            border-bottom: 1px solid black;
+        }
+
+        .defaultBtn:hover {
+            background-color: #557588;
+            color: white !important;
+        }
+    </style>
+</div>
+<!-- widget content -->
+@model List<POS.Models.clsInvoice>
+    @{
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    <div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <h1 class="page-title txt-color-blueDark">
+                    <i class="fa fa-shopping-cart fa-fw "></i>
+                    Delivery Challan
+                    <span>
+                        >
+                        Delivery Challan Report
+                    </span>
+                </h1>
+            </div>
+        </div>
+        <section>
+            <div class="panel">
+                <div class="panel-heading">
+                    @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { id = "downloadForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                    {
+                        <span class="header"> Delivery Challan Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                        <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                        <input type="hidden" name="FileName" id="FileName" value="@Model[0].ComputerNo" />
+                        <a id="backBtn" class="btn btn-labeled  btn-default defaultBtn" href="@Url.Action("deliverychallanindex", "sale")" style="color: #000 !important; background-color: #fff !important; height: 34px; width: 65px;line-height:31px">
+                            Back
+                        </a>
+                        <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                            Print
+                        </button>
+                        <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                    }
+                </div>
+                <div class="panel-body">
+                    <div id="HtmlData">
+                        <div id="printable-content" class="panel rpt" style="width:800px;padding: 1px; border-radius: 0px; ">
+                            <table style="padding-top: 37px;padding-left: 37px;padding-right: 37px;font-size:18px !important" class="headTable oldCss">
+                                <tr><td colspan="99" style="text-align:center;font-size:22px;font-weight:bold;padding-bottom:30px">Delivery Challan</td></tr>
+                                <tr>
+                                    <td colspan="99">
+                                        @if (!(string.IsNullOrEmpty(System.Web.HttpContext.Current.Application["BusinessName"].ToString()))
+                                        || !(string.IsNullOrEmpty(System.Web.HttpContext.Current.Application["BusinessAddress"].ToString())))
+                                        {
+                                            <table class="purchaseHeading oldCss">
+                                                <tbody>
+                                                    <tr>
+                                                        <th style="  text-align: left; padding-bottom: 15px;padding-right:15px;padding-top:10px;" colspan="12" class="pull-left businssName businssName22">
+                                                            <div style="font-weight: bold;font-size: 20px;">@System.Web.HttpContext.Current.Application["BusinessName"]</div>
+                                                            <div style="font-size: 16px;margin-left:2px">
+                                                                @System.Web.HttpContext.Current.Application["BusinessAddress"]
+                                                            </div>
+                                                        </th>
+                                                        @*
+                                                            <th style="font-weight: bold; font-size: 20px; text-align: right;padding-left:12px;padding-top:10px;border-bottom:none;" colspan="12" class="pull-right">
+                                                                <img src="@Url.Action(" getbusinesslogo", "Sale" , new { id=Convert.ToInt32(Model.SaleInvoice[0].BusinessId) })" style="height:70px;width:70px" alt="Business Logo">
+                                                            </th>*@
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <table style="" class="borderLineTable oldCss">
+                                                <tr>
+                                                    <td style="border-bottom:1px solid black;"></td>
+                                                </tr>
+                                            </table>
+                                        }
+                                        <table style="margin-bottom: 30px;margin-top:3px;" class="purchaseHeading oldCss">
+                                            <tbody>
+                                                <tr>
+                                                    @if (Model[0].InvoiceType == 1)
+                                                    {
+                                                        <th class="Font18 accountName" style="font-weight: bold; font-size: 14px; text-align: left;width:50%">@Model[0].DetailName</th>
+                                                    }
+                                                    else
+                                                    {
+                                                        <th class="Font18 accountName" style="font-weight: bold; font-size: 14px; text-align: left;width:50%">@Model[0].CashCustomerName</th>    
+                                                    }
+                                                    <th class="Font17" style="font-weight:bold;text-align:right;font-size:14px">DC No: </th>
+                                                    <th class="Font17" style="font-weight: normal; text-align: left; width: 18%; font-size: 16px; padding-left: 15px; ">@Model[0].ComputerNo</th>
+                                                </tr>
+                                                <tr>
+                                                    @if (!(string.IsNullOrEmpty(Model[0].Address)))
+                                                    {
+                                                        <th style="font-size: 14px; text-align: left; width: 50%; " class="businssName RouteName Font17">@Html.Raw(HttpUtility.HtmlEncode(Model[0].Address).Replace("\n", "<br />"))</th>
+                                                    }
+                                                    else
+                                                    {
+                                                        <th style="font-size: 15px; text-align: left; width: 50%; " class="businssName RouteName Font17"></th>
+                                                    }
+                                                    <th class="Font17" style="font-weight: bold; text-align: right; font-size: 14px">Date: </th>
+                                                    <th class="Font17" style="font-weight: normal; text-align: left; width: 18%; font-size: 14px; padding-left: 15px; ">@Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model[0].RecordDate))</th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="font-size: 14px; text-align: left; width: 50%; " class="businssName RouteName Font17">@Model[0].Phone</th>
+                                                    <th class="Font17" style="font-weight:bold;text-align:right;font-size:14px">Ref No: </th>
+                                                    <th class="Font17" style="text-align: left; width: 18%; font-size: 14px; font-weight: normal; padding-left: 16px">
+                                                        @Model[0].RefrenceNo
+                                                    </th>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <table class="mainTable oldCss" id="" style="margin-top:-12px">
+                                            <thead>
+                                                <tr>
+                                                    <th style="font-weight: bold; font-size: 13px; text-align: center; padding: 5px; border: none; border-bottom: 1px solid black" colspan="12">&nbsp;</th>
+                                                </tr>
+                                            </thead>
+                                            <tr>
+                                                <th class="Font17" style="text-align: center; border-top: 1px solid black; border-bottom: 1px solid black; border-left: 1px solid black; border-right: 1px solid black; font-size: 14px; font-weight: bold; width: 30px;padding:3px ">Sr#</th>
+                                                <th class="Font17" style="border-bottom: 1px solid black; border-top: 1px solid black; border-right: 1px solid black; font-size: 14px; font-weight: bold; text-align: center; width: 120px; padding: 3px; ">Warehouse</th>
+                                                <th class="Font17" style="padding-left: 8px; border-top: 1px solid black; border-bottom: 1px solid black; border-right: 1px solid black; font-size: 14px; font-weight: bold; text-align: left; padding: 3px; ">Item Name</th>
+                                                <th class="Font17" style="border-bottom: 1px solid black; border-top: 1px solid black; border-right: 1px solid black; font-size: 14px; font-weight: bold; text-align: center; width: 70px; padding: 3px; ">Qty</th>
+                                                <th class="Font17" align="center" style="text-align: center; border-top: 1px solid black; border-bottom: 1px solid black; border-right: 1px solid black; font-size: 14px; font-weight: bold; width: 150px; padding: 3px; ">Item Note</th>
+                                            </tr>
+                                            <tbody>
+                                                @{decimal totalQty = 0;
+                                                decimal totalAmount = 0;}
+                                                @for (int i = 0; i < Model.Count; i++)
+                                                {
+                                                    totalQty += Convert.ToDecimal(Model[i].Qty);
+                                                    <tr class="">
+                                                        <td class="Font17" align="center" style="text-align: center; border-bottom: 1px solid black; border-left: 1px solid black; border-right: 1px solid black; padding-top: 4px; font-size: 14px; padding: 3px; ">@(i + 1)</td>
+                                                        <td class="Font17" align="left" style="padding-left: 8px; border-bottom: 1px solid black; border-right: 1px solid black; padding-top: 4px; font-size: 14px; padding: 3px; ">@Model[i].WarehouseName</td>
+                                                        <td class="Font17" align="left" style="padding-left: 8px; border-bottom: 1px solid black; border-right: 1px solid black; padding-top: 4px; font-size: 14px; padding: 3px; ">@Model[i].ItemName</td>
+                                                        @if (Model[i].Qty == Convert.ToInt32(Model[i].Qty))
+                                                        {
+                                                            <td class="Font17" align="center" style="border-bottom: 1px solid black; padding-top: 4px; border-right: 1px solid black; font-size: 14px; padding: 3px; ">@Math.Round(Convert.ToDecimal(Model[i].Qty), 0) @Model[i].UnitName</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="Font17" align="center" style="border-bottom: 1px solid black; padding-top: 4px; border-right: 1px solid black; font-size: 14px; padding: 3px; ">@Math.Round(Convert.ToDecimal(Model[i].Qty), 2) @Model[i].UnitName</td>
+                                                        }
+                                                        
+                                                        <td class="Font17" align="center" style="border-bottom: 1px solid black; padding-top: 4px; border-right: 1px solid black; font-size: 14px; padding: 3px; ">@Model[i].ItemNote </td>
+                                                    </tr>
+                                                }
+                                                <tr class="">
+                                                    <td class="Font17" align="right" style="text-align: right; padding-right: 10px; font-weight: bold; border-bottom: 1px solid black; border-left: 1px solid black; border-right: 1px solid black; padding-top: 4px; font-size: 14px; padding: 3px; " colspan="3">Total Qty:</td>
+                                                    @if (totalQty == Convert.ToInt32(totalQty))
+                                                    {
+                                                        <td class="Font17" align="center" style="border-bottom: 1px solid black; font-weight: bold; padding-top: 4px; border-right: 1px solid black; font-size: 14px; padding: 3px; ">@Math.Round(Convert.ToDecimal(totalQty), 0)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="Font17" align="center" style="border-bottom: 1px solid black; font-weight: bold; padding-top: 4px; border-right: 1px solid black; font-size: 14px; padding: 3px; ">@Math.Round(Convert.ToDecimal(totalQty), 2)</td>
+                                                    }
+                                                    <td class="Font17" style="border-bottom: 1px solid black; text-align: center; padding-top: 3px; border-right: 1px solid black; font-size: 14px; padding: 3px; font-weight: bold"></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 3.9px;  border: none;" colspan="12">&nbsp;</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        <br />
+                                        @if (!string.IsNullOrEmpty(Model[0].Remarks))
+                                        {
+                                            <table style="margin-bottom:15px;margin-top:-22px" class="description oldCss">
+                                                <tr>
+                                                    <td class="Font17" style="font-size: 14px"><b><span style="font-size: 17px">Remarks:</span></b> @Model[0].Remarks</td>
+                                                </tr>
+                                            </table>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- END MAIN CONTENT -->
+    @section pagespecific {
+        <script src="~/Scripts/CustomJs/ResponsivePrintScreenForInvoices.js?v=2"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+            })
+            $('#downloadForm').on("submit", function () {
+                $("table").each(function () {
+                    $(this).removeClass("oldCss");
+                    $(this).addClass("newCss");
+                    var cssData = $('#CssData').html();
+                    var htmlData = $('#HtmlData').html();
+                    $('#DocumentName').val(cssData + htmlData);
+                })
+                $("table").each(function () {
+                    $(this).removeClass("newCss");
+                    $(this).addClass("oldCss");
+                })
+            })
+            //function getPaymentDetail() {
+            //    $.ajax({
+            //        type: "POST",
+            //        url: "/sale/getPaymentDetail/" + $('.SaleInvoiceId').val(),
+            //        dataType: "json",
+            //        success: function (data) {
+            //            if (data.RemainingDays > 0) {
+            //                var append = '<tr  ><td colspan="99" ><div style="text-align: center; margin-top: 40px;margin-bottom:35px;"><span style="color: #FF0000; border-width: 5px; border-color: #FF0000; padding: 10px; font-size: 20px">OVERDUE</span></div></td></tr>';
+            //                $('.mainTableBody').append(append);
+            //            }
+            //        }
+            //    })
+            //}
+            function PrintElem(elem) {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+                mywindow.document.write('<html><head><title></title>');
+                mywindow.document.write('</head><body>');
+                //mywindow.document.write('<h1></h1>');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+            $('.report_body tr td').each(function () {
+                if (parseFloat($(this).html()) > 0) {
+                    $(this).html(ReplaceNumberWithCommas($(this).html()));
+                }
+            });
+            function ReplaceNumberWithCommas(yourNumber) {
+                if (yourNumber != "0") {
+                    //Seperates the components of the number
+                    var n = yourNumber.toString().split(".");
+                    //Comma-fies the first part
+                    n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    if (n.length == 1) {
+                        n[0] = n[0] + ".00";
+                    }
+                    else {
+                        if (n[1].toString().length == 1) {
+                            n[1] = n[1] + "0";
+                        }
+                    }
+                    //Combines the two sections
+                    n = n.join(".");
+                }
+                else {
+                    n = yourNumber;
+                }
+                return n;
+            }
+        </script>
+    }

@@ -1,8 +1,12 @@
 using ERP.Application.Interfaces.Finance;
 using ERP.Shared.DTOs.Finance;
+using HotChocolate;
+using ICurrencyService = ERP.Application.Interfaces.ICurrencyService;
+using IExchangeRateService = ERP.Application.Interfaces.IExchangeRateService;
 
 namespace ERP.Api.GraphQL.Finance;
 
+[ExtendObjectType("Query")]
 public class FinanceQueries
 {
     private readonly IAccountingService _accountingService;
@@ -114,10 +118,47 @@ public class FinanceQueries
         };
     }
 
+    // Bills (AP)
+    public async Task<BillDto?> GetBill(Guid billId, Guid tenantId)
+        => await _invoiceService.GetBillByIdAsync(billId, tenantId);
+
+    public async Task<PagedResultType<BillDto>> SearchBills(
+        Guid tenantId,
+        Guid? vendorId = null,
+        string? status = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int pageNumber = 1,
+        int pageSize = 50)
+    {
+        var query = new BillQuery
+        {
+            TenantId = tenantId,
+            VendorId = vendorId,
+            Status = status,
+            FromDate = fromDate,
+            ToDate = toDate,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+
+        var (bills, totalCount) = await _invoiceService.SearchBillsAsync(query);
+        return new PagedResultType<BillDto>
+        {
+            Items = bills.ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<IEnumerable<BillLineDto>> GetBillLines(Guid billId, Guid tenantId)
+        => await _invoiceService.GetBillLinesByBillIdAsync(billId, tenantId);
+
     // Payments
     public async Task<PaymentType?> GetPayment(Guid paymentId, Guid tenantId)
     {
-        var payment = await _paymentService.GetByIdAsync(paymentId);
+        var payment = await _paymentService.GetByIdAsync(paymentId, tenantId);
         return payment != null ? MapToPaymentType(payment) : null;
     }
 
@@ -130,42 +171,64 @@ public class FinanceQueries
         int pageNumber = 1,
         int pageSize = 50)
     {
-        var query = new PaymentQuery
+        if (tenantId == Guid.Empty)
         {
-            TenantId = tenantId,
-            Status = status,
-            PaymentMethod = paymentMethod,
-            FromDate = fromDate,
-            ToDate = toDate,
-            PageNumber = pageNumber,
-            PageSize = pageSize
-        };
+            return new PagedResultType<PaymentType>
+            {
+                Items = [],
+                TotalCount = 0,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
 
-        var payments = await _paymentService.GetAllAsync();
-        var totalCount = payments.Count();
-        
+        IEnumerable<PaymentDto> payments = await _paymentService.GetAllAsync(tenantId);
+        if (!string.IsNullOrWhiteSpace(status))
+            payments = payments.Where(p => string.Equals(p.Status, status, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(paymentMethod))
+            payments = payments.Where(p => string.Equals(p.PaymentMethod, paymentMethod, StringComparison.OrdinalIgnoreCase));
+        if (fromDate.HasValue)
+            payments = payments.Where(p => p.PaymentDate >= fromDate.Value);
+        if (toDate.HasValue)
+            payments = payments.Where(p => p.PaymentDate <= toDate.Value);
+
+        var list = payments.ToList();
+        var page = Math.Max(1, pageNumber);
+        var size = Math.Clamp(pageSize, 1, 200);
+        var items = list.Skip((page - 1) * size).Take(size).Select(MapToPaymentType).ToList();
+
         return new PagedResultType<PaymentType>
         {
-            Items = payments.Select(MapToPaymentType).ToList(),
-            TotalCount = totalCount,
-            PageNumber = pageNumber,
-            PageSize = pageSize
+            Items = items,
+            TotalCount = list.Count,
+            PageNumber = page,
+            PageSize = size
         };
     }
+
+    // Banks (master)
+    public async Task<BankDto?> GetBank(Guid bankId, Guid tenantId)
+        => await _bankService.GetByIdAsync(bankId, tenantId);
+
+    public async Task<IEnumerable<BankDto>> GetBanks(Guid tenantId, bool activeOnly = false)
+        => activeOnly
+            ? await _bankService.GetActiveAsync(tenantId)
+            : await _bankService.GetAllAsync(tenantId);
+
+    public async Task<IEnumerable<BankDto>> SearchBanks(string searchTerm, Guid tenantId)
+        => await _bankService.SearchAsync(searchTerm, tenantId);
 
     // Bank Accounts
     public async Task<BankAccountType?> GetBankAccount(Guid bankAccountId, Guid tenantId)
     {
-        // Note: IBankService doesn't have GetBankAccountByIdAsync method
-        // This would need to be implemented or use a different approach
-        return null;
+        var account = await _bankService.GetBankAccountByIdAsync(bankAccountId, tenantId);
+        return account != null ? MapToBankAccountType(account) : null;
     }
 
     public async Task<List<BankAccountType>> GetAllBankAccounts(Guid tenantId)
     {
-        // Note: IBankService doesn't have GetAllBankAccountsAsync method
-        // This would need to be implemented or use a different approach
-        return new List<BankAccountType>();
+        var accounts = await _bankService.GetAllBankAccountsAsync(tenantId);
+        return accounts.Select(MapToBankAccountType).ToList();
     }
 
     // Fixed Assets
@@ -201,6 +264,36 @@ public class FinanceQueries
         };
     }
 
+    public async Task<List<DepreciationEntryType>> GetDepreciationEntries(Guid assetId, Guid tenantId)
+    {
+        var entries = await _fixedAssetService.GetDepreciationEntriesAsync(assetId, tenantId);
+        return entries.Select(MapToDepreciationEntryType).ToList();
+    }
+
+    public async Task<List<DepreciationEntryType>> GetDepreciationEntriesByPeriod(
+        Guid tenantId,
+        DateTime periodStart,
+        DateTime periodEnd)
+    {
+        var entries = await _fixedAssetService.GetDepreciationEntriesByPeriodAsync(tenantId, periodStart, periodEnd);
+        return entries.Select(MapToDepreciationEntryType).ToList();
+    }
+
+    public async Task<IEnumerable<string>> GetAvailableDepreciationMethods()
+        => await _fixedAssetService.GetAvailableDepreciationMethodsAsync();
+
+    public async Task<decimal> GetAssetNetBookValue(Guid assetId, DateTime asOfDate, Guid tenantId)
+        => await _fixedAssetService.GetAssetNetBookValueAsync(assetId, asOfDate, tenantId);
+
+    public async Task<object> GetAssetValuationReport(Guid tenantId, DateTime asOfDate)
+        => await _fixedAssetService.GetAssetValuationReportAsync(tenantId, asOfDate);
+
+    public async Task<object> GetDepreciationSchedule(Guid assetId, Guid tenantId)
+        => await _fixedAssetService.GetDepreciationScheduleAsync(assetId, tenantId);
+
+    public async Task<IEnumerable<string>> GetAssetCategories()
+        => await _fixedAssetService.GetAssetCategoriesAsync();
+
     // Financial Reports
     public async Task<List<TrialBalanceType>> GetTrialBalance(Guid tenantId, DateTime fromDate, DateTime toDate, string? currencyCode = null)
     {
@@ -223,6 +316,120 @@ public class FinanceQueries
     {
         return await _accountingService.GetGeneralLedgerBalanceAsync(accountId, tenantId, fromDate, toDate);
     }
+
+    public async Task<ChequeRegisterReportDto> GetChequeRegister(
+        Guid tenantId,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        string? chequeStatus = null,
+        string? journalType = null,
+        string? search = null)
+        => await _accountingService.GetChequeRegisterAsync(
+            tenantId, fromDate, toDate, chequeStatus, journalType, search);
+
+    // Tax codes
+    public async Task<TaxCodeDto?> GetTaxCode(
+        [Service] ITaxCodeService service,
+        Guid taxCodeId,
+        Guid tenantId)
+        => await service.GetByIdAsync(taxCodeId, tenantId);
+
+    public async Task<IEnumerable<TaxCodeDto>> GetTaxCodes(
+        [Service] ITaxCodeService service,
+        Guid tenantId,
+        string? taxType = null,
+        bool activeOnly = false)
+    {
+        if (!string.IsNullOrWhiteSpace(taxType))
+            return await service.GetByTypeAsync(taxType, tenantId);
+        if (activeOnly)
+            return await service.GetActiveAsync(tenantId);
+        return await service.GetAllAsync(tenantId);
+    }
+
+    // Cost centers
+    public async Task<CostCenterDto?> GetCostCenter(
+        [Service] ICostCenterService service,
+        Guid costCenterId,
+        Guid tenantId)
+        => await service.GetByIdAsync(costCenterId, tenantId);
+
+    public async Task<IEnumerable<CostCenterDto>> GetCostCenters(
+        [Service] ICostCenterService service,
+        Guid tenantId,
+        bool? isActive = null)
+        => await service.GetAllAsync(tenantId, isActive);
+
+    // Account purpose defaults + last-used voucher defaults
+    public async Task<IEnumerable<AccountDefaultDto>> GetAccountDefaults(
+        [Service] IAccountDefaultService service,
+        Guid tenantId)
+        => await service.GetAllAsync(tenantId);
+
+    public async Task<AccountDefaultDto?> GetAccountDefaultByPurpose(
+        [Service] IAccountDefaultService service,
+        string purpose,
+        Guid tenantId)
+        => await service.GetByPurposeAsync(purpose, tenantId);
+
+    public async Task<VoucherDefaultsDto> GetVoucherDefaults(Guid tenantId)
+        => await _accountingService.GetVoucherDefaultsAsync(tenantId);
+
+    // Bank reconciliations
+    public async Task<BankReconciliationDto?> GetReconciliation(Guid reconciliationId, Guid tenantId)
+        => await _bankService.GetReconciliationAsync(reconciliationId, tenantId);
+
+    public async Task<IEnumerable<BankReconciliationDto>> ListReconciliations(
+        Guid bankAccountId,
+        Guid tenantId,
+        string? status = null)
+        => await _bankService.ListReconciliationsAsync(bankAccountId, tenantId, status);
+
+    // Currencies
+    public async Task<CurrencyDto?> GetCurrency(
+        [Service] ICurrencyService service,
+        string currencyCode)
+        => await service.GetByIdAsync(currencyCode);
+
+    public async Task<IEnumerable<CurrencyDto>> GetCurrencies(
+        [Service] ICurrencyService service,
+        bool activeOnly = false)
+        => activeOnly ? await service.GetActiveAsync() : await service.GetAllAsync();
+
+    public async Task<bool> CurrencyExists(
+        [Service] ICurrencyService service,
+        string currencyCode)
+        => await service.ExistsAsync(currencyCode);
+
+    // Exchange rates
+    public async Task<ExchangeRateDto?> GetExchangeRate(
+        [Service] IExchangeRateService service,
+        Guid exchangeRateId)
+        => await service.GetByIdAsync(exchangeRateId);
+
+    public async Task<IEnumerable<ExchangeRateDto>> GetExchangeRates(
+        [Service] IExchangeRateService service)
+        => await service.GetAllAsync();
+
+    public async Task<IEnumerable<ExchangeRateDto>> GetExchangeRatesByCurrency(
+        [Service] IExchangeRateService service,
+        string fromCurrency,
+        string toCurrency)
+        => await service.GetByCurrencyAsync(fromCurrency, toCurrency);
+
+    public async Task<ExchangeRateDto?> GetCurrentExchangeRate(
+        [Service] IExchangeRateService service,
+        string fromCurrency,
+        string toCurrency)
+        => await service.GetCurrentRateAsync(fromCurrency, toCurrency);
+
+    public async Task<decimal> ConvertAmount(
+        [Service] IExchangeRateService service,
+        decimal amount,
+        string fromCurrency,
+        string toCurrency,
+        DateTime? asOfDate = null)
+        => await service.ConvertAmountAsync(amount, fromCurrency, toCurrency, asOfDate);
 
     // Mapping methods
     private static ChartOfAccountType MapToChartOfAccountType(ChartOfAccountDto dto)
@@ -266,7 +473,10 @@ public class FinanceQueries
             PostedAt = dto.PostedAt,
             PostedBy = dto.PostedBy,
             IsLocked = dto.IsLocked ?? false,
-            JournalEntries = dto.JournalEntries.Select(MapToJournalEntryType).ToList()
+            InvoiceNumber = dto.InvoiceNumber,
+            EntityReferenceTable = dto.EntityReferenceTable,
+            EntityReferenceId = dto.EntityReferenceId,
+            JournalEntries = (dto.JournalEntries ?? []).Select(MapToJournalEntryType).ToList()
         };
     }
 
@@ -432,15 +642,37 @@ public class FinanceQueries
         };
     }
 
-    private static List<TrialBalanceType> MapToTrialBalanceType(object trialBalance)
+    private static List<TrialBalanceType> MapToTrialBalanceType(TrialBalanceReportDto trialBalance)
     {
-        // Implementation depends on the actual structure returned by GetTrialBalanceAsync
-        return new List<TrialBalanceType>();
+        return trialBalance.Lines.Select(l => new TrialBalanceType
+        {
+            AccountCode = l.AccountCode,
+            AccountName = l.AccountName,
+            AccountType = l.AccountType,
+            DebitBalance = l.Debit,
+            CreditBalance = l.Credit,
+            NetBalance = l.Balance
+        }).ToList();
     }
 
-    private static List<AgedReceivablesType> MapToAgedReceivablesType(object agedReceivables)
+    private static List<AgedReceivablesType> MapToAgedReceivablesType(AgingReportDto agedReceivables)
     {
-        // Implementation depends on the actual structure returned by GetAgedReceivablesAsync
-        return new List<AgedReceivablesType>();
+        return agedReceivables.Lines
+            .GroupBy(l => l.PartnerId)
+            .Select(g =>
+            {
+                var partnerLines = g.ToList();
+                return new AgedReceivablesType
+                {
+                    CustomerId = g.Key,
+                    Current = partnerLines.Where(x => x.Bucket == "Current").Sum(x => x.Balance),
+                    Days30 = partnerLines.Where(x => x.Bucket is "1-30").Sum(x => x.Balance),
+                    Days60 = partnerLines.Where(x => x.Bucket is "31-60").Sum(x => x.Balance),
+                    Days90 = partnerLines.Where(x => x.Bucket is "61-90").Sum(x => x.Balance),
+                    Over90 = partnerLines.Where(x => x.Bucket.StartsWith("Over ", StringComparison.OrdinalIgnoreCase)).Sum(x => x.Balance),
+                    Total = partnerLines.Sum(x => x.Balance)
+                };
+            })
+            .ToList();
     }
 }

@@ -12,6 +12,8 @@ public interface IQuoteService
     Task<IEnumerable<QuoteDto>> GetByCustomerAsync(Guid customerId);
     Task<IEnumerable<QuoteDto>> GetByStatusAsync(string status);
     Task<IEnumerable<QuoteDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
-    Task<bool> SendQuoteAsync(Guid id);
-    Task<Guid> ConvertToSalesOrderAsync(Guid id);
+    Task<bool> SendQuoteAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId);
+    Task<Guid> ConvertToSalesOrderAsync(Guid id, Guid tenantId, Guid userId);
 }

@@ -1,0 +1,524 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+
+    .Amount {
+        text-align: right;
+    }
+
+    tbody .Bold {
+        font-weight: bold;
+        font-size: 14px;
+        background-color: #F0FFF0;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+    .NoDisplay {
+        display: none;
+    }
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .dataTables_processing {
+        width: 10%;
+    }
+
+    input[type="text"]:disabled {
+        background-color: #eeeeee;
+    }
+
+    #CashCreditType:disabled {
+        background-color: #eeeeee;
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+</style>
+@model POS.Models.clsInvoice
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Sale Purchase Lookup </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            <div class="widget-body">
+                                <div class="well smart-form" style="border: 1px solid #bdbdbd; background-color: #F7F7F7;padding:10px">
+                                    <div class="row">
+                                        <div class="col col-md-4">
+                                            <table class="" style="">
+                                                <tr>
+                                                    <td style="width: 10%; padding-right: 3px; padding-left: 7px" id="">
+                                                        <span style="font-size:13px">Date</span>
+                                                    </td>
+                                                    <td style="width: 90%; padding-left: 3px; " id="">
+                                                        <label class="input">
+                                                            <i class="icon-prepend fa fa-user"></i>
+                                                            <input type="date" name="AttendanceDate" id="AttendanceDate" autocomplete="off" required />
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col col-md-2">
+                                            <table class="pull-right" style="margin-top:3px">
+                                                <tr>
+                                                    <td style="padding-left:7px">
+                                                        <button type="button" id="btnSearch" class="btn btn-primary" style="width: 65px; height: 25px; font-size: 13px; margin-bottom: 8px; color: white; line-height: 5px;">
+                                                            Search
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" id="btnRefresh" class="btn btn-default" style="width: 65px; height: 27px; font-size: 13px; margin-left: 5px; margin-bottom: 8px; color: #000; line-height: 3px;">
+                                                            Refresh
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col col-md-6">
+                                            <table class="pull-right" style="margin-top:3px">
+                                                <tr>
+                                                    <td style="padding-left:7px">
+        <button type="button" id="btnSaveAndPrint" class="btn btn-success" style="padding: 4px;font-size: 13px; margin-bottom: 8px; color: white;">
+            Save & Print
+        </button>
+    </td>
+                                                    <td style="padding-left:7px">
+                                                        <button type="button" id="btnSave" class="btn btn-success" style="font-size: 13px; margin-bottom: 8px; color: white; padding: 4px">
+                                                            Save
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table id="myTableMinStockLevel" class="table table-striped table-bordered table-hover">
+                                        <thead>
+                                            <tr id="HeadingTr">
+                                                <th style="text-align: left;">@*<i class="fa fa-fw fa-user text-muted"></i>*@ Employee</th>
+                                                <th style="text-align: center; width: 140px">@*<i class="fa fa-fw fa-list text-muted"></i>*@ Attendance</th>
+                                                <th style="width: 110px; text-align: center; ">@*<i class="fa fa-fw fa-clock text-muted"></i>*@ In Time</th>
+                                                <th style="text-align: center; width: 110px; ">@*<i class="fa fa-fw fa-clock text-muted"></i>*@ Out Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="TableBody">
+                                            <tr class="noRecordTr">
+                                                <td class="NoRecordTd" colspan="4" style="text-align:center;padding:10px;background-color:#fff">No Record Found.</td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            GetTodayDate();
+        });
+        //$('#btnSearch').click(function () {
+        //    var attendanceDate = $('#AttendanceDate').val();
+        //    if (attendanceDate == '' || attendanceDate == null)
+        //    {
+        //        $('#AttendanceDate').css('border-color', '#A90329');
+        //        $('#AttendanceDate').css('background-color', '#FFF0F0');
+        //    }
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "/salepurchase/SetSessions/",
+        //        dataType: 'json',
+        //        data: {
+        //            'type': type, 'customerCheckbox': customerCheckbox, 'customerId': customerId,
+        //            'itemCheckbox': itemCheckbox, 'itemId': itemId, 'dateCheckbox': dateCheckbox,
+        //            'fromDate': fromDate, 'toDate': toDate, 'cashCustomerCheckbox': cashCustomerNameCheckbox,
+        //            'cashCustomerName': cashCustomerName, 'cashCreditTypeCheckbox': cashCreditTypeCheckbox, 'cashCreditType': cashCreditType,
+        //            'brandCheckbox': brandCheckbox, 'brandId': brand, 'codeCheckbox': codeCheckbox, 'code': code,
+        //        },
+        //        success: function (response) {
+        //            getItems();
+        //            $('.showItemsBtn').prop("disabled", true);
+        //        }
+        //    })
+        //})
+        $('#btnSearch').click(function () {
+            var attendanceDate = $('#AttendanceDate').val();
+            if (attendanceDate == '' || attendanceDate == null) {
+                $('#AttendanceDate').css('border-color', '#A90329');
+                $('#AttendanceDate').css('background-color', '#FFF0F0');
+                return false;
+            }
+            $('.newTh').remove();
+            var today = new Date(attendanceDate);
+            var day = today.getDate();
+            var mm = today.getMonth() + 1;
+            var yyyy = today.getFullYear();
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var day2 = 0;
+            var dayString = '';
+            var td = '';
+            for (var d = 1; d < day; d++) {
+                day2 = day - d;
+                if (day2 < 10) {
+                    day2 = "0" + day2;
+                }
+                td += '<th class="newTh" style="text-align: center;width:110px"> ' + day2 + '</th>';
+            }
+            $('#HeadingTr').append(td);
+            $('.NoRecordTd').attr("colspan", 4 + day - 1);
+            var colSpan = 4 + parseFloat(day) - 1;
+            $('.noRecordTr').html('<td colspan="' + colSpan + '" class="dataTables_empty" rowspan="4" style="text-align: left;font-size:17px;"><i class="fa fa-refresh fa-spin"></i> &nbsp;Processing....</td>');
+            $.ajax({
+                type: "POST",
+                url: "/attendance/getEmployeesForAttendance/",
+                dataType: 'json',
+                data: { 'attendanceDate': attendanceDate},
+                success: function (response) {
+                    if (response.data.length == 0)
+                    {
+                        $('.noRecordTr').html('<td class="NoRecordTd" colspan="' + colSpan + '" style="text-align:center;padding:10px;background-color:#fff">No Record Found.</td>');
+                    }
+                    else
+                    {
+                        var div = '';
+                        var i =0;
+                        for (var key in response.data)
+                        {
+                            var inTime = '';
+                            var outTime = '';
+                            if (response.data[key].TimeRecord == "Y")
+                            {
+                                var inTimeGiven = '';
+                                var outTimeGiven = '';
+                                if (response.data[key].InTimeDateTime != null && response.data[key].InTimeDateTime != '') {
+                                    inTimeGiven = getGivenTime(response.data[key].InTimeDateTime);
+                                }
+                                else {
+                                    inTimeGiven = getNowTime();
+                                }
+                                if (response.data[key].OutTimeDateTime != null && response.data[key].OutTimeDateTime != '') {
+                                    outTimeGiven = getGivenTime(response.data[key].OutTimeDateTime);
+                                }
+                                else {
+                                    outTimeGiven = getNowTime();
+                                }
+                                inTime = '<input type="time" class="InTime" value="' + inTimeGiven + '"  id="InTime' + i + '" />';
+                                outTime = '<input type="time" class="OutTime" value="' + outTimeGiven + '"  id="OutTime' + i + '" />';
+                            }
+                            var present = "";
+                            var absent = "";
+                            var leave = "";
+                            var holiday = "";
+                            if (response.data[key].Attendance == "P")
+                            {
+                                present = "selected";
+                                absent = "";
+                                leave = "";
+                                holiday = "";
+                            }
+                            else if (response.data[key].Attendance == "A") {
+                                present = "";
+                                absent = "selected";
+                                leave = "";
+                                holiday = "";
+                            }
+                            else if (response.data[key].Attendance == "L") {
+                                present = "";
+                                absent = "";
+                                leave = "selected";
+                                holiday = "";
+                            }
+                            else if (response.data[key].Attendance == "H") {
+                                present = "";
+                                absent = "";
+                                leave = "";
+                                holiday = "selected";
+                            }
+                            div += '<tr class="newRows">' +
+                                       '<td style="text-align: left;"><input type="hidden" class="EmployeeId" value = "' + response.data[key].EmployeeId + '" /><input type="hidden" class="AttendanceId" value = "' + response.data[key].AttendanceId + '" />' + response.data[key].FullName + '</td>' +
+                                       '<td style="text-align: center;"><label class="select"><i class="append fa fa-caret-down"></i><select class="Attendance" id="Attendance' + i + '"><option value="P" ' + present + '>P</option><option value="A" ' + absent + '>A</option><option value="L" ' + leave + '>L</option><option value="H" ' + holiday + '>H</option></select></label></td>' +
+                                       '<td style="width: 110px;">' + inTime + '</td>' +
+                                       '<td style="text-align: center;">' + outTime + '</td>';
+
+                            for (var key2 in response.data[key].DateList)
+                            {
+                                var bgColor = '';
+                                if (response.data[key].DateList[key2].Attendance == 'P')
+                                {
+                                    bgColor = '#F0FFF0'; //Green
+                                }
+                                else if (response.data[key].DateList[key2].Attendance == 'A') {
+                                    bgColor = '#F8A5A5'; //red
+                                }
+                                else if (response.data[key].DateList[key2].Attendance == 'L') {
+                                    bgColor = '#F8ED62'; //yellow
+                                }
+                                else if (response.data[key].DateList[key2].Attendance == 'H') {
+                                    bgColor = '#58CCED'; //blue
+                                }
+                                else {
+                                    bgColor = '#FFF'; //blue
+                                }
+                                div += '<td style="text-align: center; background-color: ' + bgColor + '; ">' + response.data[key].DateList[key2].Attendance + '</td>';
+                            }
+                            div += '</tr>';
+                            i++;
+                        }
+                        $('#TableBody').html(div);
+                    }
+                }
+            })
+        })
+        $('#btnSave').click(function () {
+            $('#btnSave').html("<i class='fa fa-refresh fa-spin'></i> Processing....");
+            $('#btnSave').prop("disabled", true);
+            $('#btnSaveAndPrint').prop("disabled", true);
+            SaveAttendance("");
+        })
+        $('#btnSaveAndPrint').click(function () {
+            $('#btnSaveAndPrint').html("<i class='fa fa-refresh fa-spin'></i> Processing....");
+            $('#btnSave').prop("disabled", true);
+            $('#btnSaveAndPrint').prop("disabled", true);
+            SaveAttendance("Print");
+        })
+        function SaveAttendance(print) {
+            var check = 0;
+            var attendanceDate = $('#AttendanceDate').val();
+            if (attendanceDate == '' || attendanceDate == null) {
+                $('#AttendanceDate').css('border-color', '#A90329');
+                $('#AttendanceDate').css('background-color', '#FFF0F0');
+                return false;
+            }
+            $('#btnSave').html("<i class='fa fa-refresh fa-spin'></i> Processing....");
+            $('#btnSave').prop("disabled", true);
+            var data = [];
+            $('.newRows').each(function () {
+                check++;
+                var employeeId = $(this).find('.EmployeeId').val();
+                var attendanceId = $(this).find('.AttendanceId').val();
+                var attendance = $(this).find('.Attendance').val();
+                var inTime = $(this).find('.InTime').val();
+                var outTime = $(this).find('.OutTime').val();
+                var alldata = {
+                    'AttendanceId': attendanceId,
+                    'AttendanceDate': attendanceDate,
+                    'EmployeeId': employeeId,
+                    'Attendance': attendance,
+                    'InTime': inTime,
+                    'OutTime': outTime
+                }
+                data.push(alldata);
+            });
+            if (check == 0)
+            {
+                alert("There is no attendance record to be saved.");
+                $('#btnSave').html("Save");
+                $('#btnSaveAndPrint').html("Save & Print");
+                $('#btnSave').prop("disabled", false);
+                $('#btnSaveAndPrint').prop("disabled", false);
+                return false;
+            }
+            var allData = JSON.stringify(data);
+            $.ajax({
+                type: "POST",
+                url: "/attendance/InsertUpdateAttendance/",
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'data': allData }),
+                success: function (data) {
+                    if (data.status == true) {
+                        if (print == "Print") {
+                            window.location.href = "/attendance/attendancereport/" + attendanceDate;
+                        }
+                        else {
+                            $('.alertDiv').html('<div class="alert alert-success success-alert2" style="margin-top:15px;">' +
+                                                    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                    ' <strong>Success! </strong>' +
+                                                    'Attendance Saved Succesfully.' +
+                                                '</div>');
+                            $(".success-alert2").fadeTo(1000, 500).slideUp(500, function () {
+                                $(".success-alert2").slideUp(500);
+                                location.reload();
+                            });
+                        }
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSave').html("Save");
+                        $('#btnSaveAndPrint').html("Save & Print");
+                        $('#btnSave').prop("disabled", false);
+                        $('#btnSaveAndPrint').prop("disabled", false);
+                    }
+                }
+            })
+        }
+        $('#AttendanceDate').keydown(function () {
+            $('#AttendanceDate').css('border-color', '#bdbdbd');
+            $('#AttendanceDate').css('background-color', '#fff');
+        }).mousedown(function () {
+            $('#AttendanceDate').css('border-color', '#bdbdbd');
+            $('#AttendanceDate').css('background-color', '#fff');
+        })
+        $('#btnRefresh').click(function () {
+            location.reload();
+        })
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#AttendanceDate').val(today);
+        }
+        function getNowTime() {
+            var d = new Date(),        
+            h = d.getHours(),
+            m = d.getMinutes();
+            if(h < 10) h = '0' + h; 
+            if(m < 10) m = '0' + m; 
+            var today = h + ':' + m;
+            return today;
+        }
+        function getGivenTime(givenTime) {
+            var d = new Date(parseInt(givenTime.substr(6))),
+            h = d.getHours(),
+            m = d.getMinutes();
+            if (h < 10) h = '0' + h;
+            if (m < 10) m = '0' + m;
+            var today = h + ':' + m;
+            return today;
+        }
+    </script>
+}

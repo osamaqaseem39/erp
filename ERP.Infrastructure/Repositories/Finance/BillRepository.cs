@@ -17,7 +17,7 @@ public class BillRepository : IBillRepository
     {
         return await _context.Bills
             .Include(b => b.BillLines)
-            .FirstOrDefaultAsync(b => b.BillId == id);
+            .FirstOrDefaultAsync(b => b.Id == id || b.BillId == id);
     }
 
     public async Task<IEnumerable<Bill>> GetAllAsync()
@@ -31,7 +31,7 @@ public class BillRepository : IBillRepository
     {
         return await _context.Bills
             .Include(b => b.BillLines)
-            .Where(b => b.SupplierId == supplierId)
+            .Where(b => b.SupplierId == supplierId || b.VendorId == supplierId)
             .ToListAsync();
     }
 
@@ -60,9 +60,11 @@ public class BillRepository : IBillRepository
 
     public async Task<Guid> CreateAsync(Bill bill)
     {
+        if (bill.Id == Guid.Empty) bill.Id = Guid.NewGuid();
+        if (bill.BillId == Guid.Empty) bill.BillId = bill.Id;
         _context.Bills.Add(bill);
         await _context.SaveChangesAsync();
-        return bill.BillId;
+        return bill.Id;
     }
 
     public async Task<bool> UpdateAsync(Bill bill)
@@ -74,7 +76,7 @@ public class BillRepository : IBillRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var bill = await _context.Bills.FindAsync(id);
+        var bill = await GetByIdAsync(id);
         if (bill == null) return false;
 
         _context.Bills.Remove(bill);

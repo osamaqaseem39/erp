@@ -25,6 +25,9 @@ public class CreateFixedAssetValidator : AbstractValidator<CreateFixedAssetDto>
             .NotEmpty().WithMessage("Asset type is required")
             .MaximumLength(50).WithMessage("Asset type cannot exceed 50 characters");
 
+        RuleFor(x => x.GLAccountId)
+            .NotEmpty().WithMessage("GL account is required");
+
         RuleFor(x => x.Location)
             .MaximumLength(100).WithMessage("Location cannot exceed 100 characters");
     }

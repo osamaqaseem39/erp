@@ -1,0 +1,259 @@
+﻿<style>
+    .Acenter {
+        text-align: center;
+    }
+</style>
+
+@model POS.Models.clsBooking
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="widget-body">
+        <input type="hidden" id="BookID" value="@Model.RecordID" />
+        <table style="font-size: 14px; border-collapse: separate; border-spacing: 0.6em;">
+            <tr>
+                <td style="font-weight:bold">Partner Name : </td>
+                <td style="padding-left:10px;font-size:18px">@Model.DetailName</td>
+            </tr>
+
+            <tr>
+                <td style="font-weight:bold">Name : </td>
+                <td style="padding-left:10px">@Model.PasengerName</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Mobile # : </td>
+                <td style="padding-left:10px">@Model.Cellno</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">No. of Passengers : </td>
+                <td style="padding-left:10px">Adult(s) = @Model.NoOfAdult &nbsp;&nbsp;&nbsp; Child(s) = @Model.NoOfChild</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Pick up Date-Time: </td>
+                <td style="padding-left:10px">@Convert.ToString(string.Format("{0:dd-MM-yyyy}", Model.PickupDateTime)) &nbsp;&nbsp; @Model.PickupTimeString </td>
+            </tr>
+
+            <tr>
+                <td style="font-weight:bold"> Pickup Address : </td>
+                <td style="padding-left:10px">@Model.Startpoint</td>
+            </tr>
+
+            @if (!String.IsNullOrEmpty(Model.Startpoint1))
+            {
+                <tr>
+                    <td style="font-weight:bold"> Via : </td>
+                    <td style="padding-left:10px">@Model.Startpoint1</td>
+                </tr>    
+            }
+            @if (!String.IsNullOrEmpty(Model.Startpoint2))
+            {
+                <tr>
+                    <td style="font-weight:bold"> Via : </td>
+                    <td style="padding-left:10px">@Model.Startpoint2</td>
+                </tr>
+            }
+            @if (!String.IsNullOrEmpty(Model.Startpoint3))
+            {
+                <tr>
+                    <td style="font-weight:bold"> Via : </td>
+                    <td style="padding-left:10px">@Model.Startpoint3</td>
+                </tr>
+            }
+            @if (!String.IsNullOrEmpty(Model.Endposition1))
+            {
+                <tr>
+                    <td style="font-weight:bold"> Via : </td>
+                    <td style="padding-left:10px">@Model.Endposition1</td>
+                </tr>
+            }
+            @if (!String.IsNullOrEmpty(Model.Endposition2))
+            {
+                <tr>
+                    <td style="font-weight:bold"> Via : </td>
+                    <td style="padding-left:10px">@Model.Endposition2</td>
+                </tr>
+            }
+            @if (!String.IsNullOrEmpty(Model.Endposition3))
+            {
+                <tr>
+                    <td style="font-weight:bold"> Via : </td>
+                    <td style="padding-left:10px">@Model.Endposition3</td>
+                </tr>
+            }
+            <tr>
+                <td style="font-weight:bold"> Dropoff Address : </td>
+                <td style="padding-left:10px">@Model.Endposition</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Distance : </td>
+                <td style="padding-left:10px">@Model.TotalKm</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Child Seat Required : </td>
+                <td style="padding-left:10px">@(Model.ChildSeat == 1 ? "Y" : "N")</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Return Trip: </td>
+                <td style="padding-left:10px">@(Model.ReturnTrip == 1 ? "Y" : "N")</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold">Flight No. : </td>
+                <td style="padding-left:10px">@Model.FlightNo</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Arrival From : </td>
+                <td style="padding-left:10px">@Model.ArrivalFrom</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Terminal : </td>
+                <td style="padding-left:10px">@Model.Terminal</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Flight Time: </td>
+                <td style="padding-left:10px">@Model.FlightTimeString</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Meet &amp; Greet : </td>
+                <td style="padding-left:10px">@(Model.MeetGreet == 1 ? "Y" : "N")</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Additional Info. : </td>
+                <td style="padding-left:10px">@Model.AdditionalInfo</td>
+            </tr>
+
+            <tr>
+                <td style="font-weight:bold"> Passenger Amount : </td>
+                <td style="padding-left:10px">@Convert.ToDecimal(Model.EstimateFareNet).ToString("#,##0.00")</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Max. Bid Amount : </td>
+                <td style="padding-left:10px">@Convert.ToDecimal(Model.MaxAmount).ToString("#,##0.00")</td>
+            </tr>
+
+            <tr>
+                <td style="font-weight:bold"> Bid Close Date -Time: </td>
+                <td style="padding-left:10px">@Convert.ToString(string.Format("{0:dd-MM-yyyy}", Model.BidCloseDate)) &nbsp;&nbsp; @Model.BidCloseTimeStr </td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold"> Post Remarks : </td>
+                <td style="padding-left:10px">@Model.BidPostRemarks</td>
+            </tr>
+
+            <tr>
+                <td style="font-weight:bold"> Partner Bid Amount : </td>
+                <td style="padding-left:10px">@Convert.ToDecimal(Model.SuppBidAmount).ToString("#,##0.00")</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; padding-top: 10px">
+                    <a title="Save Bid" id="btnSaveBid" href="javascript:void(0)" class="btn btn-success" style="width:100px; height:33px;color:white;font-size:16px; vertical-align:middle;border-radius:5px;">
+                        Select Bid
+                    </a>
+                </td>  
+            </tr>
+            @*<tr>
+                @if (Model.SuppBookStatus == "Cancel")
+                {
+                    <td style="font-weight: bold; padding-top: 10px">
+                        <a title="Save Bid" id="btnSaveBid" href="javascript:void(0)" class="btn btn-success" style="width:100px; height:33px;color:white;font-size:16px; vertical-align:middle;border-radius:5px;">
+                            Resave Bid
+                        </a>
+                    </td>
+                }else if (Model.SuppBookStatus == "Bid")
+                {
+                    <td style="font-weight: bold; padding-top: 10px">
+                    </td>
+                }else if (Model.SuppBookStatus == "Assigned")
+                {
+                    <td style="font-weight: bold; padding-top: 10px">
+                    </td>
+                }
+                else
+                {
+                      
+                }
+                
+                @if (Model.SuppBookStatus == "Assigned")
+                {
+                    <td style="font-weight: bold; padding-top: 10px">
+                    </td>
+                }else if (Model.SuppBookStatus != "Cancel")
+                {
+                    <td style="font-weight: bold; padding-top: 10px">
+                        <a title="Cancel Bid" id="btnCancelBid" href="javascript:void(0)" class="btn btn-danger" style="width:140px; height:33px;color:white;font-size:16px; vertical-align:middle;border-radius:5px;">
+                            Cancel Bid
+                        </a>
+                    </td>   
+                }
+                
+            </tr>*@
+
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+    });
+
+    $('#btnSaveBid').click(function () {
+        var bookid = $('#BookID').val();
+        SaveBidFunction(bookid, "Select");
+    })
+
+    //$('#btnCancelBid').click(function () {
+    //    var bookid = $('#BookID').val();
+    //    var vamount = 0; 
+    //    var vremk = "";
+
+    //    SaveBidFunction(bookid, vamount, vremk, "Cancel", "Cancel");
+        
+    //})
+    
+
+    function SaveBidFunction(id ,vTitle) {
+        var a = $.confirm({
+            title: vTitle + ' Bid',
+            content: 'Are you sure u want to ' +  vTitle + ' this bid?',
+            type: 'white',
+            buttons: {
+                ok: {
+                    text: "Yes",
+                    btnClass: 'btnConfirm',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '/CabBooking/FinalBid/',
+                            data: { id: id },
+                            type: "POST",
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.status == true) {
+                                    $('#MainModal').modal('toggle');
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: "No",
+                    btnClass: 'btn-default',
+                    keys: ['esc'],
+                    action: function () {
+                        a.close();
+                    }
+                },
+            }
+        });
+    }
+
+    function NumberPostiveNegativeWithDecimal(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+            (charCode < 48 || charCode > 57))
+            evt.preventDefault();
+        return true;
+    }
+</script>

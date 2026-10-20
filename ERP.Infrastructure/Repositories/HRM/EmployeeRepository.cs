@@ -52,6 +52,7 @@ public class EmployeeRepository : IEmployeeRepository
     public async Task<PagedResult<Employee>> GetAllEmployeesAsync(EmployeeQuery filter)
     {
         var query = _context.Employees
+            .Include(e => e.EmploymentContract)
             .Where(e => !e.IsDeleted);
 
         if (filter.TenantId.HasValue)

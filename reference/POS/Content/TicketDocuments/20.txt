@@ -1,0 +1,180 @@
+<!-- MAIN CONTENT -->
+<link rel="stylesheet" href=@Url.Content("~/Content/jqxWidget/jqx.base.css") type="text/css" />
+@*<link rel="stylesheet" href=@Url.Content("~/Content/css/bootstrap-theme.min.css") type="text/css" />*@
+<style>
+    .rpts-bar {
+        margin-top: 10PX;
+        border: 1px solid #ddd;
+        box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.24);
+    }
+
+        .rpts-bar a {
+            margin-right: 5px;
+        }
+
+        .rpts-bar .btn-prime {
+            color: #fff;
+            background-color: #4285f4;
+            border-color: #4285f4;
+        }
+
+        .rpts-bar .btn-success {
+            color: #fff;
+            background-color: #39a650;
+            border-color: #39a650;
+        }
+
+        .rpts-bar .btn-warning {
+            color: #fff;
+            background-color: #e8884d;
+            border-color: #e87e27;
+        }
+
+        .rpts-bar .btn-blue {
+            color: #fff;
+            background-color: #02547d;
+            border-color: #02547d;
+        }
+
+        .rpts-bar .btn-frzi {
+            color: #fff;
+            background-color: #18cdcc;
+            border-color: #18cdca;
+        }
+
+        .rpts-bar .btn-dark {
+            color: #fff;
+            background-color: #616161;
+            border-color: #616161;
+        }
+
+    .selected {
+        background-color: lightgrey !important;
+    }
+
+    h8 {
+        font-weight: bold;
+        color: #000;
+    }
+</style>
+@{
+    Layout = null;
+}
+<div style="overflow-x: hidden;padding: 12px 20px;">
+    <div id="jqxgridLookupitems"></div>
+</div>
+<!-- END MAIN CONTENT -->
+@*@section pagespecific {*@
+@*<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jquery-1.11.1.min.js")></script>*@
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxcore.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxdata.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxbuttons.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxscrollbar.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxmenu.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxcheckbox.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxlistbox.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxdropdownlist.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxgrid.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxgrid.filter.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxgrid.sort.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxgrid.pager.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxgrid.selection.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxgrid.aggregates.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxgrid.edit.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxwindow.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxnumberinput.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxinput.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxcombobox.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxtabs.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxdatetimeinput.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/jqxcalendar.js")></script>
+<script type="text/javascript" src=@Url.Content("~/Scripts/jqxWidget/globalize.js")></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //$("#jqxgridLookupitems").jqxGrid('clearfilters');
+
+        var url = '@Url.Action("getItemSelectAllAdvance", "Team")';
+
+        var sourcepkl =
+        {
+            datatype: "json",
+            datafields:
+            [
+                { name: 'TeamId', type: 'int' },
+                { name: 'TeamName', type: 'string' },
+            ],
+            id: 'TeamId',
+            url: url,
+            cache: false,
+            filter: function () {
+                // update the grid and send a request to the server.
+                $("#jqxgridLookupitems").jqxGrid('updatebounddata', 'filter');
+            },
+            sort: function () {
+                // update the grid and send a request to the server.
+                $("#jqxgridLookupitems").jqxGrid('updatebounddata', 'sort');
+            },
+            root: 'Rows',
+            beforeprocessing: function (data) {
+                if (data != null) {
+                    sourcepkl.totalrecords = data[0].TotalRows;
+                }
+            }
+        };
+        var dataAdapterao = new $.jqx.dataAdapter(sourcepkl, {
+            loadError: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+        // initialize jqxGrid
+        $("#jqxgridLookupitems").jqxGrid(
+        {
+            width: '100%',
+            height: 400,
+            source: dataAdapterao,
+            filterable: true,
+            showfilterrow: true,
+            sortable: true,
+            autoheight: false,
+            pageable: true,
+            virtualmode: true,
+            rendergridrows: function (obj) {
+                return obj.data;
+            },
+            rendertoolbar: function (toolbar) {
+                $("#jqxgridLookupitems").dblclick(function () {
+                    var selectedrowindex = $("#jqxgridLookupitems").jqxGrid('getselectedrowindex');
+                    var dataRecord = $("#jqxgridLookupitems").jqxGrid('getrowdata', selectedrowindex);
+                    if (dataRecord.TeamId > 0)
+                    {
+                        $dialog.dialog('close');
+
+                        $('#TeamId').val(dataRecord.TeamId);
+                        $('#TeamName').val(dataRecord.TeamName);
+                        $('#btnSaveTeam').prop('disabled', false);
+                        $('#btnSaveTeam').html("SAVE");
+                        $('#btnSaveTeam').css('width', '95px');
+                        $('#DeleteTeam').prop('disabled', false);
+                        $('#TeamName').prop('disabled', false);
+                    }
+                });
+            },
+            columns: [
+                    {
+                        text: 'Sr.#', sortable: false, filterable: false, editable: false,
+                        groupable: false, draggable: false, resizable: false,
+                        datafield: '', columntype: 'number', width: 40,
+                        cellsrenderer: function (row, column, value) {
+                            return "<div style='margin:4px;'>" + (value + 1) + "</div>";
+                        }
+                    },
+
+          { text: 'Team Name', datafield: 'TeamName', filtertype: 'input', width: 690 },
+            ]
+        });
+
+    });
+</script>
+@*}*@

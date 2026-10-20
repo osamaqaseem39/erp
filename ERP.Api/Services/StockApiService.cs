@@ -42,15 +42,9 @@ public class StockApiService : IStockApiService
         return await _service.AdjustStockAsync(dto);
     }
 
-    public async Task<bool> TransferStockAsync(StockTransferDto dto)
-    {
-        // Note: TransferStockAsync not available in current interface
-        return false;
-    }
+    public Task<bool> TransferStockAsync(StockTransferDto dto)
+        => _service.TransferStockAsync(dto);
 
-    public async Task<IEnumerable<StockLedgerDto>> GetStockLedgerAsync(Guid itemId, Guid warehouseId)
-    {
-        // Note: GetStockLedgerAsync not available in current interface
-        return new List<StockLedgerDto>();
-    }
+    public Task<IEnumerable<StockLedgerDto>> GetStockLedgerAsync(Guid itemId, Guid warehouseId)
+        => _service.GetStockLedgerAsync(itemId, Guid.Empty, warehouseId);
 }

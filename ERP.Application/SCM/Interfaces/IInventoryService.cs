@@ -13,4 +13,5 @@ public interface IInventoryService
     Task<IEnumerable<StockTransferDto>> GetStockTransfersAsync(Guid tenantId, Guid companyId);
     Task<StockTransferDto?> GetStockTransferByIdAsync(Guid id, Guid tenantId);
     Task<IEnumerable<StockBalanceDto>> GetLowStockItemsAsync(Guid tenantId, Guid companyId);
+    Task<InventoryValuationDto> GetInventoryValuationAsync(Guid tenantId, Guid? warehouseId = null, DateTime? asOfDate = null);
 }

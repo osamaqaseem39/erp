@@ -17,10 +17,11 @@ public class CustomerRepositoryPagingTests
     {
         var repository = CreateRepository(TenantA, out _);
 
-        var page = await repository.GetPagedAsync(new CustomerPagedQuery { PageSize = 50 });
+        var page = await repository.GetPagedAsync(new CustomerPagedQuery { PageSize = 50 }, TenantA);
 
         Assert.Equal(3, page.TotalCount);
         Assert.All(page.Items, c => Assert.Equal(TenantA, c.TenantId));
+        Assert.Equal(0, (await repository.GetPagedAsync(new CustomerPagedQuery(), Guid.Empty)).TotalCount);
     }
 
     [Fact]
@@ -28,8 +29,8 @@ public class CustomerRepositoryPagingTests
     {
         var repository = CreateRepository(TenantA, out _);
 
-        var active = await repository.GetPagedAsync(new CustomerPagedQuery { Status = "Active" });
-        var byEmail = await repository.GetPagedAsync(new CustomerPagedQuery { SearchTerm = "  globex.io " });
+        var active = await repository.GetPagedAsync(new CustomerPagedQuery { Status = "Active" }, TenantA);
+        var byEmail = await repository.GetPagedAsync(new CustomerPagedQuery { SearchTerm = "  globex.io " }, TenantA);
 
         Assert.Equal(new[] { "Acme", "Globex" }, active.Items.Select(c => c.CustomerName));
         Assert.Equal("Globex", Assert.Single(byEmail.Items).CustomerName);
@@ -40,7 +41,8 @@ public class CustomerRepositoryPagingTests
     {
         var repository = CreateRepository(TenantA, out _);
 
-        var page = await repository.GetPagedAsync(new CustomerPagedQuery { SortBy = "customerCode", SortDescending = true });
+        var page = await repository.GetPagedAsync(
+            new CustomerPagedQuery { SortBy = "customerCode", SortDescending = true }, TenantA);
 
         Assert.Equal(new[] { "C-003", "C-002", "C-001" }, page.Items.Select(c => c.CustomerCode));
     }

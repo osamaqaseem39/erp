@@ -1,5 +1,6 @@
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.HRM;
 using ERP.Shared.DTOs.HRM;
@@ -10,18 +11,21 @@ namespace ERP.Api.Controllers.HRM;
 [ApiController]
 [Route("api/hrm/benefits")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class BenefitsController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IBenefitsService _benefitsService;
-    private readonly ILogger<BenefitsController> _logger;
 
     public BenefitsController(IBenefitsService benefitsService, ILogger<BenefitsController> logger) : base(logger)
     {
         _benefitsService = benefitsService;
-        _logger = logger;
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(BenefitDto), OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateBenefitDto dto)
     {
         var tenantId = GetTenantId();
@@ -31,6 +35,7 @@ public class BenefitsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(BenefitDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -41,6 +46,7 @@ public class BenefitsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<BenefitDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] string? category = null, [FromQuery] bool? isActive = null)
     {
         var tenantId = GetTenantId();
@@ -49,10 +55,11 @@ public class BenefitsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(BenefitDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] BenefitDto dto)
     {
         if (id != dto.Id)
-        return BadRequest("ID mismatch");
+            return BadRequest("ID mismatch");
 
         var tenantId = GetTenantId();
         var userId = GetUserId();
@@ -61,6 +68,7 @@ public class BenefitsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/enroll")]
+    [ProducesResponseType(typeof(BenefitDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> EnrollEmployee(Guid id, [FromBody] EnrollEmployeeDto dto)
     {
         var tenantId = GetTenantId();
@@ -70,6 +78,7 @@ public class BenefitsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("{id}/unenroll")]
+    [ProducesResponseType(typeof(BenefitDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> UnenrollEmployee(Guid id, [FromBody] UnenrollEmployeeDto dto)
     {
         var tenantId = GetTenantId();
@@ -79,6 +88,7 @@ public class BenefitsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

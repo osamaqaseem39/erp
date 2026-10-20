@@ -1,0 +1,1390 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+    .nav-tabs > li.active > a {
+        -webkit-box-shadow: 0 -2px 0 #015778;
+        -moz-box-shadow: 0 -2px 0 #015778;
+        /* box-shadow: 0 -2px 0 #015778; */
+    }
+
+    .tabForeColor {
+        color: #015778;
+    }
+
+    .widget-header > :first-child .fa {
+        vertical-align: middle;
+        font-size: 30px;
+        color: #015778;
+    }
+
+    .ui-dialog {
+        border-radius: 1px !important;
+        border-top: 3px solid #015778 !important;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    .Acenter {
+        text-align: center;
+    }
+    /*.jarviswidget-color-teal .nav-tabs li.active{
+        background-color: #015778 !important;
+        border-left: 2px solid #015778 !important;
+    }*/
+
+    .jarviswidget-color-darken > header {
+        background: #03386C;
+    }
+
+    .btnUp:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .5s, height .5s;
+        /*-webkit-transform-origin: center bottom;
+        -webkit-transform: scale(1.5);*/
+        /*animation: bounce .9s 1 alternate ease-out;*/
+    }
+
+    .btnUpSave:hover {
+        width: 60px !important;
+        height: 60px !important;
+        transition: width .7s, height .7s;
+    }
+    /*#addTd em {
+        position: absolute;
+        left: 50%;
+        display: none;
+        width: 150px;
+        margin-left: -75px;
+        text-align: center;
+    }*/
+
+    /*#addTd em:after {
+            content: " ";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -6px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0, 0, 0, .6);
+            border-bottom: none;
+        }*/
+    /*#addTd em span {
+            display: inline-block;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-style: normal;
+            color: #FFF;
+            background: #000;
+            background: rgba(0, 0, 0, .6);
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .9);
+            border-radius: 12px;
+        }*/
+    .heading-1 {
+        position: relative;
+        text-align: center;
+    }
+
+        .heading-1:before {
+            content: "";
+            display: block;
+            border-top: solid 3px #03386C;
+            width: 100%;
+            height: 2px;
+            position: absolute;
+            top: 50%;
+            z-index: 0;
+        }
+
+        .heading-1 span {
+            background: #fff;
+            padding: 0 10px;
+            position: relative;
+            z-index: 1;
+        }
+</style>
+@model POS.Models.clsVoucher
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+    <div class="alertDiv">
+
+    </div>
+    <div class="modal fade" id="CashPaymentListModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Breakage Credit Notes List</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="cashPaymentListDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="DocumentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                    <h4 class="modal-title" style="color:white;margin-top:-4px;">Attach Documents</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="documentsDiv"></div>
+                </div>
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    <section id="widget-grid" class="" style="padding: 10px; margin-top: 15px">
+        <div class="row">
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-deletebutton="false" data-widget-draggable="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>Breakage Credit Note </h2>
+                    </header>
+                    <div>
+                        <div class="jarviswidget-editbox">
+                        </div>
+                        <div class="widget-body smart-form">
+                            @using (Html.BeginForm("InsertUpdateDebitCreditNote", "cash", FormMethod.Post, new { id = "cashPaymentForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                            {
+                                if (User.Save == 1)
+                                {
+                                    <input type="hidden" id="CanSave" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanSave" value="0" />
+                                }
+                                if (User.Change == 1)
+                                {
+                                    <input type="hidden" id="CanChange" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanChange" value="0" />
+                                }
+                                if (User.Delete == 1)
+                                {
+                                    <input type="hidden" id="CanDelete" value="1" />
+                                }
+                                else
+                                {
+                                    <input type="hidden" id="CanDelete" value="0" />
+                                }
+                                <input type="hidden" id="DisableOrNot" value="0" />
+                                <table style="width: 100%;overflow-y: scroll; " class="smart-form dock">
+                                    <tr>
+                                        @if (User.Save == 1)
+                                        {
+                                            <td style="width: 42%; padding-bottom: 5px; padding-left: 3px;text-align: right;" id="addTd">
+                                                <a title="Add New Breakage Credit Note" id="btnAddCashPayment" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/plus2.png" style="width: 45px; height: 45px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveCashPayment" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintCashPayment" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="listTd">
+                                                <a title="Breakage Credit Notes List" id="btnCashPaymentList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#CashPaymentListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshCashPayment" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 43%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitCashPayment" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveTd" hidden>
+                                                <button title="Save" class="btnUpSave" id="btnSaveCashPayment" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/save.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 0px; text-align: left; " id="saveAndPrintTd" hidden>
+                                                <button title="Save and Print" class="btnUpSave" id="btnSaveAndPrintCashPayment" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img src="~/Content/img/Print.png" style="width: 43px; height: 43px; color: white; " />
+                                                </button>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px;text-align: left;" id="documentTd" hidden>
+                                                <a title="Attach Document" id="btnAttachDocument" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#DocumentModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/Document2.png" style="width: 42px; height: 42px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 41%; padding-bottom: 5px;text-align: right;" id="listTd">
+                                                <a title="Breakage Credit Notes List" id="btnCashPaymentList" class="btnUp" href="javascript:void(0)" data-toggle="modal" data-target="#CashPaymentListModal" style="width: 45px; height: 45px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/list2.png" style="width: 47px; height: 47px; color: white; margin-top: 4px; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 3%; padding-bottom: 5px; padding-right: 3px; text-align: left; " id="refreshTd">
+                                                <a title="Refresh" id="btnRefreshCashPayment" class="btnUp" href="javascript:void(0)" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/refresh2.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                            <td style="width: 47%; padding-bottom: 5px; padding-right: 3px;text-align: left; " id="exitTd">
+                                                <a title="Exit" id="btnExitCashPayment" class="btnUp" href="@Url.Action("index", "home")" style="width: 43px; height: 43px; color: white; border: none; background: transparent !important; ">
+                                                    <img class="btnUp" src="~/Content/img/exit.png" style="width: 43px; height: 43px; color: white; " />
+                                                </a>
+                                            </td>
+                                        }
+                                    </tr>
+                                </table>
+                                <div class="col-md-12" id="voucherNoSection" style="padding-top: 15px; padding-bottom: 15px;" hidden>
+                                    <div class="col-md-4">
+                                        <input type="hidden" id="IsNewOrEdit" value="" />
+                                        <input type="hidden" id="HiddenTr" value="0" />
+                                        <input type="hidden" id="VoucherNo" value="0" />
+                                        <label class="" style="font-size:16px;">
+                                            Voucher No:
+                                            <span class="badge bg-color-blue" id="VoucherNoSpan" style="font-size:16px;border-radius:4px;padding:5px;"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-top: 15px; padding-bottom: 15px;">
+                                    <div class="col col-5">
+                                        <label>Customer/Supplier Account</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            @Html.DropDownListFor(model => model.DetailCode, ViewBag.DetailCode as SelectList, new { @style = "width:100%", @id = "MainDetailCode" })
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Date</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-calendar"></i>
+                                            <input type="date" name="Date" id="Date" min="@ViewBag.FromDate" max="@ViewBag.ToDate" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-2">
+                                        <label>Reference No.</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <select id="ReferenceNo" name="ReferenceNo">
+                                                <option value="Breakage" selected>Breakage</option>
+                                                <option value="Discount">Discount</option>
+                                                <option value="Coupen">Coupen</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2">
+                                        <label>Amount</label>
+                                        <label class="input">
+                                            <input type="text" name="Credit" id="Credit" class="Credit" placeholder="Amount" autocomplete="off" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;">
+                                    <div class="col col-8">
+                                        <label>Remarks</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" name="Remarks" id="Remarks" class="Remarks" placeholder="Remarks" autocomplete="off" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-2">
+                                        <label>Paid By</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" name="PaidBy" id="PaidBy" placeholder="Paid By" autocomplete="off" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-2">
+                                        <label>Received By</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" name="ReceivedBy" id="ReceivedBy" placeholder="Received By" autocomplete="off" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3" hidden>
+                                        <label class="checkbox pull-left" style="margin-top:22px">
+                                            <input id="DefaultVoucher" type="checkbox" name="DefaultVoucher" checked><i></i>
+                                            <span style="font-size:11px">To Other Account</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="row" style="padding-top: 5px; padding-bottom: 15px;">
+                                    <div class="col-md-3 pull-right deleteRow">
+                                        <a title="Delete Voucher" id="btnDeleteCashPayment" href="javascript:void(0)" class="btn btn-danger pull-right" style="width:75px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;margin-right:15px">
+                                            Delete
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-top: 5px; padding-bottom: 15px;" hidden>
+                                    <div class="col col-md-5 PaidToSection">
+                                        <label>Select Debit Account</label>
+                                        <label class="select">
+                                            <i class="append fa fa-caret-down"></i>
+                                            <div id="LineDetailDiv">
+                                                @Html.DropDownListFor(model => model.DetailCode, ViewBag.DetailCodeLine as SelectList, new { @style = "width:100%", @id = "LineDetailCode" })
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                    </div>
+                                    <div class="col-md-3" hidden>
+                                        <label class="" style="text-align:left;margin-top:20px;margin-left:15px">
+                                            <span style="font-size: 15px">Previous Bal:</span>
+                                            <span style="font-size: 16px; margin-left: 2px; color: green;" id="PreviousBalance">0.00</span>
+                                        </label>
+                                    </div>
+                                    <div class="col col-3" hidden>
+                                        <table class="" style="">
+                                            <tr>
+                                                <td style="width:50%;padding:2px" id="LineDebitTd">
+                                                    <label>Debit</label>
+                                                    <label class="input">
+                                                        <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                                        <input type="text" name="LineDebit" id="LineDebit" placeholder="Debit" autocomplete="off" />
+                                                    </label>
+                                                </td>
+                                                <td style="width: 50%; padding: 2px" id="LineCreditTd" hidden>
+                                                    <label>Credit</label>
+                                                    <label class="input">
+                                                        <i class="icon-prepend fa fa-money-bill-alt"></i>
+                                                        <input type="text" name="LineCredit" id="LineCredit" placeholder="Credit" autocomplete="off" />
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row" style="padding-bottom: 15px;margin-top:-5px" hidden>
+                                    <div class="col col-md-6">
+                                        <label>Remarks</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-info"></i>
+                                            <input type="text" name="LineRemarks" id="LineRemarks" placeholder="Remarks" autocomplete="off" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3">
+                                        <label>Cheque No.</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-hashtag"></i>
+                                            <input type="text" name="ChequeNo" id="ChequeNo" placeholder="Cheque No." autocomplete="off" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3" style="">
+                                        <label class="checkbox" style="margin-top:20px">
+                                            <input id="TaxCheckbox" type="checkbox" name="TaxCheckbox"><i></i>
+                                            Tax
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row" id="taxRowDummy" style="padding-bottom: 15px;" hidden>
+                                    <div class="col col-4" style="">
+                                        <label style="text-align:left">Select Tax</label>
+                                        <label class="select">
+                                            @Html.DropDownListFor(model => model.TaxID, ViewBag.Tax as SelectList, new { @style = "width:100%" })
+                                        </label>
+                                    </div>
+                                    <div class="col col-2">
+                                        <label style="text-align:left">Tax Rate</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-percent"></i>
+                                            <input type="text" name="TaxRate" id="TaxRate" placeholder="Tax Rate" autocomplete="off" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-3" style="text-align: left; ">
+                                        <label style="text-align:center;margin-top:18px">
+                                            <span style="font-size: 20px">Tax Value:</span>
+                                            <span style="font-size: 20px; margin-left: 8px; color: green;" id="TaxValue">0</span>
+                                        </label>
+                                    </div>
+                                    <div class="col col-3" style="text-align: left">
+                                        <label style="text-align: center; margin-top: 18px; ">
+                                            <span style="font-size: 20px" id="NetLbl">Net Debit:</span>
+                                            <span style="font-size: 20px; margin-left: 8px; color: green;" id="Net">0</span>
+                                        </label>
+                                    </div>
+                                </div>
+    <div hidden>
+        <center>
+            <a title="Add Detail" id="btnAddVoucherDetail" href="javascript:void(0)" class="btn btn-primary" style="width:95px; height:28px;color:white; margin-bottom:8px;line-height:26px;border-radius:5px;">
+                <i class="fa fa-plus"></i> Add
+            </a>
+            <a title="Cancel" id="btnCancelDetail" href="javascript:void(0)" class="btn btn-default" style="width:75px; height:28px;color:#333; margin-bottom:8px;line-height:26px;border-radius:5px;" hidden>
+                Cancel
+            </a>
+        </center>
+    </div>
+                            }
+                            <div class="col-md-12" style="margin-top:10px;margin-bottom:10px" hidden>
+                                <table id="voucherDetailTable" class="display nowrap cell-border table table-bordered table-striped" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th data-class="expand" style="width: 20px; background-color: #03386C; color: white; padding: 7px; text-align: center;border-right:none "></th>
+                                            <th data-class="expand" style="width: 20px; background-color: #03386C; color: white; padding: 7px; text-align: center; border-left: none; "></th>
+                                            <th data-hide="" style="width: 300px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Detail</th>
+                                            <th style="width: 200px; background-color: #03386C; color: white; padding: 7px; text-align: left;">Remarks</th>
+                                            <th style="width: 70px; background-color: #03386C; color: white; padding: 7px; text-align: right; ">Debit</th>
+                                            <th style="width: 70px; background-color: #03386C; color: white; padding: 7px; text-align: right; ">Credit</th>
+                                            <th style="width: 130px; background-color: #03386C; color: white; padding: 7px; ">Cheque No.</th>
+                                            <th style="width: 180px; background-color: #03386C; color: white; padding: 7px; text-align: left; ">Tax Name</th>
+                                            <th style="width: 90px; background-color: #03386C; color: white; padding: 7px; text-align: right; ">Tax Rate</th>
+                                            <th style="width: 90px; background-color: #03386C; color: white; padding: 7px; text-align: right; ">Tax Value</th>
+                                            <th style="width: 100px; background-color: #03386C; color: white; padding: 7px; text-align: right; ">Net Debit</th>
+                                            <th style="width: 100px; background-color: #03386C; color: white; padding: 7px;text-align:right ">Net Credit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+
+                            </div>
+                            <div class="col-md-12 TotalDebitRowDummy" style="margin-top:10px;margin-bottom:10px" hidden>
+                                <label class="pull-right">
+                                    <span style="font-size: 20px" id="TotalDebitLbl">Total Debit:</span>
+                                    <span style="font-size: 20px; margin-left: 8px; color: green;" id="TotalDebit">0.00</span>
+                                </label>
+                            </div>
+                            <div class="col-md-12 TotalCreditRowDummy" style="margin-bottom:10px" hidden>
+                                <label class="pull-right">
+                                    <span style="font-size: 20px" id="TotalCreditLbl">Total Credit:</span>
+                                    <span style="font-size: 20px; margin-left: 8px; color: green;" id="TotalCredit">0.00</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+</div>
+@section pagespecific {
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/notify.min.js"></script>
+    <script type="text/javascript">
+        $('#TaxCheckbox').change(function () {
+            var check = $(this).is(':checked');
+            if (check == true) {
+                $('#taxRow').removeAttr("hidden");
+            }
+            else {
+                $('#taxRow').attr("hidden", "hidden");
+                $('#TaxID').val(null).trigger('change');
+                $('#TaxRate').val('');
+                $('#TaxValue').html(0.00);
+                //$('#NetLbl').html('Net Debit:');
+                //$('#Net').html(0.00);
+                var debit = $('#LineDebit').val();
+                var credit = $('#LineCredit').val();
+                var taxRate = $('#TaxRate').val();
+                if (debit == '' || debit == null || isNaN(debit)) {
+                    debit = 0;
+                }
+                if (credit == '' || credit == null || isNaN(credit)) {
+                    credit = 0;
+                }
+                if (debit == 0 && credit == 0) {
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html('0.00');
+                }
+                else if (debit != 0 && credit == 0) {
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html(ReplaceNumberWithCommas(parseFloat(debit).toFixed(2)));
+                }
+                else if (debit == 0 && credit != 0) {
+                    $('#NetLbl').html('Net Credit:');
+                    $('#Net').html(ReplaceNumberWithCommas(parseFloat(credit).toFixed(2)));
+                }
+                else if (debit != 0 && credit != 0) {
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html(ReplaceNumberWithCommas(parseFloat(debit).toFixed(2)));
+                }
+            }
+        })
+        $('#DefaultVoucher').change(function () {
+            var check = $(this).is(':checked');
+            if (check == true) {
+                $('.PaidToSection').removeAttr("hidden");
+            }
+            else {
+                //$('.PaidToSection').attr("hidden", "hidden");
+            }
+        })
+        $('#btnAddVoucherDetail').click(function () {
+
+            if ($('#DisableOrNot').val() == 1) {
+                var lineDetail = $('#LineDetailCode option:selected').val();
+                var check = 0;
+                if (lineDetail == '' || lineDetail == null || lineDetail == 0) {
+                    $('#LineDetailDiv').closest('#LineDetailDiv').find('.select2-choice').css('border-color', '#cf564a');
+                    $('#LineDetailDiv').closest('#LineDetailDiv').find('.select2-choice').css('color', '#cf564a');
+                    check = 1;
+                }
+                var debit = $('#LineDebit').val();
+                var credit = $('#LineCredit').val();
+                if ((debit == '' || debit == null) && $('#LineCreditTd').is(":hidden")) {
+                    $('#LineDebit').css('border-color', '#A90329');
+                    $('#LineDebit').css('background-color', '#FFF0F0');
+                    check = 1;
+                }
+                if ($('#LineCreditTd').is(":visible") && (debit == '' || debit == null) && (credit == '' || credit == null)) {
+                    $('#LineDebit').css('border-color', '#A90329');
+                    $('#LineDebit').css('background-color', '#FFF0F0');
+                    check = 1;
+                }
+                if (check == 1) {
+                    return false;
+                }
+                if (debit != null && debit != '' && debit != 0 && credit != null && credit != '' && credit != 0) {
+                    alert("Please give only debit or credit value.");
+                    return false;
+                }
+                var remarks = $('#LineRemarks').val();
+                var vtable = $('#voucherDetailTable').DataTable();
+                var lineDetailCode = $('#LineDetailCode option:selected').text();
+                if (debit == null || debit == '' || debit == 0) {
+                    debit = 0;
+                }
+                if (credit == null || credit == '' || credit == 0) {
+                    credit = 0;
+                }
+                var chequeNo = $('#ChequeNo').val();
+                var taxId = $('#TaxID').val();
+                var taxName = $('#TaxID option:selected').text();
+                var taxRate = $('#TaxRate').val();
+                if (taxRate == '' || taxRate == null || isNaN(taxRate)) {
+                    taxRate = 0;
+                }
+                var taxValue = ReplaceCommas($('#TaxValue').html());
+                var net = ReplaceCommas($('#Net').html());
+                var netDebit = '';
+                var netCredit = '';
+                if (net == 0) {
+                    if (debit != null && debit != '') {
+                        $('#NetLbl').html('Net Debit:');
+                        net = debit;
+                    }
+                    else if (credit != null && credit != '') {
+                        $('#NetLbl').html('Net Credit:');
+                        net = credit;
+                    }
+                }
+                else {
+                    net = ReplaceCommas($('#Net').html());
+                }
+                if ($('#NetLbl').html().trim() == 'Net Debit:') {
+                    netDebit = net;
+                    netCredit = 0;
+                }
+                else {
+                    netCredit = net;
+                    netDebit = 0;
+                }
+                if (parseFloat(taxValue) == 0 && parseFloat(debit) != parseFloat(netDebit) && parseFloat(credit) != parseFloat(netCredit))
+                {
+                    alert("Error! Please try again.");
+                    return false;
+                }
+                if ($(this).html().trim() == '<i class="fa fa-plus"></i> Add') {
+                    vtable.row.add([
+                    "<a href='javascript:void(0);' class='btn btn-success editRowBtn' title='Edit' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-edit'></i></a>",
+                    "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtn' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                    "<span><input type='hidden' class='LineDetailCode01' value=" + lineDetail + " />" + lineDetailCode + "</span>",
+                    "<span><input type='hidden' class='LineRemarks01' value=" + remarks + " />" + remarks + "</span>",
+                    "<span style='text-align:right' class='pull-right'><input type='hidden' class='LineDebit01' value=" + debit + " />" + ReplaceNumberWithCommas(parseFloat(debit).toFixed(2)) + "</span>",
+                    "<span style='text-align:right' class='pull-right'><input type='hidden' class='LineCredit01' value=" + credit + " />" + ReplaceNumberWithCommas(parseFloat(credit).toFixed(2)) + "</span>",
+                    "<span><input type='hidden' class='LineCheque01' value=" + chequeNo + " />" + chequeNo + "</span>",
+                    "<span><input type='hidden' class='TaxId01' value=" + taxId + " />" + taxName + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='TaxRate01' value=" + taxRate + " />" + taxRate + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='TaxValue01' value=" + taxValue + " />" + taxValue + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='NetDebit01' value=" + netDebit + " />" + ReplaceNumberWithCommas(parseFloat(netDebit).toFixed(2)) + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='NetCredit01' value=" + netCredit + " />" + ReplaceNumberWithCommas(parseFloat(netCredit).toFixed(2)) + "</span>",
+                    ]).draw(false);
+                }
+                else {
+                    $('#btnAddVoucherDetail').html('<i class="fa fa-plus"></i> Add');
+                    $('#btnCancelDetail').hide();
+                    var tr = $('#HiddenTr').val();
+                    vtable.row(tr).data([
+                    "<a href='javascript:void(0);' class='btn btn-success editRowBtn' title='Edit' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-edit'></i></a>",
+                    "<a href='javascript:void(0);' class='btn btn-danger deleteRowBtn' title='Delete' style='height: 25px; font-size: 12.5px;width:25px;line-height:23px'><i class='fa fa-times'></i></a>",
+                    "<span><input type='hidden' class='LineDetailCode01' value=" + lineDetail + " />" + lineDetailCode + "</span>",
+                    "<span><input type='hidden' class='LineRemarks01' value=" + remarks + " />" + remarks + "</span>",
+                    "<span style='text-align:right' class='pull-right'><input type='hidden' class='LineDebit01' value=" + debit + " />" + ReplaceNumberWithCommas(parseFloat(debit).toFixed(2)) + "</span>",
+                    "<span style='text-align:right' class='pull-right'><input type='hidden' class='LineCredit01' value=" + credit + " />" + ReplaceNumberWithCommas(parseFloat(credit).toFixed(2)) + "</span>",
+                    "<span><input type='hidden' class='LineCheque01' value=" + chequeNo + " />" + chequeNo + "</span>",
+                    "<span><input type='hidden' class='TaxId01' value=" + taxId + " />" + taxName + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='TaxRate01' value=" + taxRate + " />" + taxRate + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='TaxValue01' value=" + taxValue + " />" + taxValue + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='NetDebit01' value=" + netDebit + " />" + ReplaceNumberWithCommas(parseFloat(netDebit).toFixed(2)) + "</span>",
+                    "<span class='pull-right'><input type='hidden' class='NetCredit01' value=" + netCredit + " />" + ReplaceNumberWithCommas(parseFloat(netCredit).toFixed(2)) + "</span>",
+                    ]).draw(false);
+                }
+
+                $('#LineDetailCode').val(null).trigger('change');
+                $('#LineRemarks').val('');
+                $('#ChequeNo').val('');
+                $('#LineDebit').val('');
+                $('#LineCredit').val('');
+                $('#TaxCheckbox').prop("checked", false);
+                $('#taxRow').attr("hidden", "hidden");
+                $('#TaxID').val(null).trigger('change');
+                $('#TaxRate').val('');
+                $('#TaxValue').html(0.00);
+                $('#NetLbl').html('Net Debit:');
+                $('#Net').html(0.00);
+                getGrandTotal();
+                $('#LineDetailCode').select2('open');
+                $('#PreviousBalance').html("0.00");
+            }
+        })
+        $('#MainDetailCode').on('select2:select', function (e) {
+            $('#Date').focus();
+        });
+        $('#DefaultVoucher').on('focusout', function () {
+            $('#LineDetailCode').select2('open');
+        });
+        $('#LineDetailCode').on('select2:select', function (e) {
+            $('#LineDebit').focus();
+        });
+        $('#btnCancelDetail').click(function () {
+            $('#PreviousBalance').html("0.00");
+            $('#btnCancelDetail').hide();
+            $('#LineDetailCode').val(null).trigger('change');
+            $('#LineRemarks').val('');
+            $('#ChequeNo').val('');
+            $('#LineDebit').val('');
+            $('#LineCredit').val('');
+            $('#TaxCheckbox').prop("checked", false);
+            $('#taxRow').attr("hidden", "hidden");
+            $('#TaxID').val(null).trigger('change');
+            $('#TaxRate').val('');
+            $('#TaxValue').html(0.00);
+            $('#NetLbl').html('Net Debit:');
+            $('#Net').html(0.00);
+            $('#btnAddVoucherDetail').html('<i class="fa fa-plus"></i> Add');
+        })
+        $(document).on('click', '.editRowBtn', function () {
+            var vtable = $('#voucherDetailTable').DataTable();
+            var tr = vtable.row($(this).parents('tr')).index();
+            $('#HiddenTr').val(tr);
+            var data = vtable.row($(this).parents('tr')).data();
+            var detailCode = data[2].split('value=')[1].split('/>')[0].trim();
+            var remarks = data[3].split('value=')[1].split('/>')[0].trim();
+            var debit = data[4].split('value=')[1].split('/>')[0].trim();
+            var credit = data[5].split('value=')[1].split('/>')[0].trim();
+            var cheque = data[6].split('value=')[1].split('/>')[0].trim();
+            var taxId = data[7].split('value=')[1].split('/>')[0].trim();
+            var taxRate = data[8].split('value=')[1].split('/>')[0].trim();
+            var taxValue = data[9].split('value=')[1].split('/>')[0].trim();
+            var netDebit = data[10].split('value=')[1].split('/>')[0].trim();
+            var netCredit = data[11].split('value=')[1].split('/>')[0].trim();
+            if (taxId == 'null' || taxId == 0) {
+                $('#TaxCheckbox').prop("checked", false);
+                $('#taxRow').attr("hidden", "hidden");
+                $('#TaxID').val(null).trigger('change');
+                $('#TaxRate').val('');
+                $('#TaxValue').html(0.00);
+                $('#NetLbl').html('Net Debit:');
+                $('#Net').html(0.00);
+            }
+            else {
+                $('#TaxCheckbox').prop("checked", true);
+                $('#taxRow').removeAttr("hidden");
+                $('#TaxID').val(taxId).trigger('change');
+                $('#TaxRate').val(taxRate);
+                $('#TaxValue').html(taxValue);
+                if (netCredit == 0) {
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html(netDebit);
+                }
+                else {
+                    $('#NetLbl').html('Net Credit:');
+                    $('#Net').html(netCredit);
+                }
+            }
+            $('#LineDetailCode').val(detailCode).trigger('change');
+            //$('#LineDetailCode').select2('val', detailCode);
+            $('#LineRemarks').val(remarks);
+            $('#LineDebit').val(debit);
+            $('#LineCredit').val(credit);
+            $('#ChequeNo').val(cheque);
+            getPreviousBalance(detailCode);
+            $('#btnAddVoucherDetail').html('<i class="fa fa-edit"></i> Change');
+            $('#btnCancelDetail').removeAttr("hidden");
+            $('#btnCancelDetail').show();
+        })
+        $(document).on('click', '.deleteRowBtn', function () {
+            var vtable = $('#voucherDetailTable').DataTable();
+            var tr = vtable.row($(this).parents('tr')).index();
+            vtable.row(tr).remove().draw(false);
+            $('#PreviousBalance').html("0.00");
+            $('#btnCancelDetail').hide();
+            $('#LineDetailCode').val(null).trigger('change');
+            $('#LineRemarks').val('');
+            $('#ChequeNo').val('');
+            $('#LineDebit').val('');
+            $('#LineCredit').val('');
+            $('#TaxCheckbox').prop("checked", false);
+            $('#taxRow').attr("hidden", "hidden");
+            $('#TaxID').val(null).trigger('change');
+            $('#TaxRate').val('');
+            $('#TaxValue').html(0.00);
+            $('#NetLbl').html('Net Debit:');
+            $('#Net').html(0.00);
+            $('#btnAddVoucherDetail').html('<i class="fa fa-plus"></i> Add');
+            getGrandTotal();
+        })
+        $('#LineDebit').keydown(function () {
+            $('#LineDebit').css('border-color', '#bdbdbd');
+            $('#LineDebit').css('background-color', '#fff');
+
+            $('#LineCredit').css('border-color', '#bdbdbd');
+            $('#LineCredit').css('background-color', '#fff');
+        }).mousedown(function () {
+            $('#LineDebit').css('border-color', '#bdbdbd');
+            $('#LineDebit').css('background-color', '#fff');
+
+            $('#LineCredit').css('border-color', '#bdbdbd');
+            $('#LineCredit').css('background-color', '#fff');
+        })
+        $('#LineCredit').keydown(function () {
+            $('#LineDebit').css('border-color', '#bdbdbd');
+            $('#LineDebit').css('background-color', '#fff');
+
+            $('#LineCredit').css('border-color', '#bdbdbd');
+            $('#LineCredit').css('background-color', '#fff');
+        }).mousedown(function () {
+            $('#LineDebit').css('border-color', '#bdbdbd');
+            $('#LineDebit').css('background-color', '#fff');
+
+            $('#LineCredit').css('border-color', '#bdbdbd');
+            $('#LineCredit').css('background-color', '#fff');
+        })
+        function ClearFormFields() {
+            $("input[value='Debit']").prop("checked", true);
+            $("input[type='radio']").prop("disabled", false);
+            //$('.PaidToSection').attr("hidden", "hidden");
+            $('.TotalDebitRow').attr("hidden", "hidden");
+            $('.TotalCreditRow').attr("hidden", "hidden");
+            $('#TotalDebit').html('0.00');
+            $('#TotalCredit').html('0.00');
+            $('#PreviousBalance').html("0.00");
+            $('#DisableOrNot').val(0);
+            $('#MainDetailCode').select().enable(false);
+            $('#MainDetailCode').val(null).trigger('change');
+            $('#LineDetailCode').select().enable(false);
+            $('#LineDetailCode').val(null).trigger('change');
+            $('#TaxID').prop("disable",true)
+            $('#TaxID').val(null).trigger('change');
+            $('#Date').prop("disabled", true);
+            $('#ReferenceNo').prop("disabled", true);
+            $('#Credit').prop("disabled", true); 
+            $('#Remarks').prop("disabled", true);
+            $('#PaidBy').prop("disabled", true);
+            $('#ReceivedBy').prop("disabled", true);
+            $('#DefaultVoucher').prop("disabled", true);
+            $('#LineRemarks').prop("disabled", true);
+            $('#ChequeNo').prop("disabled", true);
+            $('#LineDebit').prop("disabled", true);
+            $('#LineCredit').prop("disabled", true);
+            $('#TaxCheckbox').prop("disabled", true);
+            $('#taxRow').attr("hidden", "hidden");
+
+            $('#btnCancelDetail').hide();
+            $('#btnAddVoucherDetail').html('<i class="fa fa-plus"></i> Add');
+            $('#documentTd').attr("hidden", "hidden");
+            GetTodayDate();
+            $('#ReferenceNo').val('Breakage');
+            $('#Credit').val('');
+            $('#Remarks').val('');
+            $('#PaidBy').val('');
+            $('#ReceivedBy').val('');
+            $('#DefaultVoucher').prop("checked", false);
+            $('#LineRemarks').val('');
+            $('#ChequeNo').val('');
+            $('#LineDebit').val('');
+            $('#LineCredit').val('');
+            $('#TaxCheckbox').prop("checked", false);
+            $('#TaxRate').val('');
+            $('#TaxValue').html('0');
+            $('#NetLbl').html('Net Debit:');
+            $('#Net').html('0');
+
+            var vtable = $('#voucherDetailTable').DataTable();
+            vtable.clear().draw();
+
+            $('#btnSaveCashPayment').prop('disabled', true);
+            $('#btnSaveAndPrintCashPayment').prop('disabled', true);
+            $('#addTd').removeAttr("hidden");
+            $('#saveTd').attr("hidden", "hidden");
+            $('#saveAndPrintTd').attr("hidden", "hidden");
+            $('.deleteRow').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            $('#voucherNoSection').attr("hidden", "hidden");
+            $('#IsNewOrEdit').val("New");
+            $('#VoucherNo').val(0);
+            $('#VoucherNoSpan').html('0');
+            if ($('#CanSave').val() == 0) {
+                $('#listTd').css({ 'width': '44%', 'text-align': 'right' });
+                $('#saveTd').css({ 'width': '3%', 'text-align': 'left' });
+                $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'left' });
+            }
+            $('.StatusSection').attr("hidden", "hidden");
+        }
+        $('#btnAddCashPayment').click(function () {
+            EnableFormFields();
+        })
+        function EnableFormFields() {
+            $("input[value='Debit']").prop("checked", true);
+            $("input[type='radio']").prop("disabled", false);
+            //$('.PaidToSection').attr("hidden", "hidden");
+            $('.TotalDebitRow').removeAttr("hidden");
+            $('.TotalCreditRow').removeAttr("hidden");
+            $('#TotalDebit').html('0.00');
+            $('#TotalCredit').html('0.00');
+            $('#PreviousBalance').html("0.00");
+            $('#documentTd').attr("hidden", "hidden");
+            $('#DisableOrNot').val(1);
+            $('#MainDetailCode').select().enable(true);
+            $('#MainDetailCode').val(null).trigger('change');
+            $('#LineDetailCode').select().enable(true);
+            $('#LineDetailCode').val(null).trigger('change');
+            $('#TaxID').prop("disable", false)
+            $('#TaxID').val(null).trigger('change');
+            $('#Date').prop("disabled", false);
+            $('#ReferenceNo').prop("disabled", false); 
+            $('#Credit').prop("disabled", false);
+            $('#Remarks').prop("disabled", false);
+            $('#PaidBy').prop("disabled", false);
+            $('#ReceivedBy').prop("disabled", false);
+            $('#DefaultVoucher').prop("disabled", false);
+            $('#LineRemarks').prop("disabled", false);
+            $('#ChequeNo').prop("disabled", false);
+            $('#LineDebit').prop("disabled", false);
+            $('#LineCredit').prop("disabled", false);
+            $('#TaxCheckbox').prop("disabled", false);
+            $('#taxRow').attr("hidden", "hidden");
+
+            $('#btnCancelDetail').hide();
+            $('#btnAddVoucherDetail').html('<i class="fa fa-plus"></i> Add');
+
+            GetTodayDate();
+            $('#ReferenceNo').val('Breakage');
+            $('#Credit').val('');
+            $('#Remarks').val('');
+            $('#PaidBy').val('');
+            $('#ReceivedBy').val('');
+            $('#DefaultVoucher').prop("checked", false);
+            $('#LineRemarks').val('');
+            $('#ChequeNo').val('');
+            $('#LineDebit').val('');
+            $('#LineCredit').val('');
+            $('#TaxCheckbox').prop("checked", false);
+            $('#TaxRate').val('');
+            $('#TaxValue').html('0');
+            $('#NetLbl').html('Net Debit:');
+            $('#Net').html('0');
+
+            var vtable = $('#voucherDetailTable').DataTable();
+            vtable.clear().draw();
+            getMaxCode();
+            $('#btnSaveCashPayment').prop('disabled', false);
+            $('#btnSaveAndPrintCashPayment').prop('disabled', false);
+            $('#saveTd').removeAttr("hidden");
+            $('#saveAndPrintTd').removeAttr("hidden");
+            $('#addTd').attr("hidden", "hidden");
+            $('#saveTd').css({ 'width': '44%', 'text-align': 'right' });
+            $('#saveAndPrintTd').css({ 'width': '3%', 'text-align': 'right' });
+            
+            $('.deleteRow').attr("hidden", "hidden");
+            $('.StatusSection').attr("hidden", "hidden");
+        }
+        function getMaxCode()
+        {
+            $.ajax({
+                type: "POST",
+                url: "/cash/getMaxCodeForDebitCreditNote",
+                dataType: 'json',
+                success: function (response) {
+                    $('#voucherNoSection').removeAttr("hidden");
+                    $('#IsNewOrEdit').val("New");
+                    $('#VoucherNo').val(response);
+                    $('#VoucherNoSpan').html(response);
+                }
+            })
+        }
+        $('#LineDetailCode').change(function () {
+            getPreviousBalance($(this).val());
+        })
+        function getPreviousBalance(detailCode){
+            var code = $('#VoucherNo').val();
+            var voucherNo = code;
+            $.ajax({
+                type: "POST",
+                url: "/sale/getCreditDaysAndPreviousBalance/",
+                dataType: 'json',
+                data: { 'detailCode': detailCode, 'code': code, 'voucherNo': voucherNo },
+                success: function (response) {
+                    $('#PreviousBalance').html(ReplaceNumberWithCommas(parseFloat(response.previousBalance).toFixed(2)));
+                }
+            })
+        }
+        $('#TaxID').change(function () {
+            var taxId = $(this).val();
+            $.ajax({
+                type: "POST",
+                url: "/cash/getTaxRate/" + taxId,
+                dataType: 'json',
+                success: function (response) {
+                    $('#TaxRate').val(response);
+                    getTaxValue();
+                }
+            })
+        })
+        $('#LineDebit').keyup(function () {
+            getTaxValue();
+        })
+        $('#LineCredit').keyup(function () {
+            getTaxValue();
+        })
+        $('#TaxRate').keyup(function () {
+            getTaxValue();
+        })
+
+        function getTaxValue() {
+            var debit = $('#LineDebit').val();
+            var credit = $('#LineCredit').val();
+            var taxRate = $('#TaxRate').val();
+            if (debit == '' || debit == null || isNaN(debit)) {
+                debit = 0;
+            }
+            if (credit == '' || credit == null || isNaN(credit)) {
+                credit = 0;
+            }
+            if (taxRate == '' || taxRate == null || isNaN(taxRate)) {
+                taxRate = 0;
+            }
+            if ($('#TaxID').val() != '' && $('#TaxID').val() != null && $('#TaxID').val() != 0) {
+                if (debit == 0 && credit == 0) {
+                    $('#TaxValue').html('0.00');
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html('0.00');
+                }
+                else if (debit != 0 && credit == 0) {
+                    var taxAmount = parseFloat(debit) * parseFloat(taxRate);
+                    taxAmount = (parseFloat(taxAmount) / 100);
+                    var net = parseFloat(debit) - taxAmount;
+                    $('#TaxValue').html(ReplaceNumberWithCommas(taxAmount.toFixed(2)));
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html(ReplaceNumberWithCommas(net.toFixed(2)));
+                }
+                else if (debit == 0 && credit != 0) {
+                    var taxAmount = parseFloat(credit) * parseFloat(taxRate);
+                    taxAmount = (parseFloat(taxAmount) / 100);
+                    var net = parseFloat(credit) - taxAmount;
+                    $('#TaxValue').html(ReplaceNumberWithCommas(taxAmount.toFixed(2)));
+                    $('#NetLbl').html('Net Credit:');
+                    $('#Net').html(ReplaceNumberWithCommas(net.toFixed(2)));
+                }
+                else if (debit != 0 && credit != 0) {
+                    var taxAmount = parseFloat(debit) * parseFloat(taxRate);
+                    taxAmount = (parseFloat(taxAmount) / 100);
+                    var net = parseFloat(debit) - taxAmount;
+                    $('#TaxValue').html(ReplaceNumberWithCommas(taxAmount.toFixed(2)));
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html(ReplaceNumberWithCommas(net.toFixed(2)));
+                }
+            }
+            else {
+                if (debit == 0 && credit == 0) {
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html('0.00');
+                }
+                else if (debit != 0 && credit == 0) {
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html(ReplaceNumberWithCommas(parseFloat(debit).toFixed(2)));
+                }
+                else if (debit == 0 && credit != 0) {
+                    $('#NetLbl').html('Net Credit:');
+                    $('#Net').html(ReplaceNumberWithCommas(parseFloat(credit).toFixed(2)));
+                }
+                else if (debit != 0 && credit != 0) {
+                    $('#NetLbl').html('Net Debit:');
+                    $('#Net').html(ReplaceNumberWithCommas(parseFloat(debit).toFixed(2)));
+                }
+            }
+        }
+        $('#Credit').keyup(function () {
+            //getGrandTotal();
+        })
+        function getGrandTotal() {
+            var count = 0;
+            $('#voucherDetailTable tr[role="row"]').each(function () {
+                count++;
+            });
+            var rowsCount = count - 1;
+            var vtable = $('#voucherDetailTable').DataTable();
+            var totalDebit = 0;
+            var totalCredit = 0;
+            for (irow = 0; irow < rowsCount; irow++) {
+                var data = vtable.row(irow).data();
+                var netDebit = ReplaceCommas(data[10].split('value=')[1].split('/>')[0].trim());
+                var netCredit = ReplaceCommas(data[11].split('value=')[1].split('/>')[0].trim());
+                totalDebit += parseFloat(netDebit);
+                totalCredit += parseFloat(netCredit);
+            }
+            var mainCredit = $('#Credit').val();
+            if (mainCredit == '' || mainCredit == null || isNaN(mainCredit)) {
+                mainCredit = 0;
+            }
+            totalCredit += parseFloat(mainCredit);
+            $('#TotalDebit').html(ReplaceNumberWithCommas(totalDebit.toFixed(2)));
+            $('#TotalCredit').html(ReplaceNumberWithCommas(totalCredit.toFixed(2)));
+        }
+        $(document).ready(function () {
+            $('#btnCancelDetail').hide();
+            $('#btnAddVoucherDetail').hide();
+            $('#MainDetailCode').select2();
+            $('#LineDetailCode').select2();
+            $('#TaxID').select2();
+
+            var responsiveHelper_dt_basic = undefined;
+            var responsiveHelper_datatable_fixed_column = undefined;
+            var responsiveHelper_datatable_col_reorder = undefined;
+            var responsiveHelper_datatable_tabletools = undefined;
+
+            var breakpointDefinition = {
+                tablet: 1024,
+                phone: 480
+            };
+            $('#voucherDetailTable').dataTable({
+                "sDom": '<"top">rt<"bottom"lp i><"clear">',
+                "autoWidth": true,
+                "preDrawCallback": function () {
+                    if (!responsiveHelper_dt_basic) {
+                        responsiveHelper_dt_basic = new ResponsiveDatatablesHelper($('#voucherDetailTable'), breakpointDefinition);
+                    }
+                },
+                "rowCallback": function (nRow) {
+                    responsiveHelper_dt_basic.createExpandIcon(nRow);
+                },
+                "drawCallback": function (oSettings) {
+                    responsiveHelper_dt_basic.respond();
+                },
+                "bPaginate": false,
+                "serverSide": false,
+                "bLengthChange": false,
+                "processing": false,
+                "searching": false,
+                "bInfo": false,
+                "ordering": false,
+                "scrollX": true,
+                //"scrollY": 200
+            });
+
+            $('#cashPaymentForm').validate({
+                ignore: [],
+                // Rules for form validation
+                rules: {
+                    Date: {
+                        required: true
+                    },
+                    Credit: {
+                        required: true
+                    },
+                    DetailCode: {
+                        required: true
+                    },
+                },
+
+                // Messages for form validation
+                messages: {
+                    Date: {
+                        required: 'Date is required.'
+                    },
+                    Credit: {
+                        required: 'Amount is required.'
+                    },
+                    DetailCode: {
+                        required: 'Account is required.'
+                    },
+                },
+                // Do not change code below
+                errorPlacement: function (error, element) {
+                    error.insertAfter(element.parent());
+                }
+            });
+
+            EnableFormFields();
+        })
+        $('#btnRefreshCashPayment').click(function () {
+            location.reload();
+        })
+        $('#btnCashPaymentList').click(function () {
+            $('#cashPaymentListDiv').load('@Url.Action("DebitCreditNotesList", "cash")')
+        })
+        $('#btnAttachDocument').click(function () {
+            var voucherNo = $('#VoucherNo').val();
+            $('#documentsDiv').load('@Url.Action("attachdocument", "documents")?type=Voucher&id=' + voucherNo + '');
+        })
+        $('.btnUpSave').mouseover(function () {
+            $(this).find('img').css({ 'height': '50px', 'width': '50px' });
+        }).mouseleave(function () {
+            $(this).find('img').css({ 'height': '43px', 'width': '43px' });
+        });
+        function getAllData() {
+            var arrayData = [];
+                var isNewOrEdit = $('#IsNewOrEdit').val();
+                var voucherNo = $('#VoucherNo').val();
+                var detailCode = $('#MainDetailCode').val();
+                var date = $('#Date').val();
+                var referenceNo = $('#ReferenceNo').val(); 
+                var mainCredit = $('.Credit').val();
+                var mainRemarks = $('.Remarks').val();
+                var paidBy = $('#PaidBy').val();
+                var receivedBy = $('#ReceivedBy').val();
+                var debitOrCredit = "";
+                
+                var defaultVoucher = $('#DefaultVoucher').is(':checked');
+                var defaultVoucherInt = 0;
+                if (defaultVoucher == true) {
+                    defaultVoucherInt = 1;
+                }
+                else {
+                    defaultVoucherInt = 0;
+                }
+                var detailCodeLine = 0; // $('#LineDetailCode').val();
+                var remarks = "";
+                var debit = 0;
+                var credit = 0;
+                var cheque = "";
+                var taxId = 0;
+                var taxRate = 0;
+                var taxValue = 0;
+                var netDebit = 0;
+                var netCredit = 0;
+                var alldata = {
+                    'IsNewOrEdit': isNewOrEdit,
+                    'VoucherNo': voucherNo,
+                    'DetailCode': detailCode,
+                    'VoucherDate': date,
+                    'RefrenceNo': referenceNo,
+                    'Credit': mainCredit,
+                    
+                    'Remarks': mainRemarks,
+                    'PaidBy': paidBy,
+                    'ReceivedBy': receivedBy,
+                    'DefaultVoucher': defaultVoucherInt,
+                    'LineDetailCode': detailCodeLine,
+                    'LineDebit': mainCredit,
+                    'LineCredit': credit,
+                    'LineRemarks': remarks,
+                    'LineChequeNo': cheque,
+                    'LineChequeComputerNo': 0,
+                    'TaxID': taxId,
+                    'TaxRate': taxRate,
+                    'TaxValue': taxValue,
+                    'NetDebit': netDebit,
+                    'NetCredit': netCredit,
+                }
+                arrayData.push(alldata);
+            console.log(arrayData);
+            return arrayData;
+        }
+        $('#cashPaymentForm').on('submit', function (e) {
+            e.preventDefault();
+            if (!$("#cashPaymentForm").valid()) {
+                return false;
+            }
+            var val = $(this).find("button:focus").attr("title");
+            var print = 0;
+            if (val.trim() == "Save") {
+                print = 0;
+            }
+            else {
+                print = 1;
+            }
+            var totalDebit = ReplaceCommas($('#TotalDebit').html());
+            var totalCredit = ReplaceCommas($('#TotalCredit').html());
+            //if ($('#DefaultVoucher').is(':checked') && ($('#LineDetailCode').val() == '' || $('#LineDetailCode').val() == null)) {
+            //    alert("Paid To Account is required.");
+            //    return false;
+            //}
+
+            $('#btnSaveCashPayment').prop('disabled', true);
+            $('#btnSaveAndPrintCashPayment').prop('disabled', true);
+            var voucherDetailData = JSON.stringify(getAllData());
+            var url = $('#cashPaymentForm')[0].action;
+            $.ajax({
+                type: "POST",
+                url: url,
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'data': voucherDetailData }),
+                success: function (data) {
+                    if (data.status == true) {
+                        if (print == 1) {
+                            window.location.href = "/cash/debitcreditnotereport/" + data.voucherNo;
+                        }
+                        else {
+                            $('.alertDiv').html('<div class="alert alert-success" id="success-alert" style="margin-top:15px;">' +
+                                                '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                ' <strong>Success! </strong>' +
+                                                'Voucher Saved Succesfully.' +
+                                            '</div>');
+                            $("#success-alert").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert").slideUp(500);
+                                $('.alertDiv').html('');
+                            });
+                            //$.notify("First Level Saved Successfully.", "success");
+                            EnableFormFields();
+                        }
+                    }
+                    else {
+                        alert(data.message);
+                        $('#btnSaveCashPayment').prop('disabled', false);
+                        $('#btnSaveAndPrintCashPayment').prop('disabled', false);
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        $('#btnDeleteCashPayment').click(function () {
+            var voucherNo = $('#VoucherNo').val();
+            DeleteCashPayment(voucherNo);
+        })
+        function DeleteCashPayment(id) {
+            var a = $.confirm({
+                title: 'Delete Voucher',
+                content: 'Are you sure u want to delete this voucher?',
+                type: 'white',
+                buttons: {
+                    ok: {
+                        text: "Yes",
+                        btnClass: 'btnConfirm',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: '/cash/DeleteCashPayment/' + id,
+                                type: "POST",
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.status == true) {
+                                        location.reload();
+                                    }
+                                    else {
+                                        alert(data.message);
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: "No",
+                        btnClass: 'btn-default',
+                        keys: ['esc'],
+                        action: function () {
+                            a.close();
+                        }
+                    },
+                }
+            });
+        }
+        $("#Credit").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#LineDebit").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#LineCredit").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        $("#TaxRate").on('keypress', function (event) {
+            NumberPostiveNegativeWithDecimal(event, this);
+        });
+        function NumberPostiveNegativeWithDecimal(evt, element) {
+            var charCode = (evt.which) ? evt.which : event.keyCode
+            if (
+                (charCode != 127) &&
+                (charCode != 8) &&
+                (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+                (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                evt.preventDefault();
+            return true;
+        }
+        function GetTodayDate() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#Date').val(today);
+        }
+        function ReplaceCommas(yourNumber) {
+            var noCommas = yourNumber.replace(/,/g, ''),
+                asANumber = +noCommas;
+            return noCommas;
+        }
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+    </script>
+}

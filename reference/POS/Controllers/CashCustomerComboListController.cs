@@ -1,0 +1,73 @@
+﻿using POS.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace POS.Controllers
+{
+    public class CashCustomerComboListController : Controller
+    {
+        PosMBDb db = new PosMBDb();
+
+        IQueryable<clsCashCustomerList> AllItemsList;
+
+        public JsonResult GetOptionList(string searchTerm, int pageSize, int pageNumber)
+        {
+            AllItemsList = AllItemsListDetail();
+            var select2pagedResult = new Select2PagedCashCustomerResult();
+            var totalResults = 0;
+            select2pagedResult.Results = GetPagedListOptions(searchTerm, pageSize, pageNumber, out totalResults);
+            select2pagedResult.Total = totalResults;
+
+            var result = select2pagedResult;
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        public IQueryable<clsCashCustomerList> AllItemsListDetail()
+        {
+            //string cacheKey = "Select2Options";
+            ////check cache 
+            //if (System.Web.HttpContext.Current.Cache[cacheKey] != null)
+            //{
+            //    return (IQueryable<clsItemList>)System.Web.HttpContext.Current.Cache[cacheKey];
+            //}
+
+            List<clsCashCustomerList> item = new List<clsCashCustomerList>();
+            item = (from c in db.Invoice_Main
+                    select new clsCashCustomerList
+                    {
+                        id = c.CashCustomerName ?? "",
+                        text = c.CashCustomerName ?? ""
+                    }).Distinct().ToList();
+
+            var result = item.AsQueryable();
+
+            //cache results
+            //System.Web.HttpContext.Current.Cache[cacheKey] = result;
+
+            return result;
+        }
+
+
+        List<clsCashCustomerList> GetPagedListOptions(string searchTerm, int pageSize, int pageNumber, out int totalSearchRecords)
+        {
+            var allSearchedResults = GetAllSearchResults(searchTerm);
+            totalSearchRecords = allSearchedResults.Count;
+            return allSearchedResults.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+        }
+
+        List<clsCashCustomerList> GetAllSearchResults(string searchTerm)
+        {
+            //AllItemsList = AllItemsListDetail();
+            var resultList = new List<clsCashCustomerList>();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+                resultList = AllItemsList.Where(n => n.text.ToLower().Contains(searchTerm.ToLower())).ToList();
+            else
+                resultList = AllItemsList.ToList();
+            return resultList;
+        }
+	}
+}

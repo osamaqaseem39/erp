@@ -54,10 +54,31 @@ class JournalService {
   };
 
   /**
+   * Approve journal (Draft → Approved / Closed)
+   */
+  approve = async (id: string): Promise<void> => {
+    await api.create(`/finance/journals/${id}/approve`, {});
+  };
+
+  /**
+   * Reject approved journal back to Draft
+   */
+  reject = async (id: string, reason?: string): Promise<void> => {
+    await api.create(`/finance/journals/${id}/reject`, { reason: reason || '', reversalReason: reason || '' });
+  };
+
+  /**
    * Post journal
    */
   post = async (id: string): Promise<void> => {
     await api.create(`/finance/journals/${id}/post`, {});
+  };
+
+  /**
+   * Unpost journal (Posted → Draft)
+   */
+  unpost = async (id: string): Promise<void> => {
+    await api.create(`/finance/journals/${id}/unpost`, {});
   };
 }
 

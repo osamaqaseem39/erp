@@ -1,5 +1,7 @@
 # Architecture — ERP SaaS
 
+> On conflict, [operating/PROJECT_CONSTITUTION.md](./operating/PROJECT_CONSTITUTION.md) §Architecture and [operating/rules.md](./operating/rules.md) supersede this file. Update both in the same change.
+
 ## Style
 
 Clean Architecture / layered .NET solution with a React SPA client.

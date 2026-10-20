@@ -1,6 +1,14 @@
+using ERP.Application.Core;
 using ERP.Application.Interfaces.Admin;
 using ERP.Shared.DTOs.Admin;
+using ERP.Shared.DTOs.Core;
 using HotChocolate;
+using IPermissionService = ERP.Application.Interfaces.Core.IPermissionService;
+using IRoleService = ERP.Application.Interfaces.Admin.IRoleService;
+using AuditLogDto = ERP.Shared.DTOs.Admin.AuditLogDto;
+using PermissionDto = ERP.Shared.DTOs.Core.PermissionDto;
+using RoleDto = ERP.Shared.DTOs.Admin.RoleDto;
+using UserDto = ERP.Shared.DTOs.Admin.UserDto;
 
 namespace ERP.Api.GraphQL.Admin;
 
@@ -47,6 +55,31 @@ public class AdminQueries
     {
         return await service.GetAllAsync(tenantId, isActive);
     }
+
+    public async Task<IEnumerable<PermissionDto>> GetRolePermissions(
+        [Service] IRoleService service,
+        Guid roleId,
+        Guid tenantId)
+        => await service.GetPermissionsAsync(roleId, tenantId);
+
+    public async Task<IEnumerable<PermissionDto>> GetPermissions(
+        [Service] IPermissionService permissionService,
+        Guid tenantId,
+        bool activeOnly = true)
+        => await permissionService.GetAllAsync(tenantId, activeOnly);
+
+    // Admin notification emails
+    public async Task<AdminEmailDto?> GetAdminEmail(
+        [Service] IAdminEmailService service,
+        Guid adminEmailId,
+        Guid tenantId)
+        => await service.GetByIdAsync(adminEmailId, tenantId);
+
+    public async Task<IEnumerable<AdminEmailDto>> GetAdminEmails(
+        [Service] IAdminEmailService service,
+        Guid tenantId,
+        bool? isActive = null)
+        => await service.GetAllAsync(tenantId, isActive);
 
     // System Setting Queries
     [HotChocolate.Authorization.Authorize(Roles = new[] { "SuperAdmin", "SUPER_ADMIN" })]

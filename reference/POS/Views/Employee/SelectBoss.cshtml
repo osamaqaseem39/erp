@@ -1,0 +1,124 @@
+﻿<style>
+    .btnSelectSupplier:hover {
+        color: white !important;
+    }
+</style>
+@model List<POS.Models.clsEmployee>
+    <div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-12 col-xs-12 pull-right" style="">
+        <input class="form-control input-lg" type="text" placeholder="Search here..." name="txtSearch" id="txtSearch" style="border-radius: 0px !important; border-color: #E2E2E2 !important; ">
+        <div class="input-group-btn">
+            <button type="button" id="btnSearch" class="btn btn-default" style="background-color: #fff !important; border-color: #E2E2E2 !important;">
+                &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-search fa-lg" style="color: #656C79; "></i>&nbsp;&nbsp;&nbsp;
+            </button>
+        </div>
+    </div>
+    <div class="row" style=""> &nbsp;</div>
+    <hr style="border: 1px solid #D8D8D8" />
+    @if (Model.Count == 0)
+    {
+        <div class="row selectSupplierRow" style="width: 100%; border-bottom: 1px solid #D8D8D8;margin-top:-10px">
+            <div class="col col-md-12" style="">
+                <table class="" style="width:100%;">
+                    <tr>
+                        <td style="width: 100%; text-align: center; padding-left: 15px; padding-top: 10px; padding-bottom: 10px" class="supplierTd">
+                            No Employee Record  Found.
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    }
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        var src = "";
+        string marginTop = "0px";
+        if (i == 0)
+        {
+            marginTop = "-15px";
+        }
+        <div class="row selectSupplierRow" style="width: 100%; border-bottom: 1px solid #D8D8D8;margin-top:@marginTop">
+            <input type="hidden" class="Boss_EmployeeId" value="@Model[i].EmployeeId" />
+            <input type="hidden" class="Boss_FullName" value="@Model[i].FullName" />
+            <div class="col col-md-12" style="">
+                <table class="" style="width:100%;">
+                    @if (i == 0)
+                    {
+                        <tr>
+                            <td style="width: 95%; font-size: 14px; font-weight: bold; text-align: left; border-bottom: 1px solid #000; padding-left: 5px;" class="">
+                                <h6 style="font-weight:normal">Full Name</h6>
+                            </td>
+                            <td style="width: 5%; font-size: 14px; font-weight: bold; text-align: center; border-bottom: 1px solid #000;">
+                                <h5 class="">Action</h5>
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td style="width:80%;text-align:left;padding-left:5px;padding-top:0px;padding-bottom:10px" class="supplierTd">
+                            <h6  class="SelectEmployeeName" style="margin-left:10px;font-weight:normal">@Model[i].FullName</h6>
+                        </td>
+                        <td style="width: 5%; text-align: right; padding-top: 10px; padding-bottom: 10px">
+                            <button type="button" class="btn btn-primary pull-right btnSelectBossSelection" data-dismiss="modal" style="background-color: #0472BA !important" id="DeleteBtn">
+                                <i class="fa fa-check-circle"></i>
+                                Select
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            @*<hr style="border: 1px solid #D8D8D8;margin-top:2px" />*@
+        </div>
+    }
+
+
+    <script type="text/javascript">
+        $("#txtSearch").on("keyup", function () {
+            SearchText();
+        });
+        $("#btnSearch").on("click", function () {
+            SearchText();
+        });
+        $('#txtSearch').on('keypress', function (event) {
+            if (event.keyCode == 13) {
+                SearchText();
+            }
+        });
+        $(document).on("click", ".btnSelectBossSelection", function () {
+            var bossEmployeeId = $(this).parents(".selectSupplierRow").find('.Boss_EmployeeId').val();
+            var bossName = $(this).parents(".selectSupplierRow").find('.Boss_FullName').val();
+            $('#ImmediateBossId').val(bossEmployeeId);
+            $('#ImmediateBoss').val(bossName);
+        });
+
+        $(window).resize(function () {
+            // This will execute whenever the window is resized
+            //ChangeScreenwidthSupplier();
+
+        });
+        $(document).ready(function () {
+            //ChangeScreenwidthSupplier();
+        });
+        function SearchText() {
+            var value = $("#txtSearch").val().toLowerCase();
+            $(".selectSupplierRow").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        }
+        //function ChangeScreenwidthSupplier() {
+        //    if ($(window).width() <= 480) {
+        //        $('.imageTd').each(function () {
+        //            $(this).css('width', '35%');
+        //        })
+        //        $('.supplierTd').each(function () {
+        //            $(this).css('width', '60%');
+        //        })
+        //    }
+        //    else {
+        //        $('.imageTd').each(function () {
+        //            $(this).css('width', '10%');
+        //        })
+        //        $('.supplierTd').each(function () {
+        //            $(this).css('width', '85%');
+        //        })
+        //    }
+        //}
+    </script>

@@ -13,60 +13,78 @@ public class LeaveRequestRepository : ILeaveRequestRepository
         _context = context;
     }
 
-    public async Task<LeaveRequest?> GetByIdAsync(Guid id)
+    // Avoid Include on required Employee/LeaveType — missing rows become INNER JOINs and hide requests.
+    private IQueryable<LeaveRequest> Query(Guid tenantId)
     {
-        return await _context.LeaveRequests
-            .Include(l => l.Employee)
-            .Include(l => l.LeaveType)
-            .FirstOrDefaultAsync(l => l.Id == id);
+        if (tenantId == Guid.Empty)
+            return _context.LeaveRequests.Where(_ => false);
+        return _context.LeaveRequests.Where(l => l.TenantId == tenantId);
     }
 
-    public async Task<IEnumerable<LeaveRequest>> GetAllAsync()
+    private async Task LoadRelatedAsync(LeaveRequest? entity)
     {
-        return await _context.LeaveRequests
-            .Include(l => l.Employee)
-            .Include(l => l.LeaveType)
-            .ToListAsync();
+        if (entity == null) return;
+        await _context.Entry(entity).Reference(l => l.Employee).LoadAsync();
+        await _context.Entry(entity).Reference(l => l.LeaveType).LoadAsync();
     }
 
-    public async Task<IEnumerable<LeaveRequest>> GetByEmployeeAsync(Guid employeeId)
+    private async Task LoadRelatedAsync(IEnumerable<LeaveRequest> entities)
     {
-        return await _context.LeaveRequests
-            .Include(l => l.Employee)
-            .Include(l => l.LeaveType)
-            .Where(l => l.EmployeeId == employeeId)
-            .ToListAsync();
+        foreach (var entity in entities)
+        {
+            await _context.Entry(entity).Reference(l => l.Employee).LoadAsync();
+            await _context.Entry(entity).Reference(l => l.LeaveType).LoadAsync();
+        }
     }
 
-    public async Task<IEnumerable<LeaveRequest>> GetByStatusAsync(string status)
+    public async Task<LeaveRequest?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        return await _context.LeaveRequests
-            .Include(l => l.Employee)
-            .Include(l => l.LeaveType)
-            .Where(l => l.Status == status)
-            .ToListAsync();
+        var entity = await Query(tenantId).FirstOrDefaultAsync(l => l.Id == id);
+        await LoadRelatedAsync(entity);
+        return entity;
     }
 
-    public async Task<IEnumerable<LeaveRequest>> GetByLeaveTypeAsync(Guid leaveTypeId)
+    public async Task<IEnumerable<LeaveRequest>> GetAllAsync(Guid tenantId)
     {
-        return await _context.LeaveRequests
-            .Include(l => l.Employee)
-            .Include(l => l.LeaveType)
-            .Where(l => l.LeaveTypeId == leaveTypeId)
-            .ToListAsync();
+        var list = await Query(tenantId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
     }
 
-    public async Task<IEnumerable<LeaveRequest>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<LeaveRequest>> GetByEmployeeAsync(Guid employeeId, Guid tenantId)
     {
-        return await _context.LeaveRequests
-            .Include(l => l.Employee)
-            .Include(l => l.LeaveType)
+        var list = await Query(tenantId).Where(l => l.EmployeeId == employeeId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<LeaveRequest>> GetByStatusAsync(string status, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(l => l.Status == status).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<LeaveRequest>> GetByLeaveTypeAsync(Guid leaveTypeId, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(l => l.LeaveTypeId == leaveTypeId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<LeaveRequest>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
+    {
+        var list = await Query(tenantId)
             .Where(l => l.StartDate >= startDate && l.EndDate <= endDate)
             .ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
     }
 
     public async Task<Guid> CreateAsync(LeaveRequest leaveRequest)
     {
+        if (leaveRequest.Id == Guid.Empty) leaveRequest.Id = Guid.NewGuid();
+        if (leaveRequest.CreatedAt == default) leaveRequest.CreatedAt = DateTime.UtcNow;
         _context.LeaveRequests.Add(leaveRequest);
         await _context.SaveChangesAsync();
         return leaveRequest.Id;
@@ -74,18 +92,16 @@ public class LeaveRequestRepository : ILeaveRequestRepository
 
     public async Task<bool> UpdateAsync(LeaveRequest leaveRequest)
     {
+        leaveRequest.UpdatedAt = DateTime.UtcNow;
         _context.LeaveRequests.Update(leaveRequest);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var leaveRequest = await _context.LeaveRequests.FindAsync(id);
+        var leaveRequest = await GetByIdAsync(id, tenantId);
         if (leaveRequest == null) return false;
-
         _context.LeaveRequests.Remove(leaveRequest);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 }

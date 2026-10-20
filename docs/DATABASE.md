@@ -9,7 +9,7 @@
 | Secondary | Dapper via `IStoredProcedureExecutor` / `StoredProcedureExecutor` |
 | Connection | `AppConstants.SQL_CONNECTION_STRING` (hardcoded; currently machine-specific `HELLOWORLD\\SQLEXPRESS`, database `erpnew`) |
 | Migrations | Under `ERP.Infrastructure/Migrations/`; applied on API startup |
-| Extra SQL | `Database/Schemas/*Module_Schema.sql` + deployment service; root `*.sql` maintenance scripts |
+| Extra SQL | `Database/Schemas/*Module_Schema.sql` + dated `20yyMMdd_*.sql` patches (deployed after modules) + root maintenance scripts |
 
 ## EF model coverage
 
@@ -35,14 +35,10 @@ Core tables are mapped to schema **`Core`** (e.g. `Core.Tenants`, `Core.Users`).
 
 Present under `ERP.Infrastructure/Database/Schemas/`:
 
-- `CoreModule_Schema.sql`
-- `CRMModule_Schema.sql`
-- `FinanceModule_Schema.sql`
-- `HRMModule_Schema.sql`
-- `InventoryModule_Schema.sql`
-- `ProcurementModule_Schema.sql`
+- Base: `CoreModule_Schema.sql`, `CRMModule_Schema.sql`, `FinanceModule_Schema.sql`, `HRMModule_Schema.sql`, `InventoryModule_Schema.sql`, `ProcurementModule_Schema.sql`
+- Incremental (idempotent): `20yyMMdd_Feature.sql` — e.g. `20261020_Auth_TwoFactorTotp.sql`, BOM, Benefits, debit/credit note columns
 
-Deployed optionally at startup by `DatabaseDeploymentService` (`deployTables: true`, `deployStoredProcedures: true`). Failures are logged as warnings and do not abort host startup.
+Deployed optionally at startup by `DatabaseDeploymentService` (`deployTables: true`, `deployStoredProcedures: true`): module schemas first, then dated patches in name order. Failures are logged as warnings and do not abort host startup.
 
 ## Root SQL utilities
 

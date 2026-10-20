@@ -8,6 +8,8 @@ public class PaymentApplicationDto : BaseDto
     public string? PaymentNumber { get; set; }
     public Guid InvoiceId { get; set; }
     public string? InvoiceNumber { get; set; }
+    public Guid BillId { get; set; }
+    public string? BillNumber { get; set; }
     public decimal Amount { get; set; }
     public DateTime ApplicationDate { get; set; }
     public string Status { get; set; } = "Applied";

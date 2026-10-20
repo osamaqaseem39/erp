@@ -56,6 +56,16 @@ public class PermissionFilterTests
     }
 
     [Fact]
+    public async Task View_only_vendor_may_list_but_not_create()
+    {
+        Assert.Null(await Run("GET", "api/procurement/vendors", ["procurement.vendors.view"]));
+        var result = Assert.IsType<ObjectResult>(await Run("POST", "api/procurement/vendors", ["procurement.vendors.view"]));
+        Assert.Equal(403, result.StatusCode);
+        var error = Assert.IsType<ApiError>(result.Value);
+        Assert.Equal(["procurement.vendors.create"], error.Errors!["permission"]);
+    }
+
+    [Fact]
     public async Task SuperAdmin_passes_every_permission_check()
     {
         Assert.Null(await Run("DELETE", "api/crm/customers/{id:guid}", [], role: "SuperAdmin"));

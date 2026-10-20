@@ -12,6 +12,8 @@ public class SalesInvoiceDto : BaseDto
     public DateTime DueDate { get; set; }
     public string Status { get; set; } = "Draft";
     public decimal SubTotal { get; set; }
+    public decimal Tax1Amount { get; set; }
+    public decimal Tax2Amount { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal TotalAmount { get; set; }
     public decimal PaidAmount { get; set; }
@@ -64,8 +66,13 @@ public class SalesInvoiceLineDto
     public string Description { get; set; } = string.Empty;
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
+    /// <summary>Legacy alias for Tax1Rate.</summary>
     public decimal TaxRate { get; set; }
     public decimal TaxAmount { get; set; }
+    public decimal Tax1Rate { get; set; }
+    public decimal Tax1Amount { get; set; }
+    public decimal Tax2Rate { get; set; }
+    public decimal Tax2Amount { get; set; }
     public decimal LineTotal { get; set; }
     public int LineNumber { get; set; }
 }
@@ -76,7 +83,10 @@ public class CreateSalesInvoiceLineDto
     public string Description { get; set; } = string.Empty;
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
+    /// <summary>Legacy alias for Tax1Rate.</summary>
     public decimal TaxRate { get; set; }
+    public decimal? Tax1Rate { get; set; }
+    public decimal? Tax2Rate { get; set; }
     public int LineNumber { get; set; }
 }
 
@@ -88,5 +98,7 @@ public class UpdateSalesInvoiceLineDto
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal TaxRate { get; set; }
+    public decimal? Tax1Rate { get; set; }
+    public decimal? Tax2Rate { get; set; }
     public int LineNumber { get; set; }
 }

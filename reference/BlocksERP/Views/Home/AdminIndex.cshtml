@@ -1,0 +1,62 @@
+﻿@{
+    MvcHtmlString businessName = Html.Action("GetCompanyName", "account");
+
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml"; 
+    ViewBag.Title = "Admin Dashboard";
+    //ViewBag.BusinessName = businessName;
+    //ViewBag.AdminPicture = adminImageSrc;
+    //ViewBag.BusinessBgImageSideBar = bgImageSrc;
+    //ViewBag.Admin = adminName;
+    //ViewBag.BusinessLogo = bgLogo;
+    //ViewBag.BgColor = bgColor;
+}
+@model List<BlocksERP.Models.clsModule>
+
+<html lang="en">
+    <body class="mod-bg-1 ">
+        <main id="js-page-content" role="main" class="page-content">
+            <div class="row">
+                <div class="col-md-12" style="display:flex">
+                    <table style="width:100%">
+                        <tr>
+                            <th>
+                                <ol class="breadcrumb breadcrumb-sm breadcrumb-arrow">
+                                    <li>
+                                        <a href="javascript:void(0)">
+                                            <i class="fal fa-home"></i>
+                                            &nbsp;
+                                            <span class="hidden-md-down">@businessName</span>
+                                        </a>
+                                    </li>
+                                    <li class="">
+                                        <a href="javascript:void(0)">
+                                            <i class="fal fa-home"></i>
+                                            &nbsp;
+                                            <span class="hidden-md-down">Dashboard</span>
+                                        </a>
+                                    </li>
+                                </ol>
+                            </th>
+                            <th style="text-align:right">
+                                <h6 class="js-get-date" style="margin-top: -7px;"></h6>
+                            </th>
+                        </tr>
+                    </table>
+
+                </div>
+
+            </div>
+            <div class="subheader">
+                <h1 class="subheader-title">
+                    <i class='subheader-icon fal fa-home'></i> Dashboard
+                    <small>
+                    </small>
+                </h1>
+            </div>
+
+            @{Html.RenderAction("AdminDashboardIndex", "Dashboards");}
+
+        </main>
+
+    </body>
+</html>

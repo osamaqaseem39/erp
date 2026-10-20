@@ -12,7 +12,8 @@ public interface IJournalRepository
     Task<Journal> UpdateAsync(Journal journal);
     Task<bool> DeleteAsync(Guid journalId, Guid tenantId);
     Task<bool> IsLockedAsync(Guid journalId, Guid tenantId);
-    Task<bool> PostJournalAsync(Guid journalId, Guid tenantId, Guid postedBy);
+    Task<bool> PostJournalAsync(Guid journalId, Guid tenantId, Guid postedBy, bool allowPostWithoutApprove = true);
+    Task<bool> UnpostJournalAsync(Guid journalId, Guid tenantId, Guid unpostedBy);
     Task<bool> ReverseJournalAsync(Guid journalId, Guid tenantId, Guid reversedBy, string? reversalReason = null);
     
     // Journal Entries

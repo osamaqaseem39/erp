@@ -9,7 +9,7 @@ public class SerialNumberService : ISerialNumberService
 {
     private readonly ISerialNumberRepository _repository;
     private readonly SerialNumberMapper _mapper = new();
-    
+
     public SerialNumberService(ISerialNumberRepository repository)
     {
         _repository = repository;
@@ -30,20 +30,27 @@ public class SerialNumberService : ISerialNumberService
     public async Task<SerialNumberDto> CreateAsync(SerialNumberDto dto, Guid tenantId, string createdBy)
     {
         var entity = _mapper.ToEntity(dto);
+        if (entity.Id == Guid.Empty) entity.Id = Guid.NewGuid();
         entity.TenantId = tenantId;
         entity.CreatedBy = createdBy;
-        
+
         var created = await _repository.CreateAsync(entity);
         return _mapper.ToDto(created);
     }
 
     public async Task<SerialNumberDto> UpdateAsync(SerialNumberDto dto, Guid tenantId, string updatedBy)
     {
-        var entity = _mapper.ToEntity(dto);
-        entity.TenantId = tenantId;
-        entity.UpdatedBy = updatedBy;
-        
-        var updated = await _repository.UpdateAsync(entity);
+        var existing = await _repository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Serial number '{dto.Id}' not found.");
+
+        existing.ItemId = dto.ItemId;
+        existing.SerialNumberValue = dto.SerialNumber;
+        existing.Status = dto.Status;
+        existing.Location = dto.Location;
+        existing.IsActive = dto.IsActive;
+        existing.UpdatedBy = updatedBy;
+
+        var updated = await _repository.UpdateAsync(existing);
         return _mapper.ToDto(updated);
     }
 

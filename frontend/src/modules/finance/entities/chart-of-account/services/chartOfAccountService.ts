@@ -11,11 +11,19 @@ class ChartOfAccountService {
     const params = new URLSearchParams();
     if (query?.accountType) params.append('accountType', query.accountType);
     if (query?.isActive !== undefined) params.append('isActive', query.isActive.toString());
-    
+    if (query?.level !== undefined) params.append('level', query.level.toString());
+    if (query?.parentAccountId) params.append('parentAccountId', query.parentAccountId);
+    if (query?.postingOnly !== undefined) params.append('postingOnly', query.postingOnly.toString());
+
     const queryString = params.toString();
     const url = queryString ? `/finance/accounting/chart-of-accounts?${queryString}` : '/finance/accounting/chart-of-accounts';
     const response = await api.get(url, null);
     return Array.isArray(response.data) ? response.data : [response.data];
+  };
+
+  seedDefaults = async (): Promise<number> => {
+    const response = await api.create('/finance/accounting/chart-of-accounts/seed-defaults', {});
+    return response.data?.seeded ?? 0;
   };
 
   /**

@@ -1,0 +1,96 @@
+﻿<style>
+    .set-img {
+        font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    }
+
+    .table tr td {
+        border: 0 !important;
+    }
+
+    .custome-class-form h4 {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .custome-class-form label {
+        font-weight: bold !important;
+        color: #000;
+    }
+
+    .table tr .V__align {
+        vertical-align: bottom !important;
+    }
+
+    imgs {
+        opacity: 0.5;
+        filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
+    .dropwidth {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #03386C !important;
+        }
+</style>
+
+@model POS.Models.clsInvoice
+@{
+    Layout = null;
+}
+<div class="widget-body no-padding" style="overflow-x:hidden;">
+    @using (Html.BeginForm("printcustomersupplierdetailreport", "sale", FormMethod.Post, new { id = "saleSumaryItemForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+
+        <fieldset id="myField1">
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Customer/Supplier</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.DetailCode, ViewBag.Customers as SelectList, new { @id = "DetailCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+                
+            </div>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select City</label>
+                    <label class="select">
+                        <i class="append fa fa-caret-down"></i>
+                        @Html.DropDownListFor(model => model.CityId, ViewBag.City as SelectList, new { @style = "width:100%", @multiple = "multiple" })
+                    </label>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Account Type</label>
+                    <select name="ReportType" id="ReportType" style="width:100%">
+                        <option value="All">All</option>
+                        <option value="Customer">Customer</option>
+                        <option value="Supplier">Supplier</option>
+                        <option value="Customer + Supplier">Customer + Supplier</option>
+                    </select>
+                </section>
+            </div>
+        </fieldset>
+        <footer>
+            <button formtarget="_blank" type="submit" class="btn btn-labeled btn-primary pull-right">
+                GENERATE REPORT
+            </button>
+        </footer>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#DetailCode').select2();
+        $('#CityId').select2();
+        $('#ReportType').select2();
+        $('#ReportType').val('All').trigger('change');
+    });
+</script>

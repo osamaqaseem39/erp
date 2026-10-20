@@ -1,6 +1,7 @@
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.SCM.Interfaces;
 using ERP.Shared.DTOs.Inventory;
@@ -10,6 +11,10 @@ namespace ERP.Api.Controllers.Inventory;
 [ApiController]
 [Route("api/inventory/valuation-methods")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class InventoryValuationMethodController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IInventoryValuationMethodService _service;
@@ -22,6 +27,7 @@ public class InventoryValuationMethodController : ERP.Api.Abstractions.Controlle
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<InventoryValuationMethodDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] bool? isActive = null)
     {
         var tenantId = GetTenantId();
@@ -30,6 +36,7 @@ public class InventoryValuationMethodController : ERP.Api.Abstractions.Controlle
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(InventoryValuationMethodDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -38,6 +45,7 @@ public class InventoryValuationMethodController : ERP.Api.Abstractions.Controlle
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] InventoryValuationMethodDto dto)
     {
         var tenantId = GetTenantId();
@@ -47,6 +55,7 @@ public class InventoryValuationMethodController : ERP.Api.Abstractions.Controlle
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(InventoryValuationMethodDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] InventoryValuationMethodDto dto)
     {
         dto.Id = id;
@@ -57,6 +66,7 @@ public class InventoryValuationMethodController : ERP.Api.Abstractions.Controlle
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

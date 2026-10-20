@@ -10,30 +10,48 @@ public class EmployeeQuery
 {
     public async Task<EmployeeDto?> GetEmployeeById(
         [Service] IEmployeeService employeeService,
-        Guid employeeId)
+        Guid employeeId,
+        Guid tenantId)
     {
-        return await employeeService.GetEmployeeByIdAsync(employeeId);
+        try
+        {
+            return await employeeService.GetEmployeeByIdAsync(employeeId, tenantId);
+        }
+        catch (KeyNotFoundException)
+        {
+            return null;
+        }
     }
 
     public async Task<EmployeeDto?> GetEmployeeByCode(
         [Service] IEmployeeService employeeService,
-        string employeeCode)
+        string employeeCode,
+        Guid tenantId)
     {
-        return await employeeService.GetEmployeeByCodeAsync(employeeCode);
+        try
+        {
+            return await employeeService.GetEmployeeByCodeAsync(employeeCode, tenantId);
+        }
+        catch (KeyNotFoundException)
+        {
+            return null;
+        }
     }
 
     public async Task<PagedResult<EmployeeListDto>> GetAllEmployees(
         [Service] IEmployeeService employeeService,
-        ERP.Shared.DTOs.HRM.EmployeeQuery filter)
+        ERP.Shared.DTOs.HRM.EmployeeQuery filter,
+        Guid tenantId)
     {
-        return await employeeService.GetEmployeesAsync(filter);
+        return await employeeService.GetEmployeesAsync(filter, tenantId);
     }
 
     public async Task<bool> IsEmployeeCodeUnique(
         [Service] IEmployeeService employeeService,
         string employeeCode,
+        Guid tenantId,
         Guid? excludeEmployeeId = null)
     {
-        return await employeeService.IsEmployeeCodeUniqueAsync(employeeCode, excludeEmployeeId);
+        return await employeeService.IsEmployeeCodeUniqueAsync(employeeCode, tenantId, excludeEmployeeId);
     }
 }

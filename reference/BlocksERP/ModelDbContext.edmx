@@ -1,0 +1,2668 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="Models.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tblAccountDefault">
+          <Key>
+            <PropertyRef Name="DefaultId" />
+          </Key>
+          <Property Name="DefaultId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Type" Type="nvarchar" MaxLength="50" />
+          <Property Name="DetailCode" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblAccountDefaultGL">
+          <Key>
+            <PropertyRef Name="DefaultId" />
+          </Key>
+          <Property Name="DefaultId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Type" Type="nvarchar" MaxLength="50" />
+          <Property Name="AccountCode" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblAccountDetail">
+          <Key>
+            <PropertyRef Name="DetailCode" />
+          </Key>
+          <Property Name="DetailCode" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="255" />
+          <Property Name="Status" Type="int" />
+          <Property Name="AccountCode" Type="int" />
+          <Property Name="Type" Type="nvarchar" MaxLength="50" />
+          <Property Name="UrduName" Type="nvarchar" MaxLength="255" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblAccountDetailExtraInfo">
+          <Key>
+            <PropertyRef Name="DetailCode" />
+          </Key>
+          <Property Name="DetailCode" Type="int" Nullable="false" />
+          <Property Name="Status" Type="int" />
+          <Property Name="Phone1" Type="nvarchar" MaxLength="30" />
+          <Property Name="Phone2" Type="nvarchar" MaxLength="30" />
+          <Property Name="Cell1" Type="nvarchar" MaxLength="30" />
+          <Property Name="Cell2" Type="nvarchar" MaxLength="30" />
+          <Property Name="Fax" Type="nvarchar" MaxLength="30" />
+          <Property Name="Email" Type="nvarchar" MaxLength="100" />
+          <Property Name="Website" Type="nvarchar" MaxLength="100" />
+          <Property Name="Address" Type="nvarchar" MaxLength="200" />
+          <Property Name="CreditDays" Type="int" />
+          <Property Name="CreditLimit" Type="int" />
+          <Property Name="TaxType" Type="nvarchar" MaxLength="50" />
+          <Property Name="GST" Type="nvarchar" MaxLength="50" />
+          <Property Name="NTN" Type="nvarchar" MaxLength="50" />
+          <Property Name="CNIC" Type="nvarchar" MaxLength="50" />
+          <Property Name="Remarks" Type="nvarchar" MaxLength="200" />
+          <Property Name="SalesmanID" Type="int" />
+          <Property Name="CityId" Type="int" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="100" />
+          <Property Name="Password" Type="nvarchar" MaxLength="100" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="Terms" Type="nvarchar" MaxLength="4000" />
+          <Property Name="DateOfBirth" Type="date" />
+          <Property Name="ContactPerson" Type="varchar" MaxLength="255" />
+          <Property Name="CompanyName" Type="varchar" MaxLength="255" />
+          <Property Name="EmiratesID" Type="varchar" MaxLength="50" />
+          <Property Name="RatingStar" Type="int" />
+        </EntityType>
+        <EntityType Name="tblAdminEmail">
+          <Key>
+            <PropertyRef Name="AdminEmailID" />
+          </Key>
+          <Property Name="AdminEmailID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AdminEmail" Type="nvarchar(max)" />
+          <Property Name="Type" Type="nvarchar" MaxLength="100" />
+          <Property Name="Status" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblBankAccountDetails">
+          <Key>
+            <PropertyRef Name="BankAccountId" />
+          </Key>
+          <Property Name="BankAccountId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BankId" Type="int" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="AccountNumber" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="HolderName" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblBanks">
+          <Key>
+            <PropertyRef Name="BankId" />
+          </Key>
+          <Property Name="BankId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BankName" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblChartofAccount">
+          <Key>
+            <PropertyRef Name="AccountCode" />
+          </Key>
+          <Property Name="AccountCode" Type="int" Nullable="false" />
+          <Property Name="DisplayCode" Type="nvarchar" MaxLength="50" />
+          <Property Name="Description" Type="nvarchar" MaxLength="300" />
+          <Property Name="ParentLevelCode" Type="int" />
+          <Property Name="AccountLevel" Type="int" />
+          <Property Name="Status" Type="int" />
+          <Property Name="Remarks" Type="nvarchar" MaxLength="50" />
+          <Property Name="SectionName" Type="nvarchar" MaxLength="100" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblCity">
+          <Key>
+            <PropertyRef Name="CityId" />
+          </Key>
+          <Property Name="CityId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CountryId" Type="int" />
+          <Property Name="CityName" Type="nvarchar" MaxLength="200" />
+          <Property Name="Code" Type="nvarchar" MaxLength="20" />
+          <Property Name="Status" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="DisplayName" Type="varchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="tblCompany">
+          <Key>
+            <PropertyRef Name="CompanyId" />
+          </Key>
+          <Property Name="CompanyId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CompanyName" Type="nvarchar" MaxLength="200" />
+          <Property Name="Address" Type="nvarchar" MaxLength="500" />
+          <Property Name="ContactPerson" Type="nvarchar" MaxLength="100" />
+          <Property Name="PhoneNo" Type="nvarchar" MaxLength="50" />
+          <Property Name="CellNo" Type="nvarchar" MaxLength="50" />
+          <Property Name="Email" Type="nvarchar" MaxLength="255" />
+          <Property Name="Website" Type="nvarchar" MaxLength="255" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblCompanyBankAccountDetails">
+          <Key>
+            <PropertyRef Name="AccountId" />
+          </Key>
+          <Property Name="AccountId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BankId" Type="int" Nullable="false" />
+          <Property Name="AccountNumber" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="HolderName" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblCountry">
+          <Key>
+            <PropertyRef Name="CountryId" />
+          </Key>
+          <Property Name="CountryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CountryName" Type="nvarchar" MaxLength="100" />
+          <Property Name="Code" Type="nvarchar" MaxLength="20" />
+          <Property Name="Status" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblDocumentOther">
+          <Key>
+            <PropertyRef Name="DocumentId" />
+          </Key>
+          <Property Name="DocumentId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Date" Type="datetime" />
+          <Property Name="TypeId" Type="nvarchar" MaxLength="100" />
+          <Property Name="DocumentExtension" Type="nvarchar" MaxLength="20" />
+          <Property Name="DocumentType" Type="nvarchar" MaxLength="100" />
+          <Property Name="Remarks" Type="nvarchar" MaxLength="100" />
+          <Property Name="UserId" Type="int" />
+        </EntityType>
+        <EntityType Name="tblDocuments">
+          <Key>
+            <PropertyRef Name="DocumentId" />
+          </Key>
+          <Property Name="DocumentId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="userId" Type="int" Nullable="false" />
+          <Property Name="DocumentTypeId" Type="int" Nullable="false" />
+          <Property Name="DocumentPath" Type="nvarchar" MaxLength="500" />
+          <Property Name="Description" Type="nvarchar" MaxLength="1000" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" />
+          <Property Name="ExpiryDate" Type="datetime" />
+          <Property Name="CreatedAt" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="DocumentExtension" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="tblDocumentType">
+          <Key>
+            <PropertyRef Name="DocumentTypeID" />
+          </Key>
+          <Property Name="DocumentTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TypeName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="TypeStatus" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="Status" Type="int" />
+        </EntityType>
+        <EntityType Name="tblEducation">
+          <Key>
+            <PropertyRef Name="EducationID" />
+          </Key>
+          <Property Name="EducationID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EducationLevel" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Status" Type="int" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+        </EntityType>
+        <EntityType Name="tblEmploymentStatus">
+          <Key>
+            <PropertyRef Name="EmploymentStatusID" />
+          </Key>
+          <Property Name="EmploymentStatusID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StatusName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="Status" Type="int" />
+        </EntityType>
+        <EntityType Name="tblGender">
+          <Key>
+            <PropertyRef Name="GenderID" />
+          </Key>
+          <Property Name="GenderID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GenderName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="Status" Type="int" />
+        </EntityType>
+        <EntityType Name="tblIncomeSource">
+          <Key>
+            <PropertyRef Name="IncomeSourceID" />
+          </Key>
+          <Property Name="IncomeSourceID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SourceName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="Status" Type="int" />
+        </EntityType>
+        <EntityType Name="tblLoanApplication">
+          <Key>
+            <PropertyRef Name="LoanID" />
+          </Key>
+          <Property Name="LoanID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="BankID" Type="int" Nullable="false" />
+          <Property Name="LoanPurposeID" Type="int" Nullable="false" />
+          <Property Name="LoanCategoryID" Type="int" Nullable="false" />
+          <Property Name="InvestorID" Type="int" Nullable="false" />
+          <Property Name="LoanDate" Type="datetime" Nullable="false" />
+          <Property Name="ApprovalDate" Type="datetime" />
+          <Property Name="ApprovalComment" Type="nvarchar(max)" />
+          <Property Name="LoanAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="LoanDays" Type="int" Nullable="false" />
+          <Property Name="FixedCharges" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="CompanyFee" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="LoanReturnType" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblLoanApplicationDetail">
+          <Key>
+            <PropertyRef Name="DetailID" />
+          </Key>
+          <Property Name="DetailID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LoanID" Type="int" Nullable="false" />
+          <Property Name="ReturnDate" Type="datetime" Nullable="false" />
+          <Property Name="ReturnAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="PaidAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="PrincipalAmount" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="InterestAmount" Type="decimal" Precision="18" Scale="2" />
+        </EntityType>
+        <EntityType Name="tblLoanCategories">
+          <Key>
+            <PropertyRef Name="LoanCategoryID" />
+          </Key>
+          <Property Name="LoanCategoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CategoryName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="CategoryStatus" Type="nvarchar" MaxLength="25" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="InterestRatePercentage" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="MaxDays" Type="int" Nullable="false" />
+          <Property Name="MaxLimit" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="LoanType" Type="nvarchar" MaxLength="50" />
+          <Property Name="CompanyFee" Type="decimal" Precision="18" Scale="2" />
+        </EntityType>
+        <EntityType Name="tblLoanPurpose">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblLoanReturn">
+          <Key>
+            <PropertyRef Name="LoanReturnID" />
+          </Key>
+          <Property Name="LoanReturnID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CompanyBankID" Type="int" Nullable="false" />
+          <Property Name="Amount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="TransactionID" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Remarks" Type="varchar" MaxLength="255" />
+          <Property Name="ScreenshotImage" Type="varchar" MaxLength="255" />
+          <Property Name="Status" Type="varchar" MaxLength="50" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblLoanReturnDetail">
+          <Key>
+            <PropertyRef Name="LoanReturnDetailID" />
+          </Key>
+          <Property Name="LoanReturnDetailID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LoanReturnID" Type="int" Nullable="false" />
+          <Property Name="Amount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="LoanID" Type="int" Nullable="false" />
+          <Property Name="InstallmentID" Type="int" Nullable="false" />
+          <Property Name="Description" Type="varchar" MaxLength="255" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblMaritalStatus">
+          <Key>
+            <PropertyRef Name="MaritalStatusID" />
+          </Key>
+          <Property Name="MaritalStatusID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StatusName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="Status" Type="int" />
+        </EntityType>
+        <EntityType Name="tblMenuAction">
+          <Key>
+            <PropertyRef Name="ActionID" />
+          </Key>
+          <Property Name="ActionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ActionName" Type="nvarchar" MaxLength="200" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblMenuAssignAction">
+          <Key>
+            <PropertyRef Name="AssignID" />
+          </Key>
+          <Property Name="AssignID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModuleID" Type="int" />
+          <Property Name="ActionID" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblMenuModule">
+          <Key>
+            <PropertyRef Name="ModuleID" />
+          </Key>
+          <Property Name="ModuleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ModuleName" Type="nvarchar" MaxLength="200" />
+          <Property Name="SectionName" Type="varchar" MaxLength="200" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="DisplayName" Type="varchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="tblPersonalInfo">
+          <Key>
+            <PropertyRef Name="PersonalInfoID" />
+          </Key>
+          <Property Name="PersonalInfoID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="FullName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="SocialInsuranceNumber" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="GenderID" Type="int" Nullable="false" />
+          <Property Name="EducationID" Type="int" Nullable="false" />
+          <Property Name="MaritalStatusID" Type="int" Nullable="false" />
+          <Property Name="CountryID" Type="int" Nullable="false" />
+          <Property Name="ResidentialAddress" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="DetailAddress" Type="nvarchar" MaxLength="500" />
+          <Property Name="ResidenceCityID" Type="int" Nullable="false" />
+          <Property Name="DetailedCityID" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="DOB" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblReferalInfo">
+          <Key>
+            <PropertyRef Name="ReferalID" />
+          </Key>
+          <Property Name="ReferalID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="ContactRelationID" Type="int" Nullable="false" />
+          <Property Name="RefferalName" Type="nvarchar" MaxLength="200" />
+          <Property Name="RefferalPhoneNumber" Type="nvarchar" MaxLength="20" />
+          <Property Name="RefferalSIN" Type="nvarchar" MaxLength="100" />
+          <Property Name="RefferalAddress" Type="nvarchar" MaxLength="300" />
+          <Property Name="CreatedAt" Type="datetime" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblReferralRelation">
+          <Key>
+            <PropertyRef Name="ReferralRelationID" />
+          </Key>
+          <Property Name="ReferralRelationID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RelationName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="Status" Type="int" />
+        </EntityType>
+        <EntityType Name="tblUserMenuRole">
+          <Key>
+            <PropertyRef Name="UserRoleID" />
+          </Key>
+          <Property Name="UserRoleID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="UserID" Type="int" />
+          <Property Name="ModuleID" Type="int" />
+          <Property Name="ActionID" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <EntityType Name="tblUsers">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Email" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Password" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="PhoneNumber" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Status" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="Otp" Type="nvarchar" MaxLength="10" />
+          <Property Name="OtpCreatedAt" Type="datetime" />
+          <Property Name="type" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="tblWorkInfo">
+          <Key>
+            <PropertyRef Name="WorkInfoID" />
+          </Key>
+          <Property Name="WorkInfoID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserID" Type="int" Nullable="false" />
+          <Property Name="IncomeSourceID" Type="int" Nullable="false" />
+          <Property Name="EmploymentStatusID" Type="int" Nullable="false" />
+          <Property Name="OrganizationName" Type="nvarchar" MaxLength="255" />
+          <Property Name="OrganizationPhoneNumber" Type="nvarchar" MaxLength="20" />
+          <Property Name="OrganizationAddress" Type="nvarchar" MaxLength="500" />
+          <Property Name="DOJ" Type="datetime" />
+          <Property Name="MonthlyIncome" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="CreatedAt" Type="datetime" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="UpdatedBy" Type="int" />
+        </EntityType>
+        <Association Name="FK__tblLoanRe__Insta__282DF8C2">
+          <End Role="tblLoanApplicationDetail" Type="Self.tblLoanApplicationDetail" Multiplicity="1" />
+          <End Role="tblLoanReturnDetail" Type="Self.tblLoanReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanApplicationDetail">
+              <PropertyRef Name="DetailID" />
+            </Principal>
+            <Dependent Role="tblLoanReturnDetail">
+              <PropertyRef Name="InstallmentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblLoanRe__LoanI__6501FCD8">
+          <End Role="tblLoanApplication" Type="Self.tblLoanApplication" Multiplicity="1" />
+          <End Role="tblLoanReturnDetail" Type="Self.tblLoanReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanApplication">
+              <PropertyRef Name="LoanID" />
+            </Principal>
+            <Dependent Role="tblLoanReturnDetail">
+              <PropertyRef Name="LoanID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblLoanRe__LoanR__2A164134">
+          <End Role="tblLoanReturn" Type="Self.tblLoanReturn" Multiplicity="1" />
+          <End Role="tblLoanReturnDetail" Type="Self.tblLoanReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanReturn">
+              <PropertyRef Name="LoanReturnID" />
+            </Principal>
+            <Dependent Role="tblLoanReturnDetail">
+              <PropertyRef Name="LoanReturnID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__Conta__2EDAF651">
+          <End Role="tblReferralRelation" Type="Self.tblReferralRelation" Multiplicity="1" />
+          <End Role="tblReferalInfo" Type="Self.tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblReferralRelation">
+              <PropertyRef Name="ReferralRelationID" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="ContactRelationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__Creat__2FCF1A8A">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="0..1" />
+          <End Role="tblReferalInfo" Type="Self.tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="CreatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__Updat__30C33EC3">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="0..1" />
+          <End Role="tblReferalInfo" Type="Self.tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="UpdatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__UserI__31B762FC">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="1" />
+          <End Role="tblReferalInfo" Type="Self.tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Creat__32AB8735">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="0..1" />
+          <End Role="tblWorkInfo" Type="Self.tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="CreatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Emplo__339FAB6E">
+          <End Role="tblEmploymentStatus" Type="Self.tblEmploymentStatus" Multiplicity="1" />
+          <End Role="tblWorkInfo" Type="Self.tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblEmploymentStatus">
+              <PropertyRef Name="EmploymentStatusID" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="EmploymentStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Incom__3493CFA7">
+          <End Role="tblIncomeSource" Type="Self.tblIncomeSource" Multiplicity="1" />
+          <End Role="tblWorkInfo" Type="Self.tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblIncomeSource">
+              <PropertyRef Name="IncomeSourceID" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="IncomeSourceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Updat__3587F3E0">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="0..1" />
+          <End Role="tblWorkInfo" Type="Self.tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="UpdatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__UserI__367C1819">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="1" />
+          <End Role="tblWorkInfo" Type="Self.tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BankAccount_Bank">
+          <End Role="tblBanks" Type="Self.tblBanks" Multiplicity="1" />
+          <End Role="tblBankAccountDetails" Type="Self.tblBankAccountDetails" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblBanks">
+              <PropertyRef Name="BankId" />
+            </Principal>
+            <Dependent Role="tblBankAccountDetails">
+              <PropertyRef Name="BankId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BankAccount_User">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="1" />
+          <End Role="tblBankAccountDetails" Type="Self.tblBankAccountDetails" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblBankAccountDetails">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CompanyBankAccount_Bank">
+          <End Role="tblBanks" Type="Self.tblBanks" Multiplicity="1" />
+          <End Role="tblCompanyBankAccountDetails" Type="Self.tblCompanyBankAccountDetails" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblBanks">
+              <PropertyRef Name="BankId" />
+            </Principal>
+            <Dependent Role="tblCompanyBankAccountDetails">
+              <PropertyRef Name="BankId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplication_BankAccount">
+          <End Role="tblBankAccountDetails" Type="Self.tblBankAccountDetails" Multiplicity="1" />
+          <End Role="tblLoanApplication" Type="Self.tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblBankAccountDetails">
+              <PropertyRef Name="BankAccountId" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="BankID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplication_LoanCategory">
+          <End Role="tblLoanCategories" Type="Self.tblLoanCategories" Multiplicity="1" />
+          <End Role="tblLoanApplication" Type="Self.tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanCategories">
+              <PropertyRef Name="LoanCategoryID" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="LoanCategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplication_LoanPurpose">
+          <End Role="tblLoanPurpose" Type="Self.tblLoanPurpose" Multiplicity="1" />
+          <End Role="tblLoanApplication" Type="Self.tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanPurpose">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="LoanPurposeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplication_User">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="1" />
+          <End Role="tblLoanApplication" Type="Self.tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplicationDetail_LoanApplication">
+          <End Role="tblLoanApplication" Type="Self.tblLoanApplication" Multiplicity="1" />
+          <End Role="tblLoanApplicationDetail" Type="Self.tblLoanApplicationDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanApplication">
+              <PropertyRef Name="LoanID" />
+            </Principal>
+            <Dependent Role="tblLoanApplicationDetail">
+              <PropertyRef Name="LoanID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanReturn_User">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="1" />
+          <End Role="tblLoanReturn" Type="Self.tblLoanReturn" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblLoanReturn">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_Country">
+          <End Role="tblCountry" Type="Self.tblCountry" Multiplicity="1" />
+          <End Role="tblPersonalInfo" Type="Self.tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCountry">
+              <PropertyRef Name="CountryId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="CountryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_DetailedCity">
+          <End Role="tblCity" Type="Self.tblCity" Multiplicity="0..1" />
+          <End Role="tblPersonalInfo" Type="Self.tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCity">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="DetailedCityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_ResidenceCity">
+          <End Role="tblCity" Type="Self.tblCity" Multiplicity="1" />
+          <End Role="tblPersonalInfo" Type="Self.tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCity">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="ResidenceCityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_User">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="1" />
+          <End Role="tblPersonalInfo" Type="Self.tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblDocumentType_tblDocuments">
+          <End Role="tblDocumentType" Type="Self.tblDocumentType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="tblDocuments" Type="Self.tblDocuments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblDocumentType">
+              <PropertyRef Name="DocumentTypeID" />
+            </Principal>
+            <Dependent Role="tblDocuments">
+              <PropertyRef Name="DocumentTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblUser_tblDocuments">
+          <End Role="tblUsers" Type="Self.tblUsers" Multiplicity="1" />
+          <End Role="tblDocuments" Type="Self.tblDocuments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUsers">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblDocuments">
+              <PropertyRef Name="userId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="ModelsStoreContainer">
+          <EntitySet Name="tblAccountDefault" EntityType="Self.tblAccountDefault" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblAccountDefaultGL" EntityType="Self.tblAccountDefaultGL" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblAccountDetail" EntityType="Self.tblAccountDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblAccountDetailExtraInfo" EntityType="Self.tblAccountDetailExtraInfo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblAdminEmail" EntityType="Self.tblAdminEmail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblBankAccountDetails" EntityType="Self.tblBankAccountDetails" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblBanks" EntityType="Self.tblBanks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblChartofAccount" EntityType="Self.tblChartofAccount" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblCity" EntityType="Self.tblCity" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblCompany" EntityType="Self.tblCompany" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblCompanyBankAccountDetails" EntityType="Self.tblCompanyBankAccountDetails" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblCountry" EntityType="Self.tblCountry" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblDocumentOther" EntityType="Self.tblDocumentOther" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblDocuments" EntityType="Self.tblDocuments" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblDocumentType" EntityType="Self.tblDocumentType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblEducation" EntityType="Self.tblEducation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblEmploymentStatus" EntityType="Self.tblEmploymentStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblGender" EntityType="Self.tblGender" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblIncomeSource" EntityType="Self.tblIncomeSource" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblLoanApplication" EntityType="Self.tblLoanApplication" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblLoanApplicationDetail" EntityType="Self.tblLoanApplicationDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblLoanCategories" EntityType="Self.tblLoanCategories" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblLoanPurpose" EntityType="Self.tblLoanPurpose" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblLoanReturn" EntityType="Self.tblLoanReturn" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblLoanReturnDetail" EntityType="Self.tblLoanReturnDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblMaritalStatus" EntityType="Self.tblMaritalStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblMenuAction" EntityType="Self.tblMenuAction" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblMenuAssignAction" EntityType="Self.tblMenuAssignAction" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblMenuModule" EntityType="Self.tblMenuModule" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblPersonalInfo" EntityType="Self.tblPersonalInfo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblReferalInfo" EntityType="Self.tblReferalInfo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblReferralRelation" EntityType="Self.tblReferralRelation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblUserMenuRole" EntityType="Self.tblUserMenuRole" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblUsers" EntityType="Self.tblUsers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblWorkInfo" EntityType="Self.tblWorkInfo" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__tblLoanRe__Insta__282DF8C2" Association="Self.FK__tblLoanRe__Insta__282DF8C2">
+            <End Role="tblLoanApplicationDetail" EntitySet="tblLoanApplicationDetail" />
+            <End Role="tblLoanReturnDetail" EntitySet="tblLoanReturnDetail" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblLoanRe__LoanI__6501FCD8" Association="Self.FK__tblLoanRe__LoanI__6501FCD8">
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplication" />
+            <End Role="tblLoanReturnDetail" EntitySet="tblLoanReturnDetail" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblLoanRe__LoanR__2A164134" Association="Self.FK__tblLoanRe__LoanR__2A164134">
+            <End Role="tblLoanReturn" EntitySet="tblLoanReturn" />
+            <End Role="tblLoanReturnDetail" EntitySet="tblLoanReturnDetail" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__Conta__2EDAF651" Association="Self.FK__tblRefera__Conta__2EDAF651">
+            <End Role="tblReferralRelation" EntitySet="tblReferralRelation" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__Creat__2FCF1A8A" Association="Self.FK__tblRefera__Creat__2FCF1A8A">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__Updat__30C33EC3" Association="Self.FK__tblRefera__Updat__30C33EC3">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__UserI__31B762FC" Association="Self.FK__tblRefera__UserI__31B762FC">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Creat__32AB8735" Association="Self.FK__tblWorkIn__Creat__32AB8735">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Emplo__339FAB6E" Association="Self.FK__tblWorkIn__Emplo__339FAB6E">
+            <End Role="tblEmploymentStatus" EntitySet="tblEmploymentStatus" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Incom__3493CFA7" Association="Self.FK__tblWorkIn__Incom__3493CFA7">
+            <End Role="tblIncomeSource" EntitySet="tblIncomeSource" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Updat__3587F3E0" Association="Self.FK__tblWorkIn__Updat__3587F3E0">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__UserI__367C1819" Association="Self.FK__tblWorkIn__UserI__367C1819">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BankAccount_Bank" Association="Self.FK_BankAccount_Bank">
+            <End Role="tblBanks" EntitySet="tblBanks" />
+            <End Role="tblBankAccountDetails" EntitySet="tblBankAccountDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BankAccount_User" Association="Self.FK_BankAccount_User">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblBankAccountDetails" EntitySet="tblBankAccountDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CompanyBankAccount_Bank" Association="Self.FK_CompanyBankAccount_Bank">
+            <End Role="tblBanks" EntitySet="tblBanks" />
+            <End Role="tblCompanyBankAccountDetails" EntitySet="tblCompanyBankAccountDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplication_BankAccount" Association="Self.FK_LoanApplication_BankAccount">
+            <End Role="tblBankAccountDetails" EntitySet="tblBankAccountDetails" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplication" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplication_LoanCategory" Association="Self.FK_LoanApplication_LoanCategory">
+            <End Role="tblLoanCategories" EntitySet="tblLoanCategories" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplication" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplication_LoanPurpose" Association="Self.FK_LoanApplication_LoanPurpose">
+            <End Role="tblLoanPurpose" EntitySet="tblLoanPurpose" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplication" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplication_User" Association="Self.FK_LoanApplication_User">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplication" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplicationDetail_LoanApplication" Association="Self.FK_LoanApplicationDetail_LoanApplication">
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplication" />
+            <End Role="tblLoanApplicationDetail" EntitySet="tblLoanApplicationDetail" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanReturn_User" Association="Self.FK_LoanReturn_User">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblLoanReturn" EntitySet="tblLoanReturn" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_Country" Association="Self.FK_PersonalInfo_Country">
+            <End Role="tblCountry" EntitySet="tblCountry" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_DetailedCity" Association="Self.FK_PersonalInfo_DetailedCity">
+            <End Role="tblCity" EntitySet="tblCity" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_ResidenceCity" Association="Self.FK_PersonalInfo_ResidenceCity">
+            <End Role="tblCity" EntitySet="tblCity" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_User" Association="Self.FK_PersonalInfo_User">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblDocumentType_tblDocuments" Association="Self.FK_tblDocumentType_tblDocuments">
+            <End Role="tblDocumentType" EntitySet="tblDocumentType" />
+            <End Role="tblDocuments" EntitySet="tblDocuments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblUser_tblDocuments" Association="Self.FK_tblUser_tblDocuments">
+            <End Role="tblUsers" EntitySet="tblUsers" />
+            <End Role="tblDocuments" EntitySet="tblDocuments" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="Models" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="ModelDb" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tblAccountDefaults" EntityType="Models.tblAccountDefault" />
+          <EntitySet Name="tblAccountDefaultGLs" EntityType="Models.tblAccountDefaultGL" />
+          <EntitySet Name="tblAccountDetails" EntityType="Models.tblAccountDetail" />
+          <EntitySet Name="tblAccountDetailExtraInfoes" EntityType="Models.tblAccountDetailExtraInfo" />
+          <EntitySet Name="tblAdminEmails" EntityType="Models.tblAdminEmail" />
+          <EntitySet Name="tblBankAccountDetails" EntityType="Models.tblBankAccountDetail" />
+          <EntitySet Name="tblBanks" EntityType="Models.tblBank" />
+          <EntitySet Name="tblChartofAccounts" EntityType="Models.tblChartofAccount" />
+          <EntitySet Name="tblCities" EntityType="Models.tblCity" />
+          <EntitySet Name="tblCompanies" EntityType="Models.tblCompany" />
+          <EntitySet Name="tblCompanyBankAccountDetails" EntityType="Models.tblCompanyBankAccountDetail" />
+          <EntitySet Name="tblCountries" EntityType="Models.tblCountry" />
+          <EntitySet Name="tblDocumentTypes" EntityType="Models.tblDocumentType" />
+          <EntitySet Name="tblEducations" EntityType="Models.tblEducation" />
+          <EntitySet Name="tblEmploymentStatus" EntityType="Models.tblEmploymentStatu" />
+          <EntitySet Name="tblGenders" EntityType="Models.tblGender" />
+          <EntitySet Name="tblIncomeSources" EntityType="Models.tblIncomeSource" />
+          <EntitySet Name="tblLoanApplications" EntityType="Models.tblLoanApplication" />
+          <EntitySet Name="tblLoanApplicationDetails" EntityType="Models.tblLoanApplicationDetail" />
+          <EntitySet Name="tblLoanPurposes" EntityType="Models.tblLoanPurpose" />
+          <EntitySet Name="tblLoanReturns" EntityType="Models.tblLoanReturn" />
+          <EntitySet Name="tblLoanReturnDetails" EntityType="Models.tblLoanReturnDetail" />
+          <EntitySet Name="tblMaritalStatus" EntityType="Models.tblMaritalStatu" />
+          <EntitySet Name="tblPersonalInfoes" EntityType="Models.tblPersonalInfo" />
+          <EntitySet Name="tblReferalInfoes" EntityType="Models.tblReferalInfo" />
+          <EntitySet Name="tblReferralRelations" EntityType="Models.tblReferralRelation" />
+          <EntitySet Name="tblUsers" EntityType="Models.tblUser" />
+          <EntitySet Name="tblWorkInfoes" EntityType="Models.tblWorkInfo" />
+          <AssociationSet Name="FK_BankAccount_Bank" Association="Models.FK_BankAccount_Bank">
+            <End Role="tblBank" EntitySet="tblBanks" />
+            <End Role="tblBankAccountDetail" EntitySet="tblBankAccountDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BankAccount_User" Association="Models.FK_BankAccount_User">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblBankAccountDetail" EntitySet="tblBankAccountDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplication_BankAccount" Association="Models.FK_LoanApplication_BankAccount">
+            <End Role="tblBankAccountDetail" EntitySet="tblBankAccountDetails" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CompanyBankAccount_Bank" Association="Models.FK_CompanyBankAccount_Bank">
+            <End Role="tblBank" EntitySet="tblBanks" />
+            <End Role="tblCompanyBankAccountDetail" EntitySet="tblCompanyBankAccountDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_DetailedCity" Association="Models.FK_PersonalInfo_DetailedCity">
+            <End Role="tblCity" EntitySet="tblCities" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_ResidenceCity" Association="Models.FK_PersonalInfo_ResidenceCity">
+            <End Role="tblCity" EntitySet="tblCities" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_Country" Association="Models.FK_PersonalInfo_Country">
+            <End Role="tblCountry" EntitySet="tblCountries" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Emplo__339FAB6E" Association="Models.FK__tblWorkIn__Emplo__339FAB6E">
+            <End Role="tblEmploymentStatu" EntitySet="tblEmploymentStatus" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Incom__3493CFA7" Association="Models.FK__tblWorkIn__Incom__3493CFA7">
+            <End Role="tblIncomeSource" EntitySet="tblIncomeSources" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblLoanRe__LoanI__6501FCD8" Association="Models.FK__tblLoanRe__LoanI__6501FCD8">
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplications" />
+            <End Role="tblLoanReturnDetail" EntitySet="tblLoanReturnDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplication_LoanPurpose" Association="Models.FK_LoanApplication_LoanPurpose">
+            <End Role="tblLoanPurpose" EntitySet="tblLoanPurposes" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplication_User" Association="Models.FK_LoanApplication_User">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplicationDetail_LoanApplication" Association="Models.FK_LoanApplicationDetail_LoanApplication">
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplications" />
+            <End Role="tblLoanApplicationDetail" EntitySet="tblLoanApplicationDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblLoanRe__Insta__282DF8C2" Association="Models.FK__tblLoanRe__Insta__282DF8C2">
+            <End Role="tblLoanApplicationDetail" EntitySet="tblLoanApplicationDetails" />
+            <End Role="tblLoanReturnDetail" EntitySet="tblLoanReturnDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblLoanRe__LoanR__2A164134" Association="Models.FK__tblLoanRe__LoanR__2A164134">
+            <End Role="tblLoanReturn" EntitySet="tblLoanReturns" />
+            <End Role="tblLoanReturnDetail" EntitySet="tblLoanReturnDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanReturn_User" Association="Models.FK_LoanReturn_User">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblLoanReturn" EntitySet="tblLoanReturns" />
+          </AssociationSet>
+          <AssociationSet Name="FK_PersonalInfo_User" Association="Models.FK_PersonalInfo_User">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblPersonalInfo" EntitySet="tblPersonalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__Conta__2EDAF651" Association="Models.FK__tblRefera__Conta__2EDAF651">
+            <End Role="tblReferralRelation" EntitySet="tblReferralRelations" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__Creat__2FCF1A8A" Association="Models.FK__tblRefera__Creat__2FCF1A8A">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__Updat__30C33EC3" Association="Models.FK__tblRefera__Updat__30C33EC3">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblRefera__UserI__31B762FC" Association="Models.FK__tblRefera__UserI__31B762FC">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblReferalInfo" EntitySet="tblReferalInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Creat__32AB8735" Association="Models.FK__tblWorkIn__Creat__32AB8735">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__Updat__3587F3E0" Association="Models.FK__tblWorkIn__Updat__3587F3E0">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblWorkIn__UserI__367C1819" Association="Models.FK__tblWorkIn__UserI__367C1819">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblWorkInfo" EntitySet="tblWorkInfoes" />
+          </AssociationSet>
+          <EntitySet Name="tblMenuActions" EntityType="Models.tblMenuAction" />
+          <EntitySet Name="tblMenuAssignActions" EntityType="Models.tblMenuAssignAction" />
+          <EntitySet Name="tblMenuModules" EntityType="Models.tblMenuModule" />
+          <EntitySet Name="tblUserMenuRoles" EntityType="Models.tblUserMenuRole" />
+          <EntitySet Name="tblDocumentOthers" EntityType="Models.tblDocumentOther" />
+          <EntitySet Name="tblDocuments" EntityType="Models.tblDocument" />
+          <AssociationSet Name="FK_tblDocumentType_tblDocuments" Association="Models.FK_tblDocumentType_tblDocuments">
+            <End Role="tblDocumentType" EntitySet="tblDocumentTypes" />
+            <End Role="tblDocument" EntitySet="tblDocuments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblUser_tblDocuments" Association="Models.FK_tblUser_tblDocuments">
+            <End Role="tblUser" EntitySet="tblUsers" />
+            <End Role="tblDocument" EntitySet="tblDocuments" />
+          </AssociationSet>
+          <EntitySet Name="tblLoanCategories" EntityType="Models.tblLoanCategory" />
+          <AssociationSet Name="FK_LoanApplication_LoanCategory" Association="Models.FK_LoanApplication_LoanCategory">
+            <End Role="tblLoanCategory" EntitySet="tblLoanCategories" />
+            <End Role="tblLoanApplication" EntitySet="tblLoanApplications" />
+          </AssociationSet>
+          </EntityContainer>
+        <EntityType Name="tblAccountDefault">
+          <Key>
+            <PropertyRef Name="DefaultId" />
+          </Key>
+          <Property Name="DefaultId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="DetailCode" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblAccountDefaultGL">
+          <Key>
+            <PropertyRef Name="DefaultId" />
+          </Key>
+          <Property Name="DefaultId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="AccountCode" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblAccountDetail">
+          <Key>
+            <PropertyRef Name="DetailCode" />
+          </Key>
+          <Property Name="DetailCode" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="Int32" />
+          <Property Name="AccountCode" Type="Int32" />
+          <Property Name="Type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="UrduName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblAccountDetailExtraInfo">
+          <Key>
+            <PropertyRef Name="DetailCode" />
+          </Key>
+          <Property Name="DetailCode" Type="Int32" Nullable="false" />
+          <Property Name="Status" Type="Int32" />
+          <Property Name="Phone1" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="Phone2" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="Cell1" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="Cell2" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="Fax" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Website" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="CreditDays" Type="Int32" />
+          <Property Name="CreditLimit" Type="Int32" />
+          <Property Name="TaxType" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="GST" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="NTN" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CNIC" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Remarks" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="SalesmanID" Type="Int32" />
+          <Property Name="CityId" Type="Int32" />
+          <Property Name="UserName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Password" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="Terms" Type="String" MaxLength="4000" FixedLength="false" Unicode="true" />
+          <Property Name="DateOfBirth" Type="DateTime" Precision="0" />
+          <Property Name="ContactPerson" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="CompanyName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="EmiratesID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="RatingStar" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblAdminEmail">
+          <Key>
+            <PropertyRef Name="AdminEmailID" />
+          </Key>
+          <Property Name="AdminEmailID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AdminEmail" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Type" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblBankAccountDetail">
+          <Key>
+            <PropertyRef Name="BankAccountId" />
+          </Key>
+          <Property Name="BankAccountId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BankId" Type="Int32" Nullable="false" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="AccountNumber" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="HolderName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblBank" Relationship="Models.FK_BankAccount_Bank" FromRole="tblBankAccountDetail" ToRole="tblBank" />
+          <NavigationProperty Name="tblUser" Relationship="Models.FK_BankAccount_User" FromRole="tblBankAccountDetail" ToRole="tblUser" />
+          <NavigationProperty Name="tblLoanApplications" Relationship="Models.FK_LoanApplication_BankAccount" FromRole="tblBankAccountDetail" ToRole="tblLoanApplication" />
+        </EntityType>
+        <EntityType Name="tblBank">
+          <Key>
+            <PropertyRef Name="BankId" />
+          </Key>
+          <Property Name="BankId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BankName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblBankAccountDetails" Relationship="Models.FK_BankAccount_Bank" FromRole="tblBank" ToRole="tblBankAccountDetail" />
+          <NavigationProperty Name="tblCompanyBankAccountDetails" Relationship="Models.FK_CompanyBankAccount_Bank" FromRole="tblBank" ToRole="tblCompanyBankAccountDetail" />
+        </EntityType>
+        <EntityType Name="tblChartofAccount">
+          <Key>
+            <PropertyRef Name="AccountCode" />
+          </Key>
+          <Property Name="AccountCode" Type="Int32" Nullable="false" />
+          <Property Name="DisplayCode" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="ParentLevelCode" Type="Int32" />
+          <Property Name="AccountLevel" Type="Int32" />
+          <Property Name="Status" Type="Int32" />
+          <Property Name="Remarks" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="SectionName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblCity">
+          <Key>
+            <PropertyRef Name="CityId" />
+          </Key>
+          <Property Name="CityId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CountryId" Type="Int32" />
+          <Property Name="CityName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Code" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="DisplayName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="tblPersonalInfoes" Relationship="Models.FK_PersonalInfo_DetailedCity" FromRole="tblCity" ToRole="tblPersonalInfo" />
+          <NavigationProperty Name="tblPersonalInfoes1" Relationship="Models.FK_PersonalInfo_ResidenceCity" FromRole="tblCity" ToRole="tblPersonalInfo" />
+        </EntityType>
+        <EntityType Name="tblCompany">
+          <Key>
+            <PropertyRef Name="CompanyId" />
+          </Key>
+          <Property Name="CompanyId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CompanyName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Address" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="ContactPerson" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="PhoneNo" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CellNo" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Website" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblCompanyBankAccountDetail">
+          <Key>
+            <PropertyRef Name="AccountId" />
+          </Key>
+          <Property Name="AccountId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BankId" Type="Int32" Nullable="false" />
+          <Property Name="AccountNumber" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="HolderName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblBank" Relationship="Models.FK_CompanyBankAccount_Bank" FromRole="tblCompanyBankAccountDetail" ToRole="tblBank" />
+        </EntityType>
+        <EntityType Name="tblCountry">
+          <Key>
+            <PropertyRef Name="CountryId" />
+          </Key>
+          <Property Name="CountryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CountryName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Code" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblPersonalInfoes" Relationship="Models.FK_PersonalInfo_Country" FromRole="tblCountry" ToRole="tblPersonalInfo" />
+        </EntityType>
+        <EntityType Name="tblDocumentType">
+          <Key>
+            <PropertyRef Name="DocumentTypeID" />
+          </Key>
+          <Property Name="DocumentTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TypeName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="TypeStatus" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="tblDocuments" Relationship="Models.FK_tblDocumentType_tblDocuments" FromRole="tblDocumentType" ToRole="tblDocument" />
+          <Property Name="Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblEducation">
+          <Key>
+            <PropertyRef Name="EducationID" />
+          </Key>
+          <Property Name="EducationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EducationLevel" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblEmploymentStatu">
+          <Key>
+            <PropertyRef Name="EmploymentStatusID" />
+          </Key>
+          <Property Name="EmploymentStatusID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StatusName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="tblWorkInfoes" Relationship="Models.FK__tblWorkIn__Emplo__339FAB6E" FromRole="tblEmploymentStatu" ToRole="tblWorkInfo" />
+          <Property Name="Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblGender">
+          <Key>
+            <PropertyRef Name="GenderID" />
+          </Key>
+          <Property Name="GenderID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GenderName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblIncomeSource">
+          <Key>
+            <PropertyRef Name="IncomeSourceID" />
+          </Key>
+          <Property Name="IncomeSourceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SourceName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="tblWorkInfoes" Relationship="Models.FK__tblWorkIn__Incom__3493CFA7" FromRole="tblIncomeSource" ToRole="tblWorkInfo" />
+          <Property Name="Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblLoanApplication">
+          <Key>
+            <PropertyRef Name="LoanID" />
+          </Key>
+          <Property Name="LoanID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="BankID" Type="Int32" Nullable="false" />
+          <Property Name="LoanPurposeID" Type="Int32" Nullable="false" />
+          <Property Name="LoanCategoryID" Type="Int32" Nullable="false" />
+          <Property Name="InvestorID" Type="Int32" Nullable="false" />
+          <Property Name="LoanDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ApprovalDate" Type="DateTime" Precision="3" />
+          <Property Name="ApprovalComment" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="LoanAmount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="LoanDays" Type="Int32" Nullable="false" />
+          <Property Name="FixedCharges" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="CompanyFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="LoanReturnType" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblBankAccountDetail" Relationship="Models.FK_LoanApplication_BankAccount" FromRole="tblLoanApplication" ToRole="tblBankAccountDetail" />
+          <NavigationProperty Name="tblLoanReturnDetails" Relationship="Models.FK__tblLoanRe__LoanI__6501FCD8" FromRole="tblLoanApplication" ToRole="tblLoanReturnDetail" />
+          <NavigationProperty Name="tblLoanPurpose" Relationship="Models.FK_LoanApplication_LoanPurpose" FromRole="tblLoanApplication" ToRole="tblLoanPurpose" />
+          <NavigationProperty Name="tblUser" Relationship="Models.FK_LoanApplication_User" FromRole="tblLoanApplication" ToRole="tblUser" />
+          <NavigationProperty Name="tblLoanApplicationDetails" Relationship="Models.FK_LoanApplicationDetail_LoanApplication" FromRole="tblLoanApplication" ToRole="tblLoanApplicationDetail" />
+          <NavigationProperty Name="tblLoanCategory" Relationship="Models.FK_LoanApplication_LoanCategory" FromRole="tblLoanApplication" ToRole="tblLoanCategory" />
+        </EntityType>
+        <EntityType Name="tblLoanApplicationDetail">
+          <Key>
+            <PropertyRef Name="DetailID" />
+          </Key>
+          <Property Name="DetailID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LoanID" Type="Int32" Nullable="false" />
+          <Property Name="ReturnDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ReturnAmount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="PaidAmount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblLoanApplication" Relationship="Models.FK_LoanApplicationDetail_LoanApplication" FromRole="tblLoanApplicationDetail" ToRole="tblLoanApplication" />
+          <NavigationProperty Name="tblLoanReturnDetails" Relationship="Models.FK__tblLoanRe__Insta__282DF8C2" FromRole="tblLoanApplicationDetail" ToRole="tblLoanReturnDetail" />
+          <Property Name="PrincipalAmount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="InterestAmount" Type="Decimal" Precision="18" Scale="2" />
+        </EntityType>
+        <EntityType Name="tblLoanPurpose">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblLoanApplications" Relationship="Models.FK_LoanApplication_LoanPurpose" FromRole="tblLoanPurpose" ToRole="tblLoanApplication" />
+        </EntityType>
+        <EntityType Name="tblLoanReturn">
+          <Key>
+            <PropertyRef Name="LoanReturnID" />
+          </Key>
+          <Property Name="LoanReturnID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CompanyBankID" Type="Int32" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="TransactionID" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Remarks" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="ScreenshotImage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Status" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblLoanReturnDetails" Relationship="Models.FK__tblLoanRe__LoanR__2A164134" FromRole="tblLoanReturn" ToRole="tblLoanReturnDetail" />
+          <NavigationProperty Name="tblUser" Relationship="Models.FK_LoanReturn_User" FromRole="tblLoanReturn" ToRole="tblUser" />
+        </EntityType>
+        <EntityType Name="tblLoanReturnDetail">
+          <Key>
+            <PropertyRef Name="LoanReturnDetailID" />
+          </Key>
+          <Property Name="LoanReturnDetailID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LoanReturnID" Type="Int32" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="LoanID" Type="Int32" Nullable="false" />
+          <Property Name="InstallmentID" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblLoanApplication" Relationship="Models.FK__tblLoanRe__LoanI__6501FCD8" FromRole="tblLoanReturnDetail" ToRole="tblLoanApplication" />
+          <NavigationProperty Name="tblLoanApplicationDetail" Relationship="Models.FK__tblLoanRe__Insta__282DF8C2" FromRole="tblLoanReturnDetail" ToRole="tblLoanApplicationDetail" />
+          <NavigationProperty Name="tblLoanReturn" Relationship="Models.FK__tblLoanRe__LoanR__2A164134" FromRole="tblLoanReturnDetail" ToRole="tblLoanReturn" />
+        </EntityType>
+        <EntityType Name="tblMaritalStatu">
+          <Key>
+            <PropertyRef Name="MaritalStatusID" />
+          </Key>
+          <Property Name="MaritalStatusID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StatusName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblPersonalInfo">
+          <Key>
+            <PropertyRef Name="PersonalInfoID" />
+          </Key>
+          <Property Name="PersonalInfoID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="FullName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="SocialInsuranceNumber" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="GenderID" Type="Int32" Nullable="false" />
+          <Property Name="EducationID" Type="Int32" Nullable="false" />
+          <Property Name="MaritalStatusID" Type="Int32" Nullable="false" />
+          <Property Name="CountryID" Type="Int32" Nullable="false" />
+          <Property Name="ResidentialAddress" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="DetailAddress" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="ResidenceCityID" Type="Int32" Nullable="false" />
+          <Property Name="DetailedCityID" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="DOB" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tblCity" Relationship="Models.FK_PersonalInfo_DetailedCity" FromRole="tblPersonalInfo" ToRole="tblCity" />
+          <NavigationProperty Name="tblCity1" Relationship="Models.FK_PersonalInfo_ResidenceCity" FromRole="tblPersonalInfo" ToRole="tblCity" />
+          <NavigationProperty Name="tblCountry" Relationship="Models.FK_PersonalInfo_Country" FromRole="tblPersonalInfo" ToRole="tblCountry" />
+          <NavigationProperty Name="tblUser" Relationship="Models.FK_PersonalInfo_User" FromRole="tblPersonalInfo" ToRole="tblUser" />
+        </EntityType>
+        <EntityType Name="tblReferalInfo">
+          <Key>
+            <PropertyRef Name="ReferalID" />
+          </Key>
+          <Property Name="ReferalID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="ContactRelationID" Type="Int32" Nullable="false" />
+          <Property Name="RefferalName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="RefferalPhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="RefferalSIN" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="RefferalAddress" Type="String" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblReferralRelation" Relationship="Models.FK__tblRefera__Conta__2EDAF651" FromRole="tblReferalInfo" ToRole="tblReferralRelation" />
+          <NavigationProperty Name="tblUser" Relationship="Models.FK__tblRefera__Creat__2FCF1A8A" FromRole="tblReferalInfo" ToRole="tblUser" />
+          <NavigationProperty Name="tblUser1" Relationship="Models.FK__tblRefera__Updat__30C33EC3" FromRole="tblReferalInfo" ToRole="tblUser" />
+          <NavigationProperty Name="tblUser2" Relationship="Models.FK__tblRefera__UserI__31B762FC" FromRole="tblReferalInfo" ToRole="tblUser" />
+        </EntityType>
+        <EntityType Name="tblReferralRelation">
+          <Key>
+            <PropertyRef Name="ReferralRelationID" />
+          </Key>
+          <Property Name="ReferralRelationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RelationName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="tblReferalInfoes" Relationship="Models.FK__tblRefera__Conta__2EDAF651" FromRole="tblReferralRelation" ToRole="tblReferalInfo" />
+          <Property Name="Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblUser">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Email" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Password" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PhoneNumber" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="Otp" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="OtpCreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="type" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="tblBankAccountDetails" Relationship="Models.FK_BankAccount_User" FromRole="tblUser" ToRole="tblBankAccountDetail" />
+          <NavigationProperty Name="tblLoanApplications" Relationship="Models.FK_LoanApplication_User" FromRole="tblUser" ToRole="tblLoanApplication" />
+          <NavigationProperty Name="tblLoanReturns" Relationship="Models.FK_LoanReturn_User" FromRole="tblUser" ToRole="tblLoanReturn" />
+          <NavigationProperty Name="tblPersonalInfoes" Relationship="Models.FK_PersonalInfo_User" FromRole="tblUser" ToRole="tblPersonalInfo" />
+          <NavigationProperty Name="tblReferalInfoes" Relationship="Models.FK__tblRefera__Creat__2FCF1A8A" FromRole="tblUser" ToRole="tblReferalInfo" />
+          <NavigationProperty Name="tblReferalInfoes1" Relationship="Models.FK__tblRefera__Updat__30C33EC3" FromRole="tblUser" ToRole="tblReferalInfo" />
+          <NavigationProperty Name="tblReferalInfoes2" Relationship="Models.FK__tblRefera__UserI__31B762FC" FromRole="tblUser" ToRole="tblReferalInfo" />
+          <NavigationProperty Name="tblWorkInfoes" Relationship="Models.FK__tblWorkIn__Creat__32AB8735" FromRole="tblUser" ToRole="tblWorkInfo" />
+          <NavigationProperty Name="tblWorkInfoes1" Relationship="Models.FK__tblWorkIn__Updat__3587F3E0" FromRole="tblUser" ToRole="tblWorkInfo" />
+          <NavigationProperty Name="tblWorkInfoes2" Relationship="Models.FK__tblWorkIn__UserI__367C1819" FromRole="tblUser" ToRole="tblWorkInfo" />
+          <NavigationProperty Name="tblDocuments" Relationship="Models.FK_tblUser_tblDocuments" FromRole="tblUser" ToRole="tblDocument" />
+        </EntityType>
+        <EntityType Name="tblWorkInfo">
+          <Key>
+            <PropertyRef Name="WorkInfoID" />
+          </Key>
+          <Property Name="WorkInfoID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="IncomeSourceID" Type="Int32" Nullable="false" />
+          <Property Name="EmploymentStatusID" Type="Int32" Nullable="false" />
+          <Property Name="OrganizationName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="OrganizationPhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="OrganizationAddress" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="DOJ" Type="DateTime" Precision="3" />
+          <Property Name="MonthlyIncome" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblEmploymentStatu" Relationship="Models.FK__tblWorkIn__Emplo__339FAB6E" FromRole="tblWorkInfo" ToRole="tblEmploymentStatu" />
+          <NavigationProperty Name="tblIncomeSource" Relationship="Models.FK__tblWorkIn__Incom__3493CFA7" FromRole="tblWorkInfo" ToRole="tblIncomeSource" />
+          <NavigationProperty Name="tblUser" Relationship="Models.FK__tblWorkIn__Creat__32AB8735" FromRole="tblWorkInfo" ToRole="tblUser" />
+          <NavigationProperty Name="tblUser1" Relationship="Models.FK__tblWorkIn__Updat__3587F3E0" FromRole="tblWorkInfo" ToRole="tblUser" />
+          <NavigationProperty Name="tblUser2" Relationship="Models.FK__tblWorkIn__UserI__367C1819" FromRole="tblWorkInfo" ToRole="tblUser" />
+        </EntityType>
+        <Association Name="FK_BankAccount_Bank">
+          <End Type="Models.tblBank" Role="tblBank" Multiplicity="1" />
+          <End Type="Models.tblBankAccountDetail" Role="tblBankAccountDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblBank">
+              <PropertyRef Name="BankId" />
+            </Principal>
+            <Dependent Role="tblBankAccountDetail">
+              <PropertyRef Name="BankId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BankAccount_User">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="1" />
+          <End Type="Models.tblBankAccountDetail" Role="tblBankAccountDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblBankAccountDetail">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplication_BankAccount">
+          <End Type="Models.tblBankAccountDetail" Role="tblBankAccountDetail" Multiplicity="1" />
+          <End Type="Models.tblLoanApplication" Role="tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblBankAccountDetail">
+              <PropertyRef Name="BankAccountId" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="BankID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CompanyBankAccount_Bank">
+          <End Type="Models.tblBank" Role="tblBank" Multiplicity="1" />
+          <End Type="Models.tblCompanyBankAccountDetail" Role="tblCompanyBankAccountDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblBank">
+              <PropertyRef Name="BankId" />
+            </Principal>
+            <Dependent Role="tblCompanyBankAccountDetail">
+              <PropertyRef Name="BankId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_DetailedCity">
+          <End Type="Models.tblCity" Role="tblCity" Multiplicity="0..1" />
+          <End Type="Models.tblPersonalInfo" Role="tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCity">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="DetailedCityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_ResidenceCity">
+          <End Type="Models.tblCity" Role="tblCity" Multiplicity="1" />
+          <End Type="Models.tblPersonalInfo" Role="tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCity">
+              <PropertyRef Name="CityId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="ResidenceCityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_Country">
+          <End Type="Models.tblCountry" Role="tblCountry" Multiplicity="1" />
+          <End Type="Models.tblPersonalInfo" Role="tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCountry">
+              <PropertyRef Name="CountryId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="CountryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Emplo__339FAB6E">
+          <End Type="Models.tblEmploymentStatu" Role="tblEmploymentStatu" Multiplicity="1" />
+          <End Type="Models.tblWorkInfo" Role="tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblEmploymentStatu">
+              <PropertyRef Name="EmploymentStatusID" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="EmploymentStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Incom__3493CFA7">
+          <End Type="Models.tblIncomeSource" Role="tblIncomeSource" Multiplicity="1" />
+          <End Type="Models.tblWorkInfo" Role="tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblIncomeSource">
+              <PropertyRef Name="IncomeSourceID" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="IncomeSourceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblLoanRe__LoanI__6501FCD8">
+          <End Type="Models.tblLoanApplication" Role="tblLoanApplication" Multiplicity="1" />
+          <End Type="Models.tblLoanReturnDetail" Role="tblLoanReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanApplication">
+              <PropertyRef Name="LoanID" />
+            </Principal>
+            <Dependent Role="tblLoanReturnDetail">
+              <PropertyRef Name="LoanID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplication_LoanPurpose">
+          <End Type="Models.tblLoanPurpose" Role="tblLoanPurpose" Multiplicity="1" />
+          <End Type="Models.tblLoanApplication" Role="tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanPurpose">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="LoanPurposeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplication_User">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="1" />
+          <End Type="Models.tblLoanApplication" Role="tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplicationDetail_LoanApplication">
+          <End Type="Models.tblLoanApplication" Role="tblLoanApplication" Multiplicity="1" />
+          <End Type="Models.tblLoanApplicationDetail" Role="tblLoanApplicationDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanApplication">
+              <PropertyRef Name="LoanID" />
+            </Principal>
+            <Dependent Role="tblLoanApplicationDetail">
+              <PropertyRef Name="LoanID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblLoanRe__Insta__282DF8C2">
+          <End Type="Models.tblLoanApplicationDetail" Role="tblLoanApplicationDetail" Multiplicity="1" />
+          <End Type="Models.tblLoanReturnDetail" Role="tblLoanReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanApplicationDetail">
+              <PropertyRef Name="DetailID" />
+            </Principal>
+            <Dependent Role="tblLoanReturnDetail">
+              <PropertyRef Name="InstallmentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblLoanRe__LoanR__2A164134">
+          <End Type="Models.tblLoanReturn" Role="tblLoanReturn" Multiplicity="1" />
+          <End Type="Models.tblLoanReturnDetail" Role="tblLoanReturnDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanReturn">
+              <PropertyRef Name="LoanReturnID" />
+            </Principal>
+            <Dependent Role="tblLoanReturnDetail">
+              <PropertyRef Name="LoanReturnID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanReturn_User">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="1" />
+          <End Type="Models.tblLoanReturn" Role="tblLoanReturn" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblLoanReturn">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_PersonalInfo_User">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="1" />
+          <End Type="Models.tblPersonalInfo" Role="tblPersonalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblPersonalInfo">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__Conta__2EDAF651">
+          <End Type="Models.tblReferralRelation" Role="tblReferralRelation" Multiplicity="1" />
+          <End Type="Models.tblReferalInfo" Role="tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblReferralRelation">
+              <PropertyRef Name="ReferralRelationID" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="ContactRelationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__Creat__2FCF1A8A">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="0..1" />
+          <End Type="Models.tblReferalInfo" Role="tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="CreatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__Updat__30C33EC3">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="0..1" />
+          <End Type="Models.tblReferalInfo" Role="tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="UpdatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblRefera__UserI__31B762FC">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="1" />
+          <End Type="Models.tblReferalInfo" Role="tblReferalInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblReferalInfo">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Creat__32AB8735">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="0..1" />
+          <End Type="Models.tblWorkInfo" Role="tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="CreatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__Updat__3587F3E0">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="0..1" />
+          <End Type="Models.tblWorkInfo" Role="tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="UpdatedBy" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblWorkIn__UserI__367C1819">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="1" />
+          <End Type="Models.tblWorkInfo" Role="tblWorkInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblWorkInfo">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tblMenuAction">
+          <Key>
+            <PropertyRef Name="ActionID" />
+          </Key>
+          <Property Name="ActionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ActionName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblMenuAssignAction">
+          <Key>
+            <PropertyRef Name="AssignID" />
+          </Key>
+          <Property Name="AssignID" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModuleID" Type="Int32" />
+          <Property Name="ActionID" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblMenuModule">
+          <Key>
+            <PropertyRef Name="ModuleID" />
+          </Key>
+          <Property Name="ModuleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ModuleName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="SectionName" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="DisplayName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="tblUserMenuRole">
+          <Key>
+            <PropertyRef Name="UserRoleID" />
+          </Key>
+          <Property Name="UserRoleID" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="UserID" Type="Int32" />
+          <Property Name="ModuleID" Type="Int32" />
+          <Property Name="ActionID" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblDocumentOther">
+          <Key>
+            <PropertyRef Name="DocumentId" />
+          </Key>
+          <Property Name="DocumentId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Date" Type="DateTime" Precision="3" />
+          <Property Name="TypeId" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="DocumentExtension" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="DocumentType" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Remarks" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="UserId" Type="Int32" />
+        </EntityType>
+        <EntityType Name="tblDocument">
+          <Key>
+            <PropertyRef Name="DocumentId" />
+          </Key>
+          <Property Name="DocumentId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="userId" Type="Int32" Nullable="false" />
+          <Property Name="DocumentTypeId" Type="Int32" Nullable="false" />
+          <Property Name="DocumentPath" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ExpiryDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedAt" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <NavigationProperty Name="tblDocumentType" Relationship="Models.FK_tblDocumentType_tblDocuments" FromRole="tblDocument" ToRole="tblDocumentType" />
+          <NavigationProperty Name="tblUser" Relationship="Models.FK_tblUser_tblDocuments" FromRole="tblDocument" ToRole="tblUser" />
+          <Property Name="DocumentExtension" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="FK_tblDocumentType_tblDocuments">
+          <End Type="Models.tblDocumentType" Role="tblDocumentType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="Models.tblDocument" Role="tblDocument" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblDocumentType">
+              <PropertyRef Name="DocumentTypeID" />
+            </Principal>
+            <Dependent Role="tblDocument">
+              <PropertyRef Name="DocumentTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblUser_tblDocuments">
+          <End Type="Models.tblUser" Role="tblUser" Multiplicity="1" />
+          <End Type="Models.tblDocument" Role="tblDocument" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tblDocument">
+              <PropertyRef Name="userId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tblLoanCategory">
+          <Key>
+            <PropertyRef Name="LoanCategoryID" />
+          </Key>
+          <Property Name="LoanCategoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CategoryName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CategoryStatus" Type="String" MaxLength="25" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="InterestRatePercentage" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="MaxDays" Type="Int32" Nullable="false" />
+          <Property Name="MaxLimit" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="LoanType" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CompanyFee" Type="Decimal" Precision="18" Scale="2" />
+          <NavigationProperty Name="tblLoanApplications" Relationship="Models.FK_LoanApplication_LoanCategory" FromRole="tblLoanCategory" ToRole="tblLoanApplication" />
+        </EntityType>
+        <Association Name="FK_LoanApplication_LoanCategory">
+          <End Type="Models.tblLoanCategory" Role="tblLoanCategory" Multiplicity="1" />
+          <End Type="Models.tblLoanApplication" Role="tblLoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblLoanCategory">
+              <PropertyRef Name="LoanCategoryID" />
+            </Principal>
+            <Dependent Role="tblLoanApplication">
+              <PropertyRef Name="LoanCategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="ModelsStoreContainer" CdmEntityContainer="ModelDb">
+          <EntitySetMapping Name="tblAccountDefaults">
+            <EntityTypeMapping TypeName="Models.tblAccountDefault">
+              <MappingFragment StoreEntitySet="tblAccountDefault">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="DetailCode" ColumnName="DetailCode" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="DefaultId" ColumnName="DefaultId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblAccountDefaultGLs">
+            <EntityTypeMapping TypeName="Models.tblAccountDefaultGL">
+              <MappingFragment StoreEntitySet="tblAccountDefaultGL">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="AccountCode" ColumnName="AccountCode" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="DefaultId" ColumnName="DefaultId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblAccountDetails">
+            <EntityTypeMapping TypeName="Models.tblAccountDetail">
+              <MappingFragment StoreEntitySet="tblAccountDetail">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="UrduName" ColumnName="UrduName" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="AccountCode" ColumnName="AccountCode" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="DetailCode" ColumnName="DetailCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblAccountDetailExtraInfoes">
+            <EntityTypeMapping TypeName="Models.tblAccountDetailExtraInfo">
+              <MappingFragment StoreEntitySet="tblAccountDetailExtraInfo">
+                <ScalarProperty Name="RatingStar" ColumnName="RatingStar" />
+                <ScalarProperty Name="EmiratesID" ColumnName="EmiratesID" />
+                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+                <ScalarProperty Name="ContactPerson" ColumnName="ContactPerson" />
+                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
+                <ScalarProperty Name="Terms" ColumnName="Terms" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="CityId" ColumnName="CityId" />
+                <ScalarProperty Name="SalesmanID" ColumnName="SalesmanID" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="CNIC" ColumnName="CNIC" />
+                <ScalarProperty Name="NTN" ColumnName="NTN" />
+                <ScalarProperty Name="GST" ColumnName="GST" />
+                <ScalarProperty Name="TaxType" ColumnName="TaxType" />
+                <ScalarProperty Name="CreditLimit" ColumnName="CreditLimit" />
+                <ScalarProperty Name="CreditDays" ColumnName="CreditDays" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Website" ColumnName="Website" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Fax" ColumnName="Fax" />
+                <ScalarProperty Name="Cell2" ColumnName="Cell2" />
+                <ScalarProperty Name="Cell1" ColumnName="Cell1" />
+                <ScalarProperty Name="Phone2" ColumnName="Phone2" />
+                <ScalarProperty Name="Phone1" ColumnName="Phone1" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="DetailCode" ColumnName="DetailCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblAdminEmails">
+            <EntityTypeMapping TypeName="Models.tblAdminEmail">
+              <MappingFragment StoreEntitySet="tblAdminEmail">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="AdminEmail" ColumnName="AdminEmail" />
+                <ScalarProperty Name="AdminEmailID" ColumnName="AdminEmailID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblBankAccountDetails">
+            <EntityTypeMapping TypeName="Models.tblBankAccountDetail">
+              <MappingFragment StoreEntitySet="tblBankAccountDetails">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="HolderName" ColumnName="HolderName" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="BankId" ColumnName="BankId" />
+                <ScalarProperty Name="BankAccountId" ColumnName="BankAccountId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblBanks">
+            <EntityTypeMapping TypeName="Models.tblBank">
+              <MappingFragment StoreEntitySet="tblBanks">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="BankName" ColumnName="BankName" />
+                <ScalarProperty Name="BankId" ColumnName="BankId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblChartofAccounts">
+            <EntityTypeMapping TypeName="Models.tblChartofAccount">
+              <MappingFragment StoreEntitySet="tblChartofAccount">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="SectionName" ColumnName="SectionName" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="AccountLevel" ColumnName="AccountLevel" />
+                <ScalarProperty Name="ParentLevelCode" ColumnName="ParentLevelCode" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="DisplayCode" ColumnName="DisplayCode" />
+                <ScalarProperty Name="AccountCode" ColumnName="AccountCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblCities">
+            <EntityTypeMapping TypeName="Models.tblCity">
+              <MappingFragment StoreEntitySet="tblCity">
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="CityName" ColumnName="CityName" />
+                <ScalarProperty Name="CountryId" ColumnName="CountryId" />
+                <ScalarProperty Name="CityId" ColumnName="CityId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblCompanies">
+            <EntityTypeMapping TypeName="Models.tblCompany">
+              <MappingFragment StoreEntitySet="tblCompany">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Website" ColumnName="Website" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="CellNo" ColumnName="CellNo" />
+                <ScalarProperty Name="PhoneNo" ColumnName="PhoneNo" />
+                <ScalarProperty Name="ContactPerson" ColumnName="ContactPerson" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblCompanyBankAccountDetails">
+            <EntityTypeMapping TypeName="Models.tblCompanyBankAccountDetail">
+              <MappingFragment StoreEntitySet="tblCompanyBankAccountDetails">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="HolderName" ColumnName="HolderName" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="BankId" ColumnName="BankId" />
+                <ScalarProperty Name="AccountId" ColumnName="AccountId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblCountries">
+            <EntityTypeMapping TypeName="Models.tblCountry">
+              <MappingFragment StoreEntitySet="tblCountry">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="CountryName" ColumnName="CountryName" />
+                <ScalarProperty Name="CountryId" ColumnName="CountryId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblDocumentTypes">
+            <EntityTypeMapping TypeName="Models.tblDocumentType">
+              <MappingFragment StoreEntitySet="tblDocumentType">
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="TypeStatus" ColumnName="TypeStatus" />
+                <ScalarProperty Name="TypeName" ColumnName="TypeName" />
+                <ScalarProperty Name="DocumentTypeID" ColumnName="DocumentTypeID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblEducations">
+            <EntityTypeMapping TypeName="Models.tblEducation">
+              <MappingFragment StoreEntitySet="tblEducation">
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="EducationLevel" ColumnName="EducationLevel" />
+                <ScalarProperty Name="EducationID" ColumnName="EducationID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblEmploymentStatus">
+            <EntityTypeMapping TypeName="Models.tblEmploymentStatu">
+              <MappingFragment StoreEntitySet="tblEmploymentStatus">
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="StatusName" ColumnName="StatusName" />
+                <ScalarProperty Name="EmploymentStatusID" ColumnName="EmploymentStatusID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblGenders">
+            <EntityTypeMapping TypeName="Models.tblGender">
+              <MappingFragment StoreEntitySet="tblGender">
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="GenderName" ColumnName="GenderName" />
+                <ScalarProperty Name="GenderID" ColumnName="GenderID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblIncomeSources">
+            <EntityTypeMapping TypeName="Models.tblIncomeSource">
+              <MappingFragment StoreEntitySet="tblIncomeSource">
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="SourceName" ColumnName="SourceName" />
+                <ScalarProperty Name="IncomeSourceID" ColumnName="IncomeSourceID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblLoanApplications">
+            <EntityTypeMapping TypeName="Models.tblLoanApplication">
+              <MappingFragment StoreEntitySet="tblLoanApplication">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="LoanReturnType" ColumnName="LoanReturnType" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="CompanyFee" ColumnName="CompanyFee" />
+                <ScalarProperty Name="FixedCharges" ColumnName="FixedCharges" />
+                <ScalarProperty Name="LoanDays" ColumnName="LoanDays" />
+                <ScalarProperty Name="LoanAmount" ColumnName="LoanAmount" />
+                <ScalarProperty Name="ApprovalComment" ColumnName="ApprovalComment" />
+                <ScalarProperty Name="ApprovalDate" ColumnName="ApprovalDate" />
+                <ScalarProperty Name="LoanDate" ColumnName="LoanDate" />
+                <ScalarProperty Name="InvestorID" ColumnName="InvestorID" />
+                <ScalarProperty Name="LoanCategoryID" ColumnName="LoanCategoryID" />
+                <ScalarProperty Name="LoanPurposeID" ColumnName="LoanPurposeID" />
+                <ScalarProperty Name="BankID" ColumnName="BankID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="LoanID" ColumnName="LoanID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblLoanApplicationDetails">
+            <EntityTypeMapping TypeName="Models.tblLoanApplicationDetail">
+              <MappingFragment StoreEntitySet="tblLoanApplicationDetail">
+                <ScalarProperty Name="InterestAmount" ColumnName="InterestAmount" />
+                <ScalarProperty Name="PrincipalAmount" ColumnName="PrincipalAmount" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="PaidAmount" ColumnName="PaidAmount" />
+                <ScalarProperty Name="ReturnAmount" ColumnName="ReturnAmount" />
+                <ScalarProperty Name="ReturnDate" ColumnName="ReturnDate" />
+                <ScalarProperty Name="LoanID" ColumnName="LoanID" />
+                <ScalarProperty Name="DetailID" ColumnName="DetailID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblLoanPurposes">
+            <EntityTypeMapping TypeName="Models.tblLoanPurpose">
+              <MappingFragment StoreEntitySet="tblLoanPurpose">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblLoanReturns">
+            <EntityTypeMapping TypeName="Models.tblLoanReturn">
+              <MappingFragment StoreEntitySet="tblLoanReturn">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="ScreenshotImage" ColumnName="ScreenshotImage" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="TransactionID" ColumnName="TransactionID" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="CompanyBankID" ColumnName="CompanyBankID" />
+                <ScalarProperty Name="LoanReturnID" ColumnName="LoanReturnID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblLoanReturnDetails">
+            <EntityTypeMapping TypeName="Models.tblLoanReturnDetail">
+              <MappingFragment StoreEntitySet="tblLoanReturnDetail">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="InstallmentID" ColumnName="InstallmentID" />
+                <ScalarProperty Name="LoanID" ColumnName="LoanID" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="LoanReturnID" ColumnName="LoanReturnID" />
+                <ScalarProperty Name="LoanReturnDetailID" ColumnName="LoanReturnDetailID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblMaritalStatus">
+            <EntityTypeMapping TypeName="Models.tblMaritalStatu">
+              <MappingFragment StoreEntitySet="tblMaritalStatus">
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="StatusName" ColumnName="StatusName" />
+                <ScalarProperty Name="MaritalStatusID" ColumnName="MaritalStatusID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblPersonalInfoes">
+            <EntityTypeMapping TypeName="Models.tblPersonalInfo">
+              <MappingFragment StoreEntitySet="tblPersonalInfo">
+                <ScalarProperty Name="DOB" ColumnName="DOB" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="DetailedCityID" ColumnName="DetailedCityID" />
+                <ScalarProperty Name="ResidenceCityID" ColumnName="ResidenceCityID" />
+                <ScalarProperty Name="DetailAddress" ColumnName="DetailAddress" />
+                <ScalarProperty Name="ResidentialAddress" ColumnName="ResidentialAddress" />
+                <ScalarProperty Name="CountryID" ColumnName="CountryID" />
+                <ScalarProperty Name="MaritalStatusID" ColumnName="MaritalStatusID" />
+                <ScalarProperty Name="EducationID" ColumnName="EducationID" />
+                <ScalarProperty Name="GenderID" ColumnName="GenderID" />
+                <ScalarProperty Name="SocialInsuranceNumber" ColumnName="SocialInsuranceNumber" />
+                <ScalarProperty Name="FullName" ColumnName="FullName" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="PersonalInfoID" ColumnName="PersonalInfoID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblReferalInfoes">
+            <EntityTypeMapping TypeName="Models.tblReferalInfo">
+              <MappingFragment StoreEntitySet="tblReferalInfo">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="RefferalAddress" ColumnName="RefferalAddress" />
+                <ScalarProperty Name="RefferalSIN" ColumnName="RefferalSIN" />
+                <ScalarProperty Name="RefferalPhoneNumber" ColumnName="RefferalPhoneNumber" />
+                <ScalarProperty Name="RefferalName" ColumnName="RefferalName" />
+                <ScalarProperty Name="ContactRelationID" ColumnName="ContactRelationID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="ReferalID" ColumnName="ReferalID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblReferralRelations">
+            <EntityTypeMapping TypeName="Models.tblReferralRelation">
+              <MappingFragment StoreEntitySet="tblReferralRelation">
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="RelationName" ColumnName="RelationName" />
+                <ScalarProperty Name="ReferralRelationID" ColumnName="ReferralRelationID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblUsers">
+            <EntityTypeMapping TypeName="Models.tblUser">
+              <MappingFragment StoreEntitySet="tblUsers">
+                <ScalarProperty Name="type" ColumnName="type" />
+                <ScalarProperty Name="OtpCreatedAt" ColumnName="OtpCreatedAt" />
+                <ScalarProperty Name="Otp" ColumnName="Otp" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblWorkInfoes">
+            <EntityTypeMapping TypeName="Models.tblWorkInfo">
+              <MappingFragment StoreEntitySet="tblWorkInfo">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="MonthlyIncome" ColumnName="MonthlyIncome" />
+                <ScalarProperty Name="DOJ" ColumnName="DOJ" />
+                <ScalarProperty Name="OrganizationAddress" ColumnName="OrganizationAddress" />
+                <ScalarProperty Name="OrganizationPhoneNumber" ColumnName="OrganizationPhoneNumber" />
+                <ScalarProperty Name="OrganizationName" ColumnName="OrganizationName" />
+                <ScalarProperty Name="EmploymentStatusID" ColumnName="EmploymentStatusID" />
+                <ScalarProperty Name="IncomeSourceID" ColumnName="IncomeSourceID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="WorkInfoID" ColumnName="WorkInfoID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblMenuActions">
+            <EntityTypeMapping TypeName="Models.tblMenuAction">
+              <MappingFragment StoreEntitySet="tblMenuAction">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="ActionName" ColumnName="ActionName" />
+                <ScalarProperty Name="ActionID" ColumnName="ActionID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblMenuAssignActions">
+            <EntityTypeMapping TypeName="Models.tblMenuAssignAction">
+              <MappingFragment StoreEntitySet="tblMenuAssignAction">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="ActionID" ColumnName="ActionID" />
+                <ScalarProperty Name="ModuleID" ColumnName="ModuleID" />
+                <ScalarProperty Name="AssignID" ColumnName="AssignID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblMenuModules">
+            <EntityTypeMapping TypeName="Models.tblMenuModule">
+              <MappingFragment StoreEntitySet="tblMenuModule">
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="SectionName" ColumnName="SectionName" />
+                <ScalarProperty Name="ModuleName" ColumnName="ModuleName" />
+                <ScalarProperty Name="ModuleID" ColumnName="ModuleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblUserMenuRoles">
+            <EntityTypeMapping TypeName="Models.tblUserMenuRole">
+              <MappingFragment StoreEntitySet="tblUserMenuRole">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="ActionID" ColumnName="ActionID" />
+                <ScalarProperty Name="ModuleID" ColumnName="ModuleID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="UserRoleID" ColumnName="UserRoleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblDocumentOthers">
+            <EntityTypeMapping TypeName="Models.tblDocumentOther">
+              <MappingFragment StoreEntitySet="tblDocumentOther">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="DocumentType" ColumnName="DocumentType" />
+                <ScalarProperty Name="DocumentExtension" ColumnName="DocumentExtension" />
+                <ScalarProperty Name="TypeId" ColumnName="TypeId" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="DocumentId" ColumnName="DocumentId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblDocuments">
+            <EntityTypeMapping TypeName="Models.tblDocument">
+              <MappingFragment StoreEntitySet="tblDocuments">
+                <ScalarProperty Name="DocumentExtension" ColumnName="DocumentExtension" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="ExpiryDate" ColumnName="ExpiryDate" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="DocumentPath" ColumnName="DocumentPath" />
+                <ScalarProperty Name="DocumentTypeId" ColumnName="DocumentTypeId" />
+                <ScalarProperty Name="userId" ColumnName="userId" />
+                <ScalarProperty Name="DocumentId" ColumnName="DocumentId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblLoanCategories">
+            <EntityTypeMapping TypeName="Models.tblLoanCategory">
+              <MappingFragment StoreEntitySet="tblLoanCategories">
+                <ScalarProperty Name="CompanyFee" ColumnName="CompanyFee" />
+                <ScalarProperty Name="LoanType" ColumnName="LoanType" />
+                <ScalarProperty Name="MaxLimit" ColumnName="MaxLimit" />
+                <ScalarProperty Name="MaxDays" ColumnName="MaxDays" />
+                <ScalarProperty Name="InterestRatePercentage" ColumnName="InterestRatePercentage" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CategoryStatus" ColumnName="CategoryStatus" />
+                <ScalarProperty Name="CategoryName" ColumnName="CategoryName" />
+                <ScalarProperty Name="LoanCategoryID" ColumnName="LoanCategoryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

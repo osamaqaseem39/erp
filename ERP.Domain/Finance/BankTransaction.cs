@@ -34,6 +34,8 @@ public class BankTransaction
     public DateTime ImportedAt { get; set; } = DateTime.UtcNow;
     
     public Guid? MatchedPaymentId { get; set; }
+
+    public Guid? ReconciliationId { get; set; }
     
     public bool IsReconciled { get; set; } = false;
     
@@ -44,4 +46,5 @@ public class BankTransaction
     // Navigation properties
     public BankAccount BankAccount { get; set; } = null!;
     public Payment? MatchedPayment { get; set; }
+    public BankReconciliation? Reconciliation { get; set; }
 }

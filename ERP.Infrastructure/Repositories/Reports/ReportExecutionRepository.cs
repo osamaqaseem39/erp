@@ -13,72 +13,56 @@ public class ReportExecutionRepository : IReportExecutionRepository
         _context = context;
     }
 
-    public async Task<ReportExecution?> GetByIdAsync(Guid id)
-    {
-        return await _context.ReportExecutions
+    private IQueryable<ReportExecution> Query(Guid tenantId) =>
+        _context.ReportExecutions
             .Include(re => re.Report)
             .Include(re => re.Schedule)
-            .FirstOrDefaultAsync(re => re.Id == id);
+            .Where(re => re.TenantId == tenantId);
+
+    public async Task<ReportExecution?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(re => re.Id == id);
     }
 
-    public async Task<IEnumerable<ReportExecution>> GetAllAsync()
+    public async Task<IEnumerable<ReportExecution>> GetAllAsync(Guid tenantId)
     {
-        return await _context.ReportExecutions
-            .Include(re => re.Report)
-            .Include(re => re.Schedule)
-            .OrderByDescending(re => re.StartedAt)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<ReportExecution>();
+        return await Query(tenantId).OrderByDescending(re => re.StartedAt).ToListAsync();
     }
 
-    public async Task<IEnumerable<ReportExecution>> GetByReportAsync(Guid reportId)
+    public async Task<IEnumerable<ReportExecution>> GetByReportAsync(Guid reportId, Guid tenantId)
+        => await GetByReportIdAsync(reportId, tenantId);
+
+    public async Task<IEnumerable<ReportExecution>> GetByReportIdAsync(Guid reportId, Guid tenantId)
     {
-        return await _context.ReportExecutions
-            .Include(re => re.Report)
-            .Include(re => re.Schedule)
+        if (tenantId == Guid.Empty) return Array.Empty<ReportExecution>();
+        return await Query(tenantId)
             .Where(re => re.ReportId == reportId)
             .OrderByDescending(re => re.StartedAt)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ReportExecution>> GetByReportIdAsync(Guid reportId)
+    public async Task<IEnumerable<ReportExecution>> GetByStatusAsync(string status, Guid tenantId)
     {
-        return await _context.ReportExecutions
-            .Include(re => re.Report)
-            .Include(re => re.Schedule)
-            .Where(re => re.ReportId == reportId)
-            .OrderByDescending(re => re.StartedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<ReportExecution>> GetByStatusAsync(string status)
-    {
-        return await _context.ReportExecutions
-            .Include(re => re.Report)
-            .Include(re => re.Schedule)
+        if (tenantId == Guid.Empty) return Array.Empty<ReportExecution>();
+        return await Query(tenantId)
             .Where(re => re.Status == status)
             .OrderByDescending(re => re.StartedAt)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ReportExecution>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<IEnumerable<ReportExecution>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
     {
-        return await _context.ReportExecutions
-            .Include(re => re.Report)
-            .Include(re => re.Schedule)
+        if (tenantId == Guid.Empty) return Array.Empty<ReportExecution>();
+        return await Query(tenantId)
             .Where(re => re.StartedAt >= startDate && re.StartedAt <= endDate)
             .OrderByDescending(re => re.StartedAt)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<ReportExecution>> GetByTenantIdAsync(Guid tenantId)
-    {
-        return await _context.ReportExecutions
-            .Include(re => re.Report)
-            .Include(re => re.Schedule)
-            .Where(re => re.TenantId == tenantId)
-            .OrderByDescending(re => re.StartedAt)
-            .ToListAsync();
-    }
+        => await GetAllAsync(tenantId);
 
     public async Task<Guid> CreateAsync(ReportExecution reportExecution)
     {
@@ -94,9 +78,9 @@ public class ReportExecutionRepository : IReportExecutionRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var reportExecution = await _context.ReportExecutions.FindAsync(id);
+        var reportExecution = await GetByIdAsync(id, tenantId);
         if (reportExecution == null) return false;
 
         _context.ReportExecutions.Remove(reportExecution);

@@ -1,0 +1,378 @@
+﻿<div id="CssData">
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            #printable {
+                display: block;
+            }
+
+            .businssName {
+                margin-right: -21px !important;
+            }
+
+            .mainTable {
+                width: 98% !important;
+                margin-top: -45px !important;
+                border-bottom: none !important;
+                border-top: none !important;
+            }
+
+                .mainTable .totalTr {
+                    border-bottom: 0px !important;
+                    border-top: 0px !important;
+                }
+
+            #printable-content {
+                margin: 10px !important;
+            }
+
+            @@page {
+                size: landscape;
+                margin-left: -25px;
+            }
+
+            @@page:first {
+                size: landscape;
+                margin-top: -55px;
+                margin-left: -25px;
+            }
+
+            .headingTable {
+                border-bottom: none !important;
+                border-top: none !important;
+            }
+
+            .routeData {
+                margin-top: -50px !important;
+            }
+
+            .dateData {
+                margin-top: -55px !important;
+            }
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        .mainTable {
+            width: 98%;
+            margin-left: 10px;
+            padding-right: 35px;
+        }
+
+            .mainTable th, .mainTd {
+                border: 1px solid black;
+            }
+
+            .mainTable tr th {
+                padding: 4px;
+            }
+
+            .mainTable tr td {
+                padding: 2px;
+            }
+
+        /*.printBtn:hover {
+            margin-left: 2px;
+            width: 63px !important;
+            height: 32px !important;
+            transition: width .0001s, height .0001s;
+            background-color: #054583 !important;
+        }*/
+    </style>
+</div>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- widget content -->
+@model List<POS.Models.clsInvoice>
+    <div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <h1 class="page-title txt-color-blueDark">
+                    <i class="fa fa-home fa-fw "></i>
+                    Report
+                    <span>
+                        >
+                        PLS
+                    </span>
+                </h1>
+            </div>
+        </div>
+        <section>
+            <div class="panel">
+                <div class="panel-heading">
+                    @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                    {
+                        <span class="header"> PLS Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                        <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                        <input type="hidden" name="FileName" id="FileName" value="SaleSchedule" />
+                        <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                            Print
+                        </button>
+                        <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                    }
+                </div>
+                <div class="panel-body">
+                    <div id="HtmlData">
+                        <div id="printable-content" class="panel rpt" style=" float: center; width: 98%; font-family: Arial, Helvetica, sans-serif;">
+                            <table style="padding: 30px;" class="headingTable">
+                                <tr>
+                                    <th style="font-weight: normal; font-size: 11px; text-align: right;padding-left:12px;padding-top:0px;border-bottom:none;" colspan="12"><strong>Print Date:&nbsp;</strong>@Convert.ToDateTime(DateTime.Now).ToString("dd/MM/yyyy hh:mm tt")</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 24px; text-align: left;padding-left:12px;padding-top:10px;border-bottom:none;" colspan="12" class="pull-left">PLS</th>
+                                </tr>
+                                @{decimal totalPLS = 0;}
+                                @if (Model.Count != 0)
+                                {
+                                    <tr>
+                                        <td style="font-size: 13px; text-align: left; padding-bottom: 30px; border-bottom: none; padding-left: 12px; font-weight: normal" colspan="12" class="routeData pull-left"><strong><span style="font-size: 13px">From:</span> </strong>@Convert.ToDateTime(Model[0].FromDate).ToString("dd/MM/yyyy")&nbsp; <strong><span style="font-size:16px">To:</span></strong>@Convert.ToDateTime(Model[0].ToDate).ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                                <thead>
+                                    <tr>
+                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding-bottom: 10px" colspan="12">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="12">
+                                            @if (Model.Count != 0)
+                                            {
+                                                <table class="mainTable" style="margin-top: -60px">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 9px; border: none; border-bottom: 1px solid black" colspan="12">&nbsp;</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tr>
+                                                        <th style="text-align: center; font-size: 12px; width: 35px; ">Sr#</th>
+                                                        <th style="text-align: left; font-size: 12px">Customer</th>
+                                                        <th style="text-align: center; font-size: 12px; width: 95px; ">Invoice No.</th>
+                                                        <th style="text-align: center; font-size: 12px; width: 70px">Date</th>
+                                                        <th style="text-align: left; font-size: 12px">Item Name</th>
+                                                        <th style="text-align: right; font-size: 12px; width: 50px; ">Qty</th>
+                                                        <th style="text-align: center; font-size: 12px; width: 40px; ">Avg. Rate</th>
+                                                        <th style="text-align: right; font-size: 12px; width: 70px; ">Rate</th>
+                                                        <th style="text-align: right; font-size: 12px; width: 70px; ">Gross<br />Value</th>
+                                                        <th style="text-align: right; font-size: 12px; width: 70px; ">Cost<br />Value</th>
+                                                        <th style="text-align: right; font-size: 12px; width: 70px; ">PLS</th>
+                                                    </tr>
+                                                    @{
+                                                decimal totatlFirstQuantity = 0;
+                                                decimal totalSecondQty = 0;
+                                                decimal totalRate = 0;
+                                                decimal totalGrossValue = 0;
+                                                decimal totalCostValue = 0;
+                                                
+                                                    }
+                                                    @for (int i = 0; i < Model.Count; i++)
+                                                    {
+                                                        decimal costValue = Convert.ToDecimal(Model[i].AvgRate) * Convert.ToDecimal(Model[i].Qty);
+                                                        decimal pls = Convert.ToDecimal(Model[i].GrossValue) - costValue;
+                                                        totatlFirstQuantity += Convert.ToDecimal(Model[i].Qty);
+                                                        totalSecondQty += Convert.ToDecimal(Model[i].SecondQty);
+                                                        totalRate += Convert.ToDecimal(Model[i].Rate);
+                                                        totalGrossValue += Convert.ToDecimal(Model[i].GrossValue);
+                                                        totalCostValue += costValue;
+                                                        totalPLS += pls;
+                                                        <tr>
+                                                            <td class="mainTd" style="text-align: center; font-size: 11px">@(i + 1)</td>
+                                                            @if (string.IsNullOrEmpty(Model[i].CityName))
+                                                            {
+                                                                <td class="mainTd" style="text-align: left; font-size: 11px">@Model[i].DetailName</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td class="mainTd" style="text-align: left; font-size: 11px">@Model[i].DetailName, @Model[i].CityName</td>
+                                                            }
+                                                            <td class="mainTd" style="text-align: center; font-size: 11px">@Model[i].ComputerNo</td>
+                                                            <td class="mainTd" style="text-align: center; font-size: 11px">@Convert.ToDateTime(Model[i].RecordDate).ToString("dd/MM/yy")</td>
+                                                            <td class="mainTd" style="text-align: left; font-size: 11px">@Model[i].ItemName</td>
+                                                            <td class="mainTd" style="text-align: right; font-size: 11px; ">@Convert.ToDecimal(Model[i].Qty).ToString("#,##0.00")</td>
+                                                            <td class="mainTd" style="text-align: center; font-size: 11px; ">@Convert.ToDecimal(Model[i].AvgRate).ToString("#,##0.00")</td>
+                                                            <td class="mainTd" style="text-align: right; font-size: 11px">@Convert.ToDecimal(Model[i].Rate).ToString("#,##0.00")</td>
+                                                            <td class="mainTd" style="text-align: right; font-size: 11px; ">@Convert.ToDecimal(Model[i].GrossValue).ToString("#,##0.00")</td>
+                                                            <td class="mainTd" style="text-align: right; font-size: 11px; ">@Convert.ToDecimal(costValue).ToString("#,##0.00")</td>
+                                                            <td class="mainTd" style="text-align: right; font-size: 11px; ">@Convert.ToDecimal(pls).ToString("#,##0.00")</td>
+                                                        </tr>
+                                                    }
+                                                    <tr class="totalTr">
+                                                        <td class="mainTd" style="text-align: center; border: none; border-bottom: 1px solid #fff; font-size: 11px; "></td>
+                                                        <td class="mainTd" style="text-align: left; border: none; border-bottom: 1px solid #fff; font-size: 11px"></td>
+                                                        <td class="mainTd" style="text-align: center; border: none; border-bottom: 1px solid #fff; font-size: 11px"></td>
+                                                        <td class="mainTd" style="text-align: left; border: none; border-bottom: 1px solid #fff; font-size: 11px"></td>
+                                                        <td class="mainTd" style="text-align: left; border: none; border-bottom: 1px solid #fff; font-size: 11px"></td>
+                                                        <td class="mainTd" style="text-align: right; font-size: 12px;font-weight:bold ">@Convert.ToDecimal(totatlFirstQuantity).ToString("#,##0.00")</td>
+                                                        <td class="mainTd" style="text-align: center; border: none; border-bottom: 1px solid #fff; font-size: 11px"></td>
+                                                        <td class="mainTd" style="text-align: right; font-size: 12px; font-weight: bold; ">@Convert.ToDecimal(totalRate).ToString("#,##0.00")</td>
+                                                        <td class="mainTd" style="text-align: right; font-size: 12px; font-weight: bold;">@Convert.ToDecimal(totalGrossValue).ToString("#,##0.00")</td>
+                                                        <td class="mainTd" style="text-align: right; font-size: 12px; font-weight: bold;">@Convert.ToDecimal(totalCostValue).ToString("#,##0.00")</td>
+                                                        <td class="mainTd" style="text-align: right; font-size: 12px; font-weight: bold;">@Convert.ToDecimal(totalPLS).ToString("#,##0.00")</td>
+                                                    </tr>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 36.9px;  border: none;" colspan="12">&nbsp;</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            }
+                                            else
+                                            {
+                                                <table class="mainTable" style="">
+                                                    <tr>
+                                                        <th style="text-align: center; font-size: 12px">Sr#</th>
+                                                        <th style="text-align: left; font-size: 12px">Customer</th>
+                                                        <th style="text-align: center; font-size: 12px">Invoice No.</th>
+                                                        <th style="text-align: center; font-size: 12px">Date</th>
+                                                        <th style="text-align: left; font-size: 12px">Item Name</th>
+                                                        <th style="text-align: right; font-size: 12px; ">Qty</th>
+                                                        <th style="text-align: center; font-size: 12px">Avg. Rate</th>
+                                                        <th style="text-align: right; font-size: 12px">Rate</th>
+                                                        <th style="text-align: right; font-size: 12px">Gross<br />Value</th>
+                                                        <th style="text-align: right; font-size: 12px; width: 70px; ">Cost<br />Value</th>
+                                                        <th style="text-align: right; font-size: 12px; width: 70px; ">PLS</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="mainTd" colspan="11" style="text-align:center;padding:10px">No Record Found.</td>
+                                                    </tr>
+                                                </table>
+                                            }
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            @{decimal totaldemage = 0;};
+                            <div class="row" style="padding: 10px;">
+                                <table style="padding: 10px;" class="headingTable">
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="12">
+                                                @if (Model.Count != 0)
+                                                {
+                                                    if (Model[0].CreditNoteList.Count != 0)
+                                                    {
+                                                        <table class="mainTable" style="margin-top: -60px">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 9px; border: none; border-bottom: 1px solid black" colspan="12">&nbsp;</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tr>
+                                                                <th style="text-align: center; font-size: 12px; width: 35px; ">Sr#</th>
+                                                                <th style="text-align: left; font-size: 12px">Customer</th>
+                                                                <th style="text-align: left; font-size: 12px">City</th>
+                                                                <th style="text-align: center; font-size: 12px; width: 95px; ">Voucher No.</th>
+                                                                <th style="text-align: center; font-size: 12px; width: 70px">Date</th>
+                                                                <th style="text-align: left; font-size: 12px">Remarks</th>
+                                                                <th style="text-align: right; font-size: 12px; width: 50px; ">Amount</th>
+                                                            </tr>
+                                                            @for (int i = 0; i < Model[0].CreditNoteList.Count; i++)
+                                                            {
+                                                                totaldemage += Convert.ToDecimal(Model[0].CreditNoteList[i].Credit);
+                                                                totalPLS -= totaldemage;
+                                                                <tr>
+                                                                    <td class="mainTd" style="text-align: center; font-size: 11px">@(i + 1)</td>
+                                                                    <td class="mainTd" style="text-align: left; font-size: 11px">@Model[0].CreditNoteList[i].DetailName</td>
+                                                                    <td class="mainTd" style="text-align: left; font-size: 11px">@Model[0].CreditNoteList[i].CityName</td>
+                                                                    <td class="mainTd" style="text-align: center; font-size: 11px">@Model[0].CreditNoteList[i].VoucherNo</td>
+                                                                    <td class="mainTd" style="text-align: center; font-size: 11px">@Convert.ToDateTime(Model[0].CreditNoteList[i].VoucherDate).ToString("dd/MM/yy")</td>
+                                                                    <td class="mainTd" style="text-align: left; font-size: 11px">@Model[0].CreditNoteList[i].Remarks</td>
+                                                                    <td class="mainTd" style="text-align: right; font-size: 11px; ">@Convert.ToDecimal(Model[0].CreditNoteList[i].Credit).ToString("#,##0.00")</td>
+                                                                </tr>
+                                                            }
+                                                            <tr class="totalTr">
+                                                                <td class="mainTd" style="text-align: right; border: none; border-bottom: 1px solid #fff; font-size: 11px; " colspan="6">Total Credit Breakage</td>
+                                                                <td class="mainTd" style="text-align: right; font-size: 12px;font-weight:bold ">@Convert.ToDecimal(totaldemage).ToString("#,##0.00")</td>
+                                                            </tr>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <td class="mainTd" style="text-align: right; border: none; border-bottom: 1px solid #fff; font-size: 11px; " colspan="6">Net PLS</td>
+                                                                    <td class="mainTd" style="text-align: right; font-size: 12px;font-weight:bold ">@Convert.ToDecimal(totalPLS).ToString("#,##0.00")</td>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    }
+                                                }
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- END MAIN CONTENT -->
+    @section pagespecific {
+        <script src="~/Scripts/CustomJs/ResponsivePrintScreenForLandscape.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var cssData = $('#CssData').html();
+                var htmlData = $('#HtmlData').html();
+                $('#DocumentName').val(cssData + htmlData);
+            })
+            //$.get("ConvertServerDateIntoLocalDate", function (data) {
+            //    $('.LocalDate').html(data);
+            //});
+            function PrintElem(elem) {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+                mywindow.document.write('<html><head><title></title>');
+                mywindow.document.write('</head><body>');
+                //mywindow.document.write('<h1></h1>');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+            $('.report_body tr td').each(function () {
+                if (parseFloat($(this).html()) > 0) {
+                    $(this).html(ReplaceNumberWithCommas($(this).html()));
+                }
+            });
+            function ReplaceNumberWithCommas(yourNumber) {
+                if (yourNumber != "0") {
+                    //Seperates the components of the number
+                    var n = yourNumber.toString().split(".");
+                    //Comma-fies the first part
+                    n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    if (n.length == 1) {
+                        n[0] = n[0] + ".00";
+                    }
+                    else {
+                        if (n[1].toString().length == 1) {
+                            n[1] = n[1] + "0";
+                        }
+                    }
+                    //Combines the two sections
+                    n = n.join(".");
+                }
+                else {
+                    n = yourNumber;
+                }
+                return n;
+            }
+        </script>
+    }

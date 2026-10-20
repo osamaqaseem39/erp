@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="803f216b21d84c7394790a75dbdd6da7" Name="Diagram1">
+        <EntityTypeShape EntityType="Models.tblAccountDefault" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.tblAccountDefaultGL" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.tblAccountDetail" Width="1.5" PointX="4.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.tblAccountDetailExtraInfo" Width="1.5" PointX="6.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.tblAdminEmail" Width="1.5" PointX="8.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.tblBankAccountDetail" Width="1.5" PointX="3" PointY="21.625" />
+        <EntityTypeShape EntityType="Models.tblBank" Width="1.5" PointX="0.75" PointY="26" />
+        <EntityTypeShape EntityType="Models.tblChartofAccount" Width="1.5" PointX="8.75" PointY="4.75" />
+        <EntityTypeShape EntityType="Models.tblCity" Width="1.5" PointX="0.75" PointY="4.5" />
+        <EntityTypeShape EntityType="Models.tblCompany" Width="1.5" PointX="8.75" PointY="9.75" />
+        <EntityTypeShape EntityType="Models.tblCompanyBankAccountDetail" Width="1.5" PointX="3" PointY="40.875" />
+        <EntityTypeShape EntityType="Models.tblCountry" Width="1.5" PointX="0.75" PointY="9" />
+        <EntityTypeShape EntityType="Models.tblDocumentType" Width="1.5" PointX="13.625" PointY="19.625" />
+        <EntityTypeShape EntityType="Models.tblEducation" Width="1.5" PointX="10.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.tblEmploymentStatu" Width="1.5" PointX="3.75" PointY="29.75" />
+        <EntityTypeShape EntityType="Models.tblGender" Width="1.5" PointX="5.75" PointY="8.75" />
+        <EntityTypeShape EntityType="Models.tblIncomeSource" Width="1.5" PointX="3.75" PointY="26.75" />
+        <EntityTypeShape EntityType="Models.tblLoanApplication" Width="1.5" PointX="8.25" PointY="17.625" />
+        <EntityTypeShape EntityType="Models.tblLoanApplicationDetail" Width="1.5" PointX="10.5" PointY="23.125" />
+        <EntityTypeShape EntityType="Models.tblLoanPurpose" Width="1.5" PointX="6" PointY="22" />
+        <EntityTypeShape EntityType="Models.tblLoanReturn" Width="1.5" PointX="3" PointY="36.375" />
+        <EntityTypeShape EntityType="Models.tblLoanReturnDetail" Width="1.5" PointX="12.75" PointY="27.125" />
+        <EntityTypeShape EntityType="Models.tblMaritalStatu" Width="1.5" PointX="10.75" PointY="3.75" />
+        <EntityTypeShape EntityType="Models.tblPersonalInfo" Width="1.5" PointX="3" PointY="9.875" />
+        <EntityTypeShape EntityType="Models.tblReferalInfo" Width="1.5" PointX="6" PointY="11.5" />
+        <EntityTypeShape EntityType="Models.tblReferralRelation" Width="1.5" PointX="3.75" PointY="6.25" />
+        <EntityTypeShape EntityType="Models.tblUser" Width="1.5" PointX="0.75" PointY="15.75" />
+        <EntityTypeShape EntityType="Models.tblWorkInfo" Width="1.5" PointX="6" PointY="16.25" />
+        <AssociationConnector Association="Models.FK_BankAccount_Bank" />
+        <AssociationConnector Association="Models.FK_BankAccount_User" />
+        <AssociationConnector Association="Models.FK_LoanApplication_BankAccount" />
+        <AssociationConnector Association="Models.FK_CompanyBankAccount_Bank" />
+        <AssociationConnector Association="Models.FK_PersonalInfo_DetailedCity" />
+        <AssociationConnector Association="Models.FK_PersonalInfo_ResidenceCity" />
+        <AssociationConnector Association="Models.FK_PersonalInfo_Country" />
+        <AssociationConnector Association="Models.FK__tblWorkIn__Emplo__339FAB6E" />
+        <AssociationConnector Association="Models.FK__tblWorkIn__Incom__3493CFA7" />
+        <AssociationConnector Association="Models.FK__tblLoanRe__LoanI__6501FCD8" />
+        <AssociationConnector Association="Models.FK_LoanApplication_LoanPurpose" />
+        <AssociationConnector Association="Models.FK_LoanApplication_User" />
+        <AssociationConnector Association="Models.FK_LoanApplicationDetail_LoanApplication" />
+        <AssociationConnector Association="Models.FK__tblLoanRe__Insta__282DF8C2" />
+        <AssociationConnector Association="Models.FK__tblLoanRe__LoanR__2A164134" />
+        <AssociationConnector Association="Models.FK_LoanReturn_User" />
+        <AssociationConnector Association="Models.FK_PersonalInfo_User" />
+        <AssociationConnector Association="Models.FK__tblRefera__Conta__2EDAF651" />
+        <AssociationConnector Association="Models.FK__tblRefera__Creat__2FCF1A8A" />
+        <AssociationConnector Association="Models.FK__tblRefera__Updat__30C33EC3" />
+        <AssociationConnector Association="Models.FK__tblRefera__UserI__31B762FC" />
+        <AssociationConnector Association="Models.FK__tblWorkIn__Creat__32AB8735" />
+        <AssociationConnector Association="Models.FK__tblWorkIn__Updat__3587F3E0" />
+        <AssociationConnector Association="Models.FK__tblWorkIn__UserI__367C1819" />
+        <EntityTypeShape EntityType="Models.tblMenuAction" Width="1.5" PointX="11.375" PointY="6.75" />
+        <EntityTypeShape EntityType="Models.tblMenuAssignAction" Width="1.5" PointX="11.375" PointY="9.75" />
+        <EntityTypeShape EntityType="Models.tblMenuModule" Width="1.5" PointX="13.375" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.tblUserMenuRole" Width="1.5" PointX="13.375" PointY="4.75" />
+        <EntityTypeShape EntityType="Models.tblDocumentOther" Width="1.5" PointX="13.375" PointY="8.75" />
+        <EntityTypeShape EntityType="Models.tblDocument" Width="1.5" PointX="15.875" PointY="17.25" />
+        <AssociationConnector Association="Models.FK_tblDocumentType_tblDocuments" />
+        <AssociationConnector Association="Models.FK_tblUser_tblDocuments" />
+        <EntityTypeShape EntityType="Models.tblLoanCategory" Width="1.5" PointX="11.375" PointY="14" />
+        <AssociationConnector Association="Models.FK_LoanApplication_LoanCategory" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

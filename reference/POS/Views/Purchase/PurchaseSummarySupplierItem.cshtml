@@ -1,0 +1,236 @@
+﻿<style>
+    .set-img {
+        font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    }
+
+    .table tr td {
+        border: 0 !important;
+    }
+
+    .custome-class-form h4 {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .custome-class-form label {
+        font-weight: bold !important;
+        color: #000;
+    }
+
+    .table tr .V__align {
+        vertical-align: bottom !important;
+    }
+
+    imgs {
+        opacity: 0.5;
+        filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
+    .dropwidth {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #03386C !important;
+        }
+</style>
+@model POS.Models.clsInvoice
+@{
+    Layout = null;
+}
+<div class="widget-body no-padding" style="overflow-x:hidden;">
+    @using (Html.BeginForm("printpurchasesummarysupplieritemreport", "purchase", FormMethod.Post, new { id = "purchaseSummarySupplierItemForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+
+        <fieldset id="myField1">
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Supplier</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.DetailCode, ViewBag.Suppliers as SelectList, new { @id = "DetailCode", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>From</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-calendar"></i>
+                        <input type="date" id="FromDate" name="FromDate" required />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>To</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-calendar"></i>
+                        <input type="date" id="ToDate" name="ToDate" required />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Invoice No.</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-hashtag"></i>
+                        <input type="text" id="ComputerNo" name="ComputerNo" placeholder="Invoice No." autocomplete="off" />
+                    </label>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Reference No.</label>
+                    <label class="input">
+                        <i class="icon-prepend fa fa-calendar"></i>
+                        <input type="text" id="ReferenceNo" name="ReferenceNo" placeholder="Reference No." autocomplete="off" />
+                    </label>
+                </div>
+            </section>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Item</label>
+                    <div id="ItemIDDiv">
+                        @Html.DropDownListFor(model => model.ItemID, Enumerable.Empty<SelectListItem>(), new { @style = "width:100%", @id = "txtItemID", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Item Category</label>
+                    <div>
+                        @Html.DropDownListFor(m => m.CategoryID, ViewBag.Category as SelectList, new { @id = "CategoryID", @style = "width:100%" })
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Item Sub-Category</label>
+                    <div>
+                        @Html.DropDownListFor(m => m.SubCategoryID, ViewBag.SubCategory as SelectList, new { @id = "SubCategoryID", @style = "width:100%" })
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Warehouse</label>
+                    <div id="WarehouseIDDiv">
+                        @Html.DropDownListFor(m => m.WarehouseID, ViewBag.Warehouse as SelectList, new { @id = "WarehouseID", @style = "width:100%" })
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-6">
+                <div style="padding:3px;">
+                    <label>Salesman</label>
+                    <div id="SalesmanIDDiv">
+                        @Html.DropDownListFor(m => m.SalesmanID, ViewBag.Salesman as SelectList, new { @id = "SalesmanID", @style = "width:100%" })
+                    </div>
+                </div>
+            </section>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Report Type</label>
+                    <div id="ReportTypeDiv">
+                        <select name="ReportType" id="ReportType" style="width:100%">
+                            <option value="Purchase">Purchase Invoice</option>
+                            <option value="Purchase Return">Purchase Return</option>
+                            <option value="Purchase Invoice + Purchase Return">Purchase Invoice + Purchase Return</option>
+                        </select>
+                    </div>
+                </section>
+            </div>
+        </fieldset>
+        <footer>
+            <button formtarget="_blank" type="submit" class="btn btn-labeled btn-primary pull-right">
+                GENERATE REPORT
+            </button>
+        </footer>
+    }
+</div>
+<script type="text/javascript">
+
+    function formatItemList(repo) {
+        if (repo.loading) {
+            return repo.text;
+        }
+        var $container = $(
+            "<div class='select2-result-repository clearfix'>" +
+                "<span style='font-weight:bold'>" + repo.text + "</span> <span style='padding-left:10px;color:blue'>" + repo.description + "</span>" +
+             "</div>"
+        );
+        return $container;
+    }
+
+    $(document).ready(function () {
+
+        $('#CategoryID').select2();
+        $('#CategoryID').val(null).trigger('change');
+        $('#SubCategoryID').select2();
+        $('#SubCategoryID').val(null).trigger('change');
+
+        $('#DetailCode').select2();
+        //$('#ItemID').select2();
+        $('#WarehouseID').select2();
+        $('#SalesmanID').select2();
+        $('#ItemID').select2('val', 0);
+        $('#WarehouseID').select2('val', 0);
+        $('#SalesmanID').select2('val', 0);
+        $('#ReportType').select2();
+        $('#ReportType').val('Purchase Invoice + Purchase Return').trigger('change');
+        GetTodayBetweenDate();
+        var pageSize = 20;
+        var optionListUrl = '@Url.Action("GetOptionList", "ItemComboList")';
+        $('#txtItemID').select2({
+            ajax: {
+                delay: 150,
+                url: optionListUrl,
+                dataType: 'json',
+
+                data: function (params) {
+                    params.page = params.page || 1;
+                    return {
+                        searchTerm: params.term,
+                        pageSize: pageSize,
+                        pageNumber: params.page
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results: data.Results,
+                        pagination: {
+                            more: (params.page * pageSize) < data.Total
+                        }
+                    };
+                }
+            },
+            //placeholder: "-- Select Item--",
+            minimumInputLength: 0,
+            allowClear: true, templateResult: formatItemList,
+        });
+    });
+
+    function GetTodayBetweenDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm + '-' + dd;
+        $('#FromDate').val(today);
+        $('#ToDate').val(today);
+    }
+    //$('#purchaseSummarySupplierItemForm').on('submit', function (e) {
+    //})
+</script>

@@ -1,0 +1,399 @@
+﻿<div id="CssData">
+    <link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+    <style>
+        @@media print {
+            #printable {
+                display: block;
+            }
+
+            .businssName {
+                margin-right: -21px !important;
+            }
+
+            .mainTable {
+                width: 98% !important;
+                margin-top: -45px !important;
+                border-bottom: none !important;
+                border-top: none !important;
+            }
+
+                .mainTable .totalTr {
+                    border-bottom: 0px !important;
+                    border-top: 0px !important;
+                }
+
+
+            a[href]:after {
+                content: none !important;
+            }
+
+            #printable-content1 {
+                margin: 10px !important;
+            }
+
+            @@page {
+                size: landscape;
+                margin-left: -25px;
+            }
+
+            @@page:first {
+                size: landscape;
+                margin-top: -55px;
+                margin-left: -25px;
+            }
+
+            .headingTable {
+                border-bottom: none !important;
+                border-top: none !important;
+            }
+
+            .routeData {
+                margin-top: -50px !important;
+            }
+
+            .dateData {
+                margin-top: -55px !important;
+            }
+        }
+
+        .rpt {
+            background: #fff !important;
+            border-width: 0px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        .mainTable {
+            width: 98%;
+            margin-left: 10px;
+            padding-right: 35px;
+            font-size:10px !important;
+        }
+
+            .mainTable tr th {
+                padding: 4px;
+                border: 1px solid black;
+                font-weight:bold !important;
+            }
+
+            .mainTable tr td {
+                border: 1px solid black;
+                padding: 2px;
+            }
+
+    </style>
+</div>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- widget content -->
+@model POS.Models.clsBooking
+    <div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <h1 class="page-title txt-color-blueDark">
+                    <i class="fa fa-home fa-fw "></i>
+                    Report
+                    <span>
+                        >
+                        Driver/Partner Booking Detail
+                    </span>
+                </h1>
+            </div>
+        </div>
+        <section>
+            <div class="panel">
+                <div class="panel-heading">
+                    @using (Html.BeginForm("download", "pdf", FormMethod.Post, new { @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                    {
+                        <span class="header"> Driver/Partner Booking Detail Report&nbsp;&nbsp;&nbsp;&nbsp;</span>
+
+                        <input type="hidden" name="DocumentName" id="DocumentName" value="" />
+                        <input type="hidden" name="FileName" id="FileName" value="DriverBookingDetail" />
+                        <button type="button" class="btn printBtn" onclick="window.print();" style="background-color: #03386C; color: white;height:32px;width:65px">
+                            Print
+                        </button>
+                        <button type="submit" class="btn btn-primary downloadBtn" formtarget="_blank" style="background-color: #890505 !important; border-color: #890505 !important; color: white;padding:5.5px ">Download</button>
+                        <button id="btnExport" class="btn btn-primary" style="background-color: #286606; border-color: #286606 !important; color: white; height: 32px; width: 110px; "> Export to Excel</button>
+                        @*<button id="btnExportWord" class="btn btn-primary" style="background-color: #03386C !important; border-color: #03386C !important; color: white; height: 32px; width: 140px;padding:5.5px "> Export to Word</button>*@
+                    }
+                </div>
+                <div class="panel-body">
+                    <div id="HtmlData">
+                        <div id="printable-content1" class="panel rpt" style=" float: center; width: 98%; font-family: Arial, Helvetica, sans-serif;overflow-x:scroll !important;">
+                            <table style="padding: 30px;" class="headingTable">
+                                <tr>
+                                    <th style="font-weight: normal; font-size: 11px; text-align: right;padding-left:12px;padding-top:0px;border-bottom:none;" colspan="12"><strong>Print Date:&nbsp;</strong>@Convert.ToDateTime(DateTime.Now).ToString("dd/MM/yyyy hh:mm tt")</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 24px; text-align: left;padding-left:12px;padding-top:10px;border-bottom:none;" colspan="12" class="pull-left">Driver/Partner Booking Detail</th>
+                                </tr>
+                                @if (Model.BookingList.Count != 0)
+                                {
+                                    if (Convert.ToInt32(Model.showDate) == 1)
+                                    {
+                                        <tr>
+                                            <td style="font-size: 13px; text-align: left; padding-bottom: 30px; border-bottom: none; padding-left: 12px; font-weight: normal" colspan="12" class="routeData pull-left"><strong><span style="font-size: 13px">From:</span> </strong>@Convert.ToDateTime(Model.FromDateTime).ToString("dd-MMM-yyyy hh:mm")&nbsp; <strong><span style="font-size:16px">To:</span></strong>@Convert.ToDateTime(Model.ToDateTime).ToString("dd-MMM-yyyy hh:mm")</td>
+                                        </tr>
+                                    }
+                                }
+                                <thead>
+                                    <tr>
+                                        <th style="font-weight: bold; font-size: 16px; text-align: center; padding-bottom: 10px" colspan="12">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="12">
+                                            @if (Model.BookingList.Count != 0)
+                                            {
+                                                int i = 0;
+                                                decimal total1 = 0;
+                                                
+                                                <table class="mainTable" style="margin-top:0px;">
+
+                                                @foreach (clsBooking smain in Model.BookingList2.ToList())
+                                                {
+                                                    decimal subtotal1 = 0;
+                                                        
+                                                        <tr>
+                                                            <th style="text-align: left; font-size:14px;font-weight:bold;" colspan="15"> @smain.DetailName</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: center; width: 45px;"> Sr No.</th>
+                                                            <th style="text-align: center;"> Job No.</th>                                                            
+                                                            <th style="text-align: center; width: 80px;"> Ref. No.</th>
+                                                            <th style="text-align: center; width: 100px;"> Pickup<br /> Date</th>
+                                                            <th style="text-align: center; width: 100px;"> Pickup<br />Time</th>
+                                                            <th style="text-align: center;"> Pickup Address</th>
+                                                            <th style="text-align: center;"> Via</th>
+                                                            <th style="text-align: center;"> Via</th>
+                                                            <th style="text-align: center;"> Via</th>
+                                                            <th style="text-align: center;"> Dropoff Address</th>
+                                                            <th style="text-align: center;"> Via Drop </th>
+                                                            <th style="text-align: center;"> Via Drop </th>
+                                                            <th style="text-align: center;"> Via Drop </th>
+                                                            <th style="text-align: center; width: 80px;">  Fare</th>
+                                                            <th style="text-align: center; width: 80px;"> Dist<br />(Miles)</th>
+                                                        </tr>
+                                                        
+                                                        
+                                                        foreach (clsBooking sm in Model.BookingList.Where(x=>x.DetailCode == smain.DetailCode).ToList())
+                                                        {
+                                                            i++;
+                                                            total1 += Convert.ToDecimal(sm.SuppBidAmount);
+                                                            subtotal1 += Convert.ToDecimal(sm.SuppBidAmount);
+                                                            
+                                                            <tr>
+                                                                <td style="text-align: center;">@(i)</td>
+                                                                <td style="text-align: left;">@sm.JobNo</td>
+                                                                <td style="text-align: left;">@sm.SPRefNo</td>
+                                                                <td style="text-align: center;">@Convert.ToDateTime(sm.PickupDateTime).ToString("dd-MM-yy")</td>
+                                                                <td style="text-align: center;">@sm.PickupTimeString</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Startpoint</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Startpoint1</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Startpoint2</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Startpoint3</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Endposition</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Endposition1</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Endposition2</td>
+                                                                <td style="text-align: left; white-space: nowrap; ">@sm.Endposition3</td>
+                                                                <td style="text-align: right;">@Convert.ToDecimal(sm.SuppBidAmount).ToString("#,##0.00")</td>
+                                                                <td style="text-align: right;">@Convert.ToDecimal(sm.TotalKm).ToString("#,##0.00")</td>
+                                                            </tr>
+                                                        }
+                                                        
+                                                            <tr>
+                                                                <td class="mainTd" style="text-align: right;font-weight: bold; " colspan="13">Total :</td>
+                                                                <td class="mainTd" style="text-align: right; font-weight: bold;">@Convert.ToDecimal(subtotal1).ToString("#,##0.00")</td>
+                                                                <td class="mainTd" style="text-align: right;font-weight: bold; " colspan="1">&nbsp;</td>
+                                                            </tr>
+                                                    }
+
+                                                        <tr>
+                                                            <td class="mainTd" style="text-align: right;font-weight: bold; " colspan="13">Total :</td>
+                                                            <td class="mainTd" style="text-align: right; font-weight: bold;">@Convert.ToDecimal(total1).ToString("#,##0.00")</td>
+                                                            <td class="mainTd" style="text-align: right;font-weight: bold; " colspan="1">&nbsp;</td>
+                                                        </tr>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th style="font-weight: bold; font-size: 16px; text-align: center; padding: 36.9px;  border: none;" colspan="12">&nbsp;</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            }
+                                            
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- END MAIN CONTENT -->
+    @section pagespecific {
+        <script src="~/Scripts/CustomJs/ResponsivePrintScreenForLandscape.js"></script>
+        <script type="text/javascript">
+
+            var reportfilename = "DriverBookingDetail";
+            $(document).on('click', '#btnExportWord', function (e) {
+                e.preventDefault();
+                var filename = reportfilename + ".doc";
+                var tab_text = "";
+                var textRange; var j = 0;
+                //tab = document.getElementsByClassName('headingTable'); // id of table
+
+                Array.from(document.getElementsByClassName("headingTable")).forEach(
+                    function (element, index, array) {
+                        tab_text = tab_text + "<table border='2px'><tr bgcolor='#87AFC6'>";
+                        for (j = 0; j < element.rows.length; j++) {
+                            tab_text = tab_text + element.rows[j].innerHTML + "</tr>";
+                            //tab_text=tab_text+"</tr>";
+                        }
+
+                        tab_text = tab_text + "</table>";
+                        tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");//remove if u want links in your table
+                        tab_text = tab_text.replace(/<img[^>]*>/gi, ""); // remove if u want images in your table
+                        tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); // reomves input params
+
+                        tab_text = tab_text + "<br/><br/><br/>";
+                    }
+                );
+
+                var ua = window.navigator.userAgent;
+                var msie = ua.indexOf("MSIE ");
+
+                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
+                {
+                    txtArea1.document.open("txt/html", "replace");
+                    txtArea1.document.write(tab_text);
+                    txtArea1.document.close();
+                    txtArea1.focus();
+                    sa = txtArea1.document.execCommand("SaveAs", true, filename);
+                }
+                else                 //other browser not tested on IE 11
+                    //sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(tab_text));
+
+                    var a = document.createElement('a');
+                var data_type = 'data:application/msword';
+                a.href = data_type + ', ' + encodeURIComponent(tab_text);
+                a.download = filename;
+                a.click();
+                e.preventDefault();
+
+                return (sa);
+            })
+
+
+            $(document).on('click', '#btnExport', function (e) {
+                e.preventDefault();
+                var filename = reportfilename + ".xls";
+                var tab_text = "";
+                var textRange; var j = 0;
+                //tab = document.getElementsByClassName('headingTable'); // id of table
+
+                Array.from(document.getElementsByClassName("headingTable")).forEach(
+                    function (element, index, array) {
+                        tab_text = tab_text + "<table border='2px'><tr bgcolor='#87AFC6'>";
+                        for (j = 0; j < element.rows.length; j++) {
+                            tab_text = tab_text + element.rows[j].innerHTML + "</tr>";
+                            //tab_text=tab_text+"</tr>";
+                        }
+
+                        tab_text = tab_text + "</table>";
+                        tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");//remove if u want links in your table
+                        tab_text = tab_text.replace(/<img[^>]*>/gi, ""); // remove if u want images in your table
+                        tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); // reomves input params
+
+                        tab_text = tab_text + "<br/><br/><br/>";
+                    }
+                );
+
+                var ua = window.navigator.userAgent;
+                var msie = ua.indexOf("MSIE ");
+
+                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
+                {
+                    txtArea1.document.open("txt/html", "replace");
+                    txtArea1.document.write(tab_text);
+                    txtArea1.document.close();
+                    txtArea1.focus();
+                    sa = txtArea1.document.execCommand("SaveAs", true, filename);
+                }
+                else                 //other browser not tested on IE 11
+                    //sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(tab_text));
+
+                    var a = document.createElement('a');
+                var data_type = 'data:application/vnd.ms-excel';
+                a.href = data_type + ', ' + encodeURIComponent(tab_text);
+                a.download = filename;
+                a.click();
+                e.preventDefault();
+
+                return (sa);
+            })
+
+
+
+            $(document).ready(function () {
+                var cssData = $('#CssData').html();
+                var htmlData = $('#HtmlData').html();
+                $('#DocumentName').val(cssData + htmlData);
+            })
+            //$.get("ConvertServerDateIntoLocalDate", function (data) {
+            //    $('.LocalDate').html(data);
+            //});
+            function PrintElem(elem) {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+                mywindow.document.write('<html><head><title></title>');
+                mywindow.document.write('</head><body>');
+                //mywindow.document.write('<h1></h1>');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+            $('.report_body tr td').each(function () {
+                if (parseFloat($(this).html()) > 0) {
+                    $(this).html(ReplaceNumberWithCommas($(this).html()));
+                }
+            });
+            function ReplaceNumberWithCommas(yourNumber) {
+                if (yourNumber != "0") {
+                    //Seperates the components of the number
+                    var n = yourNumber.toString().split(".");
+                    //Comma-fies the first part
+                    n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    if (n.length == 1) {
+                        n[0] = n[0] + ".00";
+                    }
+                    else {
+                        if (n[1].toString().length == 1) {
+                            n[1] = n[1] + "0";
+                        }
+                    }
+                    //Combines the two sections
+                    n = n.join(".");
+                }
+                else {
+                    n = yourNumber;
+                }
+                return n;
+            }
+        </script>
+    }

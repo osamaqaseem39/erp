@@ -31,6 +31,8 @@ public class CreateRequestForQuotationDto : CreateDto
     public decimal? EstimatedValue { get; set; }
     public string? Terms { get; set; }
     public string? Notes { get; set; }
+    public Guid? PRId { get; set; }
+    public List<CreateRFQDetailDto> Details { get; set; } = new();
 }
 
 public class UpdateRequestForQuotationDto : UpdateDto
@@ -46,6 +48,7 @@ public class UpdateRequestForQuotationDto : UpdateDto
     public decimal? EstimatedValue { get; set; }
     public string? Terms { get; set; }
     public string? Notes { get; set; }
+    public List<CreateRFQDetailDto>? Details { get; set; }
 }
 
 public class RFQDetailDto

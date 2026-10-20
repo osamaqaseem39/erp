@@ -32,27 +32,34 @@ public class PurchaseInvoiceDto : BaseDto
 
 public class CreatePurchaseInvoiceDto : CreateDto
 {
+    public Guid? CompanyId { get; set; }
     public string? InvoiceNumber { get; set; }
     public Guid VendorId { get; set; }
     public Guid? PurchaseOrderId { get; set; }
+    public Guid? POId { get; set; }
     public DateTime? InvoiceDate { get; set; }
     public DateTime? DueDate { get; set; }
+    public string? Currency { get; set; }
     public decimal? SubTotal { get; set; }
     public decimal? TaxAmount { get; set; }
     public decimal? TotalAmount { get; set; }
-    public string? Status { get; set; } = "Draft";
+    public string? Status { get; set; } = "Pending";
     public string? Notes { get; set; }
     public string? Terms { get; set; }
+    public List<CreatePurchaseInvoiceDetailDto> Details { get; set; } = new();
 }
 
 public class UpdatePurchaseInvoiceDto : UpdateDto
 {
+    public Guid? CompanyId { get; set; }
     public string? InvoiceNumber { get; set; }
     public Guid? VendorId { get; set; }
     public Guid? PurchaseOrderId { get; set; }
+    public Guid? POId { get; set; }
     public DateTime? InvoiceDate { get; set; }
     public DateTime? DueDate { get; set; }
     public DateTime? PaymentDate { get; set; }
+    public string? Currency { get; set; }
     public decimal? SubTotal { get; set; }
     public decimal? TaxAmount { get; set; }
     public decimal? TotalAmount { get; set; }
@@ -60,6 +67,7 @@ public class UpdatePurchaseInvoiceDto : UpdateDto
     public string? Status { get; set; }
     public string? Notes { get; set; }
     public string? Terms { get; set; }
+    public List<CreatePurchaseInvoiceDetailDto> Details { get; set; } = new();
 }
 
 public class PurchaseInvoiceDetailDto

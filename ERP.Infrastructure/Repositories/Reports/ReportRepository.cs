@@ -13,55 +13,46 @@ public class ReportRepository : IReportRepository
         _context = context;
     }
 
-    public async Task<Report?> GetByIdAsync(Guid id)
-    {
-        return await _context.Reports
+    private IQueryable<Report> Query(Guid tenantId) =>
+        _context.Reports
             .Include(r => r.ReportSchedules)
             .Include(r => r.ReportExecutions)
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .Where(r => r.TenantId == tenantId);
+
+    public async Task<Report?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(r => r.Id == id);
     }
 
-    public async Task<IEnumerable<Report>> GetAllAsync()
+    public async Task<IEnumerable<Report>> GetAllAsync(Guid tenantId)
     {
-        return await _context.Reports
-            .Include(r => r.ReportSchedules)
-            .Include(r => r.ReportExecutions)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Report>();
+        return await Query(tenantId).ToListAsync();
     }
 
-    public async Task<IEnumerable<Report>> GetByTypeAsync(string reportType)
+    public async Task<IEnumerable<Report>> GetByTypeAsync(string reportType, Guid tenantId)
     {
-        return await _context.Reports
-            .Include(r => r.ReportSchedules)
-            .Include(r => r.ReportExecutions)
-            .Where(r => r.ReportType == reportType)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Report>();
+        return await Query(tenantId).Where(r => r.ReportType == reportType).ToListAsync();
     }
 
-    public async Task<IEnumerable<Report>> GetByCategoryAsync(string category)
+    public async Task<IEnumerable<Report>> GetByCategoryAsync(string category, Guid tenantId)
     {
-        return await _context.Reports
-            .Include(r => r.ReportSchedules)
-            .Include(r => r.ReportExecutions)
-            .Where(r => r.Category == category)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Report>();
+        return await Query(tenantId).Where(r => r.Category == category).ToListAsync();
     }
 
-    public async Task<IEnumerable<Report>> GetActiveAsync()
+    public async Task<IEnumerable<Report>> GetActiveAsync(Guid tenantId)
     {
-        return await _context.Reports
-            .Include(r => r.ReportSchedules)
-            .Include(r => r.ReportExecutions)
-            .Where(r => r.IsActive)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Report>();
+        return await Query(tenantId).Where(r => r.IsActive).ToListAsync();
     }
 
-    public async Task<Report?> GetByCodeAsync(string reportCode)
+    public async Task<Report?> GetByCodeAsync(string reportCode, Guid tenantId)
     {
-        return await _context.Reports
-            .Include(r => r.ReportSchedules)
-            .Include(r => r.ReportExecutions)
-            .FirstOrDefaultAsync(r => r.ReportCode == reportCode);
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(r => r.ReportCode == reportCode);
     }
 
     public async Task<Guid> CreateAsync(Report report)
@@ -78,9 +69,9 @@ public class ReportRepository : IReportRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var report = await _context.Reports.FindAsync(id);
+        var report = await GetByIdAsync(id, tenantId);
         if (report == null) return false;
 
         _context.Reports.Remove(report);

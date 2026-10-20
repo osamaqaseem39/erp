@@ -15,22 +15,46 @@ public class WarehouseService : IWarehouseService
 
     public async Task<WarehouseDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return null;
+
         var warehouse = await _warehouseRepository.GetByIdAsync(id, tenantId);
         return warehouse != null ? MapToDto(warehouse) : null;
     }
 
     public async Task<IEnumerable<WarehouseDto>> GetAllAsync(Guid tenantId, Guid companyId)
     {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<WarehouseDto>();
+
         var warehouses = await _warehouseRepository.GetAllAsync(tenantId, companyId);
         return warehouses.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<WarehouseDto>> SearchAsync(string searchTerm, Guid tenantId, Guid companyId = default)
+    {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<WarehouseDto>();
+
+        var term = searchTerm?.Trim() ?? string.Empty;
+        var all = await _warehouseRepository.GetAllAsync(tenantId, companyId);
+        if (string.IsNullOrEmpty(term))
+            return all.Select(MapToDto);
+
+        return all.Where(w =>
+                w.WarehouseCode.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || w.WarehouseName.Contains(term, StringComparison.OrdinalIgnoreCase)
+                || (w.City?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false))
+            .Select(MapToDto);
+    }
+
     public async Task<WarehouseDto> CreateAsync(CreateWarehouseDto dto, Guid tenantId, string createdBy)
     {
+        if (tenantId == Guid.Empty)
+            throw new InvalidOperationException("Tenant is required.");
+
         if (await _warehouseRepository.CodeExistsAsync(dto.WarehouseCode, tenantId, dto.CompanyId))
-        {
             throw new InvalidOperationException($"Warehouse with code '{dto.WarehouseCode}' already exists.");
-        }
 
         var warehouse = new Warehouse
         {
@@ -39,15 +63,19 @@ public class WarehouseService : IWarehouseService
             CompanyId = dto.CompanyId,
             WarehouseCode = dto.WarehouseCode,
             WarehouseName = dto.WarehouseName,
-            AddressLine1 = dto.AddressLine1,
+            Name = dto.WarehouseName,
+            Description = dto.Description,
+            AddressLine1 = dto.AddressLine1 ?? string.Empty,
             AddressLine2 = dto.AddressLine2,
-            City = dto.City,
-            State = dto.State,
-            Country = dto.Country,
-            PostalCode = dto.PostalCode,
+            City = dto.City ?? string.Empty,
+            State = dto.State ?? string.Empty,
+            Country = dto.Country ?? string.Empty,
+            PostalCode = dto.PostalCode ?? string.Empty,
             ContactPerson = dto.ContactPerson,
             PhoneNumber = dto.PhoneNumber,
             Email = dto.Email,
+            ManagerId = dto.ManagerId,
+            IsActive = dto.IsActive,
             CreatedBy = createdBy
         };
 
@@ -57,29 +85,35 @@ public class WarehouseService : IWarehouseService
 
     public async Task<WarehouseDto> UpdateAsync(UpdateWarehouseDto dto, Guid tenantId, string updatedBy)
     {
-        var warehouse = await _warehouseRepository.GetByIdAsync(dto.Id, tenantId);
-        if (warehouse == null)
-        {
-            throw new InvalidOperationException("Warehouse not found.");
-        }
+        if (tenantId == Guid.Empty)
+            throw new InvalidOperationException("Tenant is required.");
 
-        if (await _warehouseRepository.CodeExistsAsync(dto.WarehouseCode, tenantId, warehouse.CompanyId, dto.Id))
-        {
+        var warehouse = await _warehouseRepository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Warehouse '{dto.Id}' not found.");
+
+        if (!string.IsNullOrWhiteSpace(dto.WarehouseCode)
+            && await _warehouseRepository.CodeExistsAsync(dto.WarehouseCode, tenantId, warehouse.CompanyId, dto.Id))
             throw new InvalidOperationException($"Warehouse with code '{dto.WarehouseCode}' already exists.");
-        }
 
-        warehouse.WarehouseCode = dto.WarehouseCode;
-        warehouse.WarehouseName = dto.WarehouseName;
-        warehouse.AddressLine1 = dto.AddressLine1;
-        warehouse.AddressLine2 = dto.AddressLine2;
-        warehouse.City = dto.City;
-        warehouse.State = dto.State;
-        warehouse.Country = dto.Country;
-        warehouse.PostalCode = dto.PostalCode;
-        warehouse.ContactPerson = dto.ContactPerson;
-        warehouse.PhoneNumber = dto.PhoneNumber;
-        warehouse.Email = dto.Email;
-        warehouse.IsActive = dto.IsActive ?? warehouse.IsActive;
+        if (!string.IsNullOrWhiteSpace(dto.WarehouseCode))
+            warehouse.WarehouseCode = dto.WarehouseCode;
+        if (!string.IsNullOrWhiteSpace(dto.WarehouseName))
+        {
+            warehouse.WarehouseName = dto.WarehouseName;
+            warehouse.Name = dto.WarehouseName;
+        }
+        if (dto.Description != null) warehouse.Description = dto.Description;
+        if (dto.AddressLine1 != null) warehouse.AddressLine1 = dto.AddressLine1;
+        if (dto.AddressLine2 != null) warehouse.AddressLine2 = dto.AddressLine2;
+        if (dto.City != null) warehouse.City = dto.City;
+        if (dto.State != null) warehouse.State = dto.State;
+        if (dto.Country != null) warehouse.Country = dto.Country;
+        if (dto.PostalCode != null) warehouse.PostalCode = dto.PostalCode;
+        if (dto.ContactPerson != null) warehouse.ContactPerson = dto.ContactPerson;
+        if (dto.PhoneNumber != null) warehouse.PhoneNumber = dto.PhoneNumber;
+        if (dto.Email != null) warehouse.Email = dto.Email;
+        if (dto.ManagerId.HasValue) warehouse.ManagerId = dto.ManagerId;
+        if (dto.IsActive.HasValue) warehouse.IsActive = dto.IsActive.Value;
         warehouse.UpdatedBy = updatedBy;
         warehouse.UpdatedAt = DateTime.UtcNow;
 
@@ -89,12 +123,48 @@ public class WarehouseService : IWarehouseService
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return false;
+
         return await _warehouseRepository.DeleteAsync(id, tenantId);
     }
 
     public async Task<bool> ExistsAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return false;
+
         return await _warehouseRepository.ExistsAsync(id, tenantId);
+    }
+
+    public async Task<bool> ActivateAsync(Guid id, Guid tenantId, string updatedBy)
+    {
+        if (tenantId == Guid.Empty)
+            return false;
+
+        var warehouse = await _warehouseRepository.GetByIdAsync(id, tenantId);
+        if (warehouse == null) return false;
+        if (warehouse.IsActive) return true;
+        warehouse.IsActive = true;
+        warehouse.UpdatedBy = updatedBy;
+        warehouse.UpdatedAt = DateTime.UtcNow;
+        await _warehouseRepository.UpdateAsync(warehouse);
+        return true;
+    }
+
+    public async Task<bool> DeactivateAsync(Guid id, Guid tenantId, string updatedBy)
+    {
+        if (tenantId == Guid.Empty)
+            return false;
+
+        var warehouse = await _warehouseRepository.GetByIdAsync(id, tenantId);
+        if (warehouse == null) return false;
+        if (!warehouse.IsActive) return true;
+        warehouse.IsActive = false;
+        warehouse.UpdatedBy = updatedBy;
+        warehouse.UpdatedAt = DateTime.UtcNow;
+        await _warehouseRepository.UpdateAsync(warehouse);
+        return true;
     }
 
     private static WarehouseDto MapToDto(Warehouse warehouse)
@@ -106,6 +176,7 @@ public class WarehouseService : IWarehouseService
             CompanyId = warehouse.CompanyId,
             WarehouseCode = warehouse.WarehouseCode,
             WarehouseName = warehouse.WarehouseName,
+            Description = warehouse.Description,
             AddressLine1 = warehouse.AddressLine1,
             AddressLine2 = warehouse.AddressLine2,
             City = warehouse.City,
@@ -115,6 +186,7 @@ public class WarehouseService : IWarehouseService
             ContactPerson = warehouse.ContactPerson,
             PhoneNumber = warehouse.PhoneNumber,
             Email = warehouse.Email,
+            ManagerId = warehouse.ManagerId,
             IsActive = warehouse.IsActive,
             CreatedAt = warehouse.CreatedAt,
             UpdatedAt = warehouse.UpdatedAt,

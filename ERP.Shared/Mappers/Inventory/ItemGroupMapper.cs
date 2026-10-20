@@ -10,6 +10,7 @@ public static class ItemGroupMapper
         return new ItemGroupDto
         {
             Id = entity.Id,
+            TenantId = entity.TenantId,
             GroupCode = entity.GroupCode,
             GroupName = entity.GroupName,
             ParentGroupId = entity.ParentGroupId,
@@ -17,6 +18,8 @@ public static class ItemGroupMapper
             IsActive = entity.IsActive,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
+            CreatedBy = entity.CreatedBy,
+            UpdatedBy = entity.UpdatedBy,
             ParentGroupName = entity.ParentGroup?.GroupName
         };
     }

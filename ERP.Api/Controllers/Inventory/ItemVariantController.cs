@@ -1,6 +1,7 @@
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.SCM.Interfaces;
 using ERP.Shared.DTOs.Inventory;
@@ -10,6 +11,10 @@ namespace ERP.Api.Controllers.Inventory;
 [ApiController]
 [Route("api/inventory/item-variants")]
 [Authorize]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class ItemVariantController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IItemVariantService _service;
@@ -22,6 +27,7 @@ public class ItemVariantController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("item/{itemId}")]
+    [ProducesResponseType(typeof(IEnumerable<ItemVariantDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByItem(Guid itemId)
     {
         var tenantId = GetTenantId();
@@ -30,6 +36,7 @@ public class ItemVariantController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ItemVariantDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -38,6 +45,7 @@ public class ItemVariantController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] ItemVariantDto dto)
     {
         var tenantId = GetTenantId();
@@ -47,6 +55,7 @@ public class ItemVariantController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ItemVariantDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] ItemVariantDto dto)
     {
         dto.Id = id;
@@ -57,6 +66,7 @@ public class ItemVariantController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();

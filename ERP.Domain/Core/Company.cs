@@ -15,6 +15,10 @@ public class Company : BaseEntity
     public string Country { get; set; } = string.Empty;
     public string ZipCode { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
+    /// <summary>Mobile / cell for the organization contact (reference User-module Company screen).</summary>
+    public string MobilePhone { get; set; } = string.Empty;
+    /// <summary>Primary contact person name.</summary>
+    public string ContactPerson { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Website { get; set; } = string.Empty;
     public string LogoUrl { get; set; } = string.Empty;

@@ -8,7 +8,6 @@ export interface Tenant {
   country: string;
   status: string;
   databaseName: string;
-  connectionString: string;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -21,8 +20,6 @@ export interface CreateTenantDto {
   industry: string;
   country: string;
   status?: string;
-  databaseName: string;
-  connectionString: string;
   isActive?: boolean;
 }
 
@@ -34,8 +31,6 @@ export interface UpdateTenantDto {
   industry?: string;
   country?: string;
   status?: string;
-  databaseName?: string;
-  connectionString?: string;
   isActive?: boolean;
 }
 
@@ -50,6 +45,8 @@ export interface AuthResponse {
   refreshToken: string;
   expiresAt: string;
   user: User;
+  permissions: string[];
+  isSuperAdmin: boolean;
 }
 
 // API response might use different casing
@@ -58,11 +55,15 @@ export interface AuthResponseDto {
   RefreshToken?: string;
   ExpiresAt?: string;
   User?: User;
+  Permissions?: string[];
+  IsSuperAdmin?: boolean;
   // Also support lowercase for compatibility
   token?: string;
   refreshToken?: string;
   expiresAt?: string;
   user?: User;
+  permissions?: string[];
+  isSuperAdmin?: boolean;
 }
 
 export interface User {
@@ -78,6 +79,8 @@ export interface User {
   profilePicture?: string;
   companyId?: string;
   roleNames: string[];
+  /** Effective permission codes from login /auth/me (module.resource.action). */
+  permissions?: string[];
 }
 
 export interface ApiResponse<T> {

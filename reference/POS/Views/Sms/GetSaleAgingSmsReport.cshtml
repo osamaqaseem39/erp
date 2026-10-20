@@ -1,0 +1,74 @@
+﻿@model POS.Models.clsVoucher
+<center>
+    @for (int i = 0; i < Model.DetailList.Count; i++)
+    {
+        decimal detailCode = Model.DetailList[i].DetailCode;
+        decimal balance = 0;
+
+        <div class="myBorderDiv" style="border: 1px solid black; padding: 5px; width: 96%; border-radius: 10px; margin-top: 10px; padding-bottom: 20px; margin-bottom: 10px; ">
+            <table style="margin-bottom: 30px;margin-top:3px;" class="purchaseHeading">
+                <tbody>
+                    <tr>
+                        <th style="font-weight: bold; font-size: 18px; text-align: left;width:100%;padding-left:14px" class="accountName" colspan="2">@Model.DetailList[i].Name</th>
+                    </tr>
+                </tbody>
+            </table>
+            @if (Model.VouchersList.Where(x => x.DetailCode == detailCode).Count() != 0)
+            {
+                int j = 0;
+                decimal total = 0;
+                <div class="chequeTable2">
+                    <table class="mainTable" style="margin-top:2px">
+                        <tbody>
+                            <tr class="mainTr">
+                                <th style="text-align: center; width: 25px">Sr#</th>
+                                <th style="text-align:center;">Due Days</th>
+                                <th class="borderRight" style="text-align: right; width: 280px">Pending Amount</th>
+                            </tr>
+                            @foreach (clsVoucher v in Model.VouchersList.Where(x => x.DetailCode == detailCode))
+                            {
+                                j++;
+                                total += Convert.ToDecimal(v.PendingAmount);
+                                <tr class="mainTr">
+                                    <td style="text-align: center;">@j</td>
+                                    <td style="text-align:center">@v.DueDays</td>
+                                    @if (v.PendingAmount == 0)
+                                    {
+                                        <td class="borderRight" style="text-align: center;font-size:18px">-</td>
+                                    }
+                                    else
+                                    {
+                                        <td class="borderRight" style="text-align: right;">@Convert.ToDecimal(v.PendingAmount).ToString("#,##0.00")</td>
+                                    }
+                                </tr>
+                            }
+                            <tr class="mainTr">
+                                <td class="borderRight" style="text-align: right; font-size: 15px; font-weight: bold; border: 1px solid #fff;" colspan="4"><span style="font-weight:normal">Total Balance:&nbsp;</span> <span style="font-weight:bold;font-size:16px">@Convert.ToDecimal(total).ToString("#,##0.00")</span> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <table class="mainTable">
+                    <tr class="mainTr">
+                        <th style="text-align: center; width: 25px">Sr#</th>
+                        <th style="text-align:center;">Due Days</th>
+                        <th class="borderRight" style="text-align: right; width: 140px">Pending Amount</th>
+                    </tr>
+                    <tbody>
+                        <tr class="mainTr">
+                            <td class="borderRight" colspan="4" style="text-align:center;padding:10px">No Record Found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+        </div>
+    }
+</center>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnSearch').html("Search");
+    })
+</script>

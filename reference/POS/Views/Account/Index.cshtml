@@ -1,0 +1,136 @@
+﻿@{
+    Layout = "~/Views/Shared/_PartialLayout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Tikla Cars</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @*<link href="~/Content/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />*@
+    <link href="~/fonts/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/vendor/css/util.css" rel="stylesheet" />
+    <link href="~/Content/vendor/css/main.css" rel="stylesheet" />
+
+    <style>
+        .container-login100 {
+            background-color: #03386C !important;
+        }
+
+        .field-icon {
+            float: right;
+            margin-left: -24px;
+            margin-top: -43px;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-50">
+                @using (Html.BeginForm("Index", "Account", FormMethod.Post, new { id = "loginForm", enctype = "multipart/form-data", @class = "login100-form validate-form", role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <span class="login100-form-title p-b-33" style="font-family:Calibri;font-size:38px">
+                        Account Login
+                    </span>
+
+                    <div class="wrap-input100 validate-input" data-validate="Email is not valid.">
+                        <input class="input100" type="text" id="Username" name="Username" placeholder="Username" value="" required>
+                        <span class="focus-input100-1"></span>
+                        <span class="focus-input100-2"></span>
+                    </div>
+
+                    <div class="wrap-input100 rs1 validate-input" data-validate="Password is required" style="">
+                        <input class="input100" type="password" id="Password" name="Password" placeholder="Password" value="" required>
+                        <span class="focus-input100-1"></span>
+                        <span class="focus-input100-2"></span>
+                        <span data-toggle="#Password" id="eyeIcon" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                    </div>
+
+                    <div class="container-login100-form-btn m-t-20">
+                        <button class="login100-form-btn" id="btnLogin" style="background-color: #03386C; font-family: Calibri; font-size: 22px">
+                            Login
+                        </button>
+                    </div>
+                }
+                <div class="text-center important" style="margin-top:10px">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="FiscalYearModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header" style="height:40px">
+                    <h4 class="modal-title" style="margin-top:-10px">Fiscal Year</h4>
+                    <button type="button" class="close" data-dismiss="modal" style="margin-top:-25px">&times;</button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id="fiscalYearDiv"></div>
+                </div>
+
+                <!-- Modal footer -->
+            </div>
+        </div>
+    </div>
+    @*<script src="~/Content/vendor/jquery/jquery-3.2.1.min.js"></script>*@
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript">
+        $('#loginForm').on('submit', function (e) {
+            e.preventDefault();
+            $('.important').html('');
+            $('#btnLogin').attr('disabled', 'disabled');
+            $('#btnLogin').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+            var password = $('#Password').val();
+            var username = $('#Username').val();
+            var login =
+                {
+                    Username: username,
+                    Password: password,
+                }
+            $.ajax({
+                type: "POST",
+                url: "/account/login/",
+                data: login,
+                dataType: 'json',
+                success: function (data) {
+                    $('#btnLogin').prop('disabled', false);
+                    $('#btnLogin').html("Login");
+                    if (data.status) {
+                        //$('#FiscalYearModal').modal("show");
+                        @*$("#fiscalYearDiv").load('@Url.Action("FiscalYear", "account")?id=' + data.userId);*@
+                        window.location.href = "/home/index";
+                    }
+                    else {
+                        $('.important').html('<span style="color:#AF0001;font-size:16px">Login Failed! Wrong email or password.</span>');
+                    }
+                }
+            })
+        })
+        $('#eyeIcon').on('click', function () {
+            if ($(this).hasClass('fa-eye-slash')) {
+                $(this).removeClass('fa-eye-slash');
+            }
+            else {
+                $(this).addClass('fa-eye-slash');
+            }
+            var input = $("#Password");
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+    </script>
+</body>
+</html>

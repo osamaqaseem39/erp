@@ -13,79 +13,50 @@ public class ProjectRepository : IProjectRepository
         _context = context;
     }
 
-    public async Task<Project?> GetByIdAsync(Guid id)
-    {
-        return await _context.Projects
+    private IQueryable<Project> Query(Guid tenantId) =>
+        _context.Projects
             .Include(p => p.Client)
             .Include(p => p.ProjectManager)
             .Include(p => p.Tasks)
             .Include(p => p.Resources)
             .Include(p => p.Milestones)
             .Include(p => p.Documents)
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .Where(p => p.TenantId == tenantId);
+
+    public async Task<Project?> GetByIdAsync(Guid id, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<IEnumerable<Project>> GetAllAsync()
+    public async Task<IEnumerable<Project>> GetAllAsync(Guid tenantId)
     {
-        return await _context.Projects
-            .Include(p => p.Client)
-            .Include(p => p.ProjectManager)
-            .Include(p => p.Tasks)
-            .Include(p => p.Resources)
-            .Include(p => p.Milestones)
-            .Include(p => p.Documents)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Project>();
+        return await Query(tenantId).ToListAsync();
     }
 
-    public async Task<IEnumerable<Project>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<Project>> GetByStatusAsync(string status, Guid tenantId)
     {
-        return await _context.Projects
-            .Include(p => p.Client)
-            .Include(p => p.ProjectManager)
-            .Include(p => p.Tasks)
-            .Include(p => p.Resources)
-            .Include(p => p.Milestones)
-            .Include(p => p.Documents)
-            .Where(p => p.Status == status)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Project>();
+        return await Query(tenantId).Where(p => p.Status == status).ToListAsync();
     }
 
-    public async Task<IEnumerable<Project>> GetByManagerAsync(Guid managerId)
+    public async Task<IEnumerable<Project>> GetByManagerAsync(Guid managerId, Guid tenantId)
     {
-        return await _context.Projects
-            .Include(p => p.Client)
-            .Include(p => p.ProjectManager)
-            .Include(p => p.Tasks)
-            .Include(p => p.Resources)
-            .Include(p => p.Milestones)
-            .Include(p => p.Documents)
-            .Where(p => p.ProjectManagerId == managerId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Project>();
+        return await Query(tenantId).Where(p => p.ProjectManagerId == managerId).ToListAsync();
     }
 
-    public async Task<IEnumerable<Project>> GetByClientAsync(Guid clientId)
+    public async Task<IEnumerable<Project>> GetByClientAsync(Guid clientId, Guid tenantId)
     {
-        return await _context.Projects
-            .Include(p => p.Client)
-            .Include(p => p.ProjectManager)
-            .Include(p => p.Tasks)
-            .Include(p => p.Resources)
-            .Include(p => p.Milestones)
-            .Include(p => p.Documents)
-            .Where(p => p.ClientId == clientId)
-            .ToListAsync();
+        if (tenantId == Guid.Empty) return Array.Empty<Project>();
+        return await Query(tenantId).Where(p => p.ClientId == clientId).ToListAsync();
     }
 
-    public async Task<Project?> GetByCodeAsync(string projectCode)
+    public async Task<Project?> GetByCodeAsync(string projectCode, Guid tenantId)
     {
-        return await _context.Projects
-            .Include(p => p.Client)
-            .Include(p => p.ProjectManager)
-            .Include(p => p.Tasks)
-            .Include(p => p.Resources)
-            .Include(p => p.Milestones)
-            .Include(p => p.Documents)
-            .FirstOrDefaultAsync(p => p.ProjectCode == projectCode);
+        if (tenantId == Guid.Empty) return null;
+        return await Query(tenantId).FirstOrDefaultAsync(p => p.ProjectCode == projectCode);
     }
 
     public async Task<Guid> CreateAsync(Project project)
@@ -102,9 +73,9 @@ public class ProjectRepository : IProjectRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var project = await _context.Projects.FindAsync(id);
+        var project = await GetByIdAsync(id, tenantId);
         if (project == null) return false;
 
         _context.Projects.Remove(project);

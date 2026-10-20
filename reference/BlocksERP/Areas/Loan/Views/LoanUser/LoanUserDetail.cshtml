@@ -1,0 +1,530 @@
+﻿@{
+    string lineColor = "#212121";
+    ViewBag.Title = "Loan User Detail";
+}
+
+
+<style>
+       .heading-1 {
+        position: relative;
+        text-align: center;
+    }
+
+        .heading-1:before {
+            content: "";
+            display: block;
+            border-top: solid 2px @lineColor;
+            width: 100%;
+            height: 2px;
+            position: absolute;
+            top: 50%;
+            z-index: 0;
+        }
+
+        .heading-1 span {
+            background: #fff;
+            padding: 0 10px;
+            position: relative;
+            z-index: 1;
+        }
+    .ItemNote:focus {
+        background-color: #F0FFF0 !important;
+        border-color: #7DC27D !important;
+    }
+
+</style>
+
+
+@model BlocksERP.Models.clsUser
+<main id="js-page-content" role="main" class="page-content">
+    <div class="mySelect" style="overflow: hidden;padding: 0px">
+            <div class="row">
+                <div class="col-lg-6" style="margin-top:4px">
+
+                </div>
+                <div class="col-md-12" style="display:flex">
+                    <table style="width:100%">
+                        <tr>
+                            <th>
+                                <ol class="breadcrumb breadcrumb-sm breadcrumb-arrow">
+                                    <li>
+                                        <a href="javascript:void(0)">
+                                            <i class="fal fa-clipboard"></i>
+                                            &nbsp;
+                                            <span class="hidden-md-down">Loan</span>
+                                        </a>
+                                    </li>
+                                    <li class="">
+                                        <a href="javascript:void(0)">
+                                            <i class="fal fa-list-ol"></i>
+                                            &nbsp;
+                                            <span class="hidden-md-down">Loan User Detail</span>
+                                        </a>
+                                    </li>
+                                </ol>
+                            </th>
+                            <th style="text-align:right">
+                                <h6 class="js-get-date" style="margin-top: -7px;"></h6>
+                            </th>
+                        </tr>
+                    </table>
+
+                </div>
+
+            </div>
+
+            @using (Html.BeginForm("LoanUserDetail", "loanuser", FormMethod.Post, new { area="loan", id = "popupForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+            {
+                <input type="hidden" id="UserId" name="UserId" value="@Model.UserId" />
+                <div class="panel">
+                    @*Header of The main Panel Starts*@
+                    <div class="panel-hdr bg-primary-500 bg-info-gradient" role="heading">
+                        <h2>Loan User Detail</h2>
+                    </div>
+                    <div class="row" style="">
+                        <div class="col-md-3" style="padding:15px;">
+                            <img id="DocumentImage" src="@Model.ImagePath" style="border:1px solid #A2A2A2;border-radius:10px;margin-top: 0px;height: 160px;width:100%;" />
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row" style="">
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            Email :
+                                            <label style="color: green; font-size: 14px;">@Model.Email</label>
+                                        </label>
+                                    </b>
+                                </div>
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            Phone No. :
+                                            <label style="color: green; font-size: 14px; ">@Model.PhoneNumber</label>
+                                        </label>
+                                    </b>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:5px;">
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            Name :
+                                            <label style="color: green; font-size: 14px;">@Model.FullName</label>
+                                        </label>
+                                    </b>
+                                </div>
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            Social Insurance No. :
+                                            <label style="color: green; font-size: 14px; ">@Model.SocialInsuranceNumber</label>
+                                        </label>
+                                    </b>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:5px;">
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            Nationality :
+                                            <label style="color: green; font-size: 14px;">@Model.CountryName</label>
+                                        </label>
+                                    </b>
+                                </div>
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            D.O.B :
+                                            <label style="color: green; font-size: 14px; ">@Convert.ToDateTime(Model.DOB).ToString("dd-MMM-yyyy") </label>
+                                        </label>
+                                    </b>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top:5px;">
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            Gender :
+                                            <label style="color: green; font-size: 14px;">@Model.GenderName</label>
+                                        </label>
+                                    </b>
+                                </div>
+                                <div class="col-md-6">
+                                    <b>
+                                        <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                            Education :
+                                            <label style="color: green; font-size: 14px; ">@Model.EducationName </label>
+                                        </label>
+                                    </b>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row" style="margin-top:5px;">
+                        <div class="col-md-9">
+                            <b>
+                                <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                    Residential Address :
+                                    <label style="color: green; font-size: 14px;">@Model.ResidentialAddress</label>
+                                </label>
+                            </b>
+                        </div>
+                        <div class="col-md-3">
+                            <b>
+                                <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                    Residential City :
+                                    <label style="color: green; font-size: 14px; ">@Model.ResidenceCityName </label>
+                                </label>
+                            </b>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:5px;">
+                        <div class="col-md-9">
+                            <b>
+                                <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                    Permanent Address :
+                                    <label style="color: green; font-size: 14px;">@Model.DetailAddress</label>
+                                </label>
+                            </b>
+                        </div>
+                        <div class="col-md-3">
+                            <b>
+                                <label style="text-align:left;margin-top: 10px;margin-left:10px">
+                                    Permanent City :
+                                    <label style="color: green; font-size: 14px; ">@Model.DetailedCityName </label>
+                                </label>
+                            </b>
+                        </div>
+                    </div>
+
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <h1 class="heading-1" style="margin-top: 30px;  color:@lineColor;font-weight:bold "><span>Documents Detail</span></h1>
+
+                            @{
+                                int vrownumw = 0;
+                            }
+                            <table class="table table-striped table-bordered" style="width:95%;margin-left:20px">
+                                <thead style="background-color: #212121; color: white;">
+                                    <tr>
+                                        <th style="text-align:center;width:50px;">Sr#</th>
+                                        <th style="text-align:left;">Document Type</th>
+                                        <th style="text-align:center;width:100px;">Date</th>
+                                        <th style="text-align:center;width:100px;">Description</th>
+                                        <th style="text-align:center;width:60px;">Status</th>
+                                        <th style="text-align: center; width: 50px;">OK</th>
+                                        <th style="text-align: center; width: 50px;">View</th>
+                                        <th style="text-align: center; width: 50px;">Download</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (BlocksERP.Models.clsDocument vrow in Model.DocList)
+                                    {
+                                        vrownumw++;
+
+                                        <tr style="border-bottom: 1px solid #D8D8D8">
+                                            <td style="text-align: center; padding: 3px">@vrownumw</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.DocumentType </td>
+                                            <td style="text-align: left; padding: 3px">@Convert.ToDateTime(vrow.Date).ToString("dd-MMM-yyyy")</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.Description </td>
+                                            <td style="text-align: center; padding: 3px" id="rowStatus_@vrow.DocumentId">@vrow.Status </td>
+                                            @if (vrow.Status.ToLower() != "verified")
+                                            {
+                                                <td style="text-align: center; padding: 3px">
+                                                    <a href="javascript:void(0);" id="rowBtn_@vrow.DocumentId" data-value="@vrow.DocumentId" class="btn btn-primary verifyDocument" style="padding:5px;color:#fff !important">
+                                                        OK
+                                                    </a>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align: center; padding: 3px">
+                                                    &nbsp;
+                                                </td>
+                                            }
+
+                                            <td style="text-align: center; padding: 3px">
+                                                <a href="/FormsDocuments/UserDocument/@Convert.ToInt32(vrow.userId).ToString()/@Convert.ToInt32(vrow.DocumentId).ToString().@vrow.DocumentExtension" data-value="@vrow.DocumentId" target="_blank" class="btn btn-warning viewDocument" style="padding:5px;color:#000 !important">
+                                                    View
+                                                </a>
+                                            </td>
+                                            <td style="text-align: center; padding: 3px">
+                                                <a href="/FormsDocuments/UserDocument/@Convert.ToInt32(vrow.userId).ToString()/@Convert.ToInt32(vrow.DocumentId).ToString().@vrow.DocumentExtension" data-value="@vrow.DocumentId" download class="btn btn-success downloadDocument" style="padding:5px;color:#000 !important">
+                                                    Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <h1 class="heading-1" style="margin-top: 30px;  color:@lineColor;font-weight:bold "><span>Job/Works Detail</span></h1>
+                            @{
+                                int vrownum = 0;
+                            }
+                            <table class="table table-striped table-bordered" style="width:95%;margin-left:20px">
+                                <thead style="background-color: #212121; color: white;">
+                                    <tr>
+                                        <th style="text-align:center;width:50px;">Sr#</th>
+                                        <th style="text-align:left;">Income Source</th>
+                                        <th style="text-align:center;width:100px;">D.O.J</th>
+                                        <th style="text-align:center;width:100px;">Status</th>
+                                        <th style="text-align: center; width: 100px;">Organization<br />Name</th>
+                                        <th style="text-align: center; width: 100px;">Phone No.</th>
+                                        <th style="text-align: center; width: 200px;">Address</th>
+                                        <th style="text-align: center; width: 50px;">Monthly<br />Income</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (BlocksERP.Models.clsWork vrow in Model.WorkList)
+                                    {
+                                        vrownum++;
+
+                                        <tr style="border-bottom: 1px solid #D8D8D8">
+                                            <td style="text-align: center; padding: 3px">@vrownum</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.IncomeSourceName</td>
+                                            <td style="text-align: left; padding: 3px">@Convert.ToDateTime(vrow.DOJ).ToString("dd-MMM-yyyy")</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.EmploymentStatusName </td>
+                                            <td style="text-align: left; padding: 3px">@vrow.OrganizationName </td>
+                                            <td style="text-align: left; padding: 3px">@vrow.OrganizationPhoneNumber </td>
+                                            <td style="text-align: left; padding: 3px">@vrow.OrganizationAddress </td>
+                                            <td style="text-align: left; padding: 3px">@Convert.ToInt32(vrow.MonthlyIncome)</td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+
+
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <h1 class="heading-1" style="margin-top: 30px;  color:@lineColor;font-weight:bold "><span>Referal Relation Detail</span></h1>
+                            @{
+                                int vrownumR = 0;
+                            }
+                            <table class="table table-striped table-bordered" style="width:95%;margin-left:20px">
+                                <thead style="background-color: #212121; color: white;">
+                                    <tr>
+                                        <th style="text-align:center;width:50px;">Sr#</th>
+                                        <th style="text-align: left; width: 100px;">Relation</th>
+                                        <th style="text-align:center;width:100px;">Name</th>
+                                        <th style="text-align:center;width:100px;">Phone No.</th>
+                                        <th style="text-align: center; width: 100px;">Social<br />Insurance #</th>
+                                        <th style="text-align: center; ">Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (BlocksERP.Models.clsReferal vrow in Model.ReferalList)
+                                    {
+                                        vrownumR++;
+
+                                        <tr style="border-bottom: 1px solid #D8D8D8">
+                                            <td style="text-align: center; padding: 3px">@vrownumR</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.ContactRelationName</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.RefferalName</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.RefferalPhoneNumber </td>
+                                            <td style="text-align: left; padding: 3px">@vrow.RefferalSIN </td>
+                                            <td style="text-align: left; padding: 3px">@vrow.RefferalAddress </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+
+                    <div class="panel-container show">
+                        <div class="panel-content">
+                            <h1 class="heading-1" style="margin-top: 30px;  color:@lineColor;font-weight:bold "><span>Bank Account Detail</span></h1>
+                            @{
+                                int vrownumb = 0;
+                            }
+                            <table class="table table-striped table-bordered" style="width:95%;margin-left:20px">
+                                <thead style="background-color: #212121; color: white;">
+                                    <tr>
+                                        <th style="text-align:center;width:50px;">Sr#</th>
+                                        <th style="text-align: left; width: 100px;">Bank Name</th>
+                                        <th style="text-align:center;width:130px;">Account No.</th>
+                                        <th style="text-align:center;width:130px;">Account Title</th>
+                                        <th style="text-align: center;">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (BlocksERP.Models.clsUserBankAccount vrow in Model.BankList)
+                                    {
+                                        vrownumb++;
+
+                                        <tr style="border-bottom: 1px solid #D8D8D8">
+                                            <td style="text-align: center; padding: 3px">@vrownumb</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.BankName</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.AccountNumber</td>
+                                            <td style="text-align: left; padding: 3px">@vrow.HolderName </td>
+                                            <td style="text-align: left; padding: 3px">@vrow.Description </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <fieldset style="padding:1.25rem">
+                </fieldset>
+
+                <footer class="modal-footer" style="margin-top:-50px;background-color:#F9F9F9;border-top:1px solid #ddd">
+
+                    @*@if (Model.DeleteRoleId > 0)
+        {
+            <button type="button" class="btn btn-danger pull-left btnDeleteRecord">Delete</button>
+        }*@
+
+                    @if (Model.Status.ToLower() == ("Pending").ToLower())
+                    {
+                        <a href="/loan/loanuser/newloanuserIndex">
+                            <button type="button" class="btn btn-labeled btn btn-secondary pull-right">
+                                Close
+                            </button>
+                        </a>
+
+
+                        <button type="button" id="btn_Save" title="Verify" class="btn btn-primary btnVerifyUser">Verify</button>
+                    }
+                    else
+                    {
+                        <a href="/loan/loanuser/loanuserIndex">
+                            <button type="button" class="btn btn-labeled btn btn-secondary pull-right">
+                                Close
+                            </button>
+                        </a>
+                    }
+
+
+
+
+
+                </footer>
+    }
+    </div>
+</main>
+<script type="text/javascript">
+    $(document).on('click', '.verifyDocument', function () {
+        var id = $(this).attr("data-value");
+        var checkstr = confirm('Are you sure you want to verify this Record?');
+        if (checkstr == true) {
+            $.ajax({
+                url: '/loan/loanuser/UpdateDocumentStatus/',
+                data: { 'id': id, 'status': 'verified' },
+                type: "POST",
+                dataType: 'json',
+                success: function (data) {
+                    if (data.status == true) {
+                        toastr.success("Record Updated Successfully", "Update", { timeOut: 3000, "closeButton": true });
+                        $('#rowStatus_' + id).html("verified");
+                        $('#rowBtn_' + id).hide();
+                    }
+                    else {
+                        alert(data.message);
+                    }
+                }
+            })
+        }
+        else {
+            return false;
+        }
+    });
+
+    function checkpendingDocument(id) {
+        $.ajax({
+            url: '/loan/loanuser/CheckAnyPendingDocuement/' + id,
+            type: "POST",
+            dataType: 'json',
+            success: function (data) {
+                if (data.status == true) {
+                    if (parseInt(data.countPending) != 0) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                }
+                else {
+                    return 0;
+                }
+            }
+        })
+    }
+
+    $(document).on('click', '.btnVerifyUser', function () {
+        var id = $("#UserId").val();
+        //var vretnum = checkpendingDocument(id);
+        //alert(vretnum);
+
+        //if (checkpendingDocument(id) == 1) {
+            var checkstr = confirm('Are you sure you want to verify this Record?');
+            if (checkstr == true) {
+                $.ajax({
+                    url: '/loan/loanuser/UpdateUserStatus/',
+                    data: { 'id': id, 'status': 'Active' },
+                    type: "POST",
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status == true) {
+                            toastr.success("Record Updated Successfully", "Update", { timeOut: 3000, "closeButton": true });
+                            window.location = "/loan/loanuser/newloanuserIndex";
+
+                        }
+                        else {
+                            toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                        }
+                    }
+                })
+            }
+            else {
+                return false;
+            }
+        //} else {
+        //    toastr.error("First Verify all Documents", "Error", { timeOut: 3000, "closeButton": true });
+        //}
+
+    });
+
+
+
+</script>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+</script>

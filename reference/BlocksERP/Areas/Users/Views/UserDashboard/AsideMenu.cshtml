@@ -1,0 +1,139 @@
+﻿@{
+    string businessName = System.Web.HttpContext.Current.Application["BusinessName"].ToString();
+    string adminImageSrc = System.Web.HttpContext.Current.Application["UserImage"].ToString();
+    string bgImageSrc = ""; // "/Content/pos.jpg";
+    string adminName = User.Identity.Name;
+    string bgLogo = System.Web.HttpContext.Current.Application["CompanyLogo"].ToString();
+    string bgColor = "#584677";
+}
+
+
+<style>
+    .nav-function-minify .page-logo img {
+        width: 90% !important;
+    }
+
+    .page-logo img {
+        width: auto !important;
+    }
+</style>
+@model List<BlocksERP.Models.clsModule>
+<aside class="page-sidebar">
+    <div class="page-logo" style="display:block !important;">
+        <a href="#" style="display:block !important;padding-top:10px;" class="page-logo-link press-scale-down d-flex align-items-center position-relative" data-toggle="modal" data-target="#modal-shortcut">
+            <img src="@bgLogo" alt="@businessName" aria-roledescription="logo" style="height:50px !important"><br />
+            @*<span class="page-logo-text mr-1" style="margin-left: 0.2rem !important;">@businessName</span>*@
+            <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+            <i class="fal fa-angle-down d-inline-block ml-1 fs-lg color-primary-300"></i>
+        </a>
+    </div>
+    <!-- BEGIN PRIMARY NAVIGATION -->
+    <nav id="js-primary-nav" class="primary-nav" role="navigation">
+        <div class="nav-filter">
+            <div class="position-relative">
+                <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control" tabindex="0">
+                <a href="#" onclick="return false;" class="btn-primary btn-search-close js-waves-off" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar">
+                    <i class="fal fa-chevron-up"></i>
+                </a>
+            </div>
+        </div>
+        <div class="info-card" style="background-color: #99B801;color:black;">
+            <img src="@adminImageSrc" class="profile-image rounded-circle" alt="@adminName">
+            <div class="info-card-text" >
+                <a href="#" class="d-flex align-items-center text-white">
+                    <span class="text-truncate text-truncate-sm d-inline-block" style="color:black;">
+                        @adminName
+                    </span>
+                </a>
+                @*<span class="d-inline-block text-truncate text-truncate-sm">Pakistan</span>*@
+            </div>
+            @*<img src="@bgImageSrc" class="cover" style="width:100%" alt="cover">*@
+            <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                <i class="fal fa-angle-down"></i>
+            </a>
+        </div>
+        @*<div class="info-card">
+                <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                    <i class="fal fa-angle-down"></i>
+                </a>
+            </div>*@
+    <ul id="js-nav-menu" class="nav-menu">
+        @*<li class="nav-title">Dashboard</li>*@
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmMainMenuUser").ToLower()))
+        {
+
+            <li>
+                <a href="/Users/UserDashboard/index" title="User Dashboard" data-filter-tags="dashboard">
+                    <i class="fal fa-tachometer"></i>
+                    <span class="nav-link-text" data-i18n="nav.Dashboard">Dashboard</span>
+                </a>
+            </li>
+
+        }
+
+
+        @if (Model.Any(x => x.ModuleName.ToLower() == ("frmUser").ToLower()
+        || x.ModuleName.ToLower() == ("frmUserRole").ToLower()
+        ))
+        {
+            <li>
+                <a href="#" title="User" data-filter-tags="user user role user type">
+                    <i class="fal fa-user"></i>
+                    <span class="nav-link-text" data-i18n="nav.User">User</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmUser").ToLower()))
+                    {
+                        <li>
+                            <a href="/Users/users/userindex" title="User" data-filter-tags="user">
+                                <span class="nav-link-text" data-i18n="nav.User">User</span>
+                            </a>
+                        </li>
+                    }
+
+
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmUserRole").ToLower()))
+                    {
+                        <li>
+                            <a href="/Users/userrole/userroleindex" title="User Role" data-filter-tags="user role">
+                                <span class="nav-link-text" data-i18n="nav.User Role">User Role</span>
+                            </a>
+                        </li>
+                    }
+ 
+
+                </ul>
+            </li>
+        }
+
+        @*@if (Model.Any(x => x.ModuleName.ToLower() == ("frmCompany").ToLower()
+        ))
+        {
+            <li>
+                <a href="#" title="Settings" data-filter-tags="user user role user type">
+                    <i class="fal fa-cogs"></i>
+                    <span class="nav-link-text" data-i18n="nav.User">Settings</span>
+                </a>
+                <ul>
+                    @if (Model.Any(x => x.ModuleName.ToLower() == ("frmCompany").ToLower()))
+                    {
+                        <li>
+                            <a href="/Users/company/companyindex" title="Company" data-filter-tags="company">
+                                <span class="nav-link-text" data-i18n="nav.Company">Company</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }*@
+        <li>
+            <a href="/home/mainmenu" title="Main Menu" data-filter-tags="main menu">
+                <i class="fal fa-home"></i>
+                <span class="nav-link-text" data-i18n="nav.Main Menu">Main Menu</span>
+            </a>
+        </li>
+
+    </ul>
+        <div class="filter-message js-filter-message bg-success-600"></div>
+    </nav>
+</aside>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="75667252eb824fb1b76ab92a8afc3ce2" Name="Diagram1" ZoomLevel="51">
+        <EntityTypeShape EntityType="Models.AC_CashBank_Detail" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_CashBank_Main" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_ChartOfAC" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_ChequeBook" Width="1.5" PointX="4.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_ChequeBookDetail" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_ChequeInfo" Width="1.5" PointX="0.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_DefaultDetail" Width="1.5" PointX="6.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_DefaultGL" Width="1.5" PointX="6.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_Detail" Width="1.5" PointX="8.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_Detail_Extra" Width="1.5" PointX="2.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_Detail_ItemPrice" Width="1.5" PointX="8.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_Detail_Opening" Width="1.5" PointX="8.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_Voucher_Detail" Width="1.5" PointX="4.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.AC_Voucher_Main" Width="1.5" PointX="10.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_Business" Width="1.5" PointX="10.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_FiscalYear" Width="1.5" PointX="6.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_Menu" Width="1.5" PointX="8.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_Salesman" Width="1.5" PointX="10.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_Tax" Width="1.5" PointX="12.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_User" Width="1.5" PointX="12.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_UserRights" Width="1.5" PointX="12.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Admin_Setup_Warehouse" Width="1.5" PointX="12.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.City" Width="1.5" PointX="6.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Country" Width="1.5" PointX="8.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Footer" Width="1.5" PointX="16.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Form_Document" Width="1.5" PointX="16.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_AdvanceLoan" Width="1.5" PointX="12.75" PointY="16.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_Attendance" Width="1.5" PointX="16.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_Department" Width="1.5" PointX="14.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_Employee_Main" Width="1.5" PointX="16.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_Relation" Width="1.5" PointX="18.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_Religion" Width="1.5" PointX="18.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_Salary" Width="1.5" PointX="18.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_SalaryPayment" Width="1.5" PointX="18.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_WorkExperience" Width="1.5" PointX="18.75" PointY="18.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.HRM_WorkNature" Width="1.5" PointX="4.75" PointY="19.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Invoice_Detail" Width="1.5" PointX="6.75" PointY="19.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Invoice_Extra" Width="1.5" PointX="20.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Invoice_Main" Width="1.5" PointX="0.75" PointY="20.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_AvgStock" Width="1.5" PointX="20.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_Brand" Width="1.5" PointX="20.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_Category" Width="1.5" PointX="20.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_CostDateLog" Width="1.5" PointX="20.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_Information" Width="1.5" PointX="20.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_InOutType" Width="1.5" PointX="8.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_Opening" Width="1.5" PointX="10.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_UOM" Width="1.5" PointX="12.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_AC_ChartOfAC" Width="1.5" PointX="22.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_AC_ChequeBook" Width="1.5" PointX="2.75" PointY="22.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_AC_ChequeInfo" Width="1.5" PointX="22.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_AC_DefaultDetail" Width="1.5" PointX="22.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_AC_DefaultGL" Width="1.5" PointX="22.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_AC_Detail" Width="1.5" PointX="18.75" PointY="22.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_AC_Detail_Opening" Width="1.5" PointX="20.75" PointY="22.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Admin_Setup_FiscalYear" Width="1.5" PointX="22.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Admin_Setup_Salesman" Width="1.5" PointX="24.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Admin_Setup_Tax" Width="1.5" PointX="24.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Admin_Setup_User" Width="1.5" PointX="24.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Admin_Setup_Warehouse" Width="1.5" PointX="12.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_CashBank_Detail" Width="1.5" PointX="24.75" PointY="14.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_CashBank_Main" Width="1.5" PointX="24.75" PointY="19.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_City" Width="1.5" PointX="8.75" PointY="25.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Country" Width="1.5" PointX="14.75" PointY="25.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_AdvanceLoan" Width="1.5" PointX="22.75" PointY="26.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_Attendance" Width="1.5" PointX="26.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_Department" Width="1.5" PointX="4.75" PointY="27.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_Employee_Main" Width="1.5" PointX="28.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_Relation" Width="1.5" PointX="28.75" PointY="9.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_Religion" Width="1.5" PointX="28.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_Salary" Width="1.5" PointX="14.75" PointY="28.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_SalaryPayment" Width="1.5" PointX="28.75" PointY="15.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_HRM_WorkNature" Width="1.5" PointX="28.75" PointY="20.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Invoice_Detail" Width="1.5" PointX="28.75" PointY="23.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Invoice_Extra" Width="1.5" PointX="24.75" PointY="28.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Invoice_Main" Width="1.5" PointX="6.75" PointY="29.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Item_Brand" Width="1.5" PointX="8.75" PointY="29.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Item_Category" Width="1.5" PointX="10.75" PointY="29.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Item_Information" Width="1.5" PointX="30.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Item_Opening" Width="1.5" PointX="30.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Item_UOM" Width="1.5" PointX="30.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Reminder" Width="1.5" PointX="16.75" PointY="30.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_Sms_User" Width="1.5" PointX="30.75" PointY="17.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Log_SmsSetting" Width="1.5" PointX="18.75" PointY="30.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Reminder" Width="1.5" PointX="30.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Sms_Detail_Field" Width="1.5" PointX="30.75" PointY="25.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Sms_Detail_User" Width="1.5" PointX="26.75" PointY="30.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Sms_Log" Width="1.5" PointX="28.75" PointY="30.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Sms_Main" Width="1.5" PointX="30.75" PointY="29.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Sms_User" Width="1.5" PointX="0.75" PointY="31.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.SmsSetting" Width="1.5" PointX="2.75" PointY="31.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.View_Invoices" Width="1.5" PointX="20.75" PointY="31.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.View_Item_Opening_Stock_Warehouse" Width="1.5" PointX="32.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Models.Item_SubCategory" Width="1.5" PointX="23.375" PointY="32.75" />
+        <EntityTypeShape EntityType="Models.Log_Item_SubCategory" Width="1.5" PointX="31.375" PointY="32.75" />
+        <EntityTypeShape EntityType="Models.AC_Detail_Sub" Width="1.5" PointX="0.75" PointY="14.75" />
+        <EntityTypeShape EntityType="Models.Log_AC_Detail_Sub" Width="1.5" PointX="15.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.Cab_CabType" Width="1.5" PointX="3.375" PointY="15.75" />
+        <EntityTypeShape EntityType="Models.Cab_CabType_Fare" Width="1.5" PointX="5.375" PointY="16.75" />
+        <EntityTypeShape EntityType="Models.Cab_CabType_Model" Width="1.5" PointX="7.375" PointY="16.75" />
+        <EntityTypeShape EntityType="Models.Cab_Zone" Width="1.5" PointX="9.375" PointY="16.75" />
+        <EntityTypeShape EntityType="Models.Cab_Zone_Area" Width="1.5" PointX="9.375" PointY="33.75" />
+        <EntityTypeShape EntityType="Models.AC_Detail_Zone" Width="1.5" PointX="11.375" PointY="33.75" />
+        <EntityTypeShape EntityType="Models.Cab_BookingDetail" Width="1.5" PointX="33.375" PointY="17.75" />
+        <EntityTypeShape EntityType="Models.Cab_Bid" Width="1.5" PointX="25.375" PointY="33.75" />
+        <EntityTypeShape EntityType="Models.Cab_Luggage" Width="1.5" PointX="0.75" PointY="34.75" />
+        <EntityTypeShape EntityType="Models.Cab_OfferDetail" Width="1.5" PointX="3.375" PointY="34.75" />
+        <EntityTypeShape EntityType="Models.Cab_OfferMain" Width="1.5" PointX="27.375" PointY="34.75" />
+        <EntityTypeShape EntityType="Models.Cab_BookingMain" Width="1.5" PointX="33.375" PointY="21.75" />
+        <EntityTypeShape EntityType="Models.AC_Detail_NoOfVeh" Width="1.5" PointX="35.375" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.Cab_BookingLuggage" Width="1.5" PointX="35.375" PointY="3.75" />
+        <EntityTypeShape EntityType="Models.Setup_Content" Width="1.5" PointX="35.375" PointY="6.75" />
+        <EntityTypeShape EntityType="Models.View_Booking_Luggage" Width="1.5" PointX="35.375" PointY="9.75" />
+        <EntityTypeShape EntityType="Models.Setup_Content_Pages" Width="1.5" PointX="35.375" PointY="12.75" />
+        <EntityTypeShape EntityType="Models.Setup_Content_FAQ" Width="1.5" PointX="13.375" PointY="35.75" />
+        <EntityTypeShape EntityType="Models.Setup_Email" Width="1.5" PointX="15.375" PointY="35.75" />
+        <EntityTypeShape EntityType="Models.Setup_EmailMessage" Width="1.5" PointX="35.375" PointY="16.75" />
+        <EntityTypeShape EntityType="Models.Setup_Content_Blogs" Width="1.5" PointX="17.375" PointY="35.75" />
+        <EntityTypeShape EntityType="Models.AC_Setup_Documents" Width="1.5" PointX="35.375" PointY="19.75" />
+        <EntityTypeShape EntityType="Models.AC_Detail_Document" Width="1.5" PointX="35.375" PointY="22.75" />
+        <EntityTypeShape EntityType="Models.PriceList_Detail" Width="1.5" PointX="35.375" PointY="25.75" />
+        <EntityTypeShape EntityType="Models.PriceList_Main" Width="1.5" PointX="35.375" PointY="28.75" />
+        <EntityTypeShape EntityType="Models.Driver_Location" Width="1.5" PointX="35.375" PointY="31.75" />
+        <EntityTypeShape EntityType="Models.Admin_Setting" Width="1.5" PointX="35.375" PointY="34.75" />
+        <EntityTypeShape EntityType="Models.Cab_ServiceProvider" Width="1.5" PointX="9.375" PointY="36.75" />
+        <EntityTypeShape EntityType="Models.Cab_SpecialPrice" Width="1.5" PointX="29.375" PointY="36.75" />
+        <EntityTypeShape EntityType="Models.Cab_Customer" Width="1.5" PointX="37.75" PointY="0.75" />
+        <EntityTypeShape EntityType="Models.Cab_LocationCharges" Width="1.5" PointX="0.75" PointY="37.75" />
+        <EntityTypeShape EntityType="Models.Cab_TimePrice" Width="1.5" PointX="37.375" PointY="4.75" />
+        <EntityTypeShape EntityType="Models.Cab_ServicePause" Width="1.5" PointX="37.375" PointY="7.75" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

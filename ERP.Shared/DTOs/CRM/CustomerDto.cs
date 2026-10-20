@@ -20,9 +20,16 @@ public class CustomerDto : BaseDto
     public string Status { get; set; } = "Active";
     public string? Industry { get; set; }
     public decimal CreditLimit { get; set; }
+    public int CreditDays { get; set; }
     public decimal OutstandingBalance { get; set; }
     public string? PaymentTerms { get; set; }
     public string? TaxId { get; set; }
+    public string? TaxType { get; set; }
+    public string? Ntn { get; set; }
+    public string? Strn { get; set; }
+    public string? Cnic { get; set; }
+    public Guid? SalesmanId { get; set; }
+    public string? SalesmanName { get; set; }
     public string? Website { get; set; }
     public string? Notes { get; set; }
     public string CurrencyCode { get; set; } = "USD";
@@ -47,9 +54,15 @@ public class CreateCustomerDto : CreateDto
     public string Status { get; set; } = "Active";
     public string? Industry { get; set; }
     public decimal CreditLimit { get; set; }
+    public int CreditDays { get; set; }
     public decimal OutstandingBalance { get; set; }
     public string? PaymentTerms { get; set; }
     public string? TaxId { get; set; }
+    public string? TaxType { get; set; }
+    public string? Ntn { get; set; }
+    public string? Strn { get; set; }
+    public string? Cnic { get; set; }
+    public Guid? SalesmanId { get; set; }
     public string? Website { get; set; }
     public string? Notes { get; set; }
     public string CurrencyCode { get; set; } = "USD";
@@ -72,9 +85,15 @@ public class UpdateCustomerDto : UpdateDto
     public string Status { get; set; } = "Active";
     public string? Industry { get; set; }
     public decimal CreditLimit { get; set; }
+    public int? CreditDays { get; set; }
     public decimal OutstandingBalance { get; set; }
     public string? PaymentTerms { get; set; }
     public string? TaxId { get; set; }
+    public string? TaxType { get; set; }
+    public string? Ntn { get; set; }
+    public string? Strn { get; set; }
+    public string? Cnic { get; set; }
+    public Guid? SalesmanId { get; set; }
     public string? Website { get; set; }
     public string? Notes { get; set; }
     public string CurrencyCode { get; set; } = "USD";

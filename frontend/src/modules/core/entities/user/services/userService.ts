@@ -7,8 +7,19 @@ export interface UserDto {
   firstName: string;
   lastName: string;
   email: string;
+  username?: string;
   phone?: string;
+  secondaryPhone?: string;
+  mobilePhone?: string;
+  addressLine1?: string;
+  city?: string;
+  profilePicture?: string;
+  employeeId?: string;
+  employeeCode?: string;
+  employeeName?: string;
   isActive: boolean;
+  roleIds?: string[];
+  roleNames?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -18,7 +29,14 @@ export interface CreateUserDto {
   lastName: string;
   email: string;
   password: string;
+  username?: string;
   phone?: string;
+  secondaryPhone?: string;
+  mobilePhone?: string;
+  addressLine1?: string;
+  city?: string;
+  profilePicture?: string;
+  employeeId?: string;
   isActive: boolean;
   roleIds: string[];
 }
@@ -28,7 +46,14 @@ export interface UpdateUserDto {
   firstName: string;
   lastName: string;
   email: string;
+  username?: string;
   phone?: string;
+  secondaryPhone?: string;
+  mobilePhone?: string;
+  addressLine1?: string;
+  city?: string;
+  profilePicture?: string;
+  employeeId?: string | null;
   isActive: boolean;
   roleIds: string[];
 }
@@ -84,4 +109,3 @@ class UserService {
 }
 
 export const userService = new UserService();
-

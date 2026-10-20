@@ -1,5 +1,6 @@
 using ERP.Api.Security.Permissions;
 using ERP.Api.Security;
+using ERP.Api.OpenApi;
 using Microsoft.AspNetCore.Mvc;
 using ERP.Application.Interfaces.Finance;
 using ERP.Shared.DTOs.Finance;
@@ -11,6 +12,10 @@ namespace ERP.Api.Controllers.Finance;
 [Route("api/finance/chartofaccounts")]
 [Authorize]
 [PermissionResource("finance.chartOfAccounts")]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IAccountingService _accountingService;
@@ -23,6 +28,7 @@ public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> AddChartOfAccount([FromBody] CreateChartOfAccountDto dto)
     {
         var tenantId = GetTenantId();
@@ -33,6 +39,7 @@ public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{accountId}")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> UpdateChartOfAccount(Guid accountId, [FromBody] UpdateChartOfAccountDto dto)
     {
         var tenantId = GetTenantId();
@@ -44,6 +51,7 @@ public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{accountId}")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> DeleteChartOfAccount(Guid accountId)
     {
         var tenantId = GetTenantId();
@@ -53,6 +61,7 @@ public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{accountId}")]
+    [ProducesResponseType(typeof(ChartOfAccountDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetChartOfAccountById(Guid accountId)
     {
         var tenantId = GetTenantId();
@@ -65,11 +74,17 @@ public class ChartOfAccountsController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllChartOfAccounts([FromQuery] string? accountType = null, [FromQuery] bool? isActive = null)
+    [ProducesResponseType(typeof(IEnumerable<ChartOfAccountDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetAllChartOfAccounts(
+        [FromQuery] string? accountType = null,
+        [FromQuery] bool? isActive = null,
+        [FromQuery] int? level = null,
+        [FromQuery] Guid? parentAccountId = null,
+        [FromQuery] bool? postingOnly = null)
     {
         var tenantId = GetTenantId();
-        
-        var accounts = await _accountingService.GetAllChartOfAccountsAsync(tenantId, accountType, isActive);
+        var accounts = await _accountingService.GetAllChartOfAccountsAsync(
+            tenantId, accountType, isActive, level, parentAccountId, postingOnly);
         return Ok(accounts);
     }
 

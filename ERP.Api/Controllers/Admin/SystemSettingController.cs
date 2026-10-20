@@ -1,4 +1,5 @@
 using ERP.Api.Security;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.Admin;
 using ERP.Shared.DTOs.Admin;
@@ -11,6 +12,10 @@ namespace ERP.Api.Controllers.Admin;
 [Route("api/admin/system-settings")]
 // Raw key/value "advanced settings": SuperAdmin only. Tenant admins use /api/core/settings/{category}.
 [Authorize(Roles = "SuperAdmin,SUPER_ADMIN")]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly ISystemSettingService _service;
@@ -21,6 +26,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(SystemSettingDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var tenantId = GetTenantId();
@@ -29,6 +35,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("key/{key}")]
+    [ProducesResponseType(typeof(SystemSettingDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByKey(string key)
     {
         var tenantId = GetTenantId();
@@ -37,6 +44,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<SystemSettingDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAll([FromQuery] string? category = null)
     {
         var tenantId = GetTenantId();
@@ -45,6 +53,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("category/{category}")]
+    [ProducesResponseType(typeof(IEnumerable<SystemSettingDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByCategory(string category)
     {
         var tenantId = GetTenantId();
@@ -53,6 +62,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(SystemSettingDto), OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateSystemSettingDto dto)
     {
         var tenantId = GetTenantId();
@@ -62,6 +72,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(SystemSettingDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSystemSettingDto dto)
     {
         dto.Id = id;
@@ -72,6 +83,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var tenantId = GetTenantId();
@@ -80,6 +92,7 @@ public class SystemSettingController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpPost("upsert")]
+    [ProducesResponseType(typeof(SystemSettingDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Upsert([FromBody] UpsertSystemSettingDto dto)
     {
         var tenantId = GetTenantId();

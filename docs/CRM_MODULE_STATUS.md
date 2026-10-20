@@ -68,12 +68,12 @@ Primary sales pipeline: **Customer → Contact → Lead → Opportunity → Quot
 |--------|------------|----------|
 | Customer | `/api/crm/customers` | CRUD + search |
 | Contact | `/api/crm/contacts` | CRUD + by customer |
-| Lead | `/api/crm/leads` | CRUD + `POST .../convert` + `POST .../convert-to-opportunity` |
-| Opportunity | `/api/crm/opportunities` | CRUD + `POST .../convert` |
-| Quote | `/api/crm/quotes` | CRUD + send + convert |
-| Sales order | `/api/crm/sales-orders` | CRUD + approve/ship/invoice |
-| Activity | `/api/crm/activities` | CRUD + complete/reschedule |
-| Campaign | `/api/crm/campaigns` | CRUD + launch/pause/complete |
+| Lead | `/api/crm/leads` | CRUD + qualify/lose/convert (New/Qualified edit; convert from Qualified; FIX-5) |
+| Opportunity | `/api/crm/opportunities` | CRUD + win/lose/cancel/convert (Open-only edit; convert from Won; FIX-5) |
+| Quote | `/api/crm/quotes` | CRUD + send/approve/reject/convert (Draft-only edit; FIX-6; convert from Accepted) |
+| Sales order | `/api/crm/sales-orders` | CRUD + approve/reject/ship/invoice (Draft-only edit; FIX-6) |
+| Activity | `/api/crm/activities` | CRUD + complete/cancel/reschedule (Open-only edit; FIX-5) |
+| Campaign | `/api/crm/campaigns` | CRUD + launch/pause/complete/cancel (Draft-only edit; FIX-5) |
 
 ### Frontend routes (core)
 
@@ -96,7 +96,7 @@ Registered in `ERP.Api/Program.cs`: `CRMQueries`, `CRMMutations`.
 | Area | Status |
 |------|--------|
 | Queries | Customer, Contact, Lead, Opportunity, Quote, SalesOrder, Activity, Campaign |
-| Mutations | Create customer/lead/contact/campaign; convert lead→customer, lead→opportunity, opp→quote, quote→SO; complete activity; update contact/campaign |
+| Mutations | Create customer/lead/contact/campaign; lead qualify/lose/convert; opp win/lose/cancel/convert; campaign launch/pause/complete/cancel; activity complete/cancel/reschedule; quote send/approve/reject/convert; update contact/campaign |
 | Missing | Update/delete for most entities; SO workflow mutations |
 
 ### Key backend files

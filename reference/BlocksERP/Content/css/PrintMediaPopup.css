@@ -1,0 +1,120 @@
+﻿ @@media print {
+            @@page {
+                size: A4;
+                margin-top: 0px;
+                margin-left: 0px;
+                margin-bottom: 25px;
+                page-break-after: always;
+            }
+
+            @@page:first {
+                size: A4;
+                margin-top: 2px;
+                margin-left: 0px !important;
+                margin-right: 0px !important;
+                margin-bottom: 25px;
+                page-break-after: always;
+            }
+
+            .title {
+                font-size: 44px !important;
+                font-weight: bold !important;
+                vertical-align: bottom !important;
+            }
+
+            .vouchertitle {
+                font-weight: bold !important;
+                font-size: 30px !important;
+                text-align: center !important;
+                padding-top: 10px !important;
+            }
+
+
+            .nonprint {
+                visibility: hidden;
+            }
+
+            .mainTable {
+                width: 100% !important;
+                margin-left: 0px !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            .custname {
+                font-weight: bold !important;
+                font-size: 20px !important;
+            }
+
+            #myTable {
+                width: 100% !important;
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            #printable-content table {
+                width: 100%;
+                /*border-collapse: separate;*/
+            }
+
+            .purchaseHeading {
+                border-bottom: 0px !important;
+                border-top: 0px !important;
+            }
+
+            a[href]:after {
+                content: none !important;
+            }
+        }
+
+    #printable-content table {
+        width: 100%;
+        /*border-collapse: separate;*/
+    }
+
+    #printable-content .heading {
+        border-width: 0px;
+    }
+
+    .rpt {
+        background: #fff !important;
+        border-width: 0px;
+    }
+
+    .mainTable {
+        width: 98% !important;
+        /*margin-top: -25px;*/
+        margin-bottom: 1px;
+        margin-left: 10px;
+        padding-right: 19px !important;
+    }
+
+        .mainTable td {
+            border-left: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+    .borderRight {
+        border-right: 1px solid black;
+    }
+
+    .mainTable th {
+        border-top: 1px solid black;
+        border-left: 1px solid black;
+        border-bottom: 1px solid black;
+    }
+
+    .mainTable th {
+        padding: 3px;
+    }
+
+    .mainTable td {
+        padding: 3px;
+    }
+    thead {
+        display: table-header-group;
+    }
+
+    .page-content {
+        color: #000 !important;
+    }

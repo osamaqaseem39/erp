@@ -16,9 +16,14 @@ public class Vendor : BaseEntity
     public string State { get; set; } = string.Empty;
     public string Country { get; set; } = string.Empty;
     public string PostalCode { get; set; } = string.Empty;
-    public string TaxNumber { get; set; } = string.Empty; // VAT/GST/NTN
+    public string TaxNumber { get; set; } = string.Empty; // VAT/GST/NTN (legacy; prefer Ntn)
+    public string? TaxType { get; set; }
+    public string? Ntn { get; set; }
+    public string? Strn { get; set; }
+    public string? Cnic { get; set; }
     public string PaymentTerms { get; set; } = string.Empty; // Net 30, Net 60, etc.
     public decimal CreditLimit { get; set; } = 0;
+    public int CreditDays { get; set; }
     
     // Navigation properties
     public virtual Core.Company Company { get; set; } = null!;

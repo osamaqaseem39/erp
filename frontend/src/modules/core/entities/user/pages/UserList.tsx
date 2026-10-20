@@ -100,6 +100,7 @@ const UserList: React.FC = () => {
                 <SortableTh columnKey="fullName" label="Name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                 <SortableTh columnKey="email" label="Email" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                 <SortableTh columnKey="phone" label="Phone" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                <th>Roles</th>
                 <SortableTh columnKey="status" label="Status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                 <SortableTh columnKey="_Actions" label="Actions" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} sortable={false} />
                 </tr>
@@ -107,7 +108,7 @@ const UserList: React.FC = () => {
                 <tbody>
                   {users.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-8">
+                      <td colSpan={6} className="text-center py-8">
                         No users found
                       </td>
                     </tr>
@@ -117,6 +118,7 @@ const UserList: React.FC = () => {
                         <td>{user.firstName} {user.lastName}</td>
                         <td>{user.email}</td>
                         <td>{user.phone || "-"}</td>
+                        <td>{user.roleNames?.length ? user.roleNames.join(", ") : "—"}</td>
                         <td>
                           <span
                             className={`badge badge-pill ${

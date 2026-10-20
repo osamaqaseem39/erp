@@ -1,0 +1,481 @@
+﻿
+@model BlocksERP.Models.clsCompany
+<div style="overflow-x:hidden;margin-top:-20px;padding:0px">
+    @using (Html.BeginForm("InsertUpdateCompany", "Company", FormMethod.Post, new { id = "popupForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+    <fieldset style="padding:1.25rem">
+        <div class="row" style="margin-top:15px">
+            <section class="col-md-4" style="margin-top:10px">
+                <div class="row">
+                    <div class="col-md-12" style="margin-top: 12px">
+                        <label class="form-label">Company Picture</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="PictureAttachment">
+                            <label class="custom-file-label" id="PictureAttachmentLabel" for="PictureAttachment">Choose file...</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">                   
+                    <div class="col-md-12" style="margin-top:15px">
+                        <div class="myDiv">
+                            @{
+                                string imgSrc = "/Content/noimage.png";
+                            }
+
+                            <img id="DocumentImage" src="@imgSrc" style="border:1px solid #A2A2A2;border-radius:10px;margin-top: 0px;width:100%;" />
+                            <br /><br />
+                            <a href="javascript:void(0)" data-value="0" style="background-color:#C82333;font-size:14px;border-radius:50%;font-weight:bold;padding:5px;color:#fff;padding-left:9px;padding-right:9px;" class="deleteImage DeleteImage">X</a>
+                        </div>
+                    </div>                    
+                </div>
+
+            </section>
+            <section class="col-md-8" style="margin-top:10px">
+
+                <div class="row" style="margin-top:15px">
+                    <section class="col-md-6" style="margin-top:10px">
+                        <label class="form-label">Company Name (*)</label>
+                        <input type="hidden" id="CompanyId" name="CompanyId" value=@Model.CompanyId />
+                        <input type="hidden" id="HiddenImagePath" name="HiddenImagePath" value="@Model.ImagePath" />
+                        <input type="hidden" id="HiddenDocumentId" name="HiddenDocumentId" value="@Model.DocumentId" />
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-info"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.CompanyName, new { @placeholder = "Company Name", @class = "form-control num", autocomplete = "off" })
+                        </div>
+                    </section>
+                    <section class="col-md-6">
+                        <label class="form-label">Contact Person (*)</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-info"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.ContactPerson, new { @placeholder = "Contact Person", @class = "form-control num", autocomplete = "off" })
+
+                        </div>
+                    </section>
+                </div>
+                <div class="row" style="margin-top:15px">
+                    <section class="col-md-6">
+                        <label class="form-label">Phone No.</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-mobile"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.PhoneNo, new { @placeholder = "Phone No.", @class = "form-control num", autocomplete = "off" })
+
+                        </div>
+                    </section>
+
+                    <section class="col-md-6">
+                        <label class="form-label">Cell No.</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-mobile"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.CellNo, new { @placeholder = "Cell No.", @class = "form-control num", autocomplete = "off" })
+
+                        </div>
+                    </section>
+                </div>
+                <div class="row" style="margin-top:15px">
+                    <div class="col-md-12" style="margin-top:10px">
+                        <label class="form-label">Email</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-envelope"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.Email, new { @placeholder = "Email", @class = "form-control num", autocomplete = "off" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:15px">
+                    <section class="col-md-12">
+                        <label class="form-label">Website</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-info"></i>
+                                </span>
+                            </div>
+                            @Html.TextBoxFor(a => a.Website, new { @placeholder = "Website", @class = "form-control num", autocomplete = "off" })
+
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="row" style="margin-top:15px">
+                    <section class="col-md-12">
+                        <label class="form-label">Address</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-location-arrow"></i>
+                                </span>
+                            </div>
+                            @Html.TextAreaFor(a => a.Address, new { @style = "padding: 5px; font-weight: normal; border: 1px solid #BDBDBD; line-height: 19px", @class = "form-control num" })
+
+                        </div>
+                    </section>
+
+                </div>
+            </section>
+        </div>
+
+
+    </fieldset>
+    <footer class="modal-footer" style="margin-top:11px;background-color:#F9F9F9;border-top:1px solid #ddd">
+        @if (Model.DeleteRoleId > 0)
+        {
+            <button type="button" class="btn btn-danger pull-left btnDeleteRecord">Delete</button>
+        }
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        @if (Model.CompanyId > 0)
+        {
+            if (Model.UpdateRoleId > 0)
+            {
+                <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Update</button>
+
+            }
+        }
+        else
+        {
+            <button type="submit" id="btn_Save" class="btn btn-primary btnSaveForm">Save</button>
+        }
+    </footer>
+    }
+</div>
+<script src="~/Scripts/app.bundle.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ($('#CompanyId').val() > 0) {
+
+            if ($('#HiddenImagePath').val() != '' && $('#HiddenImagePath').val() != null) {
+                $("#DocumentImage").prop("height", "150");
+                $("#DocumentImage").prop("width", "150");
+                $("#DocumentImage").prop("src", $('#HiddenImagePath').val());
+            }
+        }
+
+        var $checkoutForm = $('#popupForm').validate({
+            rules: {
+                CompanyName: {
+                    required: true
+                },
+
+                ContactPerson: {
+                    required: true,
+                },
+                Email: {
+                    email: true
+                },
+                //PhoneNo: {
+                //    minlength: 10,
+                //    maxlength: 10
+                //},
+                //CellNo: {
+                //    minlength: 10,
+                //    maxlength: 10
+                //},
+               
+                //PhoneNo: {
+                //    required: true,
+                //},
+
+
+
+
+            },
+            messages: {
+                CompanyName: {
+                    required: 'Company Name is required.'
+                },
+                ContactPerson: {
+                    required: 'ContactPerson is required.',                    
+                },
+                Email: {
+                    email: 'Please enter valid email.'
+                },
+                //PhoneNo: {
+                //    minlength: 'Minimum length is 10.',
+                //    maxlength: 'Maximum length is 10.'
+                //},
+                //CellNo: {
+                //    minlength: 'Minimum length is 10.',
+                //    maxlength: 'Maximum length is 10.'
+                //},
+               
+                  
+               
+                //PhoneNo: {
+                //    required: 'Cell#1 is required.',
+                //},
+
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+            }
+        });
+    })
+    $(".num").keyup(function (event) {
+        if (event.keyCode == 13) {
+            textboxes = $(".num");
+            currentBoxNumber = textboxes.index(this);
+            if (currentBoxNumber == 6) {
+                $('#btn_Save').focus();
+                $('#btn_Save').click();
+            }
+            else {
+                nextBox = textboxes[currentBoxNumber + 1];
+                nextBox.focus();
+                nextBox.select();
+            }
+            event.preventDefault();
+            return false;
+        }
+    });
+    $('#PictureAttachment').change(function (e) {
+        var ext = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+        var size = document.getElementById('PictureAttachment').files[0].size;
+        var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
+        if ($.inArray(ext, ['jpeg', 'jpg', 'png']) == -1) {
+            $("#DocumentImage").prop("src", "/Content/noimage.png");
+            alert('Error! File type allowed : jpeg, jpg, png');
+            $('#PictureAttachment').val('');
+            $('#PictureAttachmentLabel').text('Choose file...');
+        }
+        else if (size > (5000 * 1024)) {
+            $("#DocumentImage").prop("src", "/Content/noimage.png");
+            alert('Error! Maximum File size must be 5 mb');
+            $('#PictureAttachment').val('');
+            $('#PictureAttachmentLabel').text('Choose file...');
+        }
+        else {
+
+            //Get count of selected files
+            var countFiles = $(this)[0].files.length;
+            var imgPath = $(this)[0].value;
+            $('#PictureAttachmentLabel').text(filename);
+            var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+            if (typeof (FileReader) != "undefined") {
+
+                //loop for each file selected for uploaded.
+                for (var i = 0; i < countFiles; i++) {
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#DocumentImage").prop("src", e.target.result);
+                    }
+                    //image_holder.show();
+                    reader.readAsDataURL($(this)[0].files[i]);
+                }
+
+            }
+            else {
+                alert("This browser does not support FileReader.");
+            }
+        }
+    });
+    $(document).off('click', '.deleteImage').on('click', '.deleteImage', function () {
+        var id = $('#HiddenDocumentId').val();
+        DeleteImage(id);
+    });
+    function DeleteImage(id) {
+        var a = $.confirm({
+            title: 'Delete Image',
+            content: 'Are you sure you want to delete this Image?',
+            type: 'white',
+            buttons: {
+                ok: {
+                    text: "Yes",
+                    btnClass: 'btnConfirm',
+                    keys: ['enter'],
+                    action: function () {
+                        $.ajax({
+                            url: '/Documents/DeleteDocument/' + id,
+                            type: "POST",
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.status == true) {
+                                    $('#PictureAttachment').val('');
+                                    $('#HiddenDocumentId').val(0);
+                                    $("#DocumentImage").prop("src", "/Content/noimage.png");
+                                    $('#PictureAttachmentLabel').text('Choose file...');
+                                }
+                                else {
+                                    alert(data.message);
+                                }
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: "No",
+                    btnClass: 'btn-default',
+                    keys: ['esc'],
+                    action: function () {
+                        a.close();
+                    }
+                },
+            }
+        });
+    }
+
+
+    $('#popupForm').on('submit', function (e) {
+        e.preventDefault();
+        if (!$("#popupForm").valid()) {
+            return false;
+        }
+
+        $('#btn_Save').attr('disabled', 'disabled');
+        $('#btn_Save').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Processing...");
+        var CompanyId = $('#CompanyId').val();
+        var CompanyName = $('#CompanyName').val();
+        var Address = $('#Address').val();
+        var Email = $('#Email').val();
+        var PhoneNo = $('#PhoneNo').val();
+        var CellNo = $('#CellNo').val();
+        var Website = $('#Website').val();
+        var ContactPerson = $('#ContactPerson').val();
+
+        var st =
+        {
+            CompanyId: CompanyId,
+            CompanyName: CompanyName,
+            Address: Address,
+            Email: Email,
+            PhoneNo: PhoneNo,
+            CellNo: CellNo,
+            Website: Website,
+            ContactPerson: ContactPerson,
+        }
+        $.ajax({
+            type: "POST",
+            url: "/Loan/Company/InsertUpdateCompany/",
+            data: st,
+            dataType: 'json',
+            success: function (data) {
+
+                if ($('#CompanyId').val() > 0) {
+                    $('#btn_Save').html("Update");
+                }
+                else {
+                    $('#btn_Save').html("Save");
+                }
+                $('#btn_Save').prop('disabled', false);
+                if (data.status) {
+                    var extension = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+                    if (extension != '') {
+                        var typeId = data.id;
+                        var documentType = "Company";
+                        var documentId = 0;
+                        var extension = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+                        var document = {
+                            DocumentId: documentId,
+                            DocumentType: documentType,
+                            TypeId: typeId,
+                            DocumentExtension: extension,
+                            Remarks: 'ProfilePicture'
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: '/documents/AttachDocumentsForPost/',
+                            dataType: 'json',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify({ 'doc': document }),
+                            success: function (data) {
+                                if (data.status == true) {
+                                    var bannerImage = $("#PictureAttachment").val();
+                                    var file = $('#PictureAttachment').get(0).files;
+                                    var documentFile = file[0];
+                                    var extension = $('#PictureAttachment').val().split('.').pop().toLowerCase();
+                                    var documentIdWithDocumentTypeWithExtension = data.documentId + "_" + data.documentType + "_" + data.typeId + "_" + extension;
+                                    var formData = new FormData();
+                                    formData.append(file.name, documentFile);
+                                    formData.append("DocumentName", $("#PictureAttachment").text());
+
+                                    var xhr = new XMLHttpRequest();
+                                    var url = '/documents/UploadDocument/' + documentIdWithDocumentTypeWithExtension;
+                                    xhr.open('POST', url, true);
+
+                                    xhr.onload = function (e) {
+                                        var response = $.parseJSON(e.target.response);
+                                        $('#btn_Save').html("Save");
+                                        $('#btn_Save').prop('disabled', false);
+                                        if (data.status) {
+                                            toastr.success("Record Saved Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                                            $('.close').click();
+                                            oTable.ajax.reload(null, false);
+                                            location.reload();
+                                        }
+                                        else {
+                                            toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                                        }
+                                    };
+                                    xhr.send(formData);  // multipart/form-data
+                                }
+                                else {
+                                    alert("Error! Please try again.");
+                                }
+                            }
+                        })
+
+                    }
+                    else {
+                        toastr.success("Record Saved Successfully", "Success", { timeOut: 3000, "closeButton": true });
+                        $('.close').click();
+                        oTable.ajax.reload(null, false);
+                    }
+                }
+                else {
+                    toastr.error(data.message, "Error", { timeOut: 3000, "closeButton": true });
+                }
+            }
+        })
+    })
+    $("#PhoneNo,#CellNo").on('keypress', function (event) {
+        NumberPostive(event, this);
+    });
+
+    $('#PhoneNo,#CellNo').on('input', function () {
+        this.value = this.value
+            .replace(/[^\d]/g, '')             // numbers and decimals only
+            .replace(/(^[\d]{10})[\d]/g, '$1')   // not more than 6 digits at the beginning
+        //.replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+        //.replace(/(\.[\d]{2})./g, '$1');    // not more than 2 digits after decimal
+    });
+    
+</script>
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+</script>

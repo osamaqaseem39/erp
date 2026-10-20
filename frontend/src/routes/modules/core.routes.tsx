@@ -19,6 +19,8 @@ const TenantForm = React.lazy(() => import("../../modules/core/entities/tenant/p
 const TenantList = React.lazy(() => import("../../modules/core/entities/tenant/pages/TenantList"));
 const UserForm = React.lazy(() => import("../../modules/core/entities/user/pages/UserForm"));
 const UserList = React.lazy(() => import("../../modules/core/entities/user/pages/UserList"));
+const AdminEmailList = React.lazy(() => import("../../modules/core/entities/admin-email/pages/AdminEmailList"));
+const AdminEmailForm = React.lazy(() => import("../../modules/core/entities/admin-email/pages/AdminEmailForm"));
 
 export const moduleSelectionRoute: RoutesProps = {
   path: "/modules",
@@ -135,6 +137,24 @@ export const coreRoutes: RoutesProps = {
       path: "/core/settings/roles/:id/permissions",
       name: "Assign Permissions",
       element: <AssignPermissionsForm />,
+    },
+    {
+      path: "/core/settings/admin-emails",
+      name: "Admin emails",
+      element: <AdminEmailList />,
+      permission: "admin.emails.view",
+    },
+    {
+      path: "/core/settings/admin-emails/new",
+      name: "Add admin email",
+      element: <AdminEmailForm />,
+      permission: "admin.emails.create",
+    },
+    {
+      path: "/core/settings/admin-emails/:id/edit",
+      name: "Edit admin email",
+      element: <AdminEmailForm />,
+      permission: "admin.emails.update",
     },
     // Tenants
     {

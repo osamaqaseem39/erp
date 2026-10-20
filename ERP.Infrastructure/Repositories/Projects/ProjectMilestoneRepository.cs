@@ -8,43 +8,59 @@ public class ProjectMilestoneRepository : IProjectMilestoneRepository
 {
     private readonly ERPDbContext _context;
 
-    public ProjectMilestoneRepository(ERPDbContext context)
+    public ProjectMilestoneRepository(ERPDbContext context) => _context = context;
+
+    private IQueryable<ProjectMilestone> Query(Guid tenantId)
     {
-        _context = context;
+        if (tenantId == Guid.Empty)
+            return _context.ProjectMilestones.Where(_ => false);
+        return _context.ProjectMilestones.Where(pm => pm.TenantId == tenantId);
     }
 
-    public async Task<ProjectMilestone?> GetByIdAsync(Guid id)
+    private async Task LoadRelatedAsync(ProjectMilestone? entity)
     {
-        return await _context.ProjectMilestones
-            .Include(pm => pm.Project)
-            .FirstOrDefaultAsync(pm => pm.Id == id);
+        if (entity == null) return;
+        await _context.Entry(entity).Reference(pm => pm.Project).LoadAsync();
     }
 
-    public async Task<IEnumerable<ProjectMilestone>> GetAllAsync()
+    private async Task LoadRelatedAsync(IEnumerable<ProjectMilestone> entities)
     {
-        return await _context.ProjectMilestones
-            .Include(pm => pm.Project)
-            .ToListAsync();
+        foreach (var entity in entities)
+            await LoadRelatedAsync(entity);
     }
 
-    public async Task<IEnumerable<ProjectMilestone>> GetByProjectAsync(Guid projectId)
+    public async Task<ProjectMilestone?> GetByIdAsync(Guid id, Guid tenantId)
     {
-        return await _context.ProjectMilestones
-            .Include(pm => pm.Project)
-            .Where(pm => pm.ProjectId == projectId)
-            .ToListAsync();
+        var entity = await Query(tenantId).FirstOrDefaultAsync(pm => pm.Id == id);
+        await LoadRelatedAsync(entity);
+        return entity;
     }
 
-    public async Task<IEnumerable<ProjectMilestone>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<ProjectMilestone>> GetAllAsync(Guid tenantId)
     {
-        return await _context.ProjectMilestones
-            .Include(pm => pm.Project)
-            .Where(pm => pm.Status == status)
-            .ToListAsync();
+        var list = await Query(tenantId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<ProjectMilestone>> GetByProjectAsync(Guid projectId, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(pm => pm.ProjectId == projectId).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
+    }
+
+    public async Task<IEnumerable<ProjectMilestone>> GetByStatusAsync(string status, Guid tenantId)
+    {
+        var list = await Query(tenantId).Where(pm => pm.Status == status).ToListAsync();
+        await LoadRelatedAsync(list);
+        return list;
     }
 
     public async Task<Guid> CreateAsync(ProjectMilestone projectMilestone)
     {
+        if (projectMilestone.Id == Guid.Empty) projectMilestone.Id = Guid.NewGuid();
+        if (projectMilestone.CreatedAt == default) projectMilestone.CreatedAt = DateTime.UtcNow;
         _context.ProjectMilestones.Add(projectMilestone);
         await _context.SaveChangesAsync();
         return projectMilestone.Id;
@@ -52,18 +68,16 @@ public class ProjectMilestoneRepository : IProjectMilestoneRepository
 
     public async Task<bool> UpdateAsync(ProjectMilestone projectMilestone)
     {
+        projectMilestone.UpdatedAt = DateTime.UtcNow;
         _context.ProjectMilestones.Update(projectMilestone);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var projectMilestone = await _context.ProjectMilestones.FindAsync(id);
+        var projectMilestone = await GetByIdAsync(id, tenantId);
         if (projectMilestone == null) return false;
-
         _context.ProjectMilestones.Remove(projectMilestone);
-        var result = await _context.SaveChangesAsync();
-        return result > 0;
+        return await _context.SaveChangesAsync() > 0;
     }
 }

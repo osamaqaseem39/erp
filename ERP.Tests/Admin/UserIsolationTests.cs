@@ -16,6 +16,7 @@ public class UserIsolationTests
     private static readonly Guid TenantB = Guid.NewGuid();
     private readonly string _dbName = Guid.NewGuid().ToString();
     private readonly User _userOfB;
+    private readonly Role _roleOfA;
     private readonly Role _roleOfB;
 
     public UserIsolationTests()
@@ -24,7 +25,9 @@ public class UserIsolationTests
         db.Users.Add(NewUser(TenantA, "a@x.test"));
         _userOfB = NewUser(TenantB, "b@x.test");
         db.Users.Add(_userOfB);
-        _roleOfB = new Role { TenantId = TenantB, RoleName = "B admins" };
+        _roleOfA = new Role { TenantId = TenantA, RoleName = "A users", IsActive = true };
+        _roleOfB = new Role { TenantId = TenantB, RoleName = "B admins", IsActive = true };
+        db.Roles.Add(_roleOfA);
         db.Roles.Add(_roleOfB);
         db.SaveChanges();
     }
@@ -72,7 +75,15 @@ public class UserIsolationTests
     {
         var (service, _) = ServiceFor(TenantA);
 
-        var id = await service.CreateAsync(new CreateUserDto { TenantId = TenantB, FirstName = "N", LastName = "U", Email = "new@x.test", Password = "Passw0rd!long" });
+        var id = await service.CreateAsync(new CreateUserDto
+        {
+            TenantId = TenantB,
+            FirstName = "N",
+            LastName = "U",
+            Email = "new@x.test",
+            Password = "Passw0rd!long",
+            RoleIds = [_roleOfA.Id],
+        });
 
         await using var check = Db();
         Assert.Equal(TenantA, (await check.Users.SingleAsync(u => u.Id == id)).TenantId);
@@ -83,8 +94,24 @@ public class UserIsolationTests
     {
         var (service, _) = ServiceFor(TenantA);
 
-        await service.CreateAsync(new CreateUserDto { FirstName = "N", LastName = "U", Email = "b@x.test", Password = "Passw0rd!long" });
-        await Assert.ThrowsAnyAsync<Exception>(() => service.CreateAsync(new CreateUserDto { FirstName = "N", LastName = "U", Email = "a@x.test", Password = "Passw0rd!long" }));
+        // b@x.test already exists in tenant B; tenant A may reuse that address.
+        await service.CreateAsync(new CreateUserDto
+        {
+            FirstName = "N",
+            LastName = "U",
+            Email = "b@x.test",
+            Password = "Passw0rd!long",
+            RoleIds = [_roleOfA.Id],
+        });
+        // a@x.test already exists in tenant A → rejected.
+        await Assert.ThrowsAnyAsync<Exception>(() => service.CreateAsync(new CreateUserDto
+        {
+            FirstName = "N",
+            LastName = "U",
+            Email = "a@x.test",
+            Password = "Passw0rd!long",
+            RoleIds = [_roleOfA.Id],
+        }));
     }
 
     [Fact]
@@ -93,7 +120,14 @@ public class UserIsolationTests
         var (service, _) = ServiceFor(TenantA);
 
         await Assert.ThrowsAsync<ValidationException>(() =>
-            service.CreateAsync(new CreateUserDto { FirstName = "N", LastName = "U", Email = "r@x.test", Password = "Passw0rd!long", RoleIds = [_roleOfB.Id] }));
+            service.CreateAsync(new CreateUserDto
+            {
+                FirstName = "N",
+                LastName = "U",
+                Email = "r@x.test",
+                Password = "Passw0rd!long",
+                RoleIds = [_roleOfB.Id],
+            }));
     }
 
     private sealed class FixedTenant(Guid id) : ITenantProvider

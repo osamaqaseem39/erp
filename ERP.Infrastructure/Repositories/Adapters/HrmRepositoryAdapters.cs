@@ -7,7 +7,7 @@ using Repos = ERP.Infrastructure.Repositories.HRM;
 namespace ERP.Infrastructure.Repositories.Adapters;
 
 /// <summary>
-/// Implements the Interfaces.HRM employee contract against EF Core.
+/// Implements the Interfaces.HRM employee contract against EF Core (tenant fail-closed).
 /// </summary>
 public class EmployeeRepositoryAdapter : Contracts.IEmployeeRepository
 {
@@ -15,14 +15,21 @@ public class EmployeeRepositoryAdapter : Contracts.IEmployeeRepository
 
     public EmployeeRepositoryAdapter(ERPDbContext db) => _db = db;
 
-    public Task<Employee?> GetByIdAsync(Guid id)
-        => _db.Employees.FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
+    private IQueryable<Employee> ForTenant(Guid tenantId)
+        => tenantId == Guid.Empty
+            ? _db.Employees.Where(_ => false)
+            : _db.Employees.Where(e => e.TenantId == tenantId && !e.IsDeleted);
 
-    public async Task<IEnumerable<Employee>> GetAllAsync()
-        => await _db.Employees.Where(e => !e.IsDeleted).ToListAsync();
+    public Task<Employee?> GetByIdAsync(Guid id, Guid tenantId)
+        => ForTenant(tenantId).FirstOrDefaultAsync(e => e.Id == id);
+
+    public async Task<IEnumerable<Employee>> GetAllAsync(Guid tenantId)
+        => await ForTenant(tenantId).ToListAsync();
 
     public async Task<Employee> AddAsync(Employee entity)
     {
+        if (entity.TenantId == Guid.Empty)
+            throw new InvalidOperationException("TenantId is required.");
         _db.Employees.Add(entity);
         await _db.SaveChangesAsync();
         return entity;
@@ -35,22 +42,22 @@ public class EmployeeRepositoryAdapter : Contracts.IEmployeeRepository
         await _db.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id, Guid tenantId)
     {
-        var employee = await _db.Employees.FindAsync(id);
+        var employee = await GetByIdAsync(id, tenantId);
         if (employee == null) return;
         employee.IsDeleted = true;
         await _db.SaveChangesAsync();
     }
 
-    public Task<bool> ExistsAsync(Guid id)
-        => _db.Employees.AnyAsync(e => e.Id == id && !e.IsDeleted);
+    public Task<bool> ExistsAsync(Guid id, Guid tenantId)
+        => ForTenant(tenantId).AnyAsync(e => e.Id == id);
 
-    public async Task<IEnumerable<Employee>> GetByCompanyIdAsync(Guid companyId)
-        => await _db.Employees.Where(e => e.CompanyId == companyId && !e.IsDeleted).ToListAsync();
+    public async Task<IEnumerable<Employee>> GetByCompanyIdAsync(Guid companyId, Guid tenantId)
+        => await ForTenant(tenantId).Where(e => e.CompanyId == companyId).ToListAsync();
 
-    public Task<Employee?> GetByCodeAsync(string code)
-        => _db.Employees.FirstOrDefaultAsync(e => e.EmployeeCode == code && !e.IsDeleted);
+    public Task<Employee?> GetByCodeAsync(string code, Guid tenantId)
+        => ForTenant(tenantId).FirstOrDefaultAsync(e => e.EmployeeCode == code);
 }
 
 /// <summary>
@@ -63,7 +70,9 @@ public class JobOpeningRepositoryAdapter : Contracts.IJobOpeningRepository
     public JobOpeningRepositoryAdapter(ERPDbContext db) => _db = db;
 
     private IQueryable<JobOpening> ForTenant(Guid tenantId)
-        => _db.JobOpenings.Where(j => tenantId == Guid.Empty || j.TenantId == tenantId);
+        => tenantId == Guid.Empty
+            ? _db.JobOpenings.Where(_ => false)
+            : _db.JobOpenings.Where(j => j.TenantId == tenantId);
 
     public Task<JobOpening?> GetByIdAsync(Guid id, Guid tenantId)
         => ForTenant(tenantId).FirstOrDefaultAsync(j => j.Id == id);
@@ -119,7 +128,9 @@ public class JobApplicationRepositoryAdapter : Contracts.IJobApplicationReposito
     public JobApplicationRepositoryAdapter(ERPDbContext db) => _db = db;
 
     private IQueryable<JobApplication> ForTenant(Guid tenantId)
-        => _db.JobApplications.Where(a => tenantId == Guid.Empty || a.TenantId == tenantId);
+        => tenantId == Guid.Empty
+            ? _db.JobApplications.Where(_ => false)
+            : _db.JobApplications.Where(a => a.TenantId == tenantId);
 
     public Task<JobApplication?> GetByIdAsync(Guid id, Guid tenantId)
         => ForTenant(tenantId).FirstOrDefaultAsync(a => a.Id == id);
@@ -171,7 +182,9 @@ public class CandidateRepositoryAdapter : Contracts.ICandidateRepository
     public CandidateRepositoryAdapter(ERPDbContext db) => _db = db;
 
     private IQueryable<Candidate> ForTenant(Guid tenantId)
-        => _db.Candidates.Where(c => tenantId == Guid.Empty || c.TenantId == tenantId);
+        => tenantId == Guid.Empty
+            ? _db.Candidates.Where(_ => false)
+            : _db.Candidates.Where(c => c.TenantId == tenantId);
 
     public Task<Candidate?> GetByIdAsync(Guid id, Guid tenantId)
         => ForTenant(tenantId).FirstOrDefaultAsync(c => c.Id == id);
@@ -222,13 +235,15 @@ public class InterviewRepositoryAdapter : Contracts.IInterviewRepository
     public InterviewRepositoryAdapter(ERPDbContext db) => _db = db;
 
     private IQueryable<Interview> ForTenant(Guid tenantId)
-        => _db.Interviews.Where(i => tenantId == Guid.Empty || i.TenantId == tenantId);
+        => tenantId == Guid.Empty
+            ? _db.Interviews.Where(_ => false)
+            : _db.Interviews.Where(i => i.TenantId == tenantId);
 
-    public Task<Interview?> GetByIdAsync(Guid id)
-        => _db.Interviews.FirstOrDefaultAsync(i => i.Id == id);
+    public Task<Interview?> GetByIdAsync(Guid id, Guid tenantId)
+        => ForTenant(tenantId).FirstOrDefaultAsync(i => i.Id == id);
 
-    public async Task<IEnumerable<Interview>> GetAllAsync()
-        => await _db.Interviews.ToListAsync();
+    public async Task<IEnumerable<Interview>> GetAllAsync(Guid tenantId)
+        => await ForTenant(tenantId).ToListAsync();
 
     public async Task<Guid> CreateAsync(Interview entity)
     {
@@ -244,9 +259,9 @@ public class InterviewRepositoryAdapter : Contracts.IInterviewRepository
         return await _db.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
-        var entity = await _db.Interviews.FindAsync(id);
+        var entity = await GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         _db.Interviews.Remove(entity);
         await _db.SaveChangesAsync();
@@ -256,14 +271,14 @@ public class InterviewRepositoryAdapter : Contracts.IInterviewRepository
     public async Task<IEnumerable<Interview>> GetByJobApplicationAsync(Guid jobApplicationId, Guid tenantId)
         => await ForTenant(tenantId).Where(i => i.JobApplicationId == jobApplicationId).ToListAsync();
 
-    public async Task<IEnumerable<Interview>> GetByInterviewerAsync(Guid interviewerId)
-        => await _db.Interviews.Where(i => i.InterviewerId == interviewerId).ToListAsync();
+    public async Task<IEnumerable<Interview>> GetByInterviewerAsync(Guid interviewerId, Guid tenantId)
+        => await ForTenant(tenantId).Where(i => i.InterviewerId == interviewerId).ToListAsync();
 
     public async Task<IEnumerable<Interview>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
         => await ForTenant(tenantId).Where(i => i.ScheduledDate >= startDate && i.ScheduledDate <= endDate).ToListAsync();
 
-    public async Task<IEnumerable<Interview>> GetByCandidateAsync(Guid candidateId)
-        => await _db.Interviews.Where(i => i.CandidateId == candidateId).ToListAsync();
+    public async Task<IEnumerable<Interview>> GetByCandidateAsync(Guid candidateId, Guid tenantId)
+        => await ForTenant(tenantId).Where(i => i.CandidateId == candidateId).ToListAsync();
 }
 
 public class LeaveRequestRepositoryAdapter : Contracts.ILeaveRequestRepository
@@ -272,15 +287,16 @@ public class LeaveRequestRepositoryAdapter : Contracts.ILeaveRequestRepository
 
     public LeaveRequestRepositoryAdapter(Repos.ILeaveRequestRepository inner) => _inner = inner;
 
-    public Task<LeaveRequest?> GetByIdAsync(Guid id) => _inner.GetByIdAsync(id);
-    public Task<IEnumerable<LeaveRequest>> GetAllAsync() => _inner.GetAllAsync();
+    public Task<LeaveRequest?> GetByIdAsync(Guid id, Guid tenantId) => _inner.GetByIdAsync(id, tenantId);
+    public Task<IEnumerable<LeaveRequest>> GetAllAsync(Guid tenantId) => _inner.GetAllAsync(tenantId);
     public Task<Guid> CreateAsync(LeaveRequest leaveRequest) => _inner.CreateAsync(leaveRequest);
     public Task<bool> UpdateAsync(LeaveRequest leaveRequest) => _inner.UpdateAsync(leaveRequest);
-    public Task<bool> DeleteAsync(Guid id) => _inner.DeleteAsync(id);
-    public async Task<bool> ExistsAsync(Guid id) => await _inner.GetByIdAsync(id) != null;
-    public Task<IEnumerable<LeaveRequest>> GetByEmployeeAsync(Guid employeeId) => _inner.GetByEmployeeAsync(employeeId);
-    public Task<IEnumerable<LeaveRequest>> GetByStatusAsync(string status) => _inner.GetByStatusAsync(status);
-    public Task<IEnumerable<LeaveRequest>> GetByDateRangeAsync(DateTime startDate, DateTime endDate) => _inner.GetByDateRangeAsync(startDate, endDate);
+    public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _inner.DeleteAsync(id, tenantId);
+    public async Task<bool> ExistsAsync(Guid id, Guid tenantId) => await _inner.GetByIdAsync(id, tenantId) != null;
+    public Task<IEnumerable<LeaveRequest>> GetByEmployeeAsync(Guid employeeId, Guid tenantId) => _inner.GetByEmployeeAsync(employeeId, tenantId);
+    public Task<IEnumerable<LeaveRequest>> GetByStatusAsync(string status, Guid tenantId) => _inner.GetByStatusAsync(status, tenantId);
+    public Task<IEnumerable<LeaveRequest>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
+        => _inner.GetByDateRangeAsync(startDate, endDate, tenantId);
 }
 
 public class PayrollRepositoryAdapter : Contracts.IPayrollRepository
@@ -309,17 +325,18 @@ public class PerformanceReviewRepositoryAdapter : Contracts.IPerformanceReviewRe
 
     public PerformanceReviewRepositoryAdapter(Repos.IPerformanceReviewRepository inner) => _inner = inner;
 
-    public Task<PerformanceReview?> GetByIdAsync(Guid id) => _inner.GetByIdAsync(id);
-    public Task<IEnumerable<PerformanceReview>> GetAllAsync() => _inner.GetAllAsync();
+    public Task<PerformanceReview?> GetByIdAsync(Guid id, Guid tenantId) => _inner.GetByIdAsync(id, tenantId);
+    public Task<IEnumerable<PerformanceReview>> GetAllAsync(Guid tenantId) => _inner.GetAllAsync(tenantId);
     public Task<Guid> CreateAsync(PerformanceReview performanceReview) => _inner.CreateAsync(performanceReview);
     public Task<bool> UpdateAsync(PerformanceReview performanceReview) => _inner.UpdateAsync(performanceReview);
-    public Task<bool> DeleteAsync(Guid id) => _inner.DeleteAsync(id);
-    public async Task<bool> ExistsAsync(Guid id) => await _inner.GetByIdAsync(id) != null;
-    public Task<IEnumerable<PerformanceReview>> GetByEmployeeAsync(Guid employeeId) => _inner.GetByEmployeeAsync(employeeId);
-    public Task<IEnumerable<PerformanceReview>> GetByReviewerAsync(Guid reviewerId) => _inner.GetByReviewerAsync(reviewerId);
-
-    public async Task<IEnumerable<PerformanceReview>> GetByPeriodAsync(DateTime startDate, DateTime endDate)
-        => (await _inner.GetAllAsync()).Where(r => r.ReviewPeriodStart <= endDate && r.ReviewPeriodEnd >= startDate);
+    public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _inner.DeleteAsync(id, tenantId);
+    public async Task<bool> ExistsAsync(Guid id, Guid tenantId) => await _inner.GetByIdAsync(id, tenantId) != null;
+    public Task<IEnumerable<PerformanceReview>> GetByEmployeeAsync(Guid employeeId, Guid tenantId)
+        => _inner.GetByEmployeeAsync(employeeId, tenantId);
+    public Task<IEnumerable<PerformanceReview>> GetByReviewerAsync(Guid reviewerId, Guid tenantId)
+        => _inner.GetByReviewerAsync(reviewerId, tenantId);
+    public Task<IEnumerable<PerformanceReview>> GetByPeriodAsync(DateTime startDate, DateTime endDate, Guid tenantId)
+        => _inner.GetByPeriodAsync(startDate, endDate, tenantId);
 }
 
 public class TimeEntryRepositoryAdapter : Contracts.ITimeEntryRepository
@@ -328,16 +345,18 @@ public class TimeEntryRepositoryAdapter : Contracts.ITimeEntryRepository
 
     public TimeEntryRepositoryAdapter(Repos.ITimeEntryRepository inner) => _inner = inner;
 
-    public Task<TimeEntry?> GetByIdAsync(Guid id) => _inner.GetByIdAsync(id);
-    public Task<IEnumerable<TimeEntry>> GetAllAsync() => _inner.GetAllAsync();
+    public Task<TimeEntry?> GetByIdAsync(Guid id, Guid tenantId) => _inner.GetByIdAsync(id, tenantId);
+    public Task<IEnumerable<TimeEntry>> GetAllAsync(Guid tenantId) => _inner.GetAllAsync(tenantId);
     public Task<Guid> CreateAsync(TimeEntry entity) => _inner.CreateAsync(entity);
     public Task<bool> UpdateAsync(TimeEntry entity) => _inner.UpdateAsync(entity);
-    public Task<bool> DeleteAsync(Guid id) => _inner.DeleteAsync(id);
-    public Task<IEnumerable<TimeEntry>> GetByEmployeeAsync(Guid employeeId) => _inner.GetByEmployeeAsync(employeeId);
-    public Task<IEnumerable<TimeEntry>> GetByDateRangeAsync(DateTime startDate, DateTime endDate) => _inner.GetByDateRangeAsync(startDate, endDate);
-
-    public async Task<IEnumerable<TimeEntry>> GetByEmployeeAndDateRangeAsync(Guid employeeId, DateTime startDate, DateTime endDate)
-        => (await _inner.GetByEmployeeAsync(employeeId)).Where(t => t.Date >= startDate && t.Date <= endDate);
+    public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _inner.DeleteAsync(id, tenantId);
+    public Task<IEnumerable<TimeEntry>> GetByEmployeeAsync(Guid employeeId, Guid tenantId)
+        => _inner.GetByEmployeeAsync(employeeId, tenantId);
+    public Task<IEnumerable<TimeEntry>> GetByDateRangeAsync(DateTime startDate, DateTime endDate, Guid tenantId)
+        => _inner.GetByDateRangeAsync(startDate, endDate, tenantId);
+    public Task<IEnumerable<TimeEntry>> GetByEmployeeAndDateRangeAsync(
+        Guid employeeId, DateTime startDate, DateTime endDate, Guid tenantId)
+        => _inner.GetByEmployeeAndDateRangeAsync(employeeId, startDate, endDate, tenantId);
 }
 
 public class TrainingRepositoryAdapter : Contracts.ITrainingRepository
@@ -346,11 +365,13 @@ public class TrainingRepositoryAdapter : Contracts.ITrainingRepository
 
     public TrainingRepositoryAdapter(Repos.ITrainingRepository inner) => _inner = inner;
 
-    public Task<Training?> GetByIdAsync(Guid id) => _inner.GetByIdAsync(id);
-    public Task<IEnumerable<Training>> GetAllAsync() => _inner.GetAllAsync();
+    public Task<Training?> GetByIdAsync(Guid id, Guid tenantId) => _inner.GetByIdAsync(id, tenantId);
+    public Task<IEnumerable<Training>> GetAllAsync(Guid tenantId) => _inner.GetAllAsync(tenantId);
     public Task<Guid> CreateAsync(Training entity) => _inner.CreateAsync(entity);
     public Task<bool> UpdateAsync(Training entity) => _inner.UpdateAsync(entity);
-    public Task<bool> DeleteAsync(Guid id) => _inner.DeleteAsync(id);
-    public Task<IEnumerable<Training>> GetByEmployeeAsync(Guid employeeId) => _inner.GetByEmployeeAsync(employeeId);
-    public Task<IEnumerable<Training>> GetByStatusAsync(string status) => _inner.GetByStatusAsync(status);
+    public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _inner.DeleteAsync(id, tenantId);
+    public Task<IEnumerable<Training>> GetByEmployeeAsync(Guid employeeId, Guid tenantId)
+        => _inner.GetByEmployeeAsync(employeeId, tenantId);
+    public Task<IEnumerable<Training>> GetByStatusAsync(string status, Guid tenantId)
+        => _inner.GetByStatusAsync(status, tenantId);
 }

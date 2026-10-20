@@ -1,0 +1,197 @@
+﻿@model POS.Models.clsReminder
+@using (Html.BeginForm("index", "home", FormMethod.Post, new { id = "reminderForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+{
+    <input type="hidden" id="LogID" value="0" />
+    <div class="row">
+        <section class="col col-md-6 col-lg-6">
+            <label>Select Account</label>
+            <label class="select">
+                <i class="append fa fa-caret-down"></i>
+                @Html.DropDownListFor(model => model.DetailCode, ViewBag.DetailCode as SelectList, new { @style = "width:100%" })
+            </label>
+        </section>
+        <section class="col col-md-6 col-lg-6">
+            <label>Due Date</label>
+            <label class="input">
+                <i class="icon-prepend fa fa-calendar"></i>
+                <input type="date" name="DueDate" id="DueDate" min="" max="" required />
+            </label>
+        </section>
+    </div>
+    <div class="row">
+        <section class="col col-md-6 col-lg-6">
+            <label>Due Days Alert</label>
+            <label class="input">
+                <i class="icon-prepend fa fa-hashtag"></i>
+                <input type="text" name="DueDaysAlert" id="DueDaysAlert" placeholder="Due Days Alert" autocomplete="off" />
+            </label>
+        </section>
+        <section class="col col-md-6 col-lg-6">
+            <label>Remarks</label>
+            <label class="input">
+                <i class="icon-prepend fa fa-hashtag"></i>
+                <input type="text" name="Remarks" id="Remarks" placeholder="Remarks" autocomplete="off" />
+            </label>
+        </section>
+    </div>
+    <div class="row">
+        <section class="col col-md-12  col-lg-12">
+            <table class="pull-right footer-nav" style="">
+                <tr>
+                    <td>
+                        <a id="btnSave" class="btn" style="background-color: #015778;  margin-left: 10px; margin-bottom: 8px; color: white;padding:5px">
+                            Save
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </section>
+    </div>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#DetailCode').select2({
+            dropdownParent: $("#ReminderModal")
+        });
+        GetTodayDate();
+        $('#reminderForm').validate({
+            ignore: [],
+            // Rules for form validation
+            rules: {
+                DetailCode: {
+                    required: true
+                },
+                DueDate: {
+                    required: true
+                },
+                DueDaysAlert: {
+                    required: true
+                },
+            },
+
+            // Messages for form validation
+            messages: {
+                DetailCode: {
+                    required: 'Account is required.'
+                },
+                DueDate: {
+                    required: 'Due Date is required.'
+                },
+                DueDaysAlert: {
+                    required: 'Due Days Alert is required.'
+                },
+            },
+            // Do not change code below
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+            }
+        });
+    })
+    //$(document).keypress(function (e) {
+    //    if (e.which == 13) {
+    //        var fiscalyear = $('#FiscalYearID').val();
+    //        var href = "/home/index/";
+    //        $.ajax({
+    //            type: 'POST',
+    //            url: '/account/SetFiscalYear/' + fiscalyear,
+    //            dataType: 'json',
+    //            success: function (response) {
+    //                window.location.href = href;
+    //            }
+    //        })
+    //    }
+    //});
+    $('#btnSave').on('click', function (e) {
+        e.preventDefault();
+        var logId = $('#LogID').val();
+        var detailCode = $('#DetailCode').val();
+        var dueDate = $('#DueDate').val();
+        var dueDaysAlert = $('#DueDaysAlert').val();
+        var remarks = $('#Remarks').val();
+        if (detailCode == null || detailCode == '')
+        {
+            alert("Account is required.");
+            return false;
+        }
+        if (dueDate == null || dueDate == '' || dueDaysAlert == null || dueDaysAlert == '') {
+            if (dueDate == null || dueDate == '')
+            {
+                $('#DueDate').css('border-color', '#A90329');
+                $('#DueDate').css('background-color', '#FFF0F0');
+            }
+            if (dueDaysAlert == null || dueDaysAlert == '') {
+                $('#DueDaysAlert').css('border-color', '#A90329');
+                $('#DueDaysAlert').css('background-color', '#FFF0F0');
+            }
+            return false;
+        }
+        $('#btnSave').html("<i class='fa fa-spin fa-refresh'></i> Processing...");
+        var myForm =
+            {
+                LogID: logId,
+                DetailCode: detailCode,
+                DueDate: dueDate,
+                DueDateAlert: dueDaysAlert,
+                Remarks: remarks,
+            }
+        $.ajax({
+            type: 'POST',
+            url: '/home/InsertReminder/',
+            dataType: 'json',
+            data: { 'reminder': myForm },
+            success: function (response) {
+                //oTable.ajax.reload(null, false);
+                //$('#ReminderModal').attr("class","modal fade");
+                location.reload();
+            }
+        })
+    })
+    $('#DueDate').keydown(function () {
+        $('#DueDate').css('border-color', '#bdbdbd');
+        $('#DueDate').css('background-color', '#fff');
+    }).mousedown(function () {
+        $('#DueDate').css('border-color', '#bdbdbd');
+        $('#DueDate').css('background-color', '#fff');
+    })
+    $('#DueDaysAlert').keydown(function () {
+        $('#DueDaysAlert').css('border-color', '#bdbdbd');
+        $('#DueDaysAlert').css('background-color', '#fff');
+    }).mousedown(function () {
+        $('#DueDaysAlert').css('border-color', '#bdbdbd');
+        $('#DueDaysAlert').css('background-color', '#fff');
+    })
+    $('#DueDaysAlert').on('input', function () {
+        this.value = this.value
+      .replace(/[^\d.]/g, '')             // numbers and decimals only
+      .replace(/(^[\d]{4})[\d]/g, '$1')   // not more than 3 digits at the beginning
+    });
+    $("#DueDaysAlert").on('keypress', function (event) {
+        NumberPostiveNegativeWithDecimal(event, this);
+    });
+    function NumberPostiveNegativeWithDecimal(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 127) &&
+            (charCode != 8) &&
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+            (charCode < 48 || charCode > 57))
+            evt.preventDefault();
+        return true;
+    }
+    function GetTodayDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0!
+
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd;
+        }
+        if (mm < 10) {
+            mm = '0' + mm;
+        }
+        var today = yyyy + '-' + mm + '-' + dd;
+        $('#DueDate').val(today);
+    }
+</script>

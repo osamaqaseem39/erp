@@ -47,6 +47,7 @@ public class UserDto : BaseDto
     public bool IsLocked { get; set; } = false;
     public int FailedLoginAttempts { get; set; } = 0;
     public DateTime? LockedUntil { get; set; }
+    public bool TwoFactorEnabled { get; set; }
     
     // Navigation properties
     public string CompanyName { get; set; } = string.Empty;
@@ -146,6 +147,37 @@ public class AuthResponseDto
     /// <summary>Permission codes the user holds (module.resource.action). Empty for SuperAdmin, who holds all.</summary>
     public List<string> Permissions { get; set; } = new();
     public bool IsSuperAdmin { get; set; }
+    /// <summary>When true, client must call /api/auth/2fa/verify with <see cref="TwoFactorToken"/> + TOTP code.</summary>
+    public bool RequiresTwoFactor { get; set; }
+    public string? TwoFactorToken { get; set; }
+}
+
+public class TwoFactorSetupDto
+{
+    public string Secret { get; set; } = string.Empty;
+    public string OtpAuthUri { get; set; } = string.Empty;
+}
+
+public class TwoFactorCodeDto
+{
+    public string Code { get; set; } = string.Empty;
+}
+
+public class TwoFactorDisableDto
+{
+    public string Password { get; set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
+}
+
+public class TwoFactorVerifyLoginDto
+{
+    public string TwoFactorToken { get; set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
+}
+
+public class TwoFactorStatusDto
+{
+    public bool Enabled { get; set; }
 }
 
 /// <summary>GET api/auth/me: who is signed in and what they may do.</summary>

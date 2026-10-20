@@ -12,7 +12,8 @@ public interface ICampaignService
     Task<IEnumerable<CampaignDto>> GetByStatusAsync(string status);
     Task<IEnumerable<CampaignDto>> GetByTypeAsync(string campaignType);
     Task<IEnumerable<CampaignDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
-    Task<bool> LaunchAsync(Guid id);
-    Task<bool> PauseAsync(Guid id);
-    Task<bool> CompleteAsync(Guid id);
+    Task<bool> LaunchAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> PauseAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> CompleteAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId);
 }

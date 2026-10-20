@@ -1,0 +1,160 @@
+﻿<link href="~/Content/css/PrintMedia.css" rel="stylesheet" />
+<style>
+    @@media print {
+        @@page {
+            size: A4;
+            margin-left: -50px;
+        }
+
+        @@page:first {
+            size: A4;
+            margin-top: -30px;
+            margin-left: -50px;
+            margin-bottom: 10px;
+        }
+    }
+
+    #printable-content table {
+        width: 100%;
+        border-collapse: separate;
+    }
+
+    #printable-content td, #printable-content th {
+        padding: 0px;
+        vertical-align: top;
+        font-weight: normal;
+    }
+
+    #printable-content * {
+        border-width: 0px;
+        border-color: #000;
+        border-style: solid;
+    }
+
+    .rpt {
+        background: #fff !important;
+        border-width: 0px;
+    }
+</style>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- widget content -->
+@model List<pos.models.clsvoucher>
+    <div id="content" class="tablecontainer" style="padding: 12px 30px;">
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+                <h1 class="page-title txt-color-blueDark">
+                    <i class="fa fa-home fa-fw "></i>
+                    Dashboard
+                    <span>
+                        >
+                        Inventory Quantity Movement
+                    </span>
+                </h1>
+            </div>
+        </div>
+        <section>
+            <div class="panel">
+                <div class="panel-heading">
+                    <span class="header"> Inventory Quantity Movement</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="btn printBtn" onclick="window.print();" style="background-color: #0E5B82; color: white;">Print</button>
+                    <a class="btn downloadBtn" href="#" style="background-color:#EB472C;color:white">Pdf</a>
+                </div>
+                <div class="panel-body">
+                    <div id="printable-content" class="panel rpt" style=" float: left; min-width: 800px; font-family: Arial, Helvetica, sans-serif;">
+                        <table style="padding: 30px">
+                            <thead>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding-bottom: 10px" colspan="12">sdsad</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 24px; text-align: center; padding-bottom: 10px" colspan="12">Inventory Quantity Movement</th>
+                                </tr>
+                                <tr>
+                                    <th style="font-weight: bold; font-size: 16px; text-align: center; padding-bottom: 10px" colspan="12">sdd</th>
+                                </tr>
+                                <tr class="styletrr">
+                                    <th style="text-align: center; width: 35px">Sr#</th>
+                                    <th style="text-align:left">Account</th>
+                                    <th style="text-align: right; width: 110px">Debit Balance</th>
+                                    <th class="borderRight" style="text-align: right; width: 110px; ">Credit Balance</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="7">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int j = 0;
+                                }
+                                @foreach (clsVoucher s in Model)
+                                {
+                                    j++;
+                                    <tr>
+                                        <td style="padding: 3px">@(j)</td>
+                                        <td style="padding: 3px; text-align: right; white-space: nowrap">@s.DetailName</td>
+                                        <td style="padding: 3px; text-align: right; white-space: nowrap">123</td>
+                                        <td style="padding: 3px; text-align: right; white-space: nowrap">@Convert.ToDecimal(12).ToString("#,##0.00")</td>
+                                        <td style="padding: 3px; text-align: right; white-space: nowrap">@Convert.ToDecimal(13).ToString("#,##0.00")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- END MAIN CONTENT -->
+    @section pagespecific {
+        <script>
+            function PrintElem(elem) {
+                var mywindow = window.open('', 'PRINT', 'height=400,width=500');
+
+                mywindow.document.write('<html><head><title></title>');
+                mywindow.document.write('</head><body>');
+                //mywindow.document.write('<h1></h1>');
+                mywindow.document.write(document.getElementById(elem).innerHTML);
+                mywindow.document.write('</body></html>');
+
+                mywindow.document.close(); // necessary for IE >= 10
+                mywindow.focus(); // necessary for IE >= 10*/
+
+                mywindow.print();
+                mywindow.close();
+
+                return true;
+            }
+            $('.report_body tr td').each(function () {
+                if (parseFloat($(this).html()) > 0) {
+                    $(this).html(ReplaceNumberWithCommas($(this).html()));
+                }
+            });
+            function ReplaceNumberWithCommas(yourNumber) {
+                if (yourNumber != "0") {
+                    //Seperates the components of the number
+                    var n = yourNumber.toString().split(".");
+                    //Comma-fies the first part
+                    n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    if (n.length == 1) {
+                        n[0] = n[0] + ".00";
+                    }
+                    else {
+                        if (n[1].toString().length == 1) {
+                            n[1] = n[1] + "0";
+                        }
+                    }
+                    //Combines the two sections
+                    n = n.join(".");
+                }
+                else {
+                    n = yourNumber;
+                }
+                return n;
+            }
+        </script>
+    }

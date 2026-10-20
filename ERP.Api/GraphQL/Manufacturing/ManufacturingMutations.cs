@@ -46,10 +46,12 @@ public class ManufacturingMutations
     public async Task<ProductionOrderDto> CompleteProductionOrder(
         [Service] IProductionOrderService service,
         Guid productionOrderId,
+        CompleteProductionOrderDto input,
         Guid tenantId,
         Guid userId)
     {
-        return await service.CompleteAsync(productionOrderId, tenantId, userId);
+        input.ProductionOrderId = productionOrderId;
+        return await service.CompleteAsync(productionOrderId, input, tenantId, userId);
     }
 
     public async Task<ProductionOrderDto> CancelProductionOrder(
@@ -88,5 +90,67 @@ public class ManufacturingMutations
     {
         return await service.DeleteAsync(workCenterId, tenantId);
     }
+
+    public async Task<ProductionRunDto> AddProductionRun(
+        [Service] IProductionRunService service,
+        CreateProductionRunDto input,
+        Guid tenantId,
+        Guid userId)
+    {
+        return await service.CreateAsync(input, tenantId, userId);
+    }
+
+    public async Task<ProductionRunDto> CompleteProductionRun(
+        [Service] IProductionRunService service,
+        Guid productionRunId,
+        decimal quantityProduced,
+        decimal quantityRejected,
+        Guid tenantId,
+        Guid userId)
+    {
+        return await service.CompleteAsync(productionRunId, quantityProduced, quantityRejected, tenantId, userId);
+    }
+
+    public async Task<bool> CancelProductionRun(
+        [Service] IProductionRunService service,
+        Guid productionRunId,
+        Guid tenantId,
+        Guid userId)
+        => await service.CancelAsync(productionRunId, tenantId, userId);
+
+    // Bill of Materials
+    public async Task<BillOfMaterialDto> AddBillOfMaterial(
+        [Service] IBillOfMaterialService service,
+        CreateBillOfMaterialDto input,
+        Guid tenantId,
+        Guid userId)
+        => await service.CreateAsync(input, tenantId, userId);
+
+    public async Task<BillOfMaterialDto> UpdateBillOfMaterial(
+        [Service] IBillOfMaterialService service,
+        UpdateBillOfMaterialDto input,
+        Guid tenantId,
+        Guid userId)
+        => await service.UpdateAsync(input, tenantId, userId);
+
+    public async Task<bool> DeleteBillOfMaterial(
+        [Service] IBillOfMaterialService service,
+        Guid bomId,
+        Guid tenantId)
+        => await service.DeleteAsync(bomId, tenantId);
+
+    public async Task<BillOfMaterialDto> ActivateBillOfMaterial(
+        [Service] IBillOfMaterialService service,
+        Guid bomId,
+        Guid tenantId,
+        Guid userId)
+        => await service.ActivateAsync(bomId, tenantId, userId);
+
+    public async Task<BillOfMaterialDto> ObsoleteBillOfMaterial(
+        [Service] IBillOfMaterialService service,
+        Guid bomId,
+        Guid tenantId,
+        Guid userId)
+        => await service.ObsoleteAsync(bomId, tenantId, userId);
 }
 

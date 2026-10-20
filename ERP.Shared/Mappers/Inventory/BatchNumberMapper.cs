@@ -28,7 +28,7 @@ public class BatchNumberMapper : IMapper<BatchNumber, BatchNumberDto>
     {
         return new BatchNumber
         {
-            Id = dto.Id,
+            Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             ItemId = dto.ItemId,
             BatchNumberValue = dto.BatchNumber,
             ManufacturingDate = dto.ManufacturingDate,

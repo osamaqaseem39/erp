@@ -40,6 +40,8 @@ const schema = yup.object({
   postalCode: optional(20, "Postal code"),
   country: optional(100, "Country"),
   phone: optional(30, "Phone"),
+  mobilePhone: optional(30, "Mobile phone"),
+  contactPerson: optional(200, "Contact person"),
   email: optional(200, "Email").email("Enter a valid email address"),
   website: url("Website"),
   logoUrl: url("Logo URL"),
@@ -77,6 +79,8 @@ const toForm = (c: CompanyProfile): FormValues => ({
   postalCode: c.postalCode ?? "",
   country: c.country ?? "",
   phone: c.phone ?? "",
+  mobilePhone: c.mobilePhone ?? "",
+  contactPerson: c.contactPerson ?? "",
   email: c.email ?? "",
   website: c.website ?? "",
   logoUrl: c.logoUrl ?? "",
@@ -157,7 +161,9 @@ export default function CompanyProfilePage() {
                 <TextField name="country" label="Country" autoComplete="country-name" />
               </FormSection>
               <FormSection title="Contact">
+                <TextField name="contactPerson" label="Contact person" autoComplete="name" />
                 <TextField name="phone" label="Phone" type="tel" />
+                <TextField name="mobilePhone" label="Mobile phone" type="tel" />
                 <TextField name="email" label="Email" type="email" />
                 <TextField name="website" label="Website" type="url" placeholder="https://" />
                 <TextField name="logoUrl" label="Logo URL" type="url" placeholder="https://" help="File upload arrives with file storage; paste a hosted image link for now." />

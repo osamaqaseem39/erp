@@ -15,4 +15,8 @@ public interface IVendorService
     Task<IEnumerable<VendorBankAccountDto>> GetVendorBankAccountsAsync(Guid vendorId, Guid tenantId);
     Task<bool> ValidateVendorCodeAsync(string vendorCode, Guid companyId, Guid tenantId, Guid? excludeVendorId = null);
     Task<bool> ValidateVendorEmailAsync(string email, Guid tenantId, Guid? excludeVendorId = null);
+    /// <summary>Activates a vendor (IsActive = true).</summary>
+    Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId);
+    /// <summary>Deactivates a vendor (IsActive = false). Reason stored on UpdatedBy trail only.</summary>
+    Task<bool> SuspendAsync(Guid id, SuspendVendorDto dto, Guid tenantId, Guid userId);
 }

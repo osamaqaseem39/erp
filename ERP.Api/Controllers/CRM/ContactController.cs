@@ -1,3 +1,5 @@
+using ERP.Api.Errors;
+using ERP.Api.OpenApi;
 using ERP.Api.Abstractions;
 using ERP.Application.Interfaces.CRM;
 using ERP.Shared.DTOs.CRM;
@@ -10,6 +12,10 @@ namespace ERP.Api.Controllers.CRM;
 [Authorize]
 [ApiController]
 [Route("api/crm/contacts")]
+[ProducesBadRequest]
+[ProducesUnauthorized]
+[ProducesForbidden]
+[ProducesNotFound]
 public class ContactController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IContactService _service;
@@ -28,6 +34,7 @@ public class ContactController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ContactDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var result = await _service.GetByIdAsync(id);
@@ -35,36 +42,36 @@ public class ContactController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var result = await _service.GetAllAsync();
-        return Ok(result);
-    }
+    [ProducesResponseType(typeof(IEnumerable<ContactDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
     [HttpPost]
+    [ProducesResponseType(OpenApiResponseTypes.Created)]
     public async Task<IActionResult> Create([FromBody] CreateContactDto dto)
     {
         var validationResult = await _createValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
 
         var id = await _service.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateContactDto dto)
     {
         dto.Id = id;
         var validationResult = await _updateValidator.ValidateAsync(dto);
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(ApiErrorMapper.ValidationError(validationResult.Errors));
 
         var result = await _service.UpdateAsync(dto);
         return result ? Ok() : NotFound();
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _service.DeleteAsync(id);
@@ -72,16 +79,12 @@ public class ContactController : ERP.Api.Abstractions.ControllerBase
     }
 
     [HttpGet("customer/{customerId}")]
-    public async Task<IActionResult> GetByCustomer(Guid customerId)
-    {
-        var result = await _service.GetByCustomerAsync(customerId);
-        return Ok(result);
-    }
+    [ProducesResponseType(typeof(IEnumerable<ContactDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetByCustomer(Guid customerId) =>
+        Ok(await _service.GetByCustomerAsync(customerId));
 
     [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string searchTerm)
-    {
-        var result = await _service.SearchAsync(searchTerm);
-        return Ok(result);
-    }
+    [ProducesResponseType(typeof(IEnumerable<ContactDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> Search([FromQuery] string searchTerm) =>
+        Ok(await _service.SearchAsync(searchTerm));
 }

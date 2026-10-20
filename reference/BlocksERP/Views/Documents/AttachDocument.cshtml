@@ -1,0 +1,444 @@
+﻿@model BlocksERP.Models.clsDocument
+
+<div style="overflow-x:hidden;margin-top:-20px;padding:0px">
+    @using (Html.BeginForm("AttachDocumentsForPost", "documents", FormMethod.Post, new { area = "", id = "documentForm", @class = "smart-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+
+        <input type="hidden" id="TypeId" name="TypeId" value="@Model.TypeId" />
+        <input type="hidden" id="DocumentType" name="DocumentType" value="@Model.DocumentType" />
+
+        <fieldset style="padding:1.25rem">
+            <div class="alertDocumentDiv">
+
+            </div>
+            <div class="row" style="margin-top:15px;">
+                <div class="col-md-12">
+                    <b>
+                        <label style="text-align:left;margin-left:0px;">
+                            Documents for Computer No. : <label style="color:green" id="DocComputerNo">@Model.TypeId</label>
+                        </label>
+                    </b>
+                </div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <section class="col-md-6">
+                    <label class="form-label">Date</label>
+                    <div class="input">
+                        <input type="hidden" id="DocumentId" name="DocumentId" value="0" />
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-calendar"></i>
+                                </span>
+                            </div>
+                            <input type="date" id="DocumentDate" name="DocumentDate" class="form-control" />
+                        </div>
+                    </div>
+                </section>
+                <section class="col-md-6">
+                    <label class="form-label">Remarks</label>
+                    <div class="input">
+                        <input type="hidden" id="DocumentId" name="DocumentId" value="0" />
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="fal fa-info"></i>
+                                </span>
+                            </div>
+                            <input type="text" placeholder="Remarks" id="DocumentRemarks" name="DocumentRemarks" class="form-control" autocomplete="off" />
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="row documentUploadSection">
+                <div class="col-md-12" style="margin-top: 12px">
+                    <label class="form-label">Select Document</label>
+                    <div class="custom-file fileDiv">
+                        <input type="file" class="custom-file-input num" id="Document" name="Document">
+                        <label class="custom-file-label " id="AttachDocument" for="Document">Choose file...</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row ImageDisplayRow" style="margin-top:5px">
+                <section class="col col-md-4"></section>
+                <section class="col col-md-4 thumbnail">
+                    <img id="DocumentImage" />
+                </section>
+                <section class="col col-md-4"></section>
+            </div>
+        </fieldset>
+        <div class="row">
+            <div class="col-md-8"></div>
+            <div class="col-md-4">
+                <table>
+                    <tr>
+                        <td>
+                            <button type="submit" id="btnSaveDocument" class="btn btn-primary pull-right" style="width:95px;height:35px;color:white">
+                                UPLOAD
+                            </button>
+                        </td>
+                        <td class="deleteTd">
+                            <a id="btnDeleteDocument" class="btn btn-default" style="width: 95px; height: 35px; margin-right: 16px; ">
+                                DELETE
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+    <center>
+        <h4 style="margin-top: 15px;">Documents List</h4>
+    </center>
+    <table class="table table-striped table-bordered" style="width:95%;margin-left:20px">
+        <thead style="background-color: #212121; color: white;">
+            <tr>
+                <th style="text-align:center;width:10%">Sr#</th>
+                <th style="text-align:center;width:20%">Date</th>
+                <th style="text-align:left;">Remarks</th>
+                <th style="text-align:center;width:10%">Edit</th>
+                <th style="text-align:center;width:10%">View</th>
+                <th style="text-align: center; width: 15%">Download</th>
+            </tr>
+        </thead>
+        <tbody id="DocumentsListTable"></tbody>
+    </table>
+
+    <script src="~/Scripts/app.bundle.js"></script>
+    <script type="text/javascript">
+        $('#Document').change(function (e) {
+            var ext = $('#Document').val().split('.').pop().toLowerCase();
+            var size = document.getElementById('Document').files[0].size;
+            var filename = $('input[type=file]').val().replace(/C:\\fakepath\\/i, '');
+
+
+
+            if ($.inArray(ext, ['jpeg', 'jpg', 'pdf', 'png', 'doc', 'docx', 'xls', 'xlsx', 'txt', '3gp', 'amr', 'mp3', 'wav', 'wma', 'aiff', 'opus', 'mp4a', 'gsm', 'webm']) == -1) {
+                $('.ImageDisplayRow').hide();
+                alert('Error! File type allowed : jpeg, jpg, pdf, png, doc, docx, xls, xlsx, txt, 3gp, amr, mp3, wav, wma, aiff, opus, mp4a, gsm, webm');
+                $('#Document').val('');
+                $('#AttachDocument').val('');
+            }
+            else if (size > (20000 * 1024)) {
+                $('.ImageDisplayRow').hide();
+                alert('Error! Maximum File size must be 20 mb');
+                $('#Document').val('');
+                $('#AttachDocument').val('');
+            }
+            else {
+
+                //Get count of selected files
+                var countFiles = $(this)[0].files.length;
+
+                var imgPath = $(this)[0].value;
+                var extn = imgPath.substring(imgPath.lastIndexOf('.') + 1).toLowerCase();
+
+                $('.ImageDisplayRow').show();
+                $('#AttachDocument').val(filename);
+                if (typeof (FileReader) != "undefined") {
+
+                    //loop for each file selected for uploaded.
+                    for (var i = 0; i < countFiles; i++) {
+
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+
+                            $("#DocumentImage").prop("height", "150");
+                            $("#DocumentImage").prop("width", "150");
+                            $("#DocumentImage").prop("src", e.target.result);
+                            $('.fileDiv').removeClass('state-error');
+                            $('.invalid-File').remove();
+                        }
+                        //image_holder.show();
+                        reader.readAsDataURL($(this)[0].files[i]);
+                    }
+
+                }
+                else {
+                    alert("This browser does not support FileReader.");
+                }
+            }
+        });
+        $(document).ready(function () {
+            $('.deleteTd').hide();
+            $('#btnSaveDocument').css('margin-right', '16px');
+            $('.ImageDisplayRow').hide();
+            GetTodayDate2();
+            getDocumentsList();
+        });
+        $('#documentForm').on('submit', function (e) {
+            var document = $('#Document').get(0).files;
+            var documentFile = document[0];
+            if ($('#DocumentId').val() == 0) {
+                if (documentFile == '' || documentFile == undefined) {
+                    $('.fileDiv').removeClass('state-error');
+                    $('.invalid-File').remove();
+                    $('.fileDiv').addClass('state-error');
+                    $('.fileDiv').append('<label style="color:#cf564a;font-size:11px" for="Document" class="invalid-File">Document is required.</label>');
+                    return false;
+                }
+                else {
+                    $('.fileDiv').removeClass('state-error');
+                    $('.invalid-File').remove();
+                }
+            }
+            //if (!$("#documentForm").valid()) {
+            //    return false;
+            //}
+
+            var typeId = $('#TypeId').val();
+            var documentType = $('#DocumentType').val();
+            var documentId = $('#DocumentId').val();
+            var date = $('#DocumentDate').val();
+            var remarks = $('#DocumentRemarks').val();
+            var extension = $('#Document').val().split('.').pop().toLowerCase();
+            var document = {
+                DocumentId: documentId,
+                DocumentType: documentType,
+                TypeId: typeId,
+                Date: date,
+                Remarks: remarks,
+                DocumentExtension: extension,
+                Document: document[0],
+            }
+            $('#btnSaveDocument').prop('disabled', true);
+            $('#btnSaveDocument').html("<i class='fa fa-refresh fa-spin'></i> &nbsp; Uploading...");
+            $('#btnSaveDocument').css('width', '137px');
+            $.ajax({
+                type: "POST",
+                url: '/documents/AttachDocumentsForPost/',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ 'doc': document }),
+                success: function (data) {
+                    if (data.status == true) {
+                        var bannerImage = $("#Document").val();
+                        var file = $('#Document').get(0).files;
+                        var documentFile = file[0];
+                        var extension = $('#Document').val().split('.').pop().toLowerCase();
+                        var documentIdWithDocumentTypeWithExtension = data.documentId + "_" + data.documentType + "_" + data.typeId + "_" + extension;
+                        var formData = new FormData();
+                        formData.append(file.name, documentFile);
+                        formData.append("DocumentName", $("#Document").text());
+
+                        var xhr = new XMLHttpRequest();
+                        var url = '/documents/UploadDocument/' + documentIdWithDocumentTypeWithExtension;
+                        xhr.open('POST', url, true);
+
+                        xhr.onload = function (e) {
+                            //var response = $.parseJSON(e.target.response);
+                            $('.alertDocumentDiv').html('<div class="alert alert-success" id="success-alert2" style="margin-top:15px;">' +
+                                                    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                    ' <strong>Success! </strong>' +
+                                                    'Document Uploaded Succesfully.' +
+                                                '</div>');
+                            $("#success-alert2").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert2").slideUp(500);
+                                $('.alertDocumentDiv').html('');
+                            });
+                            $('#DocumentId').val(0);
+                            $('#btnSaveDocument').prop('disabled', false);
+                            $('#btnSaveDocument').html("UPLOAD");
+                            $('#btnSaveDocument').css('width', '95px');
+                            $('.ImageDisplayRow').hide();
+                            $('.deleteTd').hide();
+                            $('#btnSaveDocument').css('margin-right', '16px');
+                            $('#documentForm')[0].reset();
+                            getDocumentsList();
+                            GetTodayDate2();
+                        };
+                        xhr.send(formData);  // multipart/form-data
+                    }
+                    else {
+                        alert("Error! Please try again.");
+                    }
+                }
+            })
+            e.preventDefault();
+        })
+        function getDocumentsList() {
+            var typeId = $('#TypeId').val();
+            var documentType = $('#DocumentType').val();
+            $.ajax({
+                type: 'POST',
+                url: '/documents/documentslist/',
+                dataType: 'json',
+                data: { 'type': documentType, 'typeId': typeId },
+                success: function (response) {
+                    var length = response.data.length;
+                    if (length == 0) {
+                        div = '<tr style="border-bottom: 1px solid #D8D8D8">' +
+                                                           //'<th  style="text-align:center;padding:10px" colspan="6">' +
+                                                        '<th  style="text-align:center;padding:10px" colspan="5">' +
+                                                           'No documents available.'
+                        '</th>' +
+                    '</tr>';
+                    }
+                    else {
+                        var i = 0;
+                        var div = '';
+                        for (var key in response.data) {
+                            i = i + 1;
+                            div += '<tr style="border-bottom: 1px solid #D8D8D8">' +
+                                                             '<th style="text-align: center;padding:3px ">' +
+                                                             '<input type="hidden" class="OldDocumentId" value="' + response.data[key].DocumentId + '" />' +
+                                                             '<input type="hidden" class="OldDocumentExtension" value="' + response.data[key].DocumentExtension + '" />' +
+                                                             '<input type="hidden" class="OldDocumentType" value="' + response.data[key].DocumentType + '" />' +
+                                                             '<input type="hidden" class="OldRemarks" value="' + response.data[key].Remarks + '" />' +
+                                                              '<input type="hidden" class="OldDate" value="' + response.data[key].Date + '" />' +
+                                                             '<input type="hidden" class="OldTypeId" value="' + response.data[key].TypeId + '" />' +
+                                                             '' + i + '' +
+                                                             '</th>' +
+                                                             '<th style="text-align: center; padding: 3px">' +
+                                                                 '' + getDate2(response.data[key].Date) + '' +
+                                                             '</th>' +
+                                                             '<th style="text-align: left; padding: 3px;padding-left:8px">' +
+                                                                 '' + response.data[key].Remarks + '' +
+                                                             '</th>' +
+                                                             '<th style="text-align: center; padding: 3px">' +
+                                                                 '<a href="#" class="btn btn-primary editDocument" style="padding:5px;color:#fff !important">' +
+                                                                     ' Edit' +
+                                                                 ' </a>' +
+                                                             '</th>' +
+                                                             '<th style="text-align: center; padding: 3px">' +
+                                                                 '<a href="/FormsDocuments/' + documentType + '/' + response.data[key].DocumentId + '.' + response.data[key].DocumentExtension + '" target="_blank" class="btn btn-success viewDocument" style="padding:5px;color:#fff !important">' +
+                                                                     ' View' +
+                                                                 ' </a>' +
+                                                             '</th>' +
+                                                             '<th style="text-align: center; padding: 3px">' +
+                                                                 '<a href="/FormsDocuments/' + documentType + '/' + response.data[key].DocumentId + '.' + response.data[key].DocumentExtension + '" download class="btn btn-success downloadDocument" style="padding:5px;color:#fff !important;background-color: #428BCA !important">' +
+                                                                     ' Download' +
+                                                                 ' </a>' +
+                                                             '</th>' +
+                                                         '</tr>';
+                        }
+                    }
+                    $('#DocumentsListTable').html(div);
+                }
+            });
+        }
+        $(document).on("click", ".editDocument", function () {
+            var documentId = $(this).closest("tr").find('.OldDocumentId').val();
+            var remarks = $(this).closest("tr").find('.OldRemarks').val();
+            var datee = $(this).closest("tr").find('.OldDate').val();
+            $('#DocumentId').val(documentId);
+            $('#DocumentDate').val(getDate3(datee));
+            $('#DocumentRemarks').val(remarks);
+            $('.deleteTd').show();
+            $('#btnSaveContactDocument').css('margin-right', '7px');
+            $('#Document').val('');
+        })
+        $('#btnDeleteDocument').click(function () {
+            var checkstr = confirm('Are you sure you want to delete this document?');
+            if (checkstr == true) {
+                var documentId = $('#DocumentId').val();
+                $.ajax({
+                    type: "POST",
+                    url: '/documents/DeleteDocument/' + documentId,
+                    success: function (data) {
+                        if (data.status == true) {
+                            $('.alertDocumentDiv').html('<div class="alert alert-success" id="success-alert2" style="margin-top:15px;">' +
+                                                    '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                                    ' <strong>Success! </strong>' +
+                                                    'Document Deleted Succesfully.' +
+                                                '</div>');
+                            $("#success-alert2").fadeTo(1000, 500).slideUp(500, function () {
+                                $("#success-alert2").slideUp(500);
+                                $('.alertDocumentDiv').html('');
+                            });
+                            $('#DocumentId').val(0);
+                            $('#btnSaveDocument').prop('disabled', false);
+                            $('#btnSaveDocument').html("UPLOAD");
+                            $('#btnSaveDocument').css('width', '95px');
+                            $('.ImageDisplayRow').hide();
+                            $('.deleteTd').hide();
+                            $('#btnSaveDocument').css('margin-right', '16px');
+                            $('#documentForm')[0].reset();
+                            getDocumentsList();
+                            GetTodayDate2();
+                        }
+                        else {
+                            alert("Error! Please try again.");
+                        }
+                    }
+                })
+            }
+            else {
+                return false;
+            }
+        })
+        function GetTodayDate2() {
+            var today = new Date();
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
+
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var today = yyyy + '-' + mm + '-' + dd;
+            $('#DocumentDate').val(today);
+        }
+        function getDate3(date) {
+            if (date == null) {
+                return null;
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (digits_count2(day) == 1 || digits_count2(day) == 0) {
+                    day = "0" + day;
+                }
+                if (digits_count2(month) == 1 || digits_count2(month) == 0) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+                var today = year + '-' + month + '-' + day;
+                if (year == 1900) {
+                    return null;
+                }
+                else {
+                    return today;
+                }
+            }
+        }
+        function getDate2(date) {
+            if (date == null) {
+                return null;
+            }
+            else {
+                var newdate = new Date(parseInt(date.substr(6)));
+                var day = newdate.getDate();
+                var month = newdate.getMonth() + 1;
+                if (digits_count2(day) == 1 || digits_count2(day) == 0) {
+                    day = "0" + day;
+                }
+                if (digits_count2(month) == 1 || digits_count2(month) == 0) {
+                    month = "0" + month;
+                }
+                var year = newdate.getFullYear();
+                var today = day + '-' + month + '-' + year;
+                if (year == 1900) {
+                    return null;
+                }
+                else {
+                    return today;
+                }
+            }
+        }
+        function digits_count2(n) {
+            var count = 0;
+            if (n > 1)
+                ++count;
+            while (n / 10 >= 1) {
+                n /= 10;
+                ++count;
+            }
+            return count;
+        }
+    </script>

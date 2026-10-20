@@ -1,0 +1,74 @@
+﻿<style>
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+</style>
+<header id="header" style="background: #12232e !important; color: #fff">
+    <div id="hide-menu" class="btn-header" style="width: 30px; margin-left: 15px;">
+        <span> <a href="javascript:void(0);" data-action="toggleMenu" title="Collapse Menu"><i class="fa fa-reorder" style="color: #FFF !IMPORTANT"></i></a> </span>
+    </div>
+    <div id="logo-group">
+        <h1 class="AppName" style="color: #FFF; margin-top: 11px; font-size: 24px">&nbsp;Tikla Cars</h1>
+        <div class="ajax-dropdown">
+            @*<div class="btn-group btn-group-justified" data-toggle="buttons">
+                    <label class="btn btn-default">
+                        <input type="radio" name="activity" id="ajax/notify/mail.html">
+                        Msgs (14)
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="activity" id="ajax/notify/notifications.html">
+                        notify (3)
+                    </label>
+                    <label class="btn btn-default">
+                        <input type="radio" name="activity" id="ajax/notify/tasks.html">
+                        Tasks (4)
+                    </label>
+                </div>*@
+            <div class="ajax-notifications custom-scroll">
+
+                <div class="alert alert-transparent">
+                    <h4>Click a button to show messages here</h4>
+                    This blank page message helps protect your privacy, or you can show the first message here automatically.
+                </div>
+
+                <i class="fa fa-lock fa-4x fa-border"></i>
+
+            </div>
+            <span>
+                Last updated on: 12/12/2013 9:43AM
+                <button type="button">
+                    <i class='fa fa-refresh fa-spin'></i> Loading..." class="btn btn-xs btn-default pull-right">
+                    <i class="fa fa-refresh"></i>
+                </button>
+            </span>
+        </div>
+    </div>
+    <section id="top-right">
+        @if (@Model is HelperResult)
+        {
+            @Model
+        }
+        else
+        {
+            <div class="pull-right">
+                @Html.Partial("_TopRight")
+            </div>
+        }
+    </section>
+</header>
+@section pagespecific {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            @*$.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSchoolName", "account", new { id = Convert.ToInt32(User.Identity.Name.Split('-')[0]) })',
+                dataType: 'json',
+                success: function (data) {
+                  $('.SchoolName').html(data);
+                }
+            })*@
+            //e.preventDefault();
+    });
+    </script>
+}

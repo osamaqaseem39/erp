@@ -1,0 +1,131 @@
+﻿@model List<POS.Models.clsItem>
+<div class="alertDiv2">
+
+</div>
+<div class="row">
+    <div class="col col-md-11">
+    </div>
+    <div class="col col-md-1 pull-right">
+        <a href="javascript:void(0);" class="btn btn-primary savePriceBtn pull-right" title="Save" style=" text-align: center;font-size: 12px;height:30px;width:55px;margin-bottom:10px;padding:4px;color:#fff !important;background-color:#428bca !important;border-color:#357ebd !important;border-radius:2px ">
+            Save
+        </a>
+    </div>
+</div>
+               <div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-12 col-xs-12 pull-right" style="margin-bottom:5px;">
+                   <input class="form-control input-lg" type="text" placeholder="Search here..." name="txtSearch" id="txtSearch" style="border-radius: 0px !important; border-color: #E2E2E2 !important; ">
+                   <div class="input-group-btn">
+                       <button type="button" id="btnSearch" class="btn btn-default" style="background-color: #fff !important; border-color: #E2E2E2 !important;">
+                           &nbsp;&nbsp;&nbsp;<i class="fa fa-fw fa-search fa-lg" style="color: #656C79; "></i>&nbsp;&nbsp;&nbsp;
+                       </button>
+                   </div>
+               </div>
+<table class="table table-bordered table-striped" style="width:100%">
+    <tr class="headingRowBilling">
+        <th style=" text-align: left; padding: 5px; padding-left:10px; ">
+            Item
+        </th>
+        <th style="width: 100px !important; text-align: right; padding: 5px; padding-right: 10px; ">
+            Price
+        </th>
+    </tr>
+    @if (Model.Count == 0)
+    {
+        <tr style="" class="rowsListBilling">
+            <th colspan="2" style="width:100%;text-align: center;padding:15px;">
+                <span style="font-size: 16px; font-weight: normal">No record found.</span>
+            </th>
+        </tr>
+    }
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        <tr class="categoryRows">
+            <th style="text-align: left; padding: 5px; padding-left: 10px; ">
+                <input type="hidden" class="ItemID" value="@Model[i].ItemID" />
+                <input type="hidden" class="DetailCode" value="@Model[i].DetailCode" />
+                <span style="font-size:14px;font-weight:normal"> @Model[i].Description </span>
+            </th>
+            <th style="width: 100px !important; text-align: right; padding: 5px; padding-right: 10px;">
+                <input type="text" class="PriceOrInch" value="@Model[i].PriceOrInch" style="text-align: right; padding: 3px; padding-right: 7px; font-weight: normal; width: 100px" />
+            </th>
+        </tr>
+    }
+</table>
+<script type="text/javascript">
+
+    $('.savePriceBtn').click(function () {
+        var data = [];
+        $('.categoryRows').each(function () {
+            var itemId = $(this).find('.ItemID').val();
+            var priceOrInch = $(this).find('.PriceOrInch').val();
+            var detailCode = $(this).find('.DetailCode').val();
+            var alldata = {
+                'ItemID': itemId,
+                'PriceOrInch': priceOrInch,
+                'DetailCode': detailCode
+            }
+            data.push(alldata);
+        });
+        var allData = JSON.stringify(data);
+        $.ajax({
+            type: "POST",
+            url: "/chartofaccount/InsertUpdateItemPrice/",
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ 'data': allData }),
+            success: function (data) {
+                if (data.status == true) {
+                    $('.alertDiv2').html('<div class="alert alert-success success-alert2" style="margin-top:15px;">' +
+                                            '<button type="button" class="close" data-dismiss="alert">x</button>' +
+                                            ' <strong>Success! </strong>' +
+                                            'Records Saved Succesfully.' +
+                                        '</div>');
+                    $(".success-alert2").fadeTo(1000, 500).slideUp(500, function () {
+                        $(".success-alert2").slideUp(500);
+                        $('.alertDiv2').html('');
+                    });
+                }
+                else {
+                    alert(data.message);
+                }
+            }
+        })
+    })
+    $("#txtSearch").on("keyup", function () {
+        SearchText();
+    });
+    $("#btnSearch").on("click", function () {
+        SearchText();
+    });
+    $('#txtSearch').on('keypress', function (event) {
+        if (event.keyCode == 13) {
+            SearchText();
+        }
+    });
+    function SearchText() {
+        var value = $("#txtSearch").val().toLowerCase();
+        $(".categoryRows").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    }
+    $(".PriceOrInch").on('keypress', function (event) {
+        NumberPostiveNegativeWithDecimal(event, this);
+    });
+    $('.PriceOrInch').on('input', function () {
+        this.value = this.value
+      .replace(/[^\d.]/g, '')             // numbers and decimals only
+      .replace(/(^[\d]{6})[\d]/g, '$1')   // not more than 6 digits at the beginning
+      .replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+      .replace(/(\.[\d]{3})./g, '$1');    // not more than 2 digits after decimal
+    });
+    function NumberPostiveNegativeWithDecimal(evt, element) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (
+            (charCode != 127) &&
+            (charCode != 8) &&
+            (charCode != 45 || $(element).val().indexOf('-') != -1) &&
+            (charCode != 46 || $(element).val().indexOf('.') != -1) &&
+            (charCode < 48 || charCode > 57))
+            evt.preventDefault();
+        return true;
+    }
+</script>

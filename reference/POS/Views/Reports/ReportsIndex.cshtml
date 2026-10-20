@@ -1,0 +1,483 @@
+﻿<style>
+    .IconContainer {
+        font-size: 43px;
+        color: #fff;
+    }
+
+    .custom-column {
+        margin-bottom: 20px;
+        margin-right: -3%;
+    }
+
+    .select2-hidden-accessible {
+        color: transparent !important;
+    }
+
+    @@media (max-width: 880px) and (min-width: 768px) smartadmin-prod…ion.min.css:22 #left-panel {
+        left: -230px;
+    }
+    /*.panel {
+        margin-bottom: 18px;
+        background-color: #f2f2f2;
+        border: none;
+        border-radius: 0px;
+        -webkit-box-shadow: none;
+            box-shadow: 0px 0px 1px 0px rgba(88, 78, 78, 0.43);
+    }
+        .panel .panel-heading {
+        background-color: rgba(0, 0, 0, 0.11);
+        box-shadow: 0px 0px 1px 0px rgba(54, 53, 53, 0.43);
+        border-bottom: 1px solid #d0c7c7;
+    }
+         .panel .panel-body{
+             background-color: rgb(242, 242, 242);
+        box-shadow: 0px 0px 1px 0px rgba(54, 53, 53, 0.43);
+         }
+        .panel .body{
+             background-color: rgb(242, 242, 242) !important;
+             box-shadow: none;
+             border:none;
+         }
+
+            .panel .panel-heading span {
+                font-weight:bold;
+            }*/
+    div.panel div.header {
+        background-color: #fafafa;
+        box-shadow: 0px 0px 1px 0px #f3f3f3;
+        border-bottom: 1px solid #ddd;
+        text-shadow: 1px 1px 0 #f9f9f9;
+        padding: 20px;
+    }
+
+    div.panel div.balance {
+        float: right;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    div.panel div.title {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    div.panel div.body {
+        padding: 20px;
+        background-color: #fff;
+    }
+
+    div.panel table td {
+        padding: 5px 0px;
+    }
+
+        div.panel table td a {
+            color: #333;
+        }
+    /*div.panel div.title {
+        border-bottom: 2px solid #cf564a;
+        width:5%;
+
+    }*/
+    /*.no-js #loader { display: none;  }
+    .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+        .se-pre-con {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url('../../Glow-resources/Spinner.gif') center no-repeat #fff;
+        }*/
+    a.atag:hover {
+        border-bottom: 1px solid;
+    }
+
+    .modal-dialog {
+        top: 10%;
+    }
+
+    .width {
+        width: 40%;
+    }
+    /*@@media screen and (min-width: 768px) {
+        .modal:before {
+            display: inline-block;
+            vertical-align: middle;
+            content: " ";
+            height: 100%;
+        }
+    }
+
+    .modal-dialog {
+        display: inline-block;
+        text-align: left;
+        vertical-align: middle;
+    }*/
+</style>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- widget content -->
+<div id="content" class="tablecontainer" style=" padding: 12px 30px;">
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <i class="fa fa-print fa-fw "></i>
+                Reports
+            </h1>
+        </div>
+    </div>
+    <!-- widget options:
+                    usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+                    data-widget-colorbutton="false"
+                    data-widget-editbutton="false"
+                    data-widget-togglebutton="false"
+                    data-widget-deletebutton="false"
+                    data-widget-fullscreenbutton="false"
+                    data-widget-custombutton="false"
+                    data-widget-collapsed="true"
+                    data-widget-sortable="false"
+
+                    -->
+    <section>
+        <div class="modal fade" id="MainModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog modal-lg mainDialog width">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header defaultBackgroundColor" style="height:50px;">
+                        <h4 class="modal-title" style="color:white;margin-top:-4px;" id="mainModalTitle"></h4>
+                        <button type="button" class="close" data-dismiss="modal" style="color: white !important; margin-top: -25px; font-size: 30px;z-index:1;">&times;</button>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <div id="mainModalDiv"></div>
+                    </div>
+                    <!-- Modal footer -->
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-heading">
+                <div style="margin-bottom:10px">
+                    <span>
+                        Reports
+                    </span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr>
+                            <td style="width: 50%; padding-right: 10px; vertical-align: top">
+                                <div class="panel panel-default" id="GeneralLedgerPanel">
+                                    <div class="panel-heading" style="background-color:#F2F2F2">
+                                        <div style="text-align:left; color: #ccc;font-size: 14px; font-weight: bold;">Ledger</div>
+                                    </div>
+                                    <div class="list-group">
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnLedger" data-toggle="modal" data-target="#MainModal" style="font-weight: bold; font-size: 12px;color:#5090CD">Ledger</a>
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnLedgerThirdLevel" data-toggle="modal" data-target="#MainModal" style="font-weight: bold; font-size: 12px;color:#5090CD">Ledger Third Level</a>
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnTrialBalance" data-toggle="modal" data-target="#MainModal" style="font-weight: bold; font-size: 12px;color:#5090CD">Account Trial Balance</a>
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnRunningTrialBalance" data-toggle="modal" data-target="#MainModal" style="font-weight: bold; font-size: 12px;color:#5090CD">Account Running Trial Balance</a>
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnChartOfAccount"  style="font-weight: bold; font-size: 12px;color:#5090CD">Chart of Account</a>
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnChartOfAccountWithDetail" style="font-weight: bold; font-size: 12px;color:#5090CD">Chart of Account With Detail Accounts</a>
+                                        @*<a href="javascript:void(0)" class="list-group-item" id="btnCustomerDetail" data-toggle="modal" data-target="#MainModal" style="font-weight: bold; font-size: 12px;color:#5090CD">Customer/Supplier Detail</a>*@
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnDaybook" data-toggle="modal" data-target="#MainModal" style="font-weight: bold; font-size: 12px;color:#5090CD">Daybook</a>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default" id="ItemPanel">
+                                    <div class="panel-heading" style="background-color:#F2F2F2">
+                                        <div style="text-align:left; color: #ccc;font-size: 14px; font-weight: bold;">Bookings</div>
+                                    </div>
+                                    <div class="list-group">
+                                        <a href="javascript:void(0)" class="list-group-item" id="btnItemslist" data-toggle="modal" data-target="#MainModal" style="font-weight: bold; font-size: 12px;color:#5090CD">Booking/Invoices</a>                                        
+                                    </div>
+                                </div>
+                            </td>
+                            
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- END MAIN CONTENT -->
+@section pagespecific {
+    <script type="text/javascript">
+        $(window).resize(function () {
+            // This will execute whenever the window is resized
+            ChangeScreenwidthForReport();
+
+        });
+        function ChangeScreenwidthForReport() {
+            if ($(window).width() <= 480) {
+                $('.mainDialog').removeClass("width");
+            }
+            else {
+                $('.mainDialog').addClass("width");
+            }
+        }
+
+        //Sale Reports
+        $('#btnSaleSchedule').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("saleschedule", "sale")');
+            $('#mainModalTitle').html("Sale Schedule");
+        })
+        $('#btnSaleSummaryCustomerItem').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("salesummarycustomeritem", "sale")');
+            $('#mainModalTitle').html("Sale Summary Customer-Item");
+        })
+        $('#btnSaleSummaryItemCustomer').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("salesummaryitemcustomer", "sale")');
+            $('#mainModalTitle').html("Sale Summary Item-Customer");
+        })
+        $('#btnSaleSummaryItem').click(function () {
+            $("#mainModalDiv").load('@Url.Action("salesummaryitem", "sale")');
+            $('#mainModalTitle').html("Sale Summary Item");
+        })
+        $('#btnSaleInvoiceSummary').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("saleinvoicesummary", "sale")');
+            $('#mainModalTitle').html("Sale Invoice Summary");
+        })
+        $('#btnItemNotSold').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("ItemNotSoldReport", "item")');
+            $('#mainModalTitle').html("Item Not Sold Since");
+        })
+
+        //End of Sale Reports
+
+        //Purchase Reports
+        $('#btnPurchaseSchedule').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("purchaseschedule", "purchase")');
+            $('#mainModalTitle').html("Purchase Schedule");
+        })
+        $('#btnPurchaseSummarySupplierItem').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("purchasesummarysupplieritem", "purchase")');
+            $('#mainModalTitle').html("Purchase Summary Supplier-Item");
+        })
+        $('#btnPurchaseSummaryItemSupplier').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("purchasesummaryitemsupplier", "purchase")');
+            $('#mainModalTitle').html("Purchase Summary Item-Supplier");
+        })
+        $('#btnPurchaseSummaryItem').click(function () {
+            $("#mainModalDiv").load('@Url.Action("purchasesummaryitem", "purchase")');
+            $('#mainModalTitle').html("Purchase Summary Item");
+        })
+        $('#btnPurchaseInvoiceSummary').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("purchaseinvoicesummary", "purchase")');
+            $('#mainModalTitle').html("Purchase Invoice Summary");
+        })
+        //End of Purchase Reports
+
+        //Financial Reports
+        $('#btnLedger').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("ledger", "financial")');
+            $('#mainModalTitle').html("Ledger");
+        })
+        $('#btnLedgerThirdLevel').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("ledgerthirdlevel", "financial")');
+            $('#mainModalTitle').html("Ledger Third Level");
+        })
+        $('#btnTrialBalance').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("trialbalance", "financial")');
+            $('#mainModalTitle').html("Trial Balance");
+        })
+        $('#btnRunningTrialBalance').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("runningtrialbalance", "financial")');
+            $('#mainModalTitle').html("Running Trial Balance");
+        })
+        //End of Financial Reports
+
+        //Cheque Reports
+        $('#btnChequeSummary').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("chequesummaryreport", "cheque")');
+            $('#mainModalTitle').html("Cheque Summary");
+        })
+        //End of Cheque Reports
+
+        //Voucher Reports
+        $('#btnDaybook').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("vouchersdaybook", "cash")');
+            $('#mainModalTitle').html("Vouchers Daybook");
+        })
+        //End of Voucher Reports
+
+        //Item Reports
+        $('#btnItemslist').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("bookingreport", "cabbooking")');
+            $('#mainModalTitle').html("Bookings Report");
+        })
+        $('#btnItemsStockOverall').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemoverallstockreport", "item")');
+            $('#mainModalTitle').html("Items Stock Overall");
+        })
+        $('#btnItemsStockWarehouseBase').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemstockwarehousebasereport", "item")');
+            $('#mainModalTitle').html("Items Stock Warehouse Base");
+        })
+        $('#btnItemStockRegisterOverall').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemstockregisteroverallreport", "item")');
+            $('#mainModalTitle').html("Items Stock Register Overall");
+        })
+        $('#btnItemStockRegisterWarehouseBase').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemstockregisterwarehousebasereport", "item")');
+            $('#mainModalTitle').html("Items Stock Register Warehouse Base");
+        })
+        $('#btnItemStockStatus').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemstockstatusreport", "item")');
+            $('#mainModalTitle').html("Items Stock Status");
+        })
+        $('#btnItemStockWithAverageRate').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemstockwithaverageratereport", "item")');
+            $('#mainModalTitle').html("Items Stock With Average Rate");
+        })
+        $('#btnItemStockAverageRateRegister').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemstockaveragerateregisterreport", "item")');
+            $('#mainModalTitle').html("Items Stock Average Rate Register");
+        })
+        $('#btnItemStockWithLastPurchaseRate').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemstocklastpurchaseratereport", "item")');
+            $('#mainModalTitle').html("Items Stock With Last Purchase Rate");
+        })
+        //End of Item Reports
+
+        //Calculate Average
+        $('#btnCalculateAverage').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("calculateaverage", "reports")');
+            $('#mainModalTitle').html("Calculate Average");
+        })
+        //
+        //Chart of Account
+        $('#btnChartOfAccount').click(function () {
+            window.location.href = "/chartofaccount/chartofaccountreport";
+        })
+        $('#btnChartOfAccountWithDetail').click(function () {
+            window.location.href = "/chartofaccount/chartofaccountwithdetailreport";
+        })
+        //
+
+        //Aging Reports   
+        $('#btnSaleAging').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("agingsale", "financial")');
+            $('#mainModalTitle').html("Sale Aging");
+        })
+        $('#btnPurchaseAging').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("agingpurchase", "financial")');
+            $('#mainModalTitle').html("Purchase Aging");
+        })
+        $('#btnCustomerDetail').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("customersupplierdetail", "sale")');
+            $('#mainModalTitle').html("Customer/Supplier Detail");
+        })
+        //End
+        //HR Reports  
+        $('#btnSalary').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("salarymultireport", "salary")');
+            $('#mainModalTitle').html("Salary");
+        })
+        $('#btnSalaryPayment').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("salarypaymentmultireport", "salarypayment")');
+            $('#mainModalTitle').html("Salary Payment");
+        })
+        $('#btnAttendance').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("attendancemultireport", "attendance")');
+            $('#mainModalTitle').html("Attendance");
+        })
+        //End
+        //Statements Reports 
+        $('#btnIncomeStatement').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("incomestatement", "financial")');
+            $('#mainModalTitle').html("Income Statement");
+        })
+        $('#btnFinancialStatement').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("financialstatement", "financial")');
+            $('#mainModalTitle').html("Financial Statement");
+        })
+        $('#btnPlsReport').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("plsreport", "sale")');
+            $('#mainModalTitle').html("PLS Report");
+        })
+        $('#btnItemPlsReport').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("itemplsreport", "item")');
+            $('#mainModalTitle').html("Item Wise PLS Report");
+        })
+        
+
+        $('#btnPlsSummaryReport').click(function () {
+            $("#mainModalDiv").html('');
+            $("#mainModalDiv").load('@Url.Action("plssummaryreport", "sale")');
+            $('#mainModalTitle').html("PLS Summary Report");
+        })
+        
+
+        //End
+        $(document).ready(function () {
+            ChangeScreenwidthForReport();
+        });
+        function ReplaceNumberWithCommas(yourNumber) {
+            if (yourNumber != "0") {
+                //Seperates the components of the number
+                var n = yourNumber.toString().split(".");
+                //Comma-fies the first part
+                n[0] = n[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (n.length == 1) {
+                    n[0] = n[0] + ".00";
+                }
+                else {
+                    if (n[1].toString().length == 1) {
+                        n[1] = n[1] + "0";
+                    }
+                }
+                //Combines the two sections
+                n = n.join(".");
+            }
+            else {
+                n = yourNumber;
+            }
+            return n;
+        }
+        function ReplaceCommas(yourNumber) {
+            var noCommas = yourNumber.replace(/,/g, ''),
+                asANumber = +noCommas;
+            return noCommas;
+        }
+    </script>
+}

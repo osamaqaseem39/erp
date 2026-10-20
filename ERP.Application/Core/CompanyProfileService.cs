@@ -49,6 +49,8 @@ public class CompanyProfileService : ICompanyProfileService
         company.PostalCode = company.ZipCode = Clean(dto.PostalCode);
         company.Country = Clean(dto.Country);
         company.Phone = Clean(dto.Phone);
+        company.MobilePhone = Clean(dto.MobilePhone);
+        company.ContactPerson = Clean(dto.ContactPerson);
         company.Email = Clean(dto.Email);
         company.Website = Clean(dto.Website);
         company.LogoUrl = Clean(dto.LogoUrl);
@@ -123,6 +125,8 @@ public class CompanyProfileService : ICompanyProfileService
         PostalCode = OrNull(c.PostalCode) ?? OrNull(c.ZipCode),
         Country = OrNull(c.Country),
         Phone = OrNull(c.Phone),
+        MobilePhone = OrNull(c.MobilePhone),
+        ContactPerson = OrNull(c.ContactPerson),
         Email = OrNull(c.Email),
         Website = OrNull(c.Website),
         LogoUrl = OrNull(c.LogoUrl),

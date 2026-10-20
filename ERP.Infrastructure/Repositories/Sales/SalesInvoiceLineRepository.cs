@@ -14,36 +14,30 @@ public class SalesInvoiceLineRepository : ISalesInvoiceLineRepository
         _context = context;
     }
 
-    public async Task<SalesInvoiceLine?> GetByIdAsync(int id)
+    public async Task<IEnumerable<SalesInvoiceLine>> GetByInvoiceIdAsync(Guid invoiceId, Guid tenantId)
     {
-        return await _context.SalesInvoiceLines.FindAsync(id);
+        return await _context.SalesInvoiceLines
+            .Where(l => l.SalesInvoiceId == invoiceId && l.TenantId == tenantId)
+            .OrderBy(l => l.LineNumber)
+            .ToListAsync();
     }
 
-    public async Task<IEnumerable<SalesInvoiceLine>> GetAllAsync()
+    public async Task<Guid> CreateAsync(SalesInvoiceLine line)
     {
-        return await _context.SalesInvoiceLines.ToListAsync();
-    }
-
-    public async Task<SalesInvoiceLine> AddAsync(SalesInvoiceLine entity)
-    {
-        _context.SalesInvoiceLines.Add(entity);
+        _context.SalesInvoiceLines.Add(line);
         await _context.SaveChangesAsync();
-        return entity;
+        return line.Id;
     }
 
-    public async Task UpdateAsync(SalesInvoiceLine entity)
+    public async Task<bool> DeleteByInvoiceIdAsync(Guid invoiceId, Guid tenantId)
     {
-        _context.SalesInvoiceLines.Update(entity);
+        var lines = await _context.SalesInvoiceLines
+            .Where(l => l.SalesInvoiceId == invoiceId && l.TenantId == tenantId)
+            .ToListAsync();
+        if (lines.Count == 0) return true;
+
+        _context.SalesInvoiceLines.RemoveRange(lines);
         await _context.SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _context.SalesInvoiceLines.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        return true;
     }
 }

@@ -1,0 +1,140 @@
+﻿<style>
+    .set-img {
+        font-family: "Open Sans",Arial,Helvetica,Sans-Serif;
+    }
+
+    .table tr td {
+        border: 0 !important;
+    }
+
+    .custome-class-form h4 {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .custome-class-form label {
+        font-weight: bold !important;
+        color: #000;
+    }
+
+    .table tr .V__align {
+        vertical-align: bottom !important;
+    }
+
+    imgs {
+        opacity: 0.5;
+        filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
+    .dropwidth {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background-color: #03386C !important;
+        border-color: #03386C !important;
+    }
+
+        .btn-primary:hover {
+            background-color: #03386C !important;
+        }
+</style>
+@model POS.Models.clsItem
+@{
+    Layout = null;
+}
+<div class="widget-body no-padding" style="overflow-x:hidden;">
+    @using (Html.BeginForm("printitemslist", "item", FormMethod.Post, new { id = "itemsListForm", @class = "smart-form custome-class-form", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+    {
+        <fieldset id="myField1">
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Item</label>
+                    <div id="ItemIDDiv">
+                        @Html.DropDownListFor(model => model.ItemID, Enumerable.Empty<SelectListItem>(), new { @style = "width:100%", @id = "txtItemID", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Category</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.CategoryID, ViewBag.Category as SelectList, new { @id = "CategoryID", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-md-12">
+                    <label>Select Brand</label>
+                    <div id="DetailCodeDiv">
+                        @Html.DropDownListFor(m => m.BrandID, ViewBag.Brand as SelectList, new { @id = "BrandID", @style = "width:100%", @multiple = "multiple" })
+                    </div>
+                </section>
+            </div>
+        </fieldset>
+        <footer>
+            <button formtarget="_blank" type="submit" class="btn btn-labeled btn-primary pull-right">
+                GENERATE REPORT
+            </button>
+        </footer>
+    }
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$('#ItemID').select2();
+        $('#CategoryID').select2();
+        $('#BrandID').select2();
+        var pageSize = 20;
+        var optionListUrl = '@Url.Action("GetOptionList", "ItemComboList")';
+        $('#txtItemID').select2({
+            ajax: {
+                delay: 150,
+                url: optionListUrl,
+                dataType: 'json',
+
+                data: function (params) {
+                    params.page = params.page || 1;
+                    return {
+                        searchTerm: params.term,
+                        pageSize: pageSize,
+                        pageNumber: params.page
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results: data.Results,
+                        pagination: {
+                            more: (params.page * pageSize) < data.Total
+                        }
+                    };
+                }
+            },
+            //placeholder: "-- Select Item--",
+            minimumInputLength: 0,
+            allowClear: true,
+        });
+       
+    });
+    //$('#DetailCode').change(function () {
+    //    $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('border-color', '#CCCCCC');
+    //    $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('color', 'black');
+    //})
+    //$('#itemsListForm').on('submit', function (e) {
+    //    var selectAll = $("#SelectAll").is(":checked");
+    //    var check = 0;
+    //    if (selectAll == true) {
+    //        check = 1;
+    //    }
+    //    else {
+    //        $("#DetailCode :selected").map(function (i, el) {
+    //            check += 1;
+    //        });
+    //    }
+    //    if (check == 0) {
+    //        $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('border-color', '#cf564a');
+    //        $('#DetailCodeDiv').closest('#DetailCodeDiv').find('.select2-choices').css('color', '#cf564a');
+    //        return false;
+    //    }
+    //})
+</script>

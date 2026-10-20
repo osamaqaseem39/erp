@@ -1,0 +1,63 @@
+﻿<!-- Left panel : Navigation area -->
+<!-- Note: This width of the aside area can be adjusted through LESS variables -->
+<aside id="left-panel" class="nav-main-ul scrolbar1" style="padding-top: 66px; position:fixed;background-color: #f2f2f2;">
+
+    <!-- User info -->
+    @*@{ Html.RenderPartial("_CurrentUser"); }*@
+    <!-- end user info -->
+    <!-- NAVIGATION : This navigation is also responsive
+
+    To make this navigation dynamic please make sure to link the node
+    (the reference to the nav > ul) after page load. Or the navigation
+    will not initialize.
+    -->
+    @*<ul class="side__shimmer__wrapper" style="padding:0;">
+        <li class="lb01"></li>
+        <li class="lb02__50"></li>
+        <li class="lb_dot"></li>
+        <li class="lb02__70"></li>
+        <li class="height__50"></li>
+        <li class="lb01"></li>
+        <li class="lb02__50"></li>
+        <li class="lb_dot"></li>
+        <li class="lb02__70"></li>
+    </ul>*@
+    <nav>
+        <!-- NOTE: Notice the gaps after each icon usage <i></i>..
+        Please note that these links work a bit different than
+        traditional href="" links. See documentation for details.
+        -->
+        @*Start Owner Aside*@
+       
+        <ul>
+            <li class="@Html.RouteIf("index", "active")">
+                <a href="#" title="Dashboard"><i class="fa fa-lg fa-fw fa-home"></i> <span class="menu-item-parent">Dashboard</span></a>
+                <ul>
+                    <li class="@Html.RouteIf("index", "active")">
+                        <a href="@Url.Action("index", "owner")" title="My Account"><span class="menu-item-parent">My Account</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("schoollist", "active")">
+                        <a href="@Url.Action("schoollist", "owner")" title="Business"><span class="menu-item-parent">Business</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("userslist", "active")">
+                        <a href="@Url.Action("userslist", "user")" title="User"><span class="menu-item-parent">User</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("moduleslist", "active")">
+                        <a href="@Url.Action("moduleslist", "module")" title="Module"><span class="menu-item-parent">Module</span></a>
+                    </li>
+                    @*<li class="@Html.RouteIf("agreement", "active")">
+                        <a href="#" title="Dashboard"><span class="menu-item-parent">User Agreement</span></a>
+                    </li>
+                    <li class="@Html.RouteIf("report", "active")">
+                        <a href="#" title="Dashboard"><span class="menu-item-parent">Reports</span></a>
+                    </li>*@
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <span class="minifyme" data-action="minifyMenu">
+        <i class="fa fa-arrow-circle-left hit"></i>
+    </span>
+
+</aside>
+<!-- END NAVIGATION -->

@@ -1,0 +1,26 @@
+﻿<div class="pull-right" style="display: inline-flex;">
+    <div class="UserImage dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <img src="~/Content/dummy.png" style="height: 35px; width: 35px; border-radius: 23px;" alt="Developer">
+        </a>
+        <div class="dropdown-menu user-info-bdy" role="menu">
+            <div class="loged-user-info">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <div class="img-bx">
+                        <img src="~/Content/dummy.png" style="height: 96px; width: 96px;" alt="Developer">
+                    </div>
+                </a>
+            </div>
+            <div class="email-info-mr">
+                <div class="usr-nm">
+                    @User.Name
+                </div>
+                <div class="user-em-id">@*@User.Name.Split('_')[1]*@</div>
+                <div class="cp-p" style="margin: 6px 0;"><a href="@Url.Action("checkoldpassword", "account")">Change password</a></div>
+            </div>
+            <div class="usr-ftr">
+                <div style="display:table-cell; text-align:right;"><a href="@Url.Action("logout", "account")" class="btn btn-default">Sign out</a></div>
+            </div>
+        </div>
+    </div>
+</div>

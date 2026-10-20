@@ -4,10 +4,13 @@ using System.Threading.RateLimiting;
 using ERP.Api.Extensions;
 using ERP.Api.GraphQL;
 using ERP.Api.GraphQL.Admin;
+using ERP.Api.GraphQL.Core;
 using ERP.Api.GraphQL.CRM;
+using ERP.Api.GraphQL.Finance;
 using ERP.Api.GraphQL.HRM;
 using ERP.Api.GraphQL.Inventory;
 using ERP.Api.GraphQL.Manufacturing;
+using ERP.Api.GraphQL.Procurement;
 using ERP.Api.GraphQL.Projects;
 using ERP.Api.GraphQL.Reports;
 using ERP.Api.GraphQL.Sales;
@@ -91,7 +94,10 @@ builder.Services.AddScoped<ERP.Infrastructure.Auditing.TenantGuardInterceptor>()
 builder.Services.AddSingleton<ERP.Infrastructure.Logging.ISystemLogWriter, ERP.Infrastructure.Logging.SystemLogWriter>();
 // Permissions: catalog from the endpoints, per-user cache cleared when roles change.
 builder.Services.AddSingleton<ERP.Api.Security.Permissions.EndpointPermissions>();
-builder.Services.AddSingleton<ERP.Infrastructure.Security.IPermissionCatalog>(sp => sp.GetRequiredService<ERP.Api.Security.Permissions.EndpointPermissions>());
+builder.Services.AddSingleton<ERP.Infrastructure.Security.IPermissionCatalog>(sp =>
+    new ERP.Api.Security.Permissions.CompositePermissionCatalog(
+        sp.GetRequiredService<ERP.Api.Security.Permissions.EndpointPermissions>(),
+        ERP.Api.Security.Permissions.ReportPermissionCatalog.All));
 builder.Services.AddSingleton<ERP.Infrastructure.Security.IEffectivePermissions, ERP.Infrastructure.Security.EffectivePermissions>();
 builder.Services.AddSingleton<ERP.Infrastructure.Security.PermissionCacheInvalidator>();
 builder.Services.AddScoped<ERP.Infrastructure.Security.IRbacSeeder, ERP.Infrastructure.Security.RbacSeeder>();
@@ -202,6 +208,8 @@ builder.Services
     .AddTypeExtension<SalesMutations>()
     .AddTypeExtension<HRMQueries>()
     .AddTypeExtension<HRMMutations>()
+    .AddTypeExtension<EmployeeQuery>()
+    .AddTypeExtension<EmployeeMutation>()
     .AddTypeExtension<InventoryQueries>()
     .AddTypeExtension<InventoryMutations>()
     .AddTypeExtension<ProjectsQueries>()
@@ -214,12 +222,53 @@ builder.Services
     .AddTypeExtension<AdminMutations>()
     .AddTypeExtension<CRMQueries>()
     .AddTypeExtension<CRMMutations>()
+    .AddTypeExtension<FinanceQueries>()
+    .AddTypeExtension<FinanceMutations>()
+    .AddTypeExtension<ProcurementQueries>()
+    .AddTypeExtension<ProcurementMutations>()
+    .AddTypeExtension<CoreModuleQueries>()
+    .AddTypeExtension<CoreModuleMutations>()
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
 
 builder.Services.AddEndpointsApiExplorer();
+// One Swagger document per module, keyed by the first route segment after /api/.
+// "v1" keeps the full API in one document; auth, setup and tenants are grouped as "platform".
+var swaggerModules = new (string Key, string Title, string[] Prefixes)[]
+{
+    ("platform", "Platform (Auth, Setup, Tenants)", ["auth", "setup", "tenants"]),
+    ("admin", "Admin", ["admin"]),
+    ("core", "Core", ["core"]),
+    ("finance", "Finance", ["finance"]),
+    ("crm", "CRM", ["crm"]),
+    ("sales", "Sales", ["sales"]),
+    ("inventory", "Inventory", ["inventory"]),
+    ("procurement", "Procurement", ["procurement"]),
+    ("manufacturing", "Manufacturing", ["manufacturing"]),
+    ("hrm", "HRM", ["hrm"]),
+    ("projects", "Projects", ["projects"]),
+    ("reports", "Reports", ["reports"]),
+};
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "ERP SaaS API", Version = "v1" });
+    foreach (var m in swaggerModules)
+        c.SwaggerDoc(m.Key, new() { Title = $"ERP SaaS API - {m.Title}", Version = "v1" });
+
+    // Admin.UserDto vs Core.UserDto (and similar) collide on short type names.
+    c.CustomSchemaIds(t => t.FullName?.Replace('+', '.') ?? t.Name);
+
+    c.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        if (docName == "v1") return true;
+        var path = apiDesc.RelativePath ?? string.Empty;
+        var segment = path.StartsWith("api/", StringComparison.OrdinalIgnoreCase)
+            ? path[4..].Split('/', '?')[0]
+            : string.Empty;
+        var module = swaggerModules.FirstOrDefault(m => m.Key == docName);
+        return module.Prefixes?.Contains(segment, StringComparer.OrdinalIgnoreCase) == true;
+    });
+
     c.AddSecurityDefinition("Bearer", new()
     {
         Name = "Authorization",
@@ -254,10 +303,22 @@ builder.Services.AddScoped<DatabaseDeploymentService>(sp =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || builder.Configuration.GetValue("Swagger:Enabled", false))
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        foreach (var m in swaggerModules)
+            c.SwaggerEndpoint($"/swagger/{m.Key}/swagger.json", m.Title);
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "All modules");
+        c.DocumentTitle = "ERP SaaS API";
+    });
+    // Runs before authentication so the bare root lands on the docs instead of a 401.
+    app.Use(async (ctx, next) =>
+    {
+        if (ctx.Request.Path == "/") { ctx.Response.Redirect("/swagger"); return; }
+        await next();
+    });
 }
 
 app.UseHttpsRedirection();
@@ -271,11 +332,6 @@ app.UseAuthorization();
 app.MapControllers();
 // GraphQL bypasses controller permissions, so it is limited to platform administrators.
 app.MapGraphQL().RequireAuthorization(policy => policy.RequireRole(ERP.Api.Security.CurrentUser.SuperAdminRoles));
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription().AllowAnonymous();
-}
 
 using (var scope = app.Services.CreateScope())
 {

@@ -15,28 +15,40 @@ public class ItemService : IItemService
 
     public async Task<ItemDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return null;
+
         var item = await _itemRepository.GetByIdAsync(id, tenantId);
         return item != null ? MapToDto(item) : null;
     }
 
     public async Task<IEnumerable<ItemDto>> GetAllAsync(Guid tenantId, Guid companyId)
     {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<ItemDto>();
+
         var items = await _itemRepository.GetAllAsync(tenantId, companyId);
         return items.Select(MapToDto);
     }
 
     public async Task<IEnumerable<ItemDto>> GetByCategoryAsync(Guid categoryId, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<ItemDto>();
+
         var items = await _itemRepository.GetByCategoryAsync(categoryId, tenantId);
         return items.Select(MapToDto);
     }
 
     public async Task<ItemDto> CreateAsync(CreateItemDto dto, Guid tenantId, string createdBy)
     {
+        if (tenantId == Guid.Empty)
+            throw new InvalidOperationException("Tenant is required.");
+
+        var categoryId = ResolveCategoryId(dto.CategoryId, dto.ItemCategoryId);
+
         if (await _itemRepository.CodeExistsAsync(dto.ItemCode, tenantId, dto.CompanyId))
-        {
             throw new InvalidOperationException($"Item with code '{dto.ItemCode}' already exists.");
-        }
 
         var item = new Item
         {
@@ -46,7 +58,7 @@ public class ItemService : IItemService
             ItemCode = dto.ItemCode,
             ItemName = dto.ItemName,
             Description = dto.Description,
-            CategoryId = Guid.Parse(dto.CategoryId),
+            CategoryId = categoryId,
             UnitOfMeasureId = dto.UnitOfMeasureId,
             ItemType = dto.ItemType,
             HSNCode = dto.HSNCode,
@@ -58,6 +70,7 @@ public class ItemService : IItemService
             SellingPrice = dto.SellingPrice,
             IsSerialized = dto.IsSerialized,
             IsBatchTracked = dto.IsBatchTracked,
+            IsActive = dto.IsActive,
             CreatedBy = createdBy
         };
 
@@ -67,21 +80,19 @@ public class ItemService : IItemService
 
     public async Task<ItemDto> UpdateAsync(UpdateItemDto dto, Guid tenantId, string updatedBy)
     {
-        var item = await _itemRepository.GetByIdAsync(dto.Id, tenantId);
-        if (item == null)
-        {
-            throw new InvalidOperationException("Item not found.");
-        }
+        if (tenantId == Guid.Empty)
+            throw new InvalidOperationException("Tenant is required.");
+
+        var item = await _itemRepository.GetByIdAsync(dto.Id, tenantId)
+            ?? throw new KeyNotFoundException($"Item '{dto.Id}' not found.");
 
         if (await _itemRepository.CodeExistsAsync(dto.ItemCode, tenantId, item.CompanyId, dto.Id))
-        {
             throw new InvalidOperationException($"Item with code '{dto.ItemCode}' already exists.");
-        }
 
         item.ItemCode = dto.ItemCode;
         item.ItemName = dto.ItemName;
         item.Description = dto.Description;
-        item.CategoryId = Guid.Parse(dto.CategoryId);
+        item.CategoryId = ResolveCategoryId(dto.CategoryId, dto.ItemCategoryId, item.CategoryId);
         item.UnitOfMeasureId = dto.UnitOfMeasureId;
         item.ItemType = dto.ItemType;
         item.HSNCode = dto.HSNCode;
@@ -103,18 +114,38 @@ public class ItemService : IItemService
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return false;
+
         return await _itemRepository.DeleteAsync(id, tenantId);
     }
 
     public async Task<bool> ExistsAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty)
+            return false;
+
         return await _itemRepository.ExistsAsync(id, tenantId);
     }
 
     public async Task<IEnumerable<ItemDto>> GetLowStockItemsAsync(Guid tenantId, Guid companyId)
     {
+        if (tenantId == Guid.Empty)
+            return Array.Empty<ItemDto>();
+
         var items = await _itemRepository.GetLowStockItemsAsync(tenantId, companyId);
         return items.Select(MapToDto);
+    }
+
+    private static Guid ResolveCategoryId(string? categoryId, Guid itemCategoryId, Guid? fallback = null)
+    {
+        if (!string.IsNullOrWhiteSpace(categoryId) && Guid.TryParse(categoryId, out var parsed) && parsed != Guid.Empty)
+            return parsed;
+        if (itemCategoryId != Guid.Empty)
+            return itemCategoryId;
+        if (fallback is { } f && f != Guid.Empty)
+            return f;
+        throw new ArgumentException("Category is required.");
     }
 
     private static ItemDto MapToDto(Item item)
@@ -126,18 +157,19 @@ public class ItemService : IItemService
             CompanyId = item.CompanyId,
             ItemCode = item.ItemCode,
             ItemName = item.ItemName,
-            Description = item.Description,
+            Description = item.Description ?? string.Empty,
             CategoryId = item.CategoryId.ToString(),
             CategoryName = item.Category?.CategoryName ?? string.Empty,
+            ItemCategoryId = item.CategoryId,
             UnitOfMeasureId = item.UnitOfMeasureId,
             UnitOfMeasureName = item.UnitOfMeasure?.UnitName ?? string.Empty,
             ItemType = item.ItemType,
-            HSNCode = item.HSNCode,
-            BarCode = item.BarCode,
+            HSNCode = item.HSNCode ?? string.Empty,
+            BarCode = item.BarCode ?? string.Empty,
             ReorderLevel = item.ReorderLevel,
             ReorderQuantity = item.ReorderQuantity,
             DefaultWarehouseId = item.DefaultWarehouseId,
-            DefaultWarehouseName = item.DefaultWarehouse?.WarehouseName,
+            DefaultWarehouseName = item.DefaultWarehouse?.WarehouseName ?? string.Empty,
             CostPrice = item.CostPrice,
             SellingPrice = item.SellingPrice,
             IsSerialized = item.IsSerialized,
@@ -145,8 +177,8 @@ public class ItemService : IItemService
             IsActive = item.IsActive,
             CreatedAt = item.CreatedAt,
             UpdatedAt = item.UpdatedAt,
-            CreatedBy = item.CreatedBy?.ToString(),
-            UpdatedBy = item.UpdatedBy?.ToString()
+            CreatedBy = item.CreatedBy,
+            UpdatedBy = item.UpdatedBy
         };
     }
 }

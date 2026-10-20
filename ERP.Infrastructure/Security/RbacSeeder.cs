@@ -41,12 +41,16 @@ public sealed class RbacSeeder : IRbacSeeder
     public const string Administrator = "Administrator";
     public const string ReadOnly = "Read-only";
 
+    /// <summary>Editable role templates (User Types in the reference product). Created once per tenant.</summary>
     private static readonly (string Name, string Description, string[] Modules)[] Templates =
     [
         ("Sales", "Customers, leads, pipeline, quotes, orders and point of sale.", ["crm", "sales"]),
         ("Finance", "Accounts, invoices, bills, payments and banking.", ["finance"]),
+        ("Accountant", "Finance-focused user type (reference User Type).", ["finance"]),
         ("HR", "Employees, leave, time, payroll and performance.", ["hrm"]),
         ("Operations", "Inventory, procurement, manufacturing and projects.", ["inventory", "procurement", "manufacturing", "projects"]),
+        ("Warehouse", "Inventory and stock movements (reference User Type).", ["inventory"]),
+        ("Production", "Manufacturing and production (reference User Type).", ["manufacturing"]),
     ];
 
     private readonly ERPDbContext _db;
