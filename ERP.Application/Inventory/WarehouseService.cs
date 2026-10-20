@@ -37,9 +37,10 @@ public class WarehouseService : IWarehouseService
 
     public async Task<Guid> CreateAsync(CreateWarehouseDto dto)
     {
+        // Tenant may be stamped by WarehouseRepositoryAdapter from ITenantProvider when dto.TenantId is empty.
         var entity = MapToEntity(dto);
         var created = await _repository.AddAsync(entity);
-        return created.Id;
+        return created.Id == Guid.Empty || created.TenantId == Guid.Empty ? Guid.Empty : created.Id;
     }
 
     public async Task<bool> UpdateAsync(UpdateWarehouseDto dto)

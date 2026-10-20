@@ -146,4 +146,25 @@ public class WmsBinStockWorkflowTests
         // Completing again must fail (already Completed).
         Assert.False(await picks.CompleteAsync(pickId, null, Tenant, User));
     }
+
+    [Fact]
+    public async Task Putaway_Create_FailsClosed_OnEmptyTenant()
+    {
+        await using var db = Db();
+        await SeedAsync(db);
+        var putaway = new PutawayTaskService(
+            new PutawayTaskRepository(db),
+            new WarehouseLocationRepository(db),
+            new StockService(new StockBalanceRepository(db), db: db));
+
+        var id = await putaway.CreateAsync(new CreatePutawayTaskDto
+        {
+            WarehouseId = Warehouse,
+            Lines = [new CreatePutawayTaskLineDto { ItemId = Item, Quantity = 1m }]
+        }, Guid.Empty, User);
+
+        Assert.Equal(Guid.Empty, id);
+        Assert.False(await putaway.StartAsync(Guid.NewGuid(), Guid.Empty, User));
+        Assert.False(await putaway.CompleteAsync(Guid.NewGuid(), null, Guid.Empty, User));
+    }
 }

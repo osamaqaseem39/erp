@@ -4,6 +4,12 @@ Append-only session notes for agents and humans. Do not rewrite history; add a n
 
 ---
 
+## 2026-10-21 — WP 1.2 tenant fail-closed DONE
+
+- Applied audit top targets: StockTransfer, ProductionOrder Create, BOM mutations, Report create/schedule/cancel, Brand/Location/Kit/Reservation/CycleCount, Training/Benefits Create, Invoice Void, Payment untenanted overloads → fail-closed, WarehouseController RequireTenantId on all actions.
+- WMS putaway/pick + FinanceGap Post* RequireTenant (earlier slice).
+- Tests: empty-tenant StockTransfer + Putaway; Wave2 payment asserts use tenanted GetById. Suite green (~555).
+
 ## 2026-10-21 — WP 1.1 / 1.6 kill stubs + FinanceGap GL
 
 - Wired 23 former stub report codes in `ModuleReportQueryService` to existing query methods.

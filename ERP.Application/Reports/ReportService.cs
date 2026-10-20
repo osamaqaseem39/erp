@@ -91,6 +91,8 @@ public class ReportService : IReportService
 
     public async Task<ReportDto> CreateAsync(CreateReportDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var report = new Report
         {
             Id = Guid.NewGuid(),
@@ -238,6 +240,8 @@ public class ReportService : IReportService
 
     public async Task<ReportScheduleDto> ScheduleReportAsync(ScheduleReportDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var report = await _reportRepository.GetByIdAsync(dto.ReportId, tenantId);
         if (report == null)
             throw new KeyNotFoundException($"Report with ID '{dto.ReportId}' not found.");
@@ -341,6 +345,7 @@ public class ReportService : IReportService
 
     public async Task<bool> CancelScheduledReportAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty) return false;
         var schedule = await _reportScheduleRepository.GetByIdAsync(id, tenantId);
         if (schedule == null) return false;
 

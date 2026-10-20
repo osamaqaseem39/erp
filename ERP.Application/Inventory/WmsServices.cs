@@ -43,6 +43,7 @@ public class PutawayTaskService : IPutawayTaskService
 
     public async Task<Guid> CreateAsync(CreatePutawayTaskDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.Lines.Count == 0 || dto.WarehouseId == Guid.Empty) return Guid.Empty;
         var id = Guid.NewGuid();
         var suggested = await SuggestBulkOrPickAsync(dto.WarehouseId, tenantId);
@@ -100,6 +101,7 @@ public class PutawayTaskService : IPutawayTaskService
 
     public async Task<bool> StartAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repo.GetByIdAsync(id, tenantId);
         if (entity == null || !DocumentWorkflow.CanTransition(entity.Status, "InProgress", Transitions)) return false;
         entity.Status = "InProgress";
@@ -110,6 +112,7 @@ public class PutawayTaskService : IPutawayTaskService
 
     public async Task<bool> CompleteAsync(Guid id, CompletePutawayTaskDto? dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repo.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "Completed", Transitions)) return false;
@@ -241,6 +244,7 @@ public class PickListService : IPickListService
 
     public async Task<Guid> CreateAsync(CreatePickListDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.Lines.Count == 0 || dto.WarehouseId == Guid.Empty) return Guid.Empty;
         var id = Guid.NewGuid();
         var lines = new List<PickListLine>();
@@ -299,6 +303,7 @@ public class PickListService : IPickListService
 
     public async Task<bool> StartAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repo.GetByIdAsync(id, tenantId);
         if (entity == null || !DocumentWorkflow.CanTransition(entity.Status, "Picking", Transitions)) return false;
         entity.Status = "Picking";
@@ -309,6 +314,7 @@ public class PickListService : IPickListService
 
     public async Task<bool> CompleteAsync(Guid id, CompletePickListDto? dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repo.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "Completed", Transitions)) return false;

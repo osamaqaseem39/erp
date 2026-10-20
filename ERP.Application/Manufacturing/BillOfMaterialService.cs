@@ -22,6 +22,8 @@ public class BillOfMaterialService : IBillOfMaterialService
 
     public async Task<BillOfMaterialDto> CreateAsync(CreateBillOfMaterialDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         ValidateHeader(dto.Name, dto.FinishedGoodItemId, dto.Lines);
 
         var id = Guid.NewGuid();
@@ -52,6 +54,8 @@ public class BillOfMaterialService : IBillOfMaterialService
 
     public async Task<BillOfMaterialDto> UpdateAsync(UpdateBillOfMaterialDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var entity = await _repo.GetByIdAsync(dto.Id, tenantId)
             ?? throw new KeyNotFoundException($"BOM '{dto.Id}' not found.");
         if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase))
@@ -82,6 +86,7 @@ public class BillOfMaterialService : IBillOfMaterialService
 
     public async Task<bool> DeleteAsync(Guid id, Guid tenantId)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repo.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (string.Equals(entity.Status, "Active", StringComparison.OrdinalIgnoreCase))
@@ -91,6 +96,8 @@ public class BillOfMaterialService : IBillOfMaterialService
 
     public async Task<BillOfMaterialDto> ActivateAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var entity = await _repo.GetByIdAsync(id, tenantId)
             ?? throw new KeyNotFoundException($"BOM '{id}' not found.");
         if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase)
@@ -108,6 +115,8 @@ public class BillOfMaterialService : IBillOfMaterialService
 
     public async Task<BillOfMaterialDto> ObsoleteAsync(Guid id, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var entity = await _repo.GetByIdAsync(id, tenantId)
             ?? throw new KeyNotFoundException($"BOM '{id}' not found.");
         if (!string.Equals(entity.Status, "Active", StringComparison.OrdinalIgnoreCase))

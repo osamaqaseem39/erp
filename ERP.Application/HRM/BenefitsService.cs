@@ -22,6 +22,8 @@ public class BenefitsService : IBenefitsService
 
     public async Task<BenefitDto> CreateAsync(CreateBenefitDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         if (string.IsNullOrWhiteSpace(dto.Name))
             throw new ArgumentException("Benefit name is required.");
 

@@ -306,6 +306,7 @@ public class FinanceGapService : IFinanceGapService
 
     public async Task<FundTransferDto> PostFundTransferAsync(Guid id, Guid tenantId, Guid userId)
     {
+        RequireTenant(tenantId);
         var entity = await _db.FundTransfers.FirstOrDefaultAsync(f => f.Id == id && f.TenantId == tenantId)
             ?? throw new NotFoundException("Fund transfer not found.");
         if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase))
@@ -418,6 +419,7 @@ public class FinanceGapService : IFinanceGapService
 
     public async Task<CreditMemoDto> PostCreditMemoAsync(Guid id, Guid tenantId, Guid userId)
     {
+        RequireTenant(tenantId);
         var entity = await _db.CreditMemos.Include(c => c.Lines)
             .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId)
             ?? throw new NotFoundException("Credit memo not found.");
@@ -540,6 +542,7 @@ public class FinanceGapService : IFinanceGapService
 
     public async Task<DebitMemoDto> PostDebitMemoAsync(Guid id, Guid tenantId, Guid userId)
     {
+        RequireTenant(tenantId);
         var entity = await _db.DebitMemos.Include(c => c.Lines)
             .FirstOrDefaultAsync(c => c.Id == id && c.TenantId == tenantId)
             ?? throw new NotFoundException("Debit memo not found.");

@@ -23,6 +23,8 @@ public class BrandService : IBrandService
 
     public async Task<BrandDto> CreateAsync(CreateBrandDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var entity = new Brand
         {
             Id = Guid.NewGuid(),
@@ -83,6 +85,8 @@ public class WarehouseLocationService : IWarehouseLocationService
 
     public async Task<WarehouseLocationDto> CreateAsync(CreateWarehouseLocationDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("Tenant is required.");
         var entity = new WarehouseLocation
         {
             Id = Guid.NewGuid(),
@@ -168,6 +172,7 @@ public class StockReservationService : IStockReservationService
 
     public async Task<Guid> CreateAsync(CreateStockReservationDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.Lines.Count == 0) return Guid.Empty;
 
         var reserved = new List<(Guid WarehouseId, Guid ItemId, decimal Quantity)>();
@@ -327,6 +332,7 @@ public class ItemKitService : IItemKitService
 
     public async Task<Guid> CreateAsync(CreateItemKitDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.Components.Count == 0) return Guid.Empty;
         var id = Guid.NewGuid();
         var entity = new ItemKit
@@ -438,6 +444,7 @@ public class CycleCountService : ICycleCountService
 
     public async Task<Guid> CreateAsync(CreateCycleCountDto dto, Guid tenantId, Guid userId)
     {
+        if (tenantId == Guid.Empty) return Guid.Empty;
         if (dto.Lines.Count == 0) return Guid.Empty;
         var id = Guid.NewGuid();
         var entity = new CycleCount

@@ -169,7 +169,7 @@ public class Wave2PaymentApplyTests
         var invoice = await invoices.GetInvoiceByIdAsync(invoiceId, Tenant);
         Assert.Equal(0m, invoice!.Balance);
         Assert.Equal("Paid", invoice.Status);
-        var payment = await payments.GetByIdAsync(payId);
+        var payment = await payments.GetByIdAsync(payId, Tenant);
         Assert.Equal("Completed", payment!.Status);
         Assert.Equal(invoiceId, payment.RelatedInvoiceId);
     }
@@ -203,7 +203,7 @@ public class Wave2PaymentApplyTests
         Assert.Equal(0m, (await invoices.GetInvoiceByIdAsync(invoiceId, Tenant))!.Balance);
 
         Assert.True(await payments.VoidAsync(payId, new VoidPaymentDto { Reason = "Duplicate" }, Tenant, User));
-        var voided = await payments.GetByIdAsync(payId);
+        var voided = await payments.GetByIdAsync(payId, Tenant);
         Assert.Equal("Voided", voided!.Status);
         Assert.False(voided.IsActive);
         Assert.Contains("Duplicate", voided.Notes);
@@ -244,7 +244,7 @@ public class Wave2PaymentApplyTests
         Assert.Equal(0m, (await invoices.GetInvoiceByIdAsync(invoiceId, Tenant))!.Balance);
 
         Assert.True(await payments.RefundAsync(payId, new RefundDto { RefundAmount = 50, Reason = "Return" }, Tenant, User));
-        var refunded = await payments.GetByIdAsync(payId);
+        var refunded = await payments.GetByIdAsync(payId, Tenant);
         Assert.Equal("Refunded", refunded!.Status);
         Assert.Equal(0m, refunded.Amount);
 
