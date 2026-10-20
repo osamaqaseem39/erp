@@ -2,11 +2,11 @@
 
 Last updated: 2026-10-21  
 Integration branch: `growth`  
-Current WP: *(Phase 0 exit next)*  
+Current WP: **1.1** (IN_PROGRESS)  
 
 ## Summary (written at the end)
 
-_In progress. Phase 0 WPs 0.1–0.4 DONE; running Phase 0 exit gate._
+_In progress. Phase 0 exit PASS. Phase 1 started at WP 1.1._
 
 ## Work packages
 
@@ -16,7 +16,7 @@ _In progress. Phase 0 WPs 0.1–0.4 DONE; running Phase 0 exit gate._
 | 0.2 | Documentation honesty pass | 0 | DONE | 0.1 | *(this WP)* | Aligned BUSINESS_MODULES DI, FEATURES, PRODUCT/BACKEND/REPORTS/CUSTOMER_DEPTH trackers, FRONTEND_NEW_COVERAGE | No “complete” claims for FinanceGap GL or all report codes |
 | 0.3 | Baseline green | 0 | DONE | — | `7e45bfa` | `dotnet build` 0 err; `dotnet test` 553 passed; `frontend-new` `npm run build` ok (tsc -b + vite; no separate lint/typecheck scripts) | Initial baseline had 10 fails — fixed in 0.1 |
 | 0.4 | Legacy frontend WIP disposition | 0 | DONE | 0.1 | — | Uncommitted `frontend/` MFG/Reports/CRM left out of commits | Discard for product path; `frontend-new` already covers MFG/reports |
-| 1.1 | Kill stubs on public REST | 1 | TODO | 0.3 | | | |
+| 1.1 | Kill stubs on public REST | 1 | IN_PROGRESS | 0.3 | | | Branch `wp/1.1-kill-stubs`; FinanceGap post→GL + de-seed/hide report stubs |
 | 1.2 | Tenant fail-closed audit | 1 | TODO | 1.1 | | | |
 | 1.3 | Transition maps + FIX-5 / FIX-6 | 1 | TODO | 1.1 | | | |
 | 1.4 | Single stock writer | 1 | TODO | 1.1 | | | |
@@ -44,7 +44,7 @@ Status values: `TODO` · `IN_PROGRESS` · `DONE` · `BLOCKED` · `N/A`
 
 | Gate | Result | Date | Evidence |
 |------|--------|------|----------|
-| Phase 0 exit | — | | Pending WP 0.2 |
+| Phase 0 exit | PASS | 2026-10-21 | WIP inventoried + honesty fixes (`7e45bfa`); docs aligned (`dedb9b9`); baseline 553/553 + frontend-new build; follow-ups tracked as 1.6 / 3.1 |
 | Phase 1 exit | — | | |
 | Phase 2 exit | — | | |
 | Phase 3 exit | — | | |
@@ -66,4 +66,4 @@ Status values: `TODO` · `IN_PROGRESS` · `DONE` · `BLOCKED` · `N/A`
 - Unimplemented report catalog codes → must not empty-succeed (`ModuleReportQueryService` throws)
 
 _Add a probe for every security or integrity fix as WPs land._
-
+
