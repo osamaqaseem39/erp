@@ -157,16 +157,39 @@ public class FinanceGapSetTests
     public async Task GapService_TaxGroup_BudgetLine_CreditMemo_FundTransfer()
     {
         await using var db = Db();
-        var accountId = Guid.NewGuid();
-        db.ChartOfAccounts.Add(new ChartOfAccount
+        var revenueId = Guid.NewGuid();
+        var arId = Guid.NewGuid();
+        var cashFrom = Guid.NewGuid();
+        var cashTo = Guid.NewGuid();
+        db.ChartOfAccounts.AddRange(
+            new ChartOfAccount
+            {
+                AccountId = revenueId, Id = revenueId, TenantId = Tenant, AccountCode = "4000",
+                AccountName = "Revenue", AccountType = "Income", IsPostingAllowed = true, CreatedBy = User.ToString()
+            },
+            new ChartOfAccount
+            {
+                AccountId = arId, Id = arId, TenantId = Tenant, AccountCode = "1100",
+                AccountName = "AR", AccountType = "Asset", IsPostingAllowed = true, CreatedBy = User.ToString()
+            },
+            new ChartOfAccount
+            {
+                AccountId = cashFrom, Id = cashFrom, TenantId = Tenant, AccountCode = "1000",
+                AccountName = "Cash A", AccountType = "Asset", IsPostingAllowed = true, CreatedBy = User.ToString()
+            },
+            new ChartOfAccount
+            {
+                AccountId = cashTo, Id = cashTo, TenantId = Tenant, AccountCode = "1001",
+                AccountName = "Cash B", AccountType = "Asset", IsPostingAllowed = true, CreatedBy = User.ToString()
+            });
+        db.AccountDefaults.Add(new AccountDefault
         {
-            AccountId = accountId,
-            Id = accountId,
+            Id = Guid.NewGuid(),
+            AccountDefaultId = Guid.NewGuid(),
             TenantId = Tenant,
-            AccountCode = "4000",
-            AccountName = "Revenue",
-            AccountType = "Income",
-            IsPostingAllowed = true,
+            Purpose = AccountPurposes.AccountsReceivable,
+            AccountId = arId,
+            IsActive = true,
             CreatedBy = User.ToString()
         });
         var taxCodeId = Guid.NewGuid();
@@ -179,7 +202,7 @@ public class FinanceGapSetTests
             TaxCodeName = "GST",
             TaxRate = 10,
             TaxType = "Sales",
-            AccountId = accountId,
+            AccountId = revenueId,
             CreatedBy = User.ToString()
         });
         var budgetId = Guid.NewGuid();
@@ -188,7 +211,7 @@ public class FinanceGapSetTests
             Id = budgetId,
             BudgetId = budgetId,
             TenantId = Tenant,
-            AccountId = accountId,
+            AccountId = revenueId,
             BudgetName = "FY Budget",
             StartDate = new DateTime(2026, 1, 1),
             EndDate = new DateTime(2026, 12, 31),
@@ -201,7 +224,11 @@ public class FinanceGapSetTests
         });
         await db.SaveChangesAsync();
 
-        var gap = new FinanceGapService(db);
+        var accounting = new AccountingService(
+            new ApplicationJournalRepositoryAdapter(db),
+            new ApplicationChartOfAccountRepositoryAdapter(db),
+            db);
+        var gap = new FinanceGapService(db, accounting);
 
         var group = await gap.CreateTaxGroupAsync(new CreateTaxGroupDto
         {
@@ -228,24 +255,28 @@ public class FinanceGapSetTests
             MemoDate = DateTime.UtcNow.Date,
             Lines =
             {
-                new CreateMemoLineDto { Description = "Goodwill", Amount = 20, TaxAmount = 0, AccountId = accountId }
+                new CreateMemoLineDto { Description = "Goodwill", Amount = 20, TaxAmount = 0, AccountId = revenueId }
             }
         }, Tenant, User);
         Assert.Equal("Draft", memo.Status);
         Assert.Equal(20m, memo.TotalAmount);
         var posted = await gap.PostCreditMemoAsync(memo.Id, Tenant, User);
         Assert.Equal("Posted", posted.Status);
+        Assert.NotNull(posted.PostedJournalId);
+        Assert.NotEqual(Guid.Empty, posted.PostedJournalId);
 
         var ft = await gap.CreateFundTransferAsync(new CreateFundTransferDto
         {
             TransferDate = DateTime.UtcNow.Date,
             Amount = 100,
-            FromAccountId = accountId,
-            ToAccountId = accountId
+            FromAccountId = cashFrom,
+            ToAccountId = cashTo
         }, Tenant, User);
         Assert.Equal("Draft", ft.Status);
         var ftPosted = await gap.PostFundTransferAsync(ft.Id, Tenant, User);
         Assert.Equal("Posted", ftPosted.Status);
+        Assert.NotNull(ftPosted.PostedJournalId);
+        Assert.NotEqual(Guid.Empty, ftPosted.PostedJournalId);
     }
 
     [Fact]

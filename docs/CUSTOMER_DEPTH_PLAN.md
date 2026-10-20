@@ -413,7 +413,7 @@ Plus field enrichments on Customer, Vendor, Quote, SalesOrder, SalesInvoice, Ite
 - [x] Sales (dispatch, unpost, general sale, prints)
 - [x] Procurement (landed cost, 3-way match, vendor contract)
 - [x] SCM (brand, bin, reservation, kit, cycle count, WAC)
-- [ ] Finance — opening/period/cheque/budget APIs exist; **expense claim approve/paid ≠ GL**; **FinanceGap fund/credit/debit post ≠ GL** (WP 1.6)
+- [ ] Finance — opening/period/cheque/budget APIs exist; **expense claim approve/paid ≠ GL**; FinanceGap fund/credit/debit post **creates journals** when account defaults + distinct From/To set
 - [x] Manufacturing (routing, scrap, SO release)
 - [x] Projects (timesheet, milestone bill, expense)
 - [x] HRM (advance, team)

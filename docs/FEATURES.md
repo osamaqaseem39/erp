@@ -75,7 +75,7 @@ DI-registered via `AddErpFinanceModule`. Controllers under `ERP.Api/Controllers/
 | Taxes | `/api/finance/taxes` | Wired |
 | Invoices / bills / payments / journals | `/api/finance/invoices`, `bills`, `payments`, `journals` | Wired; DI’d `JournalService` post/reverse is **dead** (`false`) — use AccountingService |
 | Fixed assets + depreciation | `/api/finance/fixed-assets` | Wired |
-| Finance gaps (fund/credit/debit memo, …) | `/api/finance/gaps` (etc.) | CRUD wired; **post flips status without GL** |
+| Finance gaps (fund/credit/debit memo, …) | `/api/finance/gaps` (etc.) | CRUD + post creates journals (`PostedJournalId`); needs AR/AP defaults for memos |
 | Finance reports | `/api/finance/reports` | Wired report service |
 
 CRM sales-order **Invoice** action creates a Finance invoice header (`SalesOrderService.InvoiceAsync`).

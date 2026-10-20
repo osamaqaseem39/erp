@@ -1,3 +1,4 @@
+using ERP.Application.Interfaces.Finance;
 using ERP.Domain.Finance;
 using ERP.Infrastructure.Database;
 using ERP.Shared.DTOs.Finance;
@@ -61,8 +62,13 @@ public interface IFinanceGapService
 public class FinanceGapService : IFinanceGapService
 {
     private readonly ERPDbContext _db;
+    private readonly IAccountingService? _accounting;
 
-    public FinanceGapService(ERPDbContext db) => _db = db;
+    public FinanceGapService(ERPDbContext db, IAccountingService? accounting = null)
+    {
+        _db = db;
+        _accounting = accounting;
+    }
 
     public async Task<BudgetLineDto> AddBudgetLineAsync(CreateBudgetLineDto dto, Guid tenantId, Guid userId)
     {
@@ -304,6 +310,49 @@ public class FinanceGapService : IFinanceGapService
             ?? throw new NotFoundException("Fund transfer not found.");
         if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Only Draft fund transfers can be posted.");
+        if (entity.Amount <= 0)
+            throw new ValidationException("Fund transfer amount must be positive.");
+        var fromId = entity.FromAccountId ?? Guid.Empty;
+        var toId = entity.ToAccountId ?? Guid.Empty;
+        if (fromId == Guid.Empty || toId == Guid.Empty)
+            throw new ValidationException("FromAccountId and ToAccountId are required to post a fund transfer.");
+        if (fromId == toId)
+            throw new ValidationException("From and To GL accounts must differ.");
+        if (_accounting == null)
+            throw new InvalidOperationException("Accounting service is required to post fund transfers.");
+
+        var journalId = await _accounting.AddJournalAsync(new JournalCreateDto
+        {
+            JournalType = "FundTransfer",
+            JournalDate = entity.TransferDate == default ? DateTime.UtcNow.Date : entity.TransferDate.Date,
+            Description = $"Fund transfer {entity.TransferNumber}",
+            ReferenceNo = entity.TransferNumber,
+            EntityReferenceTable = "FundTransfers",
+            EntityReferenceId = entity.Id
+        }, tenantId, userId);
+        if (journalId == Guid.Empty)
+            throw new InvalidOperationException("Failed to create fund transfer journal.");
+
+        await _accounting.AddJournalEntryAsync(new CreateJournalEntryDto
+        {
+            AccountId = toId,
+            Debit = entity.Amount,
+            Credit = 0,
+            Narration = $"Transfer in — {entity.TransferNumber}"
+        }, journalId, tenantId, userId);
+        await _accounting.AddJournalEntryAsync(new CreateJournalEntryDto
+        {
+            AccountId = fromId,
+            Debit = 0,
+            Credit = entity.Amount,
+            Narration = $"Transfer out — {entity.TransferNumber}"
+        }, journalId, tenantId, userId);
+
+        var posted = await _accounting.PostJournalAsync(journalId, tenantId, userId, allowPostWithoutApprove: true);
+        if (posted == Guid.Empty)
+            throw new InvalidOperationException("Failed to post fund transfer journal (unbalanced or period/FY gate).");
+
+        entity.PostedJournalId = posted;
         entity.Status = "Posted";
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
@@ -374,6 +423,58 @@ public class FinanceGapService : IFinanceGapService
             ?? throw new NotFoundException("Credit memo not found.");
         if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Only Draft credit memos can be posted.");
+        if (entity.Lines.Count == 0 || entity.TotalAmount <= 0)
+            throw new ValidationException("Credit memo must have lines and a positive total.");
+        if (_accounting == null)
+            throw new InvalidOperationException("Accounting service is required to post credit memos.");
+
+        var arId = await ResolvePurposeAccountAsync(AccountPurposes.AccountsReceivable, tenantId);
+        if (arId == Guid.Empty)
+            throw new ValidationException("Account default AccountsReceivable is required to post credit memos.");
+
+        var journalId = await _accounting.AddJournalAsync(new JournalCreateDto
+        {
+            JournalType = "CreditMemo",
+            JournalDate = entity.MemoDate == default ? DateTime.UtcNow.Date : entity.MemoDate.Date,
+            Description = $"Credit memo {entity.MemoNumber}",
+            ReferenceNo = entity.MemoNumber,
+            EntityReferenceTable = "CreditMemos",
+            EntityReferenceId = entity.Id
+        }, tenantId, userId);
+        if (journalId == Guid.Empty)
+            throw new InvalidOperationException("Failed to create credit memo journal.");
+
+        foreach (var line in entity.Lines.OrderBy(l => l.LineNumber))
+        {
+            var accountId = line.AccountId is { } a && a != Guid.Empty
+                ? a
+                : await ResolvePurposeAccountAsync(AccountPurposes.SalesReturns, tenantId);
+            if (accountId == Guid.Empty)
+                throw new ValidationException("Each credit memo line needs AccountId or SalesReturns default.");
+            var amount = line.Amount + line.TaxAmount;
+            if (amount <= 0) continue;
+            await _accounting.AddJournalEntryAsync(new CreateJournalEntryDto
+            {
+                AccountId = accountId,
+                Debit = amount,
+                Credit = 0,
+                Narration = line.Description ?? entity.MemoNumber
+            }, journalId, tenantId, userId);
+        }
+
+        await _accounting.AddJournalEntryAsync(new CreateJournalEntryDto
+        {
+            AccountId = arId,
+            Debit = 0,
+            Credit = entity.TotalAmount,
+            Narration = $"AR credit — {entity.MemoNumber}"
+        }, journalId, tenantId, userId);
+
+        var posted = await _accounting.PostJournalAsync(journalId, tenantId, userId, allowPostWithoutApprove: true);
+        if (posted == Guid.Empty)
+            throw new InvalidOperationException("Failed to post credit memo journal.");
+
+        entity.PostedJournalId = posted;
         entity.Status = "Posted";
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
@@ -444,6 +545,58 @@ public class FinanceGapService : IFinanceGapService
             ?? throw new NotFoundException("Debit memo not found.");
         if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Only Draft debit memos can be posted.");
+        if (entity.Lines.Count == 0 || entity.TotalAmount <= 0)
+            throw new ValidationException("Debit memo must have lines and a positive total.");
+        if (_accounting == null)
+            throw new InvalidOperationException("Accounting service is required to post debit memos.");
+
+        var apId = await ResolvePurposeAccountAsync(AccountPurposes.AccountsPayable, tenantId);
+        if (apId == Guid.Empty)
+            throw new ValidationException("Account default AccountsPayable is required to post debit memos.");
+
+        var journalId = await _accounting.AddJournalAsync(new JournalCreateDto
+        {
+            JournalType = "DebitMemo",
+            JournalDate = entity.MemoDate == default ? DateTime.UtcNow.Date : entity.MemoDate.Date,
+            Description = $"Debit memo {entity.MemoNumber}",
+            ReferenceNo = entity.MemoNumber,
+            EntityReferenceTable = "DebitMemos",
+            EntityReferenceId = entity.Id
+        }, tenantId, userId);
+        if (journalId == Guid.Empty)
+            throw new InvalidOperationException("Failed to create debit memo journal.");
+
+        await _accounting.AddJournalEntryAsync(new CreateJournalEntryDto
+        {
+            AccountId = apId,
+            Debit = entity.TotalAmount,
+            Credit = 0,
+            Narration = $"AP debit — {entity.MemoNumber}"
+        }, journalId, tenantId, userId);
+
+        foreach (var line in entity.Lines.OrderBy(l => l.LineNumber))
+        {
+            var accountId = line.AccountId is { } a && a != Guid.Empty
+                ? a
+                : await ResolvePurposeAccountAsync(AccountPurposes.PurchaseReturns, tenantId);
+            if (accountId == Guid.Empty)
+                throw new ValidationException("Each debit memo line needs AccountId or PurchaseReturns default.");
+            var amount = line.Amount + line.TaxAmount;
+            if (amount <= 0) continue;
+            await _accounting.AddJournalEntryAsync(new CreateJournalEntryDto
+            {
+                AccountId = accountId,
+                Debit = 0,
+                Credit = amount,
+                Narration = line.Description ?? entity.MemoNumber
+            }, journalId, tenantId, userId);
+        }
+
+        var posted = await _accounting.PostJournalAsync(journalId, tenantId, userId, allowPostWithoutApprove: true);
+        if (posted == Guid.Empty)
+            throw new InvalidOperationException("Failed to post debit memo journal.");
+
+        entity.PostedJournalId = posted;
         entity.Status = "Posted";
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
@@ -911,6 +1064,17 @@ public class FinanceGapService : IFinanceGapService
         var row = await _db.IntercompanyTransactions.AsNoTracking()
             .FirstOrDefaultAsync(t => t.IntercompanyId == id && t.TenantId == tenantId);
         return row == null ? null : MapIcTransaction(row);
+    }
+
+    private async Task<Guid> ResolvePurposeAccountAsync(string purpose, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return Guid.Empty;
+        var mapped = await _db.AccountDefaults.AsNoTracking()
+            .FirstOrDefaultAsync(d =>
+                d.Purpose == purpose
+                && d.IsActive
+                && d.TenantId == tenantId);
+        return mapped?.AccountId ?? Guid.Empty;
     }
 
     private static void RequireTenant(Guid tenantId)
