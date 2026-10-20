@@ -56,15 +56,29 @@ public sealed class ModuleReportQueryService : IModuleReportQueryService
             "POS_SESSION_SUMMARY" => PosSessionAsync(tenantId, from, to),
             "POS_TENDER_SUMMARY" => PosTenderAsync(tenantId, from, to),
             "POS_ITEM_SALES" => PosItemSalesAsync(tenantId, from, to),
-            // Explicit unimplemented pack — fail honestly (no empty-success JSON).
-            "DISPATCH_ADVICE" or "SALE_RETURN" or "VENDOR_INFO" or "PURCHASE_REQUISITION"
-                or "RFQ_SUMMARY" or "VENDOR_CONTRACT" or "STOCK_VALUATION" or "REORDER_ALERT"
-                or "BATCH_EXPIRY" or "SERIAL_NUMBER_LIST" or "ITEM_KIT_LIST" or "PAYMENT_REGISTER"
-                or "TAX_SUMMARY" or "FIXED_ASSET_REGISTER" or "DEPRECIATION_SCHEDULE"
-                or "EXPENSE_CLAIM_SUMMARY" or "BANK_TRANSACTION" or "OPENING_BALANCE"
-                or "QUOTE_LIST" or "ROUTING_LIST" or "BENEFIT_ENROLLMENT" or "TRAINING_SUMMARY"
-                or "RECRUITMENT_PIPELINE" => throw new NotSupportedException(
-                    $"Report '{code}' is registered but not implemented yet."),
+            "DISPATCH_ADVICE" => DispatchAdviceAsync(tenantId, from, to),
+            "SALE_RETURN" => SaleReturnAsync(tenantId, from, to),
+            "VENDOR_INFO" => VendorInfoAsync(tenantId),
+            "PURCHASE_REQUISITION" => PurchaseRequisitionAsync(tenantId, from, to),
+            "RFQ_SUMMARY" => RfqSummaryAsync(tenantId, from, to),
+            "VENDOR_CONTRACT" => VendorContractAsync(tenantId),
+            "STOCK_VALUATION" => StockValuationAsync(tenantId),
+            "REORDER_ALERT" => ReorderAlertAsync(tenantId),
+            "BATCH_EXPIRY" => BatchExpiryAsync(tenantId),
+            "SERIAL_NUMBER_LIST" => SerialNumberListAsync(tenantId),
+            "ITEM_KIT_LIST" => ItemKitListAsync(tenantId),
+            "PAYMENT_REGISTER" => PaymentRegisterAsync(tenantId, from, to),
+            "TAX_SUMMARY" => TaxSummaryAsync(tenantId, from, to),
+            "FIXED_ASSET_REGISTER" => FixedAssetRegisterAsync(tenantId),
+            "DEPRECIATION_SCHEDULE" => DepreciationScheduleAsync(tenantId, from, to),
+            "EXPENSE_CLAIM_SUMMARY" => ExpenseClaimSummaryAsync(tenantId, from, to),
+            "BANK_TRANSACTION" => BankTransactionAsync(tenantId, from, to),
+            "OPENING_BALANCE" => OpeningBalanceAsync(tenantId),
+            "QUOTE_LIST" => QuoteListAsync(tenantId, from, to),
+            "ROUTING_LIST" => RoutingListAsync(tenantId),
+            "BENEFIT_ENROLLMENT" => BenefitEnrollmentAsync(tenantId),
+            "TRAINING_SUMMARY" => TrainingSummaryAsync(tenantId, from, to),
+            "RECRUITMENT_PIPELINE" => RecruitmentPipelineAsync(tenantId),
             _ => throw new NotSupportedException(
                 $"Unknown or unimplemented report code '{code}'.")
         };

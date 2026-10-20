@@ -89,6 +89,13 @@ Phase 6  Growth / v1.1
 - **Do:** `FinanceGapService` fund transfer / credit memo / debit memo post must create journals + set `PostedJournalId` (same path as other finance posts). Add writers for `TaxTransactions` or remove from honesty claims. Kill or delete unused `JournalService` DI if still dead.
 - **Accept:** Posted gap docs have non-empty `PostedJournalId` and balanced journals; no status-only post.
 - **Verify:** Finance gap post/reverse tests including tenant fail-closed.
+- **Done (2026-10-21):** Fund/credit/debit memo posting creates journals. `TaxTransactions` writers → WP 1.7.
+
+### WP 1.7 — TaxTransactions write path
+- **Depends:** 1.6
+- **Do:** Persist `Finance.TaxTransactions` on tax-affecting posts (SI/PI/CN/DN/memos) or drop the table from honesty claims / reports until wired.
+- **Accept:** TAX_SUMMARY report has writers or catalog note; no orphan schema-only claims.
+- **Verify:** Tax post creates rows; tenant fail-closed.
 
 **Exit gate 1:** Public REST honest; tenant fail-closed on touched paths; transitions + settings for depth docs. PASS/FAIL in PROGRESS.
 

@@ -2,7 +2,7 @@
 
 **Goal:** Turn the thin Reports metadata shell into a finished multi-module ERP reporting product — one catalog, real queries, hub UI, honest exports, and working schedule delivery.
 
-**Status (partial):** `ReportCatalog` seeds ~90 codes; most ops/finance/module codes run; **23 catalog codes throw `NotSupportedException`** on generate (DISPATCH_ADVICE, SALE_RETURN, VENDOR_INFO, PURCHASE_REQUISITION, RFQ_SUMMARY, VENDOR_CONTRACT, STOCK_VALUATION, REORDER_ALERT, BATCH_EXPIRY, SERIAL_NUMBER_LIST, ITEM_KIT_LIST, PAYMENT_REGISTER, TAX_SUMMARY, FIXED_ASSET_REGISTER, DEPRECIATION_SCHEDULE, EXPENSE_CLAIM_SUMMARY, BANK_TRANSACTION, OPENING_BALANCE, QUOTE_LIST, ROUTING_LIST, BENEFIT_ENROLLMENT, TRAINING_SUMMARY, RECRUITMENT_PIPELINE). Hub UI exists. Export JSON/CSV/Excel/PDF when PDF service registered. Schedule SMTP when `email.*` set. `Query` stripped from DTOs. **Do not mark DoD #2 done until stub codes are implemented or removed from `/available`.**
+**Status (partial):** `ReportCatalog` seeds ~90 codes; module query pack (including former stub codes) is wired in `ModuleReportQueryService`. Hub UI exists. Export JSON/CSV/Excel/PDF when PDF service registered. Schedule SMTP when `email.*` set. `Query` stripped from DTOs. Remaining: print polish, EF favorites, staging SMTP sign-off, generate smoke matrix.
 
 **Out of scope:** Arbitrary client SQL, NestJS `apps/reports` Hello World, taxi/lending/CMS report packs.
 

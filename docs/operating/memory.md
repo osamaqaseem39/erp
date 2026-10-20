@@ -4,6 +4,12 @@ Append-only session notes for agents and humans. Do not rewrite history; add a n
 
 ---
 
+## 2026-10-21 — WP 1.1 / 1.6 kill stubs + FinanceGap GL
+
+- Wired 23 former stub report codes in `ModuleReportQueryService` to existing query methods.
+- FinanceGap fund/credit/debit memo post creates balanced journals via `IAccountingService` and sets `PostedJournalId` (requires AR/AP defaults for memos; distinct From/To for transfers).
+- Added WP 1.7 for TaxTransactions writers. Tests: 553/553.
+
 ## 2026-10-21 — WP 0.2 docs honesty
 
 - Flipped BUSINESS_MODULES DI column to Yes for Finance/HRM/Inventory/Procurement/MFG/Projects.
