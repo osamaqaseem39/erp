@@ -1,4 +1,5 @@
 using ERP.Domain;
+using ERP.Domain.Projects;
 
 namespace ERP.Domain.Finance;
 
@@ -17,6 +18,7 @@ public class ExpenseClaim : BaseEntity
     public Guid? ApprovedBy { get; set; }
     public DateTime? PaidAt { get; set; }
 
+    public Project? Project { get; set; }
     public ICollection<ExpenseClaimLine> Lines { get; set; } = new List<ExpenseClaimLine>();
 }
 

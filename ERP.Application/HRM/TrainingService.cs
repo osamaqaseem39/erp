@@ -68,7 +68,7 @@ public class TrainingService : ITrainingService
         if (dto.InstructorId.HasValue) entity.InstructorId = dto.InstructorId;
         entity.Cost = dto.Cost;
         entity.MaxParticipants = dto.MaxParticipants;
-        if (!string.IsNullOrWhiteSpace(dto.Status)) entity.Status = dto.Status.Trim();
+        // Status only via complete/cancel workflow
         entity.IsActive = dto.IsActive;
         entity.UpdatedAt = DateTime.UtcNow;
         entity.UpdatedBy = userId == Guid.Empty ? null : userId.ToString();

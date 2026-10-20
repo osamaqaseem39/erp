@@ -37,6 +37,8 @@ public interface IBankService
     Task<bool> ImportBankTransactionsAsync(Guid bankAccountId, List<CreateBankTransactionDto> transactions, Guid tenantId, Guid userId);
     Task<IEnumerable<BankTransactionDto>> GetBankTransactionsAsync(
         Guid bankAccountId, Guid tenantId, bool? unreconciledOnly = null, DateTime? toDate = null);
+    Task<IEnumerable<BankTransactionDto>> ListBankTransactionsAsync(
+        Guid tenantId, Guid? bankAccountId = null, bool? unreconciledOnly = null, DateTime? toDate = null);
     Task<bool> MatchBankTransactionToPaymentAsync(BankTransactionMatchDto dto, Guid tenantId, Guid userId);
     Task<bool> UnmatchBankTransactionAsync(Guid bankTxId, Guid tenantId, Guid userId);
     

@@ -27,6 +27,8 @@ public class WarehouseLocationDto : BaseDto
     public Guid WarehouseId { get; set; }
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    public string LocationType { get; set; } = "Pick";
+    public string? Zone { get; set; }
 }
 
 public class CreateWarehouseLocationDto
@@ -34,6 +36,8 @@ public class CreateWarehouseLocationDto
     public Guid WarehouseId { get; set; }
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    public string LocationType { get; set; } = "Pick";
+    public string? Zone { get; set; }
 }
 
 public class UpdateWarehouseLocationDto : CreateWarehouseLocationDto

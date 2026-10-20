@@ -1,5 +1,6 @@
 using ERP.Application.Interfaces.Finance;
 using ERP.Domain.Finance;
+using ERP.Infrastructure.Database;
 using ERP.Shared.DTOs.Finance;
 using IPaymentRepository = ERP.Infrastructure.Interfaces.Finance.IPaymentRepository;
 
@@ -9,11 +10,13 @@ public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _repository;
     private readonly IInvoiceRepository _invoiceRepository;
+    private readonly ERPDbContext? _db;
 
-    public PaymentService(IPaymentRepository repository, IInvoiceRepository invoiceRepository)
+    public PaymentService(IPaymentRepository repository, IInvoiceRepository invoiceRepository, ERPDbContext? db = null)
     {
         _repository = repository;
         _invoiceRepository = invoiceRepository;
+        _db = db;
     }
 
     public async Task<PaymentDto?> GetByIdAsync(Guid id)
@@ -196,6 +199,7 @@ public class PaymentService : IPaymentService
         var payment = await EnsurePaymentAsync(dto.PaymentId, tenantId, userId, apply, relatedInvoiceId: dto.InvoiceId);
         if (payment == null) return false;
 
+        // Compat: keep RelatedInvoiceId for void/refund paths; multi-apply lives on PaymentApplications
         payment.RelatedInvoiceId = dto.InvoiceId;
         payment.Amount = Math.Max(payment.Amount, apply);
         payment.Status = "Completed";
@@ -204,6 +208,17 @@ public class PaymentService : IPaymentService
         payment.ProcessedBy = userId;
         payment.UpdatedBy = userId.ToString();
         await _repository.UpdateAsync(payment);
+        await PersistApplicationAsync(new PaymentApplication
+        {
+            TenantId = tenantId,
+            PaymentId = payment.Id,
+            InvoiceId = dto.InvoiceId,
+            BillId = null,
+            AppliedAmount = apply,
+            AppliedDate = DateTime.UtcNow.Date,
+            Status = "Applied",
+            CreatedBy = userId.ToString()
+        });
         return true;
     }
 
@@ -230,7 +245,25 @@ public class PaymentService : IPaymentService
         payment.ProcessedBy = userId;
         payment.UpdatedBy = userId.ToString();
         await _repository.UpdateAsync(payment);
+        await PersistApplicationAsync(new PaymentApplication
+        {
+            TenantId = tenantId,
+            PaymentId = payment.Id,
+            InvoiceId = null,
+            BillId = billId,
+            AppliedAmount = apply,
+            AppliedDate = DateTime.UtcNow.Date,
+            Status = "Applied",
+            CreatedBy = userId.ToString()
+        });
         return true;
+    }
+
+    private async Task PersistApplicationAsync(PaymentApplication app)
+    {
+        if (_db == null) return;
+        _db.PaymentApplications.Add(app);
+        await _db.SaveChangesAsync();
     }
 
     public async Task<bool> VoidAsync(Guid paymentId, VoidPaymentDto dto, Guid tenantId, Guid userId)

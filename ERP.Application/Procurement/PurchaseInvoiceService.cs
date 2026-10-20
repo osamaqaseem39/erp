@@ -177,7 +177,8 @@ public class PurchaseInvoiceService : IPurchaseInvoiceService
             var apNumber = $"AP-{entity.InvoiceNumber}";
             var bills = await _billService.GetByVendorAsync(entity.VendorId, tenantId);
             var ap = bills.FirstOrDefault(b =>
-                string.Equals(b.BillNumber, apNumber, StringComparison.OrdinalIgnoreCase)
+                b.SourcePurchaseInvoiceId == entity.Id
+                || string.Equals(b.BillNumber, apNumber, StringComparison.OrdinalIgnoreCase)
                 || (b.Notes?.Contains(tag, StringComparison.OrdinalIgnoreCase) ?? false));
             if (ap != null
                 && !string.Equals(ap.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)

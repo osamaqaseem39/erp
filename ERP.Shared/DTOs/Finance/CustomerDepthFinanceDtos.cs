@@ -58,6 +58,9 @@ public class AccountingPeriodDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string Status { get; set; } = "Open";
+    public bool IsLocked { get; set; }
+    public DateTime? ClosedAt { get; set; }
+    public Guid? ClosedBy { get; set; }
 }
 
 public class CreateAccountingPeriodDto
@@ -100,12 +103,16 @@ public class CreateChequeBookDto
 
 public class IssueChequeLeafDto
 {
+    /// <summary>Leaf number for UI clients; path parameter remains authoritative on the API.</summary>
+    public int LeafNumber { get; set; }
     public Guid? JournalId { get; set; }
     public string? Notes { get; set; }
 }
 
 public class SetChequeLeafStatusDto
 {
+    /// <summary>Leaf number for UI clients; path parameter remains authoritative on the API.</summary>
+    public int LeafNumber { get; set; }
     public string Status { get; set; } = string.Empty;
     public string? Notes { get; set; }
 }

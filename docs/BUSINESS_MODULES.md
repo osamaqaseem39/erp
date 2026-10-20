@@ -14,7 +14,7 @@ Module inventory from domain folders, controllers, frontend routes, and DI regis
 | **Procurement** | `ERP.Domain/Procurement` | Vendors, purchase orders | `/procurement/*` | **No** |
 | **Manufacturing** | `ERP.Domain/Manufacturing` | Production orders | `/manufacturing/*` | **No** |
 | **Projects** | `ERP.Domain/Projects` | Projects | `/projects` | **No** |
-| **Reports** | `ERP.Domain/Reports` | Reports | (limited UI) | **No** |
+| **Reports** | `ERP.Domain/Reports` | Reports | Hub `/reports` + finance accounts reports | **Yes** |
 
 ## CRM pipeline (wired)
 

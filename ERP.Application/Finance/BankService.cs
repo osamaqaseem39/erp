@@ -280,11 +280,16 @@ public class BankService : IBankService
     }
 
     public async Task<IEnumerable<BankTransactionDto>> GetBankTransactionsAsync(
-        Guid bankAccountId, Guid tenantId, bool? unreconciledOnly = null, DateTime? toDate = null)
+        Guid bankAccountId, Guid tenantId, bool? unreconciledOnly = null, DateTime? toDate = null) =>
+        await ListBankTransactionsAsync(tenantId, bankAccountId, unreconciledOnly, toDate);
+
+    public async Task<IEnumerable<BankTransactionDto>> ListBankTransactionsAsync(
+        Guid tenantId, Guid? bankAccountId = null, bool? unreconciledOnly = null, DateTime? toDate = null)
     {
         if (tenantId == Guid.Empty) return Array.Empty<BankTransactionDto>();
-        var q = _db.BankTransactions.AsNoTracking()
-            .Where(t => t.BankAccountId == bankAccountId && t.TenantId == tenantId);
+        var q = _db.BankTransactions.AsNoTracking().Where(t => t.TenantId == tenantId);
+        if (bankAccountId.HasValue && bankAccountId != Guid.Empty)
+            q = q.Where(t => t.BankAccountId == bankAccountId);
         if (unreconciledOnly == true) q = q.Where(t => !t.IsReconciled);
         if (toDate.HasValue) q = q.Where(t => t.TransactionDate <= toDate.Value);
         var rows = await q.OrderByDescending(t => t.TransactionDate).ThenByDescending(t => t.CreatedAt).ToListAsync();
@@ -395,12 +400,41 @@ public class BankService : IBankService
                 return false;
             tx.IsReconciled = true;
             tx.ReconciliationId = reconciliationId;
+            var existingLine = await _db.BankReconciliationLines.FirstOrDefaultAsync(l =>
+                l.ReconciliationId == reconciliationId && l.BankTransactionId == bankTxId && l.TenantId == tenantId);
+            if (existingLine == null)
+            {
+                _db.BankReconciliationLines.Add(new BankReconciliationLine
+                {
+                    TenantId = tenantId,
+                    ReconciliationId = reconciliationId,
+                    BankTransactionId = bankTxId,
+                    MatchedAmount = Math.Abs(tx.Amount),
+                    IsMatched = true,
+                    CreatedBy = userId.ToString()
+                });
+            }
+            else
+            {
+                existingLine.IsMatched = true;
+                existingLine.MatchedAmount = Math.Abs(tx.Amount);
+                existingLine.UpdatedAt = DateTime.UtcNow;
+                existingLine.UpdatedBy = userId.ToString();
+            }
         }
         else
         {
             if (!tx.IsReconciled || tx.ReconciliationId != reconciliationId) return false;
             tx.IsReconciled = false;
             tx.ReconciliationId = null;
+            var line = await _db.BankReconciliationLines.FirstOrDefaultAsync(l =>
+                l.ReconciliationId == reconciliationId && l.BankTransactionId == bankTxId && l.TenantId == tenantId);
+            if (line != null)
+            {
+                line.IsMatched = false;
+                line.UpdatedAt = DateTime.UtcNow;
+                line.UpdatedBy = userId.ToString();
+            }
         }
 
         await RecalcDifferenceAsync(recon, tenantId);
@@ -418,6 +452,13 @@ public class BankService : IBankService
 
         await RecalcDifferenceAsync(recon, tenantId);
         if (Math.Abs(recon.Difference) > 0.01m) return false;
+
+        var lineCount = await _db.BankReconciliationLines.CountAsync(l =>
+            l.ReconciliationId == reconciliationId && l.TenantId == tenantId && l.IsMatched);
+        var clearedCount = await _db.BankTransactions.CountAsync(t =>
+            t.ReconciliationId == reconciliationId && t.TenantId == tenantId && t.IsReconciled);
+        // When recon lines are in use, every cleared tx must have a matched line
+        if (lineCount > 0 && lineCount < clearedCount) return false;
 
         recon.Status = "Closed";
         recon.ClosedAt = DateTime.UtcNow;

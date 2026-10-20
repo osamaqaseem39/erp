@@ -13,9 +13,10 @@ public class StockService : IStockService
     public StockService(
         IStockBalanceRepository repository,
         IStockLedgerRepository ledgers,
-        ERPDbContext db)
+        ERPDbContext db,
+        ERP.Application.Core.Settings.ICoreSettingsService? settings = null)
     {
-        _inner = new Inventory.StockService(repository, ledgers, db);
+        _inner = new Inventory.StockService(repository, ledgers, db, settings: settings);
     }
 
     public Task<StockBalanceDto?> GetByIdAsync(Guid id) => _inner.GetByIdAsync(id);
@@ -32,6 +33,8 @@ public class StockService : IStockService
         => _inner.GetByItemAndWarehouseAsync(itemId, warehouseId);
     public Task<StockBalanceDto?> GetByItemAndWarehouseAsync(Guid itemId, Guid warehouseId, Guid tenantId)
         => _inner.GetByItemAndWarehouseAsync(itemId, warehouseId, tenantId);
+    public Task<StockBalanceDto?> GetByItemWarehouseLocationAsync(Guid itemId, Guid warehouseId, Guid? warehouseLocationId, Guid tenantId)
+        => _inner.GetByItemWarehouseLocationAsync(itemId, warehouseId, warehouseLocationId, tenantId);
     public Task<IEnumerable<StockBalanceDto>> GetByItemAsync(Guid itemId) => _inner.GetByItemAsync(itemId);
     public Task<IEnumerable<StockBalanceDto>> GetByItemAsync(Guid itemId, Guid tenantId)
         => _inner.GetByItemAsync(itemId, tenantId);
@@ -51,12 +54,21 @@ public class StockService : IStockService
         => _inner.ReceiveStockAsync(tenantId, warehouseId, lines, userId);
     public Task<bool> ReceiveStockAsync(Guid tenantId, Guid warehouseId, IEnumerable<(Guid ItemId, decimal Quantity, decimal UnitCost)> lines, string? userId = null)
         => _inner.ReceiveStockAsync(tenantId, warehouseId, lines, userId);
+    public Task<bool> ReceiveStockAsync(Guid tenantId, Guid warehouseId, IEnumerable<(Guid ItemId, decimal Quantity, Guid? WarehouseLocationId)> lines, string? userId = null)
+        => _inner.ReceiveStockAsync(tenantId, warehouseId, lines, userId);
     public Task<bool> IssueStockAsync(Guid tenantId, Guid warehouseId, IEnumerable<(Guid ItemId, decimal Quantity)> lines, string? userId = null)
+        => _inner.IssueStockAsync(tenantId, warehouseId, lines, userId);
+    public Task<bool> IssueStockAsync(Guid tenantId, Guid warehouseId, IEnumerable<(Guid ItemId, decimal Quantity, Guid? WarehouseLocationId)> lines, string? userId = null)
         => _inner.IssueStockAsync(tenantId, warehouseId, lines, userId);
     public Task<bool> IssueStockAnyWarehouseAsync(Guid tenantId, IEnumerable<(Guid ItemId, decimal Quantity)> lines, string? userId = null)
         => _inner.IssueStockAnyWarehouseAsync(tenantId, lines, userId);
+    public Task<bool> ReserveAsync(Guid tenantId, Guid warehouseId, Guid itemId, decimal quantity, string? userId = null)
+        => _inner.ReserveAsync(tenantId, warehouseId, itemId, quantity, userId);
+    public Task<bool> UnreserveAsync(Guid tenantId, Guid warehouseId, Guid itemId, decimal quantity, string? userId = null)
+        => _inner.UnreserveAsync(tenantId, warehouseId, itemId, quantity, userId);
     public Task<IEnumerable<StockLedgerDto>> GetStockLedgerAsync(Guid itemId, Guid tenantId, Guid? warehouseId = null, DateTime? toDate = null)
         => _inner.GetStockLedgerAsync(itemId, tenantId, warehouseId, toDate);
     public Task<StockAverageRateDto> CalculateAverageRateAsync(Guid tenantId, CalculateStockAverageRateRequest request)
         => _inner.CalculateAverageRateAsync(tenantId, request);
+    public Task<bool> IsBinRequiredAsync() => _inner.IsBinRequiredAsync();
 }

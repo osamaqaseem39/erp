@@ -1,11 +1,14 @@
 using ERP.Application.Common;
-using ERP.Infrastructure.Numbering;
 using ERP.Application.Interfaces.CRM;
 using ERP.Application.Interfaces.Finance;
+using ERP.Application.Interfaces.Inventory;
+using ERP.Application.SCM.Interfaces;
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Infrastructure.Numbering;
 using ERP.Shared.DTOs.CRM;
 using ERP.Shared.DTOs.Finance;
+using ERP.Shared.DTOs.Inventory;
 using IStockService = ERP.Application.Interfaces.IStockService;
 
 namespace ERP.Application.CRM;
@@ -27,19 +30,28 @@ public class SalesOrderService : ISalesOrderService
     private readonly ISalesOrderLineRepository _lineRepository;
     private readonly IInvoiceService _invoiceService;
     private readonly IStockService _stockService;
+    private readonly IStockReservationService _reservations;
+    private readonly IItemKitService _kits;
+    private readonly IItemService _items;
 
     public SalesOrderService(
         ISalesOrderRepository repository,
         ISalesOrderLineRepository lineRepository,
         IInvoiceService invoiceService,
         IDocumentNumberService numbers,
-        IStockService stockService)
+        IStockService stockService,
+        IStockReservationService reservations,
+        IItemKitService kits,
+        IItemService items)
     {
         _repository = repository;
         _lineRepository = lineRepository;
         _invoiceService = invoiceService;
         _numbers = numbers;
         _stockService = stockService;
+        _reservations = reservations;
+        _kits = kits;
+        _items = items;
     }
 
     public async Task<SalesOrderDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -138,6 +150,24 @@ public class SalesOrderService : ISalesOrderService
         if (DocumentWorkflow.IsSameActor(entity.CreatedBy, userId))
             return false;
 
+        var lines = entity.SalesOrderLines?.Count > 0
+            ? entity.SalesOrderLines.ToList()
+            : (await _lineRepository.GetBySalesOrderIdAsync(id, tenantId)).ToList();
+
+        var reservationLines = await BuildReservationLinesAsync(lines, tenantId, id);
+        if (reservationLines == null) return false;
+
+        if (reservationLines.Count > 0)
+        {
+            var resId = await _reservations.CreateAsync(new CreateStockReservationDto
+            {
+                SalesOrderId = id,
+                Notes = $"SO {entity.OrderNumber}",
+                Lines = reservationLines
+            }, tenantId, userId);
+            if (resId == Guid.Empty) return false;
+        }
+
         entity.Status = "Approved";
         entity.ApprovedDate = DateTime.UtcNow;
         entity.UpdatedBy = userId.ToString();
@@ -151,6 +181,13 @@ public class SalesOrderService : ISalesOrderService
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "Cancelled", Transitions))
             return false;
+
+        foreach (var res in await _reservations.GetBySalesOrderAsync(id, tenantId))
+        {
+            if (!string.Equals(res.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                continue;
+            await _reservations.CancelAsync(res.Id, tenantId, userId);
+        }
 
         entity.Status = "Cancelled";
         entity.UpdatedBy = userId.ToString();
@@ -169,16 +206,38 @@ public class SalesOrderService : ISalesOrderService
             ? entity.SalesOrderLines
             : (await _lineRepository.GetBySalesOrderIdAsync(id, tenantId)).ToList();
 
-        var stockLines = lines
-            .Where(l => l.ItemId.HasValue && l.ItemId != Guid.Empty && l.Quantity > 0)
-            .Select(l => (l.ItemId!.Value, l.Quantity))
+        var stockLines = await ExpandKitStockLinesAsync(
+            lines
+                .Where(l => l.ItemId.HasValue && l.ItemId != Guid.Empty && l.Quantity > 0)
+                .Select(l => (l.ItemId!.Value, l.Quantity)),
+            tenantId);
+
+        // Release holds first so Available includes this order's soft allocation, then issue.
+        // If issue fails, recreate an Active reservation so ATP stays honest.
+        var activeReservations = (await _reservations.GetBySalesOrderAsync(id, tenantId))
+            .Where(r => string.Equals(r.Status, "Active", StringComparison.OrdinalIgnoreCase))
             .ToList();
+        foreach (var res in activeReservations)
+            await _reservations.ReleaseAsync(res.Id, tenantId, userId);
 
         if (stockLines.Count > 0)
         {
             var issued = await _stockService.IssueStockAnyWarehouseAsync(
                 entity.TenantId, stockLines, userId.ToString());
-            if (!issued) return false;
+            if (!issued)
+            {
+                var rebuild = await BuildReservationLinesAsync(lines, tenantId, id);
+                if (rebuild is { Count: > 0 })
+                {
+                    await _reservations.CreateAsync(new CreateStockReservationDto
+                    {
+                        SalesOrderId = id,
+                        Notes = $"SO {entity.OrderNumber} (re-hold after failed ship)",
+                        Lines = rebuild
+                    }, tenantId, userId);
+                }
+                return false;
+            }
         }
 
         entity.Status = "Shipped";
@@ -186,6 +245,65 @@ public class SalesOrderService : ISalesOrderService
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
+    }
+
+    private async Task<List<CreateStockReservationLineDto>?> BuildReservationLinesAsync(
+        IEnumerable<SalesOrderLine> lines, Guid tenantId, Guid salesOrderId)
+    {
+        var result = new List<CreateStockReservationLineDto>();
+        foreach (var line in lines.Where(l => l.ItemId.HasValue && l.ItemId != Guid.Empty && l.Quantity > 0))
+        {
+            var exploded = await ExpandKitStockLinesAsync([(line.ItemId!.Value, line.Quantity)], tenantId);
+            foreach (var (itemId, qty) in exploded)
+            {
+                var warehouseId = await ResolveWarehouseAsync(itemId, tenantId);
+                if (warehouseId == Guid.Empty) return null;
+                result.Add(new CreateStockReservationLineDto
+                {
+                    SalesOrderId = salesOrderId,
+                    ItemId = itemId,
+                    WarehouseId = warehouseId,
+                    Quantity = qty
+                });
+            }
+        }
+        return result;
+    }
+
+    private async Task<List<(Guid ItemId, decimal Quantity)>> ExpandKitStockLinesAsync(
+        IEnumerable<(Guid ItemId, decimal Quantity)> lines, Guid tenantId)
+    {
+        var result = new List<(Guid ItemId, decimal Quantity)>();
+        foreach (var (itemId, qty) in lines)
+        {
+            var kit = await _kits.GetByKitItemIdAsync(itemId, tenantId);
+            if (kit?.Components is { Count: > 0 })
+            {
+                foreach (var c in kit.Components.Where(c => c.ComponentItemId != Guid.Empty && c.Quantity > 0))
+                    result.Add((c.ComponentItemId, qty * c.Quantity));
+            }
+            else
+            {
+                result.Add((itemId, qty));
+            }
+        }
+        return result;
+    }
+
+    private async Task<Guid> ResolveWarehouseAsync(Guid itemId, Guid tenantId)
+    {
+        var item = await _items.GetByIdAsync(itemId, tenantId);
+        if (item?.DefaultWarehouseId is { } def && def != Guid.Empty)
+            return def;
+
+        var balances = (await _stockService.GetByItemAsync(itemId, tenantId))
+            .Where(b => b.QuantityOnHand > 0 || b.QuantityAvailable > 0)
+            .OrderByDescending(b => b.QuantityAvailable)
+            .ToList();
+        if (balances.Count > 0)
+            return balances[0].WarehouseId;
+
+        return Guid.Empty;
     }
 
     public async Task<bool> InvoiceAsync(Guid id, Guid tenantId, Guid userId)

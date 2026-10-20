@@ -19,7 +19,18 @@ public sealed class SmtpTenantEmailSender : ITenantEmailSender
         _logger = logger;
     }
 
-    public async Task<bool> TrySendAsync(Guid tenantId, string toEmail, string subject, string bodyText, CancellationToken ct = default)
+    public Task<bool> TrySendAsync(Guid tenantId, string toEmail, string subject, string bodyText, CancellationToken ct = default)
+        => TrySendWithAttachmentAsync(tenantId, toEmail, subject, bodyText, null, null, null, ct);
+
+    public async Task<bool> TrySendWithAttachmentAsync(
+        Guid tenantId,
+        string toEmail,
+        string subject,
+        string bodyText,
+        byte[]? attachmentContent,
+        string? attachmentFileName,
+        string? attachmentContentType,
+        CancellationToken ct = default)
     {
         var keys = new[]
         {
@@ -52,6 +63,13 @@ public sealed class SmtpTenantEmailSender : ITenantEmailSender
             IsBodyHtml = false
         };
         message.To.Add(toEmail);
+
+        if (attachmentContent is { Length: > 0 } && !string.IsNullOrWhiteSpace(attachmentFileName))
+        {
+            var stream = new MemoryStream(attachmentContent);
+            var attachment = new Attachment(stream, attachmentFileName, attachmentContentType ?? "application/octet-stream");
+            message.Attachments.Add(attachment);
+        }
 
         using var client = new SmtpClient(host, port)
         {

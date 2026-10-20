@@ -4,9 +4,11 @@ using ERP.Application.CRM;
 using ERP.Application.Interfaces.Finance;
 using ERP.Application.Interfaces.Sales;
 using ERP.Domain.Sales;
+using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Interfaces.Sales;
 using ERP.Shared.DTOs.Finance;
 using ERP.Shared.DTOs.Sales;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Application.Sales;
 
@@ -23,17 +25,20 @@ public class SalesInvoiceService : ISalesInvoiceService
     private readonly ISalesInvoiceLineRepository _lineRepository;
     private readonly IInvoiceService _financeInvoiceService;
     private readonly ICoreSettingsService _settings;
+    private readonly ERPDbContext? _db;
 
     public SalesInvoiceService(
         ISalesInvoiceRepository repository,
         ISalesInvoiceLineRepository lineRepository,
         IInvoiceService financeInvoiceService,
-        ICoreSettingsService settings)
+        ICoreSettingsService settings,
+        ERPDbContext? db = null)
     {
         _repository = repository;
         _lineRepository = lineRepository;
         _financeInvoiceService = financeInvoiceService;
         _settings = settings;
+        _db = db;
     }
 
     public async Task<SalesInvoiceDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -42,6 +47,7 @@ public class SalesInvoiceService : ISalesInvoiceService
         if (entity == null) return null;
 
         var dto = MapToDto(entity);
+        await EnrichCustomerNamesAsync(new[] { dto }, tenantId);
         var lines = await _lineRepository.GetByInvoiceIdAsync(id, tenantId);
         dto.Lines = lines.Select(MapLineToDto).ToList();
         return dto;
@@ -50,7 +56,9 @@ public class SalesInvoiceService : ISalesInvoiceService
     public async Task<IEnumerable<SalesInvoiceDto>> GetAllAsync(Guid tenantId)
     {
         var entities = await _repository.GetAllAsync(tenantId);
-        return entities.Select(MapToDto);
+        var dtos = entities.Select(MapToDto).ToList();
+        await EnrichCustomerNamesAsync(dtos, tenantId);
+        return dtos;
     }
 
     public async Task<Guid> CreateAsync(CreateSalesInvoiceDto dto, Guid tenantId, Guid userId)
@@ -98,13 +106,17 @@ public class SalesInvoiceService : ISalesInvoiceService
     public async Task<IEnumerable<SalesInvoiceDto>> GetByCustomerAsync(Guid customerId, Guid tenantId)
     {
         var entities = await _repository.GetByCustomerAsync(customerId, tenantId);
-        return entities.Select(MapToDto);
+        var dtos = entities.Select(MapToDto).ToList();
+        await EnrichCustomerNamesAsync(dtos, tenantId);
+        return dtos;
     }
 
     public async Task<IEnumerable<SalesInvoiceDto>> GetByStatusAsync(string status, Guid tenantId)
     {
         var entities = await _repository.GetByStatusAsync(status, tenantId);
-        return entities.Select(MapToDto);
+        var dtos = entities.Select(MapToDto).ToList();
+        await EnrichCustomerNamesAsync(dtos, tenantId);
+        return dtos;
     }
 
     public async Task<bool> PostInvoiceAsync(Guid invoiceId, Guid tenantId, Guid postedBy)
@@ -126,7 +138,8 @@ public class SalesInvoiceService : ISalesInvoiceService
             PageSize = 50
         });
         var alreadyLinked = existing.Any(i =>
-            string.Equals(i.InvoiceNumber, arNumber, StringComparison.OrdinalIgnoreCase)
+            i.SourceSalesInvoiceId == entity.Id
+            || string.Equals(i.InvoiceNumber, arNumber, StringComparison.OrdinalIgnoreCase)
             || (i.Notes?.Contains($"SalesInvoice:{entity.Id}", StringComparison.OrdinalIgnoreCase) ?? false));
 
         if (!alreadyLinked)
@@ -143,6 +156,7 @@ public class SalesInvoiceService : ISalesInvoiceService
                 TotalAmount = entity.TotalAmount,
                 Status = "Issued",
                 SalesOrderId = entity.SalesOrderId,
+                SourceSalesInvoiceId = entity.Id,
                 Notes = $"SalesInvoice:{entity.Id}"
             }, tenantId, postedBy);
         }
@@ -170,7 +184,8 @@ public class SalesInvoiceService : ISalesInvoiceService
             PageSize = 50
         });
         var ar = existing.FirstOrDefault(i =>
-            string.Equals(i.InvoiceNumber, arNumber, StringComparison.OrdinalIgnoreCase)
+            i.SourceSalesInvoiceId == entity.Id
+            || string.Equals(i.InvoiceNumber, arNumber, StringComparison.OrdinalIgnoreCase)
             || (i.Notes?.Contains(tag, StringComparison.OrdinalIgnoreCase) ?? false));
         if (ar != null
             && !string.Equals(ar.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)
@@ -217,7 +232,8 @@ public class SalesInvoiceService : ISalesInvoiceService
             PageSize = 50
         });
         var ar = existing.FirstOrDefault(i =>
-            string.Equals(i.InvoiceNumber, arNumber, StringComparison.OrdinalIgnoreCase)
+            i.SourceSalesInvoiceId == entity.Id
+            || string.Equals(i.InvoiceNumber, arNumber, StringComparison.OrdinalIgnoreCase)
             || (i.Notes?.Contains(tag, StringComparison.OrdinalIgnoreCase) ?? false));
         if (ar != null
             && !string.Equals(ar.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)
@@ -333,6 +349,22 @@ public class SalesInvoiceService : ISalesInvoiceService
         LineNumber = line.LineNumber
     };
 
+    private async Task EnrichCustomerNamesAsync(IEnumerable<SalesInvoiceDto> dtos, Guid tenantId)
+    {
+        if (_db == null) return;
+        var list = dtos as IList<SalesInvoiceDto> ?? dtos.ToList();
+        if (list.Count == 0 || tenantId == Guid.Empty) return;
+        var ids = list.Select(d => d.CustomerId).Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0) return;
+        var names = await _db.Customers.AsNoTracking()
+            .Where(c => c.TenantId == tenantId && ids.Contains(c.Id))
+            .Select(c => new { c.Id, Name = c.CompanyName != null && c.CompanyName != "" ? c.CompanyName : c.CustomerName })
+            .ToDictionaryAsync(x => x.Id, x => x.Name);
+        foreach (var d in list)
+            if (names.TryGetValue(d.CustomerId, out var name))
+                d.CustomerName = name;
+    }
+
     private static SalesInvoiceDto MapToDto(SalesInvoice entity) => new()
     {
         Id = entity.Id,
@@ -363,6 +395,8 @@ public class SalesInvoiceService : ISalesInvoiceService
         DiscountAmount = entity.DiscountAmount,
         PostedAt = entity.PostedAt,
         PostedBy = entity.PostedBy,
+        ProjectId = entity.ProjectId,
+        ProjectMilestoneId = entity.ProjectMilestoneId,
         TenantId = entity.TenantId,
         CreatedAt = entity.CreatedAt,
         UpdatedAt = entity.UpdatedAt
@@ -411,6 +445,8 @@ public class SalesInvoiceService : ISalesInvoiceService
         Overhead = dto.Overhead,
         DiscountType = dto.DiscountType,
         DiscountAmount = dto.DiscountAmount,
+        ProjectId = dto.ProjectId,
+        ProjectMilestoneId = dto.ProjectMilestoneId,
         CreatedBy = userId.ToString(),
         CreatedAt = DateTime.UtcNow
     };

@@ -14,6 +14,7 @@ public class SalesInvoiceMapper : BaseMapper<SalesInvoice, SalesInvoiceDto>
             Id = source.Id,
             InvoiceNumber = source.InvoiceNumber,
             CustomerId = source.CustomerId,
+            CustomerName = null, // populated by SalesInvoiceService
             InvoiceDate = source.InvoiceDate,
             DueDate = source.DueDate,
             Status = source.Status,

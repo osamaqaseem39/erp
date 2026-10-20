@@ -3,6 +3,7 @@ using ERP.Application.Interfaces.Inventory;
 using ERP.Domain.SCM;
 using ERP.Infrastructure.Interfaces.SCM;
 using ERP.Shared.DTOs.Inventory;
+using IStockService = ERP.Application.Interfaces.IStockService;
 
 namespace ERP.Application.Inventory;
 
@@ -89,6 +90,8 @@ public class WarehouseLocationService : IWarehouseLocationService
             WarehouseId = dto.WarehouseId,
             Code = dto.Code.Trim(),
             Name = dto.Name.Trim(),
+            LocationType = NormalizeLocationType(dto.LocationType),
+            Zone = string.IsNullOrWhiteSpace(dto.Zone) ? null : dto.Zone.Trim(),
             CreatedBy = userId.ToString(),
             CreatedAt = DateTime.UtcNow
         };
@@ -102,6 +105,8 @@ public class WarehouseLocationService : IWarehouseLocationService
         entity.WarehouseId = dto.WarehouseId;
         entity.Code = dto.Code.Trim();
         entity.Name = dto.Name.Trim();
+        entity.LocationType = NormalizeLocationType(dto.LocationType);
+        entity.Zone = string.IsNullOrWhiteSpace(dto.Zone) ? null : dto.Zone.Trim();
         if (dto.IsActive.HasValue) entity.IsActive = dto.IsActive.Value;
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
@@ -111,6 +116,16 @@ public class WarehouseLocationService : IWarehouseLocationService
 
     public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _repo.DeleteAsync(id, tenantId);
 
+    private static string NormalizeLocationType(string? type)
+    {
+        var t = string.IsNullOrWhiteSpace(type) ? "Pick" : type.Trim();
+        return t switch
+        {
+            "Bulk" or "Staging" or "QC" or "Pick" => t,
+            _ => "Pick"
+        };
+    }
+
     private static WarehouseLocationDto MapLoc(WarehouseLocation e) => new()
     {
         Id = e.Id,
@@ -118,6 +133,8 @@ public class WarehouseLocationService : IWarehouseLocationService
         WarehouseId = e.WarehouseId,
         Code = e.Code,
         Name = e.Name,
+        LocationType = e.LocationType,
+        Zone = e.Zone,
         IsActive = e.IsActive,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt,
@@ -129,7 +146,13 @@ public class WarehouseLocationService : IWarehouseLocationService
 public class StockReservationService : IStockReservationService
 {
     private readonly IStockReservationRepository _repo;
-    public StockReservationService(IStockReservationRepository repo) => _repo = repo;
+    private readonly IStockService _stock;
+
+    public StockReservationService(IStockReservationRepository repo, IStockService stock)
+    {
+        _repo = repo;
+        _stock = stock;
+    }
 
     public async Task<StockReservationDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
@@ -146,6 +169,26 @@ public class StockReservationService : IStockReservationService
     public async Task<Guid> CreateAsync(CreateStockReservationDto dto, Guid tenantId, Guid userId)
     {
         if (dto.Lines.Count == 0) return Guid.Empty;
+
+        var reserved = new List<(Guid WarehouseId, Guid ItemId, decimal Quantity)>();
+        foreach (var line in dto.Lines)
+        {
+            if (line.WarehouseId == Guid.Empty || line.ItemId == Guid.Empty || line.Quantity <= 0)
+            {
+                await UndoReservesAsync(tenantId, reserved, userId);
+                return Guid.Empty;
+            }
+
+            var ok = await _stock.ReserveAsync(
+                tenantId, line.WarehouseId, line.ItemId, line.Quantity, userId.ToString());
+            if (!ok)
+            {
+                await UndoReservesAsync(tenantId, reserved, userId);
+                return Guid.Empty;
+            }
+            reserved.Add((line.WarehouseId, line.ItemId, line.Quantity));
+        }
+
         var id = Guid.NewGuid();
         var entity = new StockReservation
         {
@@ -180,8 +223,16 @@ public class StockReservationService : IStockReservationService
     {
         var entity = await _repo.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
+        if (IsTerminal(entity.Status)) return true;
+
+        foreach (var line in entity.Lines.Where(IsActiveLine))
+        {
+            await _stock.UnreserveAsync(
+                tenantId, line.WarehouseId, line.ItemId, line.Quantity, userId.ToString());
+            line.Status = "Released";
+        }
+
         entity.Status = "Released";
-        foreach (var line in entity.Lines) line.Status = "Released";
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
         return await _repo.UpdateAsync(entity);
@@ -191,12 +242,36 @@ public class StockReservationService : IStockReservationService
     {
         var entity = await _repo.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
+        if (IsTerminal(entity.Status)) return true;
+
+        foreach (var line in entity.Lines.Where(IsActiveLine))
+        {
+            await _stock.UnreserveAsync(
+                tenantId, line.WarehouseId, line.ItemId, line.Quantity, userId.ToString());
+            line.Status = "Cancelled";
+        }
+
         entity.Status = "Cancelled";
-        foreach (var line in entity.Lines) line.Status = "Cancelled";
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
         return await _repo.UpdateAsync(entity);
     }
+
+    private async Task UndoReservesAsync(
+        Guid tenantId,
+        List<(Guid WarehouseId, Guid ItemId, decimal Quantity)> reserved,
+        Guid userId)
+    {
+        foreach (var (warehouseId, itemId, quantity) in reserved)
+            await _stock.UnreserveAsync(tenantId, warehouseId, itemId, quantity, userId.ToString());
+    }
+
+    private static bool IsActiveLine(StockReservationLine line) =>
+        string.Equals(line.Status, "Active", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsTerminal(string status) =>
+        string.Equals(status, "Released", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(status, "Cancelled", StringComparison.OrdinalIgnoreCase);
 
     public Task<bool> DeleteAsync(Guid id, Guid tenantId) => _repo.DeleteAsync(id, tenantId);
 
@@ -238,6 +313,12 @@ public class ItemKitService : IItemKitService
     public async Task<ItemKitDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
         var e = await _repo.GetByIdAsync(id, tenantId);
+        return e == null ? null : MapKit(e);
+    }
+
+    public async Task<ItemKitDto?> GetByKitItemIdAsync(Guid kitItemId, Guid tenantId)
+    {
+        var e = await _repo.GetByKitItemIdAsync(kitItemId, tenantId);
         return e == null ? null : MapKit(e);
     }
 

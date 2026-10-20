@@ -22,6 +22,8 @@ public class ProjectTimesheetLineDto
     public Guid? ProjectTaskId { get; set; }
     public decimal Hours { get; set; }
     public string? Description { get; set; }
+    public bool IsBillable { get; set; } = true;
+    public decimal HourlyRate { get; set; }
 }
 
 public class CreateProjectTimesheetDto
@@ -41,6 +43,19 @@ public class CreateProjectTimesheetLineDto
     public Guid? ProjectTaskId { get; set; }
     public decimal Hours { get; set; }
     public string? Description { get; set; }
+    public bool? IsBillable { get; set; }
+    public decimal? HourlyRate { get; set; }
+}
+
+public class ProjectCostSummaryDto
+{
+    public Guid ProjectId { get; set; }
+    public decimal Budget { get; set; }
+    public decimal LaborCost { get; set; }
+    public decimal ExpenseCost { get; set; }
+    public decimal GlDebitCost { get; set; }
+    public decimal ActualCost { get; set; }
+    public decimal StoredActualCost { get; set; }
 }
 
 public class MilestoneBillingDto

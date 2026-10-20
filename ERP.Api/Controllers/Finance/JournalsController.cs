@@ -110,7 +110,7 @@ public class JournalsController : ERP.Api.Abstractions.ControllerBase
         var userId = GetUserId();
         var result = await _accountingService.PostJournalAsync(id, tenantId, userId);
         if (result == Guid.Empty)
-            return BadRequest(new { error = "Cannot post journal (must be balanced Approved/Draft)." });
+            return BadRequest(new { error = "Cannot post journal (must be balanced Approved/Draft, open period, and within budget when finance.enforceBudget is on)." });
         return Ok(new { JournalId = result });
     }
 

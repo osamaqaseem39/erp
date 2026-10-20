@@ -19,6 +19,8 @@ public class Bill : BaseEntity
     public decimal Balance { get; set; } = 0;
     public string Status { get; set; } = "Draft"; // Draft, Issued, Paid, Overdue, Cancelled
     public Guid? PurchaseOrderId { get; set; }
+    /// <summary>Operational Purchase invoice that created this AP bill.</summary>
+    public Guid? SourcePurchaseInvoiceId { get; set; }
     public string Notes { get; set; } = string.Empty;
     public DateTime? ApprovedDate { get; set; }
     public DateTime? PaidDate { get; set; }

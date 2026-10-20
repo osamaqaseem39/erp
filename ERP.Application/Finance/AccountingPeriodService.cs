@@ -64,6 +64,9 @@ public class AccountingPeriodService : IAccountingPeriodService
     {
         var entity = await GetTrackedAsync(id, tenantId);
         entity.Status = "Closed";
+        entity.IsLocked = true;
+        entity.ClosedAt = DateTime.UtcNow;
+        entity.ClosedBy = userId == Guid.Empty ? null : userId;
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
@@ -74,6 +77,9 @@ public class AccountingPeriodService : IAccountingPeriodService
     {
         var entity = await GetTrackedAsync(id, tenantId);
         entity.Status = "Open";
+        entity.IsLocked = false;
+        entity.ClosedAt = null;
+        entity.ClosedBy = null;
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
@@ -95,6 +101,9 @@ public class AccountingPeriodService : IAccountingPeriodService
         Name = e.Name,
         StartDate = e.StartDate,
         EndDate = e.EndDate,
-        Status = e.Status
+        Status = e.Status,
+        IsLocked = e.IsLocked,
+        ClosedAt = e.ClosedAt,
+        ClosedBy = e.ClosedBy
     };
 }

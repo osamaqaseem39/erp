@@ -81,6 +81,7 @@ public class BomWorkflowTests
             new ProductionRunRepository(db),
             new WorkCenterRepository(db),
             new BillOfMaterialRepository(db),
+            db,
             stock);
 
         var order = await orderSvc.CreateAsync(new CreateProductionOrderDto

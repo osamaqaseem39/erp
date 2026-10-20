@@ -6,6 +6,7 @@ public class TimeEntry : BaseEntity
 {
     public Guid EmployeeId { get; set; }
     public Guid? ProjectId { get; set; }
+    public Guid? ProjectTaskId { get; set; }
     public DateTime ClockIn { get; set; }
     public DateTime? ClockOut { get; set; }
     public DateTime Date { get; set; }

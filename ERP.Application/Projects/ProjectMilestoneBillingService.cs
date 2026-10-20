@@ -39,11 +39,21 @@ public class ProjectMilestoneBillingService : IProjectMilestoneBillingService
         Guid milestoneId, MilestoneBillingDto dto, Guid tenantId, Guid userId)
     {
         if (tenantId == Guid.Empty) throw new ValidationException("Tenant is required.");
-        if (dto.Amount <= 0) throw new ValidationException("Amount must be positive.");
 
         var milestone = await _milestones.GetByIdAsync(milestoneId, tenantId)
             ?? throw new NotFoundException("Milestone not found.");
-        var project = await _db.Projects.AsNoTracking()
+
+        if (milestone.SalesInvoiceId.HasValue || milestone.FinanceInvoiceId.HasValue)
+            throw new InvalidOperationException("Milestone has already been billed.");
+
+        var amount = dto.Amount > 0 ? dto.Amount : milestone.Amount;
+        if (amount <= 0)
+            throw new ValidationException("Amount must be positive (set dto.Amount or milestone.Amount).");
+
+        if (!milestone.IsBillable && dto.Amount <= 0)
+            throw new ValidationException("Milestone is not billable; pass an explicit Amount to override.");
+
+        var project = await _db.Projects
             .FirstOrDefaultAsync(p => p.Id == milestone.ProjectId && p.TenantId == tenantId)
             ?? throw new NotFoundException("Project not found.");
 
@@ -58,23 +68,33 @@ public class ProjectMilestoneBillingService : IProjectMilestoneBillingService
                 CustomerId = project.ClientId.Value,
                 InvoiceDate = invoiceDate,
                 DueDate = dueDate,
-                SubTotal = dto.Amount,
+                SubTotal = amount,
                 TaxAmount = 0,
-                TotalAmount = dto.Amount,
+                TotalAmount = amount,
                 Status = "Draft",
                 Notes = $"ProjectMilestone:{milestone.Id} — {desc}",
+                ProjectId = project.Id,
+                ProjectMilestoneId = milestone.Id,
                 Lines =
                 [
                     new CreateSalesInvoiceLineDto
                     {
                         Description = desc,
                         Quantity = 1,
-                        UnitPrice = dto.Amount
+                        UnitPrice = amount
                     }
                 ]
             }, tenantId, userId);
             if (salesId != Guid.Empty)
             {
+                milestone.SalesInvoiceId = salesId;
+                milestone.BilledAt = DateTime.UtcNow;
+                milestone.Amount = amount;
+                milestone.IsBillable = true;
+                milestone.UpdatedAt = DateTime.UtcNow;
+                milestone.UpdatedBy = userId.ToString();
+                await _milestones.UpdateAsync(milestone);
+
                 return new MilestoneBillingResultDto
                 {
                     MilestoneId = milestoneId,
@@ -91,14 +111,24 @@ public class ProjectMilestoneBillingService : IProjectMilestoneBillingService
                 CustomerId = project.ClientId.Value,
                 InvoiceDate = invoiceDate,
                 DueDate = dueDate,
-                SubTotal = dto.Amount,
+                SubTotal = amount,
                 TaxAmount = 0,
-                TotalAmount = dto.Amount,
+                TotalAmount = amount,
                 Status = "Draft",
-                Notes = $"ProjectMilestone:{milestone.Id} — {desc}"
+                Notes = $"ProjectMilestone:{milestone.Id} — {desc}",
+                ProjectId = project.Id,
+                ProjectMilestoneId = milestone.Id
             }, tenantId, userId);
             if (financeId != Guid.Empty)
             {
+                milestone.FinanceInvoiceId = financeId;
+                milestone.BilledAt = DateTime.UtcNow;
+                milestone.Amount = amount;
+                milestone.IsBillable = true;
+                milestone.UpdatedAt = DateTime.UtcNow;
+                milestone.UpdatedBy = userId.ToString();
+                await _milestones.UpdateAsync(milestone);
+
                 return new MilestoneBillingResultDto
                 {
                     MilestoneId = milestoneId,

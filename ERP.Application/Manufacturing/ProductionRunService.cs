@@ -22,6 +22,9 @@ public class ProductionRunService : IProductionRunService
         return e == null ? null : Map(e);
     }
 
+    public async Task<IEnumerable<ProductionRunDto>> GetAllAsync(Guid tenantId) =>
+        (await _runs.GetAllAsync(tenantId)).Select(Map);
+
     public async Task<IEnumerable<ProductionRunDto>> GetByOrderAsync(Guid productionOrderId, Guid tenantId)
     {
         var order = await _orders.GetByIdAsync(productionOrderId, tenantId);
@@ -37,9 +40,11 @@ public class ProductionRunService : IProductionRunService
             || string.Equals(order.Status, "Completed", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Cannot start a run on a closed production order.");
 
-        if (string.Equals(order.Status, "Draft", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(order.Status, "Draft", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(order.Status, "Planned", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(order.Status, "Released", StringComparison.OrdinalIgnoreCase))
         {
-            order.Status = "In Progress";
+            order.Status = "InProgress";
             order.ActualStartDate ??= DateTime.UtcNow;
             order.UpdatedAt = DateTime.UtcNow;
             order.UpdatedBy = userId.ToString();
@@ -57,6 +62,8 @@ public class ProductionRunService : IProductionRunService
             StartTime = dto.StartTime ?? DateTime.UtcNow,
             QuantityProduced = dto.QuantityProduced ?? 0,
             QuantityRejected = dto.QuantityRejected ?? 0,
+            WorkCenterId = dto.WorkCenterId ?? order.WorkCenterId,
+            ProductionOrderOperationId = dto.ProductionOrderOperationId,
             Status = "InProgress",
             Notes = dto.Notes,
             CreatedBy = userId.ToString(),
@@ -82,19 +89,17 @@ public class ProductionRunService : IProductionRunService
         e.UpdatedBy = userId.ToString();
         await _runs.UpdateAsync(e);
 
+        // Do NOT mark the production order Completed here — order completion
+        // (with BOM stock issue/receive) stays on ProductionOrderService.CompleteAsync.
         var order = await _orders.GetByIdAsync(e.ProductionOrderId, tenantId);
         if (order != null)
         {
             var runs = (await _runs.GetByProductionOrderAsync(order.Id, tenantId)).ToList();
             var produced = runs.Where(r => r.Status == "Completed").Sum(r => r.QuantityProduced);
-            if (produced >= order.Quantity && order.Quantity > 0)
-            {
-                order.Status = "Completed";
-                order.ActualEndDate = DateTime.UtcNow;
-                order.UpdatedAt = DateTime.UtcNow;
-                order.UpdatedBy = userId.ToString();
-                await _orders.UpdateAsync(order);
-            }
+            order.CompletedQuantity = produced;
+            order.UpdatedAt = DateTime.UtcNow;
+            order.UpdatedBy = userId.ToString();
+            await _orders.UpdateAsync(order);
         }
 
         return Map(e);
@@ -122,6 +127,8 @@ public class ProductionRunService : IProductionRunService
         EndTime = e.EndTime,
         QuantityProduced = e.QuantityProduced,
         QuantityRejected = e.QuantityRejected,
+        WorkCenterId = e.WorkCenterId,
+        ProductionOrderOperationId = e.ProductionOrderOperationId,
         Status = e.Status,
         Notes = e.Notes,
         CreatedAt = e.CreatedAt,

@@ -30,8 +30,12 @@ public class IntercompanyTransaction
     
     [MaxLength(50)]
     public string Status { get; set; } = "Pending"; // Pending, Approved, Posted
+
+    public Guid? SettlementId { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public Guid? CreatedBy { get; set; }
+
+    public IntercompanySettlement? Settlement { get; set; }
 }

@@ -27,6 +27,8 @@ public class ProjectTimesheetLine : BaseEntity
     public Guid? ProjectTaskId { get; set; }
     public decimal Hours { get; set; }
     public string? Description { get; set; }
+    public bool IsBillable { get; set; } = true;
+    public decimal HourlyRate { get; set; }
 
     public ProjectTimesheet ProjectTimesheet { get; set; } = null!;
 }

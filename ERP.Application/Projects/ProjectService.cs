@@ -71,6 +71,9 @@ public class ProjectService : IProjectService
             Priority = dto.Priority,
             Budget = dto.Budget ?? 0,
             Notes = dto.Notes,
+            CostCenterId = dto.CostCenterId,
+            CurrencyId = dto.CurrencyId,
+            BranchId = dto.BranchId,
             Status = "Planning",
             CreatedBy = userId.ToString(),
             CreatedAt = DateTime.UtcNow
@@ -100,6 +103,9 @@ public class ProjectService : IProjectService
         project.ActualCost = dto.ActualCost ?? project.ActualCost;
         project.Progress = dto.Progress ?? project.Progress;
         project.Notes = dto.Notes;
+        if (dto.CostCenterId.HasValue) project.CostCenterId = dto.CostCenterId;
+        if (dto.CurrencyId.HasValue) project.CurrencyId = dto.CurrencyId;
+        if (dto.BranchId.HasValue) project.BranchId = dto.BranchId;
         project.UpdatedBy = userId.ToString();
         project.UpdatedAt = DateTime.UtcNow;
 
@@ -182,6 +188,9 @@ public class ProjectService : IProjectService
             ActualCost = project.ActualCost,
             Progress = project.Progress,
             Notes = project.Notes,
+            CostCenterId = project.CostCenterId,
+            CurrencyId = project.CurrencyId,
+            BranchId = project.BranchId,
             ClientName = project.Client?.CustomerName ?? project.Client?.CompanyName,
             ProjectManagerName = $"{project.ProjectManager?.FirstName} {project.ProjectManager?.LastName}".Trim(),
             CreatedAt = project.CreatedAt,

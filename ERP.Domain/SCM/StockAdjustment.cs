@@ -26,8 +26,10 @@ public class StockAdjustmentLine : BaseEntity
     public decimal QuantityOnHand { get; set; }
     public decimal QuantityCounted { get; set; }
     public decimal QuantityDifference { get; set; }
+    public Guid? WarehouseLocationId { get; set; }
     public string? Notes { get; set; }
 
     public StockAdjustment StockAdjustment { get; set; } = null!;
     public Item Item { get; set; } = null!;
+    public WarehouseLocation? WarehouseLocation { get; set; }
 }

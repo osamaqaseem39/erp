@@ -14,6 +14,7 @@ public class WorkCenterDto : BaseDto
     public string? Location { get; set; }
     public decimal Capacity { get; set; }
     public string CapacityUnit { get; set; } = string.Empty;
+    public decimal WeeklyAvailableHours { get; set; } = 40m;
     public decimal Efficiency { get; set; }
     public string? Notes { get; set; }
     public new bool IsActive { get; set; }
@@ -31,6 +32,7 @@ public class CreateWorkCenterDto : CreateDto
     public string? Location { get; set; }
     public decimal? Capacity { get; set; }
     public string? CapacityUnit { get; set; }
+    public decimal? WeeklyAvailableHours { get; set; }
     public decimal? Efficiency { get; set; }
     public string? Notes { get; set; }
     public bool? IsActive { get; set; } = true;
@@ -47,6 +49,7 @@ public class UpdateWorkCenterDto : UpdateDto
     public string? Location { get; set; }
     public decimal? Capacity { get; set; }
     public string? CapacityUnit { get; set; }
+    public decimal? WeeklyAvailableHours { get; set; }
     public decimal? Efficiency { get; set; }
     public string? Notes { get; set; }
     public bool? IsActive { get; set; }

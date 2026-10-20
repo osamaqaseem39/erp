@@ -87,8 +87,8 @@ public static class JournalEntryMapper
             EntryId = entity.EntryId,
             JournalId = entity.JournalId,
             AccountId = entity.AccountId,
-            AccountCode = string.Empty, // TODO: Get from Account navigation
-            AccountName = string.Empty, // TODO: Get from Account navigation
+            AccountCode = entity.Account?.AccountCode ?? string.Empty,
+            AccountName = entity.Account?.AccountName ?? string.Empty,
             CostCenterId = entity.CostCenterId,
             CostCenterName = entity.CostCenter?.CostCenterName,
             ProjectId = entity.ProjectId,

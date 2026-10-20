@@ -53,10 +53,28 @@ public class StockBalanceRepository : IStockBalanceRepository
     }
 
     public async Task<StockBalance?> GetByItemAndWarehouseAsync(Guid itemId, Guid warehouseId, Guid tenantId)
+        => await GetByItemWarehouseLocationAsync(itemId, warehouseId, null, tenantId);
+
+    public async Task<StockBalance?> GetByItemWarehouseLocationAsync(
+        Guid itemId, Guid warehouseId, Guid? warehouseLocationId, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
+        if (warehouseLocationId is null || warehouseLocationId == Guid.Empty)
+        {
+            return await _context.StockBalances
+                .FirstOrDefaultAsync(x =>
+                    x.ItemId == itemId
+                    && x.WarehouseId == warehouseId
+                    && x.TenantId == tenantId
+                    && x.WarehouseLocationId == null);
+        }
+
         return await _context.StockBalances
-            .FirstOrDefaultAsync(x => x.ItemId == itemId && x.WarehouseId == warehouseId && x.TenantId == tenantId);
+            .FirstOrDefaultAsync(x =>
+                x.ItemId == itemId
+                && x.WarehouseId == warehouseId
+                && x.TenantId == tenantId
+                && x.WarehouseLocationId == warehouseLocationId);
     }
 
     public async Task<IEnumerable<StockBalance>> GetByItemAsync(Guid itemId, Guid tenantId)
@@ -72,6 +90,15 @@ public class StockBalanceRepository : IStockBalanceRepository
         if (tenantId == Guid.Empty) return Array.Empty<StockBalance>();
         return await _context.StockBalances
             .Where(x => x.WarehouseId == warehouseId && x.TenantId == tenantId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<StockBalance>> GetByItemAndWarehouseAllLocationsAsync(
+        Guid itemId, Guid warehouseId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return Array.Empty<StockBalance>();
+        return await _context.StockBalances
+            .Where(x => x.ItemId == itemId && x.WarehouseId == warehouseId && x.TenantId == tenantId)
             .ToListAsync();
     }
 }

@@ -8,7 +8,9 @@ public class Routing : BaseEntity
     public string Name { get; set; } = string.Empty;
     public Guid? ItemId { get; set; }
     public string Version { get; set; } = "1";
+    /// <summary>Draft → Active → Obsolete</summary>
     public string Status { get; set; } = "Draft";
+    public bool IsDefault { get; set; }
     public string? Notes { get; set; }
 
     public ICollection<RoutingStep> Steps { get; set; } = new List<RoutingStep>();
@@ -32,7 +34,10 @@ public class ProductionScrap : BaseEntity
     public Guid? ItemId { get; set; }
     public decimal Quantity { get; set; }
     public DateTime ScrapDate { get; set; }
+    public Guid? ScrapReasonId { get; set; }
+    public Guid? WarehouseId { get; set; }
     public string? Reason { get; set; }
 
     public ProductionOrder? ProductionOrder { get; set; }
+    public ScrapReason? ScrapReason { get; set; }
 }

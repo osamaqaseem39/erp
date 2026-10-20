@@ -101,7 +101,7 @@ public class FixedAssetService : IFixedAssetService
             entity.CurrentValue = Math.Round(entity.CurrentValue + delta, 2);
         }
         if (dto.PurchaseDate.HasValue) entity.PurchaseDate = dto.PurchaseDate.Value.Date;
-        if (!string.IsNullOrWhiteSpace(dto.Status)) entity.Status = dto.Status.Trim();
+        // Status only via Dispose / undo-disposal
         entity.UpdatedAt = DateTime.UtcNow;
         entity.UpdatedBy = userId == Guid.Empty ? null : userId.ToString();
         await _db.SaveChangesAsync();

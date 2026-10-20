@@ -1,10 +1,11 @@
 using ERP.Application.Common;
-using ERP.Application.Interfaces;
+using ERP.Application.Interfaces.Inventory;
 using ERP.Application.Interfaces.Procurement;
 using ERP.Domain.Procurement;
 using ERP.Infrastructure.Interfaces.Procurement;
 using ERP.Infrastructure.Repositories.Procurement;
 using ERP.Shared.DTOs.Procurement;
+using IStockService = ERP.Application.Interfaces.IStockService;
 
 namespace ERP.Application.Procurement;
 
@@ -22,19 +23,22 @@ public class GoodsReceiptNoteService : IGoodsReceiptNoteService
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
     private readonly IPurchaseOrderDetailRepository _purchaseOrderDetailRepository;
     private readonly IStockService _stockService;
+    private readonly IPutawayTaskService? _putaway;
 
     public GoodsReceiptNoteService(
         IGoodsReceiptNoteRepository repository,
         IGoodsReceiptNoteDetailRepository detailRepository,
         IPurchaseOrderRepository purchaseOrderRepository,
         IPurchaseOrderDetailRepository purchaseOrderDetailRepository,
-        IStockService stockService)
+        IStockService stockService,
+        IPutawayTaskService? putaway = null)
     {
         _repository = repository;
         _detailRepository = detailRepository;
         _purchaseOrderRepository = purchaseOrderRepository;
         _purchaseOrderDetailRepository = purchaseOrderDetailRepository;
         _stockService = stockService;
+        _putaway = putaway;
     }
 
     public async Task<GoodsReceiptNoteDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -130,10 +134,24 @@ public class GoodsReceiptNoteService : IGoodsReceiptNoteService
 
         var stockLines = details
             .Where(d => d.QuantityReceived > 0)
-            .Select(d => (d.ItemId, d.QuantityReceived));
-        var received = await _stockService.ReceiveStockAsync(
-            tenantId, entity.WarehouseId, stockLines, userId.ToString());
-        if (!received) return false;
+            .Select(d => (d.ItemId, d.QuantityReceived))
+            .ToList();
+        if (stockLines.Count == 0) return false;
+
+        // When bins are required, defer warehouse qty until putaway completes.
+        if (await _stockService.IsBinRequiredAsync())
+        {
+            if (_putaway == null) return false;
+            var putawayId = await _putaway.CreateFromGrnAsync(
+                entity.Id, entity.WarehouseId, stockLines, tenantId, userId);
+            if (putawayId == Guid.Empty) return false;
+        }
+        else
+        {
+            var received = await _stockService.ReceiveStockAsync(
+                tenantId, entity.WarehouseId, stockLines, userId.ToString());
+            if (!received) return false;
+        }
 
         if (entity.POId != Guid.Empty)
             await ApplyReceiptToPurchaseOrderAsync(entity.POId, tenantId, details, userId);

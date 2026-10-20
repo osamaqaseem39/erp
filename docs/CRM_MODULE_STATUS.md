@@ -29,7 +29,7 @@ The CRM module’s **8 core sales entities** have an end-to-end stack: domain �
 
 **Extended entities** (customer groups, price lists, territories, return orders) are **full stack** (API + validators + frontend CRUD).
 
-**Dependent modules** (Core tenant/auth, company, users) are integrated on the backend. **Finance** DI is registered; CRM SO → Finance invoice creates an invoice header. Inventory/POS deep links remain partial.
+**Dependent modules** (Core tenant/auth, company, users) are integrated on the backend. **Finance** DI is registered; CRM SO → Finance invoice creates an invoice header. Inventory catalog is wired on quote/SO lines; SO approve/ship reserves and issues stock. POS deep links remain partial.
 
 | Layer | Estimate | Notes |
 |-------|----------|-------|
@@ -173,7 +173,7 @@ Defined in `ERP.Infrastructure/Database/Schemas/CRMModule_Schema.sql`. **Reposit
 | **Users** | Assigned-to fields | 🟡 | User picker not on all forms |
 | **Permissions** | Fine-grained CRM | ❌ | |
 | **Finance** | SO invoice | 🟢 | `SalesOrderService.InvoiceAsync` creates Finance invoice via `IInvoiceService` |
-| **Inventory** | Line `ItemId` | ❌ | Catalog not wired on quote/SO forms |
+| **Inventory** | Line `ItemId` | ✅ | Quote/SO `ItemLineSelect` + `itemService.searchOptions`; SO approve reserves stock |
 | **Sales / POS** | Separate invoice model | ❌ | |
 
 ---
@@ -199,7 +199,7 @@ Defined in `ERP.Infrastructure/Database/Schemas/CRMModule_Schema.sql`. **Reposit
 
 ### P3 — Cross-module
 
-- [ ] Quote/SO lines ↔ Inventory products
+- [x] Quote/SO lines ↔ Inventory products (`ItemLineSelect`)
 - [ ] CRM permission keys
 - [x] Register Finance DI + link SO invoice
 

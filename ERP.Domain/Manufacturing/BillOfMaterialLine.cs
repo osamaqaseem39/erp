@@ -10,6 +10,8 @@ public class BillOfMaterialLine : BaseEntity
     /// <summary>Quantity of component required per 1 finished good.</summary>
     public decimal QuantityPer { get; set; }
     public decimal ScrapPercent { get; set; }
+    /// <summary>Lines sharing a group may substitute when stock is short.</summary>
+    public string? AlternateGroup { get; set; }
     public string? Notes { get; set; }
 
     public BillOfMaterial BillOfMaterial { get; set; } = null!;

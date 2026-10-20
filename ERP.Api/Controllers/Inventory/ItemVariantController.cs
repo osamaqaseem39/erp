@@ -26,6 +26,11 @@ public class ItemVariantController : ERP.Api.Abstractions.ControllerBase
         _logger = logger;
     }
 
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ItemVariantDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetAll() =>
+        Ok(await _service.GetAllAsync(GetTenantId()));
+
     [HttpGet("item/{itemId}")]
     [ProducesResponseType(typeof(IEnumerable<ItemVariantDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetByItem(Guid itemId)

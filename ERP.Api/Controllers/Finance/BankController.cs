@@ -129,6 +129,18 @@ public class BankController : ERP.Api.Abstractions.ControllerBase
         return await HandleAsync(() => _service.DeleteBankAccountAsync(id));
     }
 
+    [HttpGet("transactions")]
+    [ProducesResponseType(typeof(IEnumerable<BankTransactionDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> ListTransactions(
+        [FromQuery] Guid? bankAccountId = null,
+        [FromQuery] bool? unreconciledOnly = null,
+        [FromQuery] DateTime? toDate = null)
+    {
+        var result = await _service.ListBankTransactionsAsync(
+            HttpContext.RequireTenantId(), bankAccountId, unreconciledOnly, toDate);
+        return Ok(result);
+    }
+
     [HttpGet("accounts/{accountId:guid}/transactions")]
     [ProducesResponseType(typeof(IEnumerable<BankTransactionDto>), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetAccountTransactions(

@@ -8,12 +8,13 @@ public class WorkCenter : BaseEntity
     public string WorkCenterCode { get; set; } = string.Empty;
     public string WorkCenterName { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public string WorkCenterType { get; set; } = string.Empty; // Machine, Assembly, Testing
+    public string WorkCenterType { get; set; } = string.Empty;
     public decimal Capacity { get; set; }
-    public string CapacityUnit { get; set; } = "Hours"; // Hours, Units
+    public string CapacityUnit { get; set; } = "Hours";
+    /// <summary>Weekly available hours for capacity warning (warn only).</summary>
+    public decimal WeeklyAvailableHours { get; set; } = 40m;
     public new bool IsActive { get; set; } = true;
     public string? Notes { get; set; }
-    
-    // Navigation properties
+
     public ICollection<ProductionRun> ProductionRuns { get; set; } = new List<ProductionRun>();
 }

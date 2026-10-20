@@ -15,14 +15,20 @@ public class BillOfMaterialRepository : IBillOfMaterialRepository
             .Include(b => b.Lines)
             .FirstOrDefaultAsync(b => b.Id == id && b.TenantId == tenantId && b.IsActive);
 
-    public Task<BillOfMaterial?> GetActiveByFinishedGoodAsync(Guid finishedGoodItemId, Guid tenantId) =>
-        _db.BillOfMaterials
+    public Task<BillOfMaterial?> GetActiveByFinishedGoodAsync(Guid finishedGoodItemId, Guid tenantId)
+    {
+        var now = DateTime.UtcNow;
+        return _db.BillOfMaterials
             .Include(b => b.Lines)
             .Where(b => b.TenantId == tenantId && b.IsActive
                         && b.FinishedGoodItemId == finishedGoodItemId
-                        && b.Status == "Active")
-            .OrderByDescending(b => b.UpdatedAt ?? b.CreatedAt)
+                        && b.Status == "Active"
+                        && (b.EffectiveFrom == null || b.EffectiveFrom <= now)
+                        && (b.EffectiveTo == null || b.EffectiveTo >= now))
+            .OrderByDescending(b => b.IsDefault)
+            .ThenByDescending(b => b.UpdatedAt ?? b.CreatedAt)
             .FirstOrDefaultAsync();
+    }
 
     public async Task<IEnumerable<BillOfMaterial>> GetAllAsync(Guid tenantId, Guid? finishedGoodItemId = null)
     {

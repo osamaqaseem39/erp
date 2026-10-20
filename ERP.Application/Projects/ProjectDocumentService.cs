@@ -180,6 +180,10 @@ public class ProjectDocumentService : IProjectDocumentService
 
             IsPublic = dto.IsPublic ?? false,
 
+            ProjectTaskId = dto.ProjectTaskId,
+
+            ProjectMilestoneId = dto.ProjectMilestoneId,
+
             CreatedBy = dto.CreatedBy,
 
             CreatedAt = DateTime.UtcNow,
@@ -403,6 +407,10 @@ public class ProjectDocumentService : IProjectDocumentService
             Version = document.Version ?? "1.0",
 
             IsPublic = document.IsPublic,
+
+            ProjectTaskId = document.ProjectTaskId,
+
+            ProjectMilestoneId = document.ProjectMilestoneId,
 
             ProjectName = document.Project?.ProjectName,
 

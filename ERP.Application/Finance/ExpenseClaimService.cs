@@ -19,8 +19,15 @@ public interface IExpenseClaimService
 public class ExpenseClaimService : IExpenseClaimService
 {
     private readonly ERPDbContext _db;
+    private readonly ERP.Application.Projects.IProjectCostService? _projectCosts;
 
-    public ExpenseClaimService(ERPDbContext db) => _db = db;
+    public ExpenseClaimService(
+        ERPDbContext db,
+        ERP.Application.Projects.IProjectCostService? projectCosts = null)
+    {
+        _db = db;
+        _projectCosts = projectCosts;
+    }
 
     public async Task<IReadOnlyList<ExpenseClaimDto>> ListAsync(Guid tenantId, string? status = null)
     {
@@ -87,11 +94,16 @@ public class ExpenseClaimService : IExpenseClaimService
         => await TransitionAsync(id, tenantId, userId, "Draft", "Submitted", e => e.SubmittedAt = DateTime.UtcNow);
 
     public async Task<ExpenseClaimDto> ApproveAsync(Guid id, Guid tenantId, Guid userId)
-        => await TransitionAsync(id, tenantId, userId, "Submitted", "Approved", e =>
+    {
+        var result = await TransitionAsync(id, tenantId, userId, "Submitted", "Approved", e =>
         {
             e.ApprovedAt = DateTime.UtcNow;
             e.ApprovedBy = userId;
         });
+        if (_projectCosts != null && result.ProjectId.HasValue && result.ProjectId != Guid.Empty)
+            await _projectCosts.RecalculateActualCostAsync(result.ProjectId.Value, tenantId);
+        return result;
+    }
 
     public async Task<ExpenseClaimDto> MarkPaidAsync(Guid id, Guid tenantId, Guid userId)
         => await TransitionAsync(id, tenantId, userId, "Approved", "Paid", e => e.PaidAt = DateTime.UtcNow);

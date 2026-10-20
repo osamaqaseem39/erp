@@ -17,6 +17,8 @@ public class ProjectDocumentDto : BaseDto
     public string Status { get; set; } = "Draft";
     public bool IsPublic { get; set; } = false;
     public string? Notes { get; set; }
+    public Guid? ProjectTaskId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
 }
 
 public class CreateProjectDocumentDto : CreateDto
@@ -33,6 +35,8 @@ public class CreateProjectDocumentDto : CreateDto
     public string? Status { get; set; } = "Draft";
     public bool? IsPublic { get; set; } = false;
     public string? Notes { get; set; }
+    public Guid? ProjectTaskId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
     /// <summary>Optional base64 payload stored under the tenant document root on create.</summary>
     public string? ContentBase64 { get; set; }
 }

@@ -654,6 +654,7 @@ public class InvoiceService : IInvoiceService
         Balance = entity.Balance,
         Status = entity.Status,
         Notes = entity.Notes,
+        SourcePurchaseInvoiceId = entity.SourcePurchaseInvoiceId,
         ApprovedDate = entity.ApprovedDate,
         PaidDate = entity.PaidDate,
         CreatedAt = entity.CreatedAt,
@@ -701,11 +702,15 @@ public class InvoiceService : IInvoiceService
             CreatedAt = entity.CreatedAt,
             CreatedBy = entity.CreatedBy,
             SalesOrderId = entity.SalesOrderId,
+            SourceSalesInvoiceId = entity.SourceSalesInvoiceId,
+            Notes = entity.Notes,
             PostedAt = entity.PostedAt,
             PostedBy = entity.PostedBy,
             IsLocked = entity.IsLocked,
             TaxAmount = entity.TaxTotal,
-            BalanceAmount = entity.Balance
+            BalanceAmount = entity.Balance,
+            ProjectId = entity.ProjectId,
+            ProjectMilestoneId = entity.ProjectMilestoneId
         };
     }
 
@@ -727,9 +732,13 @@ public class InvoiceService : IInvoiceService
             TaxTotal = dto.TaxAmount ?? 0m,
             TotalAmount = total,
             Balance = total,
-            Status = "Draft",
+            Status = string.IsNullOrWhiteSpace(dto.Status) ? "Draft" : dto.Status!,
             SalesOrderId = dto.SalesOrderId,
+            SourceSalesInvoiceId = dto.SourceSalesInvoiceId,
+            Notes = dto.Notes,
             IsLocked = dto.IsLocked ?? false,
+            ProjectId = dto.ProjectId,
+            ProjectMilestoneId = dto.ProjectMilestoneId,
             CreatedBy = userId.ToString(),
             CreatedAt = DateTime.UtcNow
         };

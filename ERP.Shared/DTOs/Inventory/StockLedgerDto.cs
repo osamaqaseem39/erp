@@ -7,6 +7,7 @@ public class StockLedgerDto : BaseDto
     public Guid ItemId { get; set; }
     public string ItemName { get; set; } = string.Empty;
     public Guid WarehouseId { get; set; }
+    public Guid? WarehouseLocationId { get; set; }
     public string WarehouseName { get; set; } = string.Empty;
     public string TransactionType { get; set; } = string.Empty;
     public string Reference { get; set; } = string.Empty;

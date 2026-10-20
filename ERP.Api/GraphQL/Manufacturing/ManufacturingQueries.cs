@@ -82,5 +82,18 @@ public class ManufacturingQueries
         Guid productionOrderId,
         Guid tenantId)
         => await service.GetByOrderAsync(productionOrderId, tenantId);
+
+    public async Task<IEnumerable<ProductionOrderOperationDto>> GetProductionOrderOperations(
+        [Service] IProductionOrderService service,
+        Guid productionOrderId,
+        Guid tenantId)
+        => await service.ListOperationsAsync(productionOrderId, tenantId);
+
+    public async Task<WorkCenterCapacityWarnDto> GetWorkCenterCapacityWarn(
+        [Service] IProductionOrderService service,
+        Guid workCenterId,
+        Guid tenantId,
+        DateTime? weekStartUtc = null)
+        => await service.GetCapacityWarnAsync(workCenterId, tenantId, weekStartUtc);
 }
 

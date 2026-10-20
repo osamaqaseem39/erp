@@ -19,7 +19,7 @@ public class Wave2PaymentApplyTests
         .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
 
     private static PaymentService Payments(ERPDbContext db) =>
-        new(new PaymentRepositoryAdapter(new PaymentRepository(db)), new ApplicationInvoiceRepositoryAdapter(db));
+        new(new PaymentRepositoryAdapter(new PaymentRepository(db)), new ApplicationInvoiceRepositoryAdapter(db), db);
 
     [Fact]
     public async Task ApplyToInvoice_ReducesBalance_AndMarksPaid()

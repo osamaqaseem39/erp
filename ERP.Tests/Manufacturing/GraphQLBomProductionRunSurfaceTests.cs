@@ -92,7 +92,8 @@ public class GraphQLBomProductionRunSurfaceTests
             new ProductionOrderLineRepository(db),
             runs,
             new WorkCenterRepository(db),
-            new BillOfMaterialRepository(db));
+            new BillOfMaterialRepository(db),
+            db);
         var runSvc = new ProductionRunService(runs, orders);
 
         var order = await orderSvc.CreateAsync(new CreateProductionOrderDto

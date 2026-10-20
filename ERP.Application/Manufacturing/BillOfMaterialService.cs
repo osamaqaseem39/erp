@@ -36,6 +36,9 @@ public class BillOfMaterialService : IBillOfMaterialService
             FinishedGoodItemId = dto.FinishedGoodItemId,
             Version = string.IsNullOrWhiteSpace(dto.Version) ? "1" : dto.Version.Trim(),
             Status = "Draft",
+            IsDefault = dto.IsDefault,
+            EffectiveFrom = dto.EffectiveFrom,
+            EffectiveTo = dto.EffectiveTo,
             Notes = dto.Notes,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = userId == Guid.Empty ? null : userId.ToString(),
@@ -60,6 +63,9 @@ public class BillOfMaterialService : IBillOfMaterialService
         entity.Name = dto.Name.Trim();
         entity.FinishedGoodItemId = dto.FinishedGoodItemId;
         entity.Version = string.IsNullOrWhiteSpace(dto.Version) ? entity.Version : dto.Version.Trim();
+        if (dto.IsDefault.HasValue) entity.IsDefault = dto.IsDefault.Value;
+        entity.EffectiveFrom = dto.EffectiveFrom ?? entity.EffectiveFrom;
+        entity.EffectiveTo = dto.EffectiveTo ?? entity.EffectiveTo;
         entity.Notes = dto.Notes;
         entity.UpdatedAt = DateTime.UtcNow;
         entity.UpdatedBy = userId == Guid.Empty ? null : userId.ToString();
@@ -141,6 +147,7 @@ public class BillOfMaterialService : IBillOfMaterialService
             ComponentItemId = l.ComponentItemId,
             QuantityPer = l.QuantityPer,
             ScrapPercent = l.ScrapPercent < 0 ? 0 : l.ScrapPercent,
+            AlternateGroup = string.IsNullOrWhiteSpace(l.AlternateGroup) ? null : l.AlternateGroup.Trim(),
             Notes = l.Notes,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = userId == Guid.Empty ? null : userId.ToString(),
@@ -157,6 +164,9 @@ public class BillOfMaterialService : IBillOfMaterialService
         FinishedGoodItemId = b.FinishedGoodItemId,
         Version = b.Version,
         Status = b.Status,
+        IsDefault = b.IsDefault,
+        EffectiveFrom = b.EffectiveFrom,
+        EffectiveTo = b.EffectiveTo,
         Notes = b.Notes,
         IsActive = b.IsActive,
         CreatedAt = b.CreatedAt,
@@ -170,6 +180,7 @@ public class BillOfMaterialService : IBillOfMaterialService
             ComponentItemId = l.ComponentItemId,
             QuantityPer = l.QuantityPer,
             ScrapPercent = l.ScrapPercent,
+            AlternateGroup = l.AlternateGroup,
             Notes = l.Notes
         }).ToList()
     };

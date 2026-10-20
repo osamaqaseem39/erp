@@ -109,7 +109,7 @@ public class SalesmanService : ISalesmanService
         if (dto.Address != null) e.Address = dto.Address;
         if (dto.Cnic != null) e.Cnic = dto.Cnic;
         if (dto.Remarks != null) e.Remarks = dto.Remarks;
-        if (dto.Status != null) e.Status = dto.Status;
+        // Status not free-set on Update
         e.UpdatedBy = userId.ToString();
         e.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(e);

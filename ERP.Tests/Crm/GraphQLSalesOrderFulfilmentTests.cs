@@ -1,6 +1,7 @@
 using ERP.Api.GraphQL.CRM;
 using ERP.Application.CRM;
 using ERP.Application.Inventory;
+using ERP.Application.SCM.Interfaces;
 using ERP.Domain.SCM;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Numbering;
@@ -10,6 +11,7 @@ using ERP.Shared.Abstractions;
 using ERP.Shared.DTOs.Core;
 using ERP.Shared.DTOs.CRM;
 using ERP.Shared.DTOs.Finance;
+using ERP.Shared.DTOs.Inventory;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Tests.CRM;
@@ -86,15 +88,40 @@ public class GraphQLSalesOrderFulfilmentTests
             Task.FromResult(new PartnerBalanceSummaryReportDto { AsOfDate = asOfDate });
     }
 
+    private sealed class StubItems : IItemService
+    {
+        public Task<ItemDto?> GetByIdAsync(Guid id, Guid tenantId) =>
+            Task.FromResult<ItemDto?>(new ItemDto { Id = id, TenantId = tenantId, DefaultWarehouseId = Warehouse });
+        public Task<IEnumerable<ItemDto>> GetAllAsync(Guid tenantId, Guid companyId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+        public Task<IEnumerable<ItemDto>> GetByCategoryAsync(Guid categoryId, Guid tenantId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+        public Task<ItemDto> CreateAsync(CreateItemDto dto, Guid tenantId, string createdBy) =>
+            throw new NotImplementedException();
+        public Task<ItemDto> UpdateAsync(UpdateItemDto dto, Guid tenantId, string updatedBy) =>
+            throw new NotImplementedException();
+        public Task<bool> DeleteAsync(Guid id, Guid tenantId) => Task.FromResult(false);
+        public Task<bool> ExistsAsync(Guid id, Guid tenantId) => Task.FromResult(true);
+        public Task<IEnumerable<ItemDto>> GetLowStockItemsAsync(Guid tenantId, Guid companyId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+    }
+
     private static ERPDbContext Db() => new(new DbContextOptionsBuilder<ERPDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
 
-    private static SalesOrderService Svc(ERPDbContext db) => new(
-        new SalesOrderRepository(db, new FixedTenant()),
-        new SalesOrderLineRepository(db, new FixedTenant()),
-        new StubInvoices(),
-        new StubNumbers(),
-        new StockService(new StockBalanceRepository(db), tenant: new FixedTenant()));
+    private static SalesOrderService Svc(ERPDbContext db)
+    {
+        var stock = new StockService(new StockBalanceRepository(db), tenant: new FixedTenant());
+        return new(
+            new SalesOrderRepository(db, new FixedTenant()),
+            new SalesOrderLineRepository(db, new FixedTenant()),
+            new StubInvoices(),
+            new StubNumbers(),
+            stock,
+            new StockReservationService(new StockReservationRepository(db), stock),
+            new ItemKitService(new ItemKitRepository(db)),
+            new StubItems());
+    }
 
     [Fact]
     public void Surface_ExposesShipAndInvoiceMutations()

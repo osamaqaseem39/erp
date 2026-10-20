@@ -58,6 +58,15 @@ public class DispatchAdviceController : Microsoft.AspNetCore.Mvc.ControllerBase
         await _service.DispatchAsync(id, HttpContext.RequireTenantId(), User.RequireUserId())
             ? Ok(new MessageResponse { Message = "Dispatched" }) : NotFound();
 
+    [HttpPost("{id:guid}/create-pick")]
+    public async Task<IActionResult> CreatePick(Guid id)
+    {
+        var pickId = await _service.CreatePickAsync(id, HttpContext.RequireTenantId(), User.RequireUserId());
+        return pickId == Guid.Empty
+            ? BadRequest()
+            : Ok(new IdResponse { Id = pickId });
+    }
+
     [HttpPost("{id:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid id) =>
         await _service.CancelAsync(id, HttpContext.RequireTenantId(), User.RequireUserId())

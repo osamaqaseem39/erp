@@ -12,6 +12,8 @@ public class ProjectDocument : BaseEntity
     public long FileSize { get; set; }
     public string? Version { get; set; }
     public bool IsPublic { get; set; } = false;
+    public Guid? ProjectTaskId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
     
     // Navigation properties
     public Project Project { get; set; } = null!;

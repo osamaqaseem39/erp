@@ -83,7 +83,7 @@ public class ProjectResourceService : IProjectResourceService
         if (dto.AllocatedHours.HasValue) e.AllocatedHours = dto.AllocatedHours.Value;
         if (dto.ActualHours.HasValue) e.ActualHours = dto.ActualHours.Value;
         if (dto.HourlyRate.HasValue) e.HourlyRate = dto.HourlyRate.Value;
-        if (dto.Status != null) e.Status = dto.Status;
+        // Status not free-set on Update
         if (dto.Notes != null) e.Notes = dto.Notes;
         e.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         e.UpdatedAt = DateTime.UtcNow;

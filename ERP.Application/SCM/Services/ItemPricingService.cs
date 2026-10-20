@@ -13,6 +13,13 @@ public class ItemPricingService : IItemPricingService
         _repository = repository;
     }
 
+    public async Task<IEnumerable<ItemPricingDto>> GetAllAsync(Guid tenantId)
+    {
+        var entities = await _repository.GetAllAsync(tenantId);
+        var mapper = new ItemPricingMapper();
+        return entities.Select(mapper.ToDto);
+    }
+
     public async Task<IEnumerable<ItemPricingDto>> GetByItemAsync(Guid itemId, Guid tenantId, string? priceListName = null)
     {
         var entities = await _repository.GetByItemAsync(itemId, tenantId, priceListName);

@@ -75,6 +75,7 @@ public class StockAdjustmentService : IStockAdjustmentService
                 QuantityOnHand = d.QuantityOnHand,
                 QuantityCounted = d.QuantityCounted,
                 QuantityDifference = d.QuantityCounted - d.QuantityOnHand,
+                WarehouseLocationId = d.WarehouseLocationId,
                 Notes = d.Notes,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
@@ -114,6 +115,7 @@ public class StockAdjustmentService : IStockAdjustmentService
                 QuantityOnHand = d.QuantityOnHand,
                 QuantityCounted = d.QuantityCounted,
                 QuantityDifference = d.QuantityCounted - d.QuantityOnHand,
+                WarehouseLocationId = d.WarehouseLocationId,
                 Notes = d.Notes,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
@@ -132,6 +134,10 @@ public class StockAdjustmentService : IStockAdjustmentService
         if (!DocumentWorkflow.CanTransition(entity.Status, "Posted", Transitions)) return false;
         if (entity.Lines.Count == 0) return false;
 
+        if (await _stock.IsBinRequiredAsync()
+            && entity.Lines.Any(l => !l.WarehouseLocationId.HasValue || l.WarehouseLocationId == Guid.Empty))
+            return false;
+
         var stockDto = new StockAdjustmentDto
         {
             TenantId = tenantId,
@@ -143,7 +149,8 @@ public class StockAdjustmentService : IStockAdjustmentService
                 ItemId = l.ItemId,
                 QuantityOnHand = l.QuantityOnHand,
                 QuantityCounted = l.QuantityCounted,
-                QuantityDifference = l.QuantityDifference
+                QuantityDifference = l.QuantityDifference,
+                WarehouseLocationId = l.WarehouseLocationId
             }).ToList()
         };
 
@@ -193,6 +200,7 @@ public class StockAdjustmentService : IStockAdjustmentService
             QuantityOnHand = l.QuantityOnHand,
             QuantityCounted = l.QuantityCounted,
             QuantityDifference = l.QuantityDifference,
+            WarehouseLocationId = l.WarehouseLocationId,
             Notes = l.Notes
         }).ToList()
     };

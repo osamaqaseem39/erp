@@ -4,6 +4,7 @@ namespace ERP.Infrastructure.Interfaces.SCM;
 
 public interface IItemPricingRepository
 {
+    Task<IEnumerable<ItemPricing>> GetAllAsync(Guid tenantId);
     Task<IEnumerable<ItemPricing>> GetByItemAsync(Guid itemId, Guid tenantId, string? priceListName = null);
     Task<ItemPricing?> GetByIdAsync(Guid id, Guid tenantId);
     Task<ItemPricing> CreateAsync(ItemPricing entity);

@@ -98,6 +98,28 @@ public class ERPDbContext : DbContext
     public DbSet<ChequeLeaf> ChequeLeaves { get; set; }
     public DbSet<ExpenseClaim> ExpenseClaims { get; set; }
     public DbSet<ExpenseClaimLine> ExpenseClaimLines { get; set; }
+    public DbSet<TaxTransaction> TaxTransactions { get; set; }
+    public DbSet<BudgetLine> BudgetLines { get; set; }
+    public DbSet<TaxGroup> TaxGroups { get; set; }
+    public DbSet<TaxGroupLine> TaxGroupLines { get; set; }
+    public DbSet<AssetCategory> AssetCategories { get; set; }
+    public DbSet<AssetDisposal> AssetDisposals { get; set; }
+    public DbSet<AssetTransfer> AssetTransfers { get; set; }
+    public DbSet<BankReconciliationLine> BankReconciliationLines { get; set; }
+    public DbSet<FundTransfer> FundTransfers { get; set; }
+    public DbSet<CreditMemo> CreditMemos { get; set; }
+    public DbSet<CreditMemoLine> CreditMemoLines { get; set; }
+    public DbSet<DebitMemo> DebitMemos { get; set; }
+    public DbSet<DebitMemoLine> DebitMemoLines { get; set; }
+    public DbSet<CustomerAdvance> CustomerAdvances { get; set; }
+    public DbSet<VendorAdvance> VendorAdvances { get; set; }
+    public DbSet<AdvanceApplication> AdvanceApplications { get; set; }
+    public DbSet<WithholdingTaxLine> WithholdingTaxLines { get; set; }
+    public DbSet<RecurringJournal> RecurringJournals { get; set; }
+    public DbSet<RecurringJournalLine> RecurringJournalLines { get; set; }
+    public DbSet<FxRevaluationRun> FxRevaluationRuns { get; set; }
+    public DbSet<FxRevaluationLine> FxRevaluationLines { get; set; }
+    public DbSet<IntercompanySettlement> IntercompanySettlements { get; set; }
 
     // CRM Entities
     public DbSet<Customer> Customers { get; set; }
@@ -140,6 +162,10 @@ public class ERPDbContext : DbContext
     public DbSet<Routing> Routings { get; set; }
     public DbSet<RoutingStep> RoutingSteps { get; set; }
     public DbSet<ProductionScrap> ProductionScraps { get; set; }
+    public DbSet<ScrapReason> ScrapReasons { get; set; }
+    public DbSet<ProductionOrderOperation> ProductionOrderOperations { get; set; }
+    public DbSet<QualityCheck> QualityChecks { get; set; }
+    public DbSet<QualityCheckLine> QualityCheckLines { get; set; }
 
     // Project Entities
     public DbSet<Project> Projects { get; set; }
@@ -149,6 +175,7 @@ public class ERPDbContext : DbContext
     public DbSet<ProjectMilestone> ProjectMilestones { get; set; }
     public DbSet<ProjectTimesheet> ProjectTimesheets { get; set; }
     public DbSet<ProjectTimesheetLine> ProjectTimesheetLines { get; set; }
+    public DbSet<ProjectMember> ProjectMembers { get; set; }
 
     // Procurement Entities
     public DbSet<Vendor> Vendors { get; set; }
@@ -211,6 +238,16 @@ public class ERPDbContext : DbContext
     public DbSet<ItemKitComponent> ItemKitComponents { get; set; }
     public DbSet<CycleCount> CycleCounts { get; set; }
     public DbSet<CycleCountLine> CycleCountLines { get; set; }
+    public DbSet<PutawayTask> PutawayTasks { get; set; }
+    public DbSet<PutawayTaskLine> PutawayTaskLines { get; set; }
+    public DbSet<PickList> PickLists { get; set; }
+    public DbSet<PickListLine> PickListLines { get; set; }
+    public DbSet<ReplenishmentTask> ReplenishmentTasks { get; set; }
+    public DbSet<ReplenishmentTaskLine> ReplenishmentTaskLines { get; set; }
+    public DbSet<PackOrder> PackOrders { get; set; }
+    public DbSet<PackOrderLine> PackOrderLines { get; set; }
+    public DbSet<Shipment> Shipments { get; set; }
+    public DbSet<ShipmentLine> ShipmentLines { get; set; }
 
     // Report Entities
     public DbSet<Report> Reports { get; set; }
@@ -969,6 +1006,10 @@ public class ERPDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.CashOrBankAccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.ReversedFromJournal)
+                .WithMany()
+                .HasForeignKey(e => e.ReversedFromJournalId)
+                .OnDelete(DeleteBehavior.Restrict);
             entity.Property(e => e.FinancialYearId);
             entity.HasIndex(e => new { e.TenantId, e.FinancialYearId });
         });
@@ -1016,6 +1057,11 @@ public class ERPDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.GLAccountAccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Category)
+                .WithMany(c => c.FixedAssets)
+                .HasForeignKey(e => e.AssetCategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Configure DepreciationEntry
@@ -1216,6 +1262,19 @@ public class ERPDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.RoutingId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.WorkCenter)
+                .WithMany()
+                .HasForeignKey(e => e.WorkCenterId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(e => e.Operations)
+                .WithOne(o => o.ProductionOrder)
+                .HasForeignKey(o => o.ProductionOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(e => e.QualityChecks)
+                .WithOne(q => q.ProductionOrder)
+                .HasForeignKey(q => q.ProductionOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(e => new { e.TenantId, e.SalesOrderLineId });
         });
         modelBuilder.Entity<ProductionOrderLine>().HasKey(e => e.Id);
         modelBuilder.Entity<ProductionRun>().HasKey(e => e.Id);
@@ -1239,7 +1298,29 @@ public class ERPDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<RoutingStep>().HasKey(e => e.Id);
-        modelBuilder.Entity<ProductionScrap>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProductionScrap>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.ScrapReason)
+                .WithMany()
+                .HasForeignKey(e => e.ScrapReasonId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<ScrapReason>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
+        });
+        modelBuilder.Entity<ProductionOrderOperation>().HasKey(e => e.Id);
+        modelBuilder.Entity<QualityCheck>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.QualityCheck)
+                .HasForeignKey(l => l.QualityCheckId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<QualityCheckLine>().HasKey(e => e.Id);
 
         // Project Entities
         modelBuilder.Entity<Project>().HasKey(e => e.Id);
@@ -1247,6 +1328,23 @@ public class ERPDbContext : DbContext
         modelBuilder.Entity<ProjectResource>().HasKey(e => e.Id);
         modelBuilder.Entity<ProjectDocument>().HasKey(e => e.Id);
         modelBuilder.Entity<ProjectMilestone>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProjectMember>(entity =>
+        {
+            entity.ToTable("ProjectMembers", "Projects");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.ProjectId });
+            entity.HasIndex(e => new { e.TenantId, e.EmployeeId });
+            entity.Property(e => e.Role).HasMaxLength(100);
+            entity.Property(e => e.Status).HasMaxLength(30);
+            entity.HasOne(e => e.Project)
+                .WithMany(p => p.Members)
+                .HasForeignKey(e => e.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Employee)
+                .WithMany()
+                .HasForeignKey(e => e.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
         modelBuilder.Entity<ProjectTimesheet>(entity =>
         {
             entity.ToTable("ProjectTimesheets", "Projects");
@@ -1260,6 +1358,7 @@ public class ERPDbContext : DbContext
         {
             entity.ToTable("ProjectTimesheetLines", "Projects");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.HourlyRate).HasPrecision(18, 4);
         });
 
         // Procurement Entities
@@ -1537,6 +1636,59 @@ public class ERPDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
         modelBuilder.Entity<CycleCountLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<PutawayTask>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.PutawayTask)
+                .HasForeignKey(l => l.PutawayTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Warehouse)
+                .WithMany()
+                .HasForeignKey(e => e.WarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<PutawayTaskLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<PickList>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.PickList)
+                .HasForeignKey(l => l.PickListId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Warehouse)
+                .WithMany()
+                .HasForeignKey(e => e.WarehouseId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<PickListLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<ReplenishmentTask>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.ReplenishmentTask)
+                .HasForeignKey(l => l.ReplenishmentTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ReplenishmentTaskLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<PackOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.PackOrder)
+                .HasForeignKey(l => l.PackOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<PackOrderLine>().HasKey(e => e.Id);
+        modelBuilder.Entity<Shipment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.Shipment)
+                .HasForeignKey(l => l.ShipmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ShipmentLine>().HasKey(e => e.Id);
         modelBuilder.Entity<ItemCategory>().HasKey(e => e.Id);
         modelBuilder.Entity<ItemGroup>().HasKey(e => e.Id);
         modelBuilder.Entity<ItemAttribute>().HasKey(e => e.Id);
@@ -1554,6 +1706,11 @@ public class ERPDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.WarehouseLocation)
+                .WithMany()
+                .HasForeignKey(e => e.WarehouseLocationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
         });
         // Configure StockLedger with proper cascade settings
         modelBuilder.Entity<StockLedger>(entity =>
@@ -1565,6 +1722,11 @@ public class ERPDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.WarehouseLocation)
+                .WithMany()
+                .HasForeignKey(e => e.WarehouseLocationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
         });
         // Configure InventoryAdjustment with proper cascade settings
         modelBuilder.Entity<InventoryAdjustment>(entity =>
@@ -1631,6 +1793,7 @@ public class ERPDbContext : DbContext
         modelBuilder.Entity<BankReconciliation>().HasKey(e => e.ReconciliationId);
         modelBuilder.Entity<Budget>().HasKey(e => e.Id);
         ConfigureFinanceCustomerDepthEntities(modelBuilder);
+        ConfigureFinanceGapEntities(modelBuilder);
         // CostCenter PK configured in ConfigureFinanceEntities (CostCenterId)
         modelBuilder.Entity<TaxCode>().HasKey(e => e.Id);
         modelBuilder.Entity<TaxRate>().HasKey(e => e.Id);
@@ -1798,11 +1961,228 @@ public class ERPDbContext : DbContext
                 .WithOne(l => l.ExpenseClaim)
                 .HasForeignKey(l => l.ExpenseClaimId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Project)
+                .WithMany()
+                .HasForeignKey(e => e.ProjectId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
         modelBuilder.Entity<ExpenseClaimLine>(entity =>
         {
             entity.ToTable("ExpenseClaimLines", "Finance");
             entity.HasKey(e => e.Id);
+        });
+    }
+
+    private static void ConfigureFinanceGapEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Invoice>(entity =>
+        {
+            entity.HasIndex(e => e.SourceSalesInvoiceId)
+                .IsUnique()
+                .HasFilter("[SourceSalesInvoiceId] IS NOT NULL");
+            entity.Property(e => e.Notes).HasMaxLength(2000);
+        });
+
+        modelBuilder.Entity<Bill>(entity =>
+        {
+            entity.HasIndex(e => e.SourcePurchaseInvoiceId)
+                .IsUnique()
+                .HasFilter("[SourcePurchaseInvoiceId] IS NOT NULL");
+        });
+
+        modelBuilder.Entity<PaymentApplication>(entity =>
+        {
+            entity.Property(e => e.InvoiceId).IsRequired(false);
+            entity.HasOne(e => e.Invoice)
+                .WithMany()
+                .HasForeignKey(e => e.InvoiceId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Bill)
+                .WithMany()
+                .HasForeignKey(e => e.BillId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(t => t.HasCheckConstraint(
+                "CK_PaymentApplications_XorTarget",
+                "([InvoiceId] IS NOT NULL AND [BillId] IS NULL) OR ([InvoiceId] IS NULL AND [BillId] IS NOT NULL)"));
+        });
+
+        modelBuilder.Entity<TaxTransaction>(entity =>
+        {
+            entity.ToTable("TaxTransactions", "Finance");
+            entity.HasKey(e => e.TaxTransactionId);
+            entity.HasOne(e => e.TaxCode)
+                .WithMany()
+                .HasForeignKey(e => e.TaxCodeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<BudgetLine>(entity =>
+        {
+            entity.ToTable("BudgetLines", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Budget)
+                .WithMany(b => b.Lines)
+                .HasForeignKey(e => e.BudgetId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TaxGroup>(entity =>
+        {
+            entity.ToTable("TaxGroups", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.TaxGroup)
+                .HasForeignKey(l => l.TaxGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<TaxGroupLine>(entity =>
+        {
+            entity.ToTable("TaxGroupLines", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.TaxCode)
+                .WithMany()
+                .HasForeignKey(e => e.TaxCodeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AssetCategory>(entity =>
+        {
+            entity.ToTable("AssetCategories", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
+        });
+        modelBuilder.Entity<AssetDisposal>(entity =>
+        {
+            entity.ToTable("AssetDisposals", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Asset)
+                .WithMany(a => a.Disposals)
+                .HasForeignKey(e => e.AssetId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<AssetTransfer>(entity =>
+        {
+            entity.ToTable("AssetTransfers", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Asset)
+                .WithMany(a => a.Transfers)
+                .HasForeignKey(e => e.AssetId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BankReconciliationLine>(entity =>
+        {
+            entity.ToTable("BankReconciliationLines", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.ReconciliationId, e.BankTransactionId }).IsUnique();
+        });
+        modelBuilder.Entity<FundTransfer>(entity =>
+        {
+            entity.ToTable("FundTransfers", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.TransferNumber }).IsUnique();
+        });
+
+        modelBuilder.Entity<CreditMemo>(entity =>
+        {
+            entity.ToTable("CreditMemos", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.MemoNumber }).IsUnique();
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.CreditMemo)
+                .HasForeignKey(l => l.CreditMemoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<CreditMemoLine>(entity =>
+        {
+            entity.ToTable("CreditMemoLines", "Finance");
+            entity.HasKey(e => e.Id);
+        });
+        modelBuilder.Entity<DebitMemo>(entity =>
+        {
+            entity.ToTable("DebitMemos", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.MemoNumber }).IsUnique();
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.DebitMemo)
+                .HasForeignKey(l => l.DebitMemoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<DebitMemoLine>(entity =>
+        {
+            entity.ToTable("DebitMemoLines", "Finance");
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<CustomerAdvance>(entity =>
+        {
+            entity.ToTable("CustomerAdvances", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.AdvanceNumber }).IsUnique();
+        });
+        modelBuilder.Entity<VendorAdvance>(entity =>
+        {
+            entity.ToTable("VendorAdvances", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.AdvanceNumber }).IsUnique();
+        });
+        modelBuilder.Entity<AdvanceApplication>(entity =>
+        {
+            entity.ToTable("AdvanceApplications", "Finance");
+            entity.HasKey(e => e.Id);
+        });
+        modelBuilder.Entity<WithholdingTaxLine>(entity =>
+        {
+            entity.ToTable("WithholdingTaxLines", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Payment)
+                .WithMany(p => p.WithholdingTaxLines)
+                .HasForeignKey(e => e.PaymentId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.TaxCode)
+                .WithMany()
+                .HasForeignKey(e => e.TaxCodeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RecurringJournal>(entity =>
+        {
+            entity.ToTable("RecurringJournals", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.RecurringJournal)
+                .HasForeignKey(l => l.RecurringJournalId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<RecurringJournalLine>(entity =>
+        {
+            entity.ToTable("RecurringJournalLines", "Finance");
+            entity.HasKey(e => e.Id);
+        });
+        modelBuilder.Entity<FxRevaluationRun>(entity =>
+        {
+            entity.ToTable("FxRevaluationRuns", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasMany(e => e.Lines)
+                .WithOne(l => l.FxRevaluationRun)
+                .HasForeignKey(l => l.FxRevaluationRunId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<FxRevaluationLine>(entity =>
+        {
+            entity.ToTable("FxRevaluationLines", "Finance");
+            entity.HasKey(e => e.Id);
+        });
+        modelBuilder.Entity<IntercompanySettlement>(entity =>
+        {
+            entity.ToTable("IntercompanySettlements", "Finance");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TenantId, e.SettlementNumber }).IsUnique();
+            entity.HasMany(e => e.Transactions)
+                .WithOne(t => t.Settlement)
+                .HasForeignKey(t => t.SettlementId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

@@ -16,6 +16,7 @@ namespace ERP.Shared.DTOs.Finance
         public decimal Balance { get; set; }
         public string Status { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
+        public Guid? SourcePurchaseInvoiceId { get; set; }
         public DateTime? ApprovedDate { get; set; }
         public DateTime? PaidDate { get; set; }
         public new bool IsActive { get; set; }

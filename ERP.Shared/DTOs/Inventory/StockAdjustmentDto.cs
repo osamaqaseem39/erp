@@ -48,6 +48,7 @@ public class StockAdjustmentDetailDto
     public decimal QuantityOnHand { get; set; }
     public decimal QuantityCounted { get; set; }
     public decimal QuantityDifference { get; set; }
+    public Guid? WarehouseLocationId { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -56,6 +57,7 @@ public class CreateStockAdjustmentDetailDto
     public Guid ItemId { get; set; }
     public decimal QuantityOnHand { get; set; }
     public decimal QuantityCounted { get; set; }
+    public Guid? WarehouseLocationId { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -65,5 +67,6 @@ public class UpdateStockAdjustmentDetailDto
     public Guid ItemId { get; set; }
     public decimal QuantityOnHand { get; set; }
     public decimal QuantityCounted { get; set; }
+    public Guid? WarehouseLocationId { get; set; }
     public string? Notes { get; set; }
 }

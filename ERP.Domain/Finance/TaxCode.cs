@@ -12,7 +12,9 @@ public class TaxCode : BaseEntity
     public new bool IsActive { get; set; } = true;
     public Guid AccountId { get; set; }
     public Guid TaxCodeId { get; set; }
+    public Guid? TaxGroupId { get; set; }
     
     // Navigation properties
     public ChartOfAccount Account { get; set; } = null!;
+    public TaxGroup? TaxGroup { get; set; }
 }

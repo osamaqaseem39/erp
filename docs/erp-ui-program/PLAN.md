@@ -190,7 +190,7 @@ Exit criteria
 | 6 | Finance | ☐ | ☐ | ☐ | stubs first |
 | 7 | HRM | ☐ | ☐ | ☐ | stubs first |
 | 8 | Procurement | ☐ | ☐ | ☐ | stubs first |
-| 9 | Manufacturing | ☐ | ☐ | ☐ | new BOM/routing |
+| 9 | Manufacturing | ✅ 2026-10-20 | ⏳ UI shipped (dashboard/BOM/routing/detail/release); walk-through pending | ☐ | light MFG+ gaps |
 | 10 | Projects | ☐ | ☐ | ☐ | |
 | 11 | Reports | ☐ | ☐ | ☐ | |
 | 12 | Hardening | ☐ | ☐ | — | |

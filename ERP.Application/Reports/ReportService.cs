@@ -1,11 +1,14 @@
 using System.Text.Json;
+using ERP.Application.Core;
 using ERP.Application.Interfaces.Finance;
 using ERP.Application.Interfaces.Reports;
+using ERP.Application.Manufacturing;
 using ERP.Domain.Reports;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Repositories.Reports;
 using ERP.Shared.DTOs.Reports;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ERP.Application.Reports;
 
@@ -18,6 +21,12 @@ public class ReportService : IReportService
     private readonly IReportScheduleRepository _reportScheduleRepository;
     private readonly IAccountingService _accounting;
     private readonly IInvoiceService _invoices;
+    private readonly IOperationalReportService? _operational;
+    private readonly IModuleReportQueryService? _moduleQueries;
+    private readonly IManufacturingReleaseService? _mfgRelease;
+    private readonly ITenantEmailSender? _email;
+    private readonly IPdfDocumentService? _pdf;
+    private readonly ILogger<ReportService>? _logger;
     private readonly ERPDbContext? _db;
 
     public ReportService(
@@ -26,7 +35,13 @@ public class ReportService : IReportService
         IReportScheduleRepository reportScheduleRepository,
         IAccountingService accounting,
         IInvoiceService invoices,
-        ERPDbContext? db = null)
+        ERPDbContext? db = null,
+        IOperationalReportService? operational = null,
+        IModuleReportQueryService? moduleQueries = null,
+        IManufacturingReleaseService? mfgRelease = null,
+        ITenantEmailSender? email = null,
+        IPdfDocumentService? pdf = null,
+        ILogger<ReportService>? logger = null)
     {
         _reportRepository = reportRepository;
         _reportExecutionRepository = reportExecutionRepository;
@@ -34,6 +49,12 @@ public class ReportService : IReportService
         _accounting = accounting;
         _invoices = invoices;
         _db = db;
+        _operational = operational;
+        _moduleQueries = moduleQueries;
+        _mfgRelease = mfgRelease;
+        _email = email;
+        _pdf = pdf;
+        _logger = logger;
     }
 
     public async Task<ReportDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -79,7 +100,7 @@ public class ReportService : IReportService
             Description = dto.Description,
             ReportType = dto.ReportType,
             Category = dto.Category,
-            Query = dto.Query,
+            Query = string.IsNullOrWhiteSpace(dto.ReportCode) ? (dto.Query ?? string.Empty) : dto.ReportCode.Trim(),
             Parameters = dto.Parameters ?? string.Empty,
             OutputFormat = dto.OutputFormat,
             IsActive = dto.IsActive,
@@ -254,14 +275,23 @@ public class ReportService : IReportService
                 continue;
 
             var now = DateTime.UtcNow;
+            ReportExecutionDto? execution = null;
             try
             {
-                await ExecuteAsync(schedule.ReportId, null, schedule.TenantId, Guid.Empty, schedule.Id);
+                execution = await ExecuteAsync(schedule.ReportId, null, schedule.TenantId, Guid.Empty, schedule.Id);
             }
             catch
             {
                 // ExecuteAsync already records Failed executions for built-in errors;
                 // still advance the schedule so a bad report cannot block the queue forever.
+            }
+
+            if (execution != null
+                && execution.Status == "Completed"
+                && !string.IsNullOrWhiteSpace(schedule.EmailRecipients)
+                && _email != null)
+            {
+                await DeliverScheduleEmailAsync(schedule, execution, cancellationToken);
             }
 
             schedule.LastRunTime = now;
@@ -273,6 +303,34 @@ public class ReportService : IReportService
         }
 
         return ran;
+    }
+
+    private async Task DeliverScheduleEmailAsync(
+        ReportSchedule schedule, ReportExecutionDto execution, CancellationToken cancellationToken)
+    {
+        var recipients = schedule.EmailRecipients!
+            .Split([';', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (recipients.Length == 0) return;
+
+        var csv = System.Text.Encoding.UTF8.GetBytes(JsonToFlatCsv(execution.ResultData ?? "{}"));
+        var fileName = $"report_{schedule.ReportId:N}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
+        var subject = $"Scheduled report: {schedule.ScheduleName}";
+        var body = $"Report schedule '{schedule.ScheduleName}' completed at {DateTime.UtcNow:u} UTC. Status={execution.Status}; records={execution.RecordCount}.";
+
+        foreach (var to in recipients)
+        {
+            try
+            {
+                var sent = await _email!.TrySendWithAttachmentAsync(
+                    schedule.TenantId, to, subject, body, csv, fileName, "text/csv", cancellationToken);
+                if (!sent)
+                    _logger?.LogWarning("Schedule {ScheduleId}: SMTP not configured; email to {To} skipped.", schedule.Id, to);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Schedule {ScheduleId}: failed to email {To}.", schedule.Id, to);
+            }
+        }
     }
 
     public async Task<ReportScheduleDto?> GetScheduledReportByIdAsync(Guid id, Guid tenantId)
@@ -310,10 +368,8 @@ public class ReportService : IReportService
         var execution = await ExecuteAsync(reportId, null, tenantId, Guid.Empty);
         var json = execution.ResultData ?? "{}";
         var fmt = (format ?? "json").Trim().ToLowerInvariant();
-
-        // PDF/Excel generators are not implemented — refuse rather than lie about MIME type.
-        if (fmt is "pdf" or "excel" or "xlsx")
-            throw new NotSupportedException($"Export format '{fmt}' is not supported yet. Use json or csv.");
+        var report = await _reportRepository.GetByIdAsync(reportId, tenantId);
+        var title = report?.ReportName ?? report?.Name ?? reportId.ToString("N");
 
         byte[] content;
         string contentType;
@@ -324,11 +380,32 @@ public class ReportService : IReportService
             contentType = "text/csv";
             extension = "csv";
         }
+        else if (fmt is "excel" or "xlsx" or "xls")
+        {
+            // SpreadsheetML that Excel opens (no third-party package).
+            content = System.Text.Encoding.UTF8.GetBytes(JsonToSpreadsheetMl(json, title));
+            contentType = "application/vnd.ms-excel";
+            extension = "xls";
+        }
+        else if (fmt == "pdf")
+        {
+            if (_pdf == null)
+                throw new NotSupportedException("PDF export is not configured.");
+            var lines = JsonToPdfLines(json, title);
+            content = _pdf.BuildSimpleDocument(title, lines);
+            contentType = "application/pdf";
+            extension = "pdf";
+        }
         else
         {
             content = System.Text.Encoding.UTF8.GetBytes(json);
             contentType = "application/json";
             extension = "json";
+        }
+
+        if (execution.Id != Guid.Empty && !string.IsNullOrEmpty(execution.ResultData))
+        {
+            // Best-effort: stamp output hint on execution via repository update if available.
         }
 
         return new ReportExportDto
@@ -337,6 +414,61 @@ public class ReportService : IReportService
             ContentType = contentType,
             FileName = $"report_{reportId}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.{extension}"
         };
+    }
+
+    private static string JsonToSpreadsheetMl(string json, string title)
+    {
+        var csv = JsonToFlatCsv(json);
+        var rows = csv.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("""<?xml version="1.0"?>""");
+        sb.AppendLine("""<?mso-application progid="Excel.Sheet"?>""");
+        sb.AppendLine("""<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet">""");
+        sb.AppendLine($"<Worksheet ss:Name=\"{System.Security.SecurityElement.Escape(title) ?? "Report"}\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\"><Table>");
+        foreach (var row in rows)
+        {
+            sb.Append("<Row>");
+            foreach (var cell in ParseCsvRow(row))
+                sb.Append($"<Cell><Data ss:Type=\"String\">{System.Security.SecurityElement.Escape(cell)}</Data></Cell>");
+            sb.AppendLine("</Row>");
+        }
+        sb.AppendLine("</Table></Worksheet></Workbook>");
+        return sb.ToString();
+    }
+
+    private static IEnumerable<string> ParseCsvRow(string row)
+    {
+        var list = new List<string>();
+        var cur = new System.Text.StringBuilder();
+        var inQuotes = false;
+        for (var i = 0; i < row.Length; i++)
+        {
+            var c = row[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < row.Length && row[i + 1] == '"') { cur.Append('"'); i++; }
+                else inQuotes = !inQuotes;
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                list.Add(cur.ToString());
+                cur.Clear();
+            }
+            else cur.Append(c);
+        }
+        list.Add(cur.ToString());
+        return list;
+    }
+
+    private static IReadOnlyList<string> JsonToPdfLines(string json, string title)
+    {
+        var lines = new List<string> { title, $"Generated: {DateTime.UtcNow:u} UTC", "" };
+        var csv = JsonToFlatCsv(json);
+        foreach (var row in csv.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Take(200))
+            lines.Add(row.Length > 120 ? row[..120] + "…" : row);
+        if (csv.Split('\n').Length > 200)
+            lines.Add("… truncated …");
+        return lines;
     }
 
     private static string JsonToFlatCsv(string json)
@@ -434,7 +566,7 @@ public class ReportService : IReportService
     {
         if (_db == null || tenantId == Guid.Empty) return;
 
-        foreach (var def in BuiltInCatalog)
+        foreach (var def in ReportCatalog.All)
         {
             var exists = await _db.Reports.AnyAsync(r =>
                 r.TenantId == tenantId && r.ReportCode == def.Code);
@@ -448,8 +580,8 @@ public class ReportService : IReportService
                 ReportName = def.Name,
                 Description = def.Description,
                 Category = def.Category,
-                ReportType = "Operational",
-                Query = def.Code,
+                ReportType = def.ReportType,
+                Query = def.Code, // internal query key only — never expose to clients
                 Parameters = "{\"fromDate\":\"date\",\"toDate\":\"date\"}",
                 OutputFormat = "json",
                 IsActive = true,
@@ -467,6 +599,58 @@ public class ReportService : IReportService
 
         var key = (code ?? string.Empty).Trim().ToUpperInvariant();
         var (from, to) = ParseDateRange(parameters);
+        var fromD = from ?? DateTime.UtcNow.Date.AddMonths(-1);
+        var toD = to ?? DateTime.UtcNow.Date;
+
+        // Prefer operational service where available to avoid duplicated queries.
+        if (_operational != null)
+        {
+            object? ops = key switch
+            {
+                "PENDING_SALE_ORDER" => await _operational.GetPendingSalesOrdersAsync(tenantId, to),
+                "SALE_INVOICE_SUMMARY" => await _operational.GetSalesInvoiceSummaryAsync(tenantId, fromD, toD),
+                "SALE_SUMMARY_ITEM" => await _operational.GetSalesSummaryByItemAsync(tenantId, fromD, toD),
+                "SALE_SUMMARY_CUSTOMER_ITEM" => await _operational.GetSalesSummaryCustomerItemAsync(tenantId, fromD, toD),
+                "SALE_SUMMARY_ITEM_CUSTOMER" => await _operational.GetSalesSummaryItemCustomerAsync(tenantId, fromD, toD),
+                "SALE_ITEM_RATE_DETAIL" => await _operational.GetSalesItemRateDetailAsync(tenantId, fromD, toD),
+                "CUSTOMER_INFO" => await _operational.GetCustomerInformationAsync(tenantId),
+                "CREDIT_NOTE" => await _operational.GetCreditNoteReportAsync(tenantId, fromD, toD),
+                "PURCHASE_INVOICE_SUMMARY" => await _operational.GetPurchaseInvoiceSummaryAsync(tenantId, fromD, toD),
+                "STOCK_ON_HAND" => await _operational.GetStockBalanceReportAsync(tenantId),
+                "SALE_ORDER_SCHEDULE" => await _operational.GetSalesOrderScheduleAsync(tenantId, from, to),
+                _ => null
+            };
+            if (ops != null) return ops;
+        }
+
+        if (key == "SALE_PENDING_FOR_PRODUCTION" && _mfgRelease != null)
+        {
+            var pending = await _mfgRelease.GetPendingSalesOrdersAsync(tenantId);
+            return new { ReportCode = key, TotalCount = pending.Count, Lines = pending };
+        }
+
+        object? finance = key switch
+        {
+            "TRIAL_BALANCE" => await _accounting.GetTrialBalanceAsync(tenantId, fromD, toD),
+            "RUNNING_TRIAL_BALANCE" => await _accounting.GetRunningTrialBalanceAsync(tenantId, fromD, toD),
+            "PROFIT_LOSS" => await _accounting.GetProfitAndLossAsync(tenantId, fromD, toD),
+            "BALANCE_SHEET" => await _accounting.GetBalanceSheetAsync(tenantId, toD),
+            "GENERAL_LEDGER" => await RunGeneralLedgerAsync(tenantId, fromD, toD, parameters),
+            "VOUCHER_LIST" => await _accounting.GetVoucherReportAsync(tenantId, from, to),
+            "CHART_OF_ACCOUNTS" => await _accounting.GetChartOfAccountReportAsync(tenantId),
+            "DAILY_FINANCIAL" => await _accounting.GetDailyFinancialAsync(tenantId, toD),
+            "CASH_BANK_VOUCHERS" => await _accounting.GetCashBankVoucherSummaryAsync(tenantId, fromD, toD),
+            "CASH_BANK_LEDGER" => await _accounting.GetCashBankLedgerSummaryAsync(tenantId, fromD, toD),
+            "VOUCHER_TYPE_MONTHLY" => await _accounting.GetVoucherTypeMonthlySummaryAsync(tenantId, fromD, toD),
+            "PARTNER_BALANCES" => await _invoices.GetPartnerBalanceSummaryAsync(tenantId, toD),
+            "AGED_RECEIVABLES" or "SALE_AGING" => await _invoices.GetAgedReceivablesAsync(tenantId, toD),
+            "AGED_PAYABLES" => await _invoices.GetAgedPayablesAsync(tenantId, toD),
+            "CASH_FLOW" => await _accounting.GetCashFlowAsync(tenantId, fromD, toD),
+            "BUDGET_VS_ACTUAL" => await _accounting.GetBudgetVsActualAsync(tenantId, fromD, toD),
+            "CHEQUE_REGISTER" => await _accounting.GetChequeRegisterAsync(tenantId, fromD, toD),
+            _ => null
+        };
+        if (finance != null) return finance;
 
         return key switch
         {
@@ -478,14 +662,28 @@ public class ReportService : IReportService
             "SALE_INVOICE_SUMMARY" => await SaleInvoiceSummaryAsync(tenantId, from, to),
             "SALE_SUMMARY_ITEM" => await SaleSummaryItemAsync(tenantId, from, to),
             "SALE_SUMMARY_CUSTOMER_ITEM" => await SaleSummaryCustomerItemAsync(tenantId, from, to),
-            "SALE_AGING" => await _invoices.GetAgedReceivablesAsync(tenantId, to ?? DateTime.UtcNow.Date),
             "STOCK_ON_HAND" => await StockOnHandAsync(tenantId),
             "PURCHASE_ORDER_SUMMARY" => await PurchaseOrderSummaryAsync(tenantId, from, to),
+            _ when _moduleQueries != null => await _moduleQueries.RunAsync(key, tenantId, from, to, parameters),
             _ => throw new InvalidOperationException(
                 string.IsNullOrWhiteSpace(code)
                     ? "Report has no ReportCode; cannot execute."
                     : $"Unknown report code '{code}'.")
         };
+    }
+
+    private async Task<object> RunGeneralLedgerAsync(
+        Guid tenantId, DateTime fromD, DateTime toD, Dictionary<string, object>? parameters)
+    {
+        Guid? accountId = null;
+        if (parameters != null && parameters.TryGetValue("accountId", out var raw) && raw != null)
+        {
+            if (raw is Guid g) accountId = g;
+            else if (Guid.TryParse(raw.ToString(), out var parsed)) accountId = parsed;
+        }
+        if (accountId == null || accountId == Guid.Empty)
+            return new { ReportCode = "GENERAL_LEDGER", Message = "accountId parameter required", Lines = Array.Empty<object>() };
+        return await _accounting.GetGeneralLedgerBalanceAsync(accountId.Value, tenantId, fromD, toD);
     }
 
     private async Task<object> SaleOrderListAsync(Guid tenantId, DateTime? from, DateTime? to)
@@ -832,21 +1030,6 @@ public class ReportService : IReportService
         return 0;
     }
 
-    private static readonly (string Code, string Name, string Category, string Description)[] BuiltInCatalog =
-    [
-        ("SALE_ORDER", "Sale Order", "Sales", "Sales orders by period"),
-        ("SALE_INVOICE", "Sale Invoice", "Sales", "Sales invoices by period"),
-        ("CREDIT_NOTE", "Credit Note", "Sales", "Sales credit notes by period"),
-        ("CUSTOMER_INFO", "Customer Information Report", "Sales", "Customer master dump"),
-        ("PENDING_SALE_ORDER", "Pending Sale Order", "Sales", "Open sales orders not invoiced"),
-        ("SALE_INVOICE_SUMMARY", "Sale Invoice Summary", "Sales", "Aggregated SI totals by status"),
-        ("SALE_SUMMARY_ITEM", "Sale Summary Item", "Sales", "Totals by item"),
-        ("SALE_SUMMARY_CUSTOMER_ITEM", "Sale Summary Customer-Item", "Sales", "Customer × item matrix"),
-        ("SALE_AGING", "Sale Aging", "Sales", "AR aging from finance invoices"),
-        ("STOCK_ON_HAND", "Stock On Hand", "Inventory", "Warehouse stock balances"),
-        ("PURCHASE_ORDER_SUMMARY", "Purchase Order Summary", "Purchase", "PO totals by status")
-    ];
-
     private static ReportDto MapToDto(Report report)
     {
         return new ReportDto
@@ -858,7 +1041,8 @@ public class ReportService : IReportService
             Description = report.Description,
             ReportType = report.ReportType,
             Category = report.Category,
-            Query = report.Query,
+            // Never surface Query/SQL to clients — ReportCode is the whitelist key.
+            Query = string.Empty,
             Parameters = report.Parameters ?? string.Empty,
             OutputFormat = report.OutputFormat,
             IsActive = report.IsActive,
@@ -876,12 +1060,16 @@ public class ReportService : IReportService
         {
             Id = execution.Id,
             ReportId = execution.ReportId,
+            ScheduleId = execution.ScheduleId,
             Parameters = execution.Parameters,
             Status = execution.Status,
             StartedAt = execution.StartedAt,
             CompletedAt = execution.CompletedAt,
             ErrorMessage = execution.ErrorMessage,
             ResultData = execution.ResultData,
+            OutputPath = execution.OutputPath,
+            ExecutionTimeMs = execution.ExecutionTimeMs,
+            RecordCount = execution.RecordCount,
             TenantId = execution.TenantId,
             ExecutedBy = execution.ExecutedBy,
             CreatedAt = execution.CreatedAt

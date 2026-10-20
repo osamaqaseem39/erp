@@ -1,7 +1,9 @@
 using ERP.Application.Interfaces.Finance;
 using ERP.Domain.Finance;
+using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Repositories.Finance;
 using ERP.Shared.DTOs.Finance;
+using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Application.Finance;
 
@@ -9,11 +11,13 @@ public class BillService : IBillService
 {
     private readonly IBillRepository _repository;
     private readonly IPaymentService? _payments;
+    private readonly ERPDbContext? _db;
 
-    public BillService(IBillRepository repository, IPaymentService? payments = null)
+    public BillService(IBillRepository repository, IPaymentService? payments = null, ERPDbContext? db = null)
     {
         _repository = repository;
         _payments = payments;
+        _db = db;
     }
 
     public async Task<BillDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -21,7 +25,9 @@ public class BillService : IBillService
         if (tenantId == Guid.Empty) return null;
         var entity = await _repository.GetByIdAsync(id);
         if (entity == null || entity.TenantId != tenantId) return null;
-        return MapToDto(entity);
+        var dto = MapToDto(entity);
+        await EnrichVendorNamesAsync(new[] { dto }, tenantId);
+        return dto;
     }
 
     public async Task<IEnumerable<BillDto>> GetAllAsync(
@@ -43,11 +49,14 @@ public class BillService : IBillService
         else
             entities = await _repository.GetAllAsync();
 
-        return entities
+        var dtos = entities
             .Where(b => b.TenantId == tenantId)
             .Where(b => !vendorId.HasValue || b.VendorId == vendorId || b.SupplierId == vendorId)
             .Where(b => string.IsNullOrWhiteSpace(status) || b.Status == status)
-            .Select(MapToDto);
+            .Select(MapToDto)
+            .ToList();
+        await EnrichVendorNamesAsync(dtos, tenantId);
+        return dtos;
     }
 
     public async Task<BillDto> CreateAsync(CreateBillDto dto, Guid tenantId, Guid userId)
@@ -76,6 +85,7 @@ public class BillService : IBillService
             Balance = dto.TotalAmount,
             Status = string.IsNullOrWhiteSpace(dto.Status) ? "Issued" : dto.Status,
             PurchaseOrderId = dto.PurchaseOrderId,
+            SourcePurchaseInvoiceId = dto.PurchaseInvoiceId,
             Notes = BuildNotes(dto),
             CreatedBy = userId.ToString(),
             CreatedAt = DateTime.UtcNow,
@@ -265,6 +275,21 @@ public class BillService : IBillService
         return notes;
     }
 
+    private async Task EnrichVendorNamesAsync(IEnumerable<BillDto> dtos, Guid tenantId)
+    {
+        if (_db == null) return;
+        var list = dtos as IList<BillDto> ?? dtos.ToList();
+        if (list.Count == 0 || tenantId == Guid.Empty) return;
+        var ids = list.Select(d => d.VendorId).Where(id => id != Guid.Empty).Distinct().ToList();
+        if (ids.Count == 0) return;
+        var names = await _db.Vendors.AsNoTracking()
+            .Where(v => v.TenantId == tenantId && ids.Contains(v.Id))
+            .ToDictionaryAsync(v => v.Id, v => v.VendorName);
+        foreach (var d in list)
+            if (names.TryGetValue(d.VendorId, out var name))
+                d.VendorName = name;
+    }
+
     private static BillDto MapToDto(Bill entity) => new()
     {
         Id = entity.Id,
@@ -280,6 +305,7 @@ public class BillService : IBillService
         Balance = entity.Balance,
         Status = entity.Status,
         Notes = entity.Notes,
+        SourcePurchaseInvoiceId = entity.SourcePurchaseInvoiceId,
         ApprovedDate = entity.ApprovedDate,
         PaidDate = entity.PaidDate,
         CreatedAt = entity.CreatedAt,

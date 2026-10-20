@@ -16,9 +16,14 @@ public class Invoice : BaseEntity
     public decimal Balance { get; set; } = 0;
     public string Status { get; set; } = "Draft"; // Draft, Issued, Paid, Overdue, Cancelled
     public Guid? SalesOrderId { get; set; }
+    /// <summary>Operational Sales invoice that posted this AR doc (preferred over Notes tag).</summary>
+    public Guid? SourceSalesInvoiceId { get; set; }
+    public string? Notes { get; set; }
     public DateTime? PostedAt { get; set; }
     public Guid? PostedBy { get; set; }
     public bool IsLocked { get; set; } = false;
+    public Guid? ProjectId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
     
     // Navigation properties
     public ICollection<InvoiceLine> InvoiceLines { get; set; } = new List<InvoiceLine>();

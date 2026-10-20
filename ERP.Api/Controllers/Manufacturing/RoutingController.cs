@@ -42,4 +42,14 @@ public class RoutingController : ERP.Api.Abstractions.ControllerBase
         var result = await _service.CreateAsync(dto, HttpContext.RequireTenantId(), User.RequireUserId());
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
+
+    [HttpPost("{id:guid}/activate")]
+    [ProducesResponseType(typeof(RoutingDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> Activate(Guid id) =>
+        Ok(await _service.ActivateAsync(id, HttpContext.RequireTenantId(), User.RequireUserId()));
+
+    [HttpPost("{id:guid}/obsolete")]
+    [ProducesResponseType(typeof(RoutingDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> Obsolete(Guid id) =>
+        Ok(await _service.ObsoleteAsync(id, HttpContext.RequireTenantId(), User.RequireUserId()));
 }

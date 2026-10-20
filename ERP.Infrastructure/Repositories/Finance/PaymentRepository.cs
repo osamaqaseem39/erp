@@ -117,7 +117,9 @@ public class PaymentRepository : IPaymentRepository
     public async Task<bool> UpdateAsync(Payment payment)
     {
         if (payment.TenantId == Guid.Empty) return false;
-        _context.Payments.Update(payment);
+        var tracked = await _context.Payments.FirstOrDefaultAsync(p => p.Id == payment.Id && p.TenantId == payment.TenantId);
+        if (tracked == null) return false;
+        _context.Entry(tracked).CurrentValues.SetValues(payment);
         return await _context.SaveChangesAsync() > 0;
     }
 

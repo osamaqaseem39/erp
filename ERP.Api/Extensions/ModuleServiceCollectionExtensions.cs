@@ -248,10 +248,12 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.Finance.ICostCenterService, CostCenterService>();
         services.AddScoped<ERP.Application.Interfaces.Finance.IAccountDefaultService, AccountDefaultService>();
         services.AddScoped<ERP.Application.Finance.IBudgetEnforcementService, ERP.Application.Finance.BudgetEnforcementService>();
+        services.AddScoped<ERP.Application.Finance.IBudgetService, ERP.Application.Finance.BudgetService>();
         services.AddScoped<ERP.Application.Finance.IOpeningBalanceService, ERP.Application.Finance.OpeningBalanceService>();
         services.AddScoped<ERP.Application.Finance.IAccountingPeriodService, ERP.Application.Finance.AccountingPeriodService>();
         services.AddScoped<ERP.Application.Finance.IChequeBookService, ERP.Application.Finance.ChequeBookService>();
         services.AddScoped<ERP.Application.Finance.IExpenseClaimService, ERP.Application.Finance.ExpenseClaimService>();
+        services.AddScoped<ERP.Application.Finance.IFinanceGapService, ERP.Application.Finance.FinanceGapService>();
         services.AddScoped<CreateTaxCodeValidator>();
         services.AddScoped<UpdateTaxCodeValidator>();
         return services;
@@ -306,11 +308,21 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IStockReservationRepository, ERP.Infrastructure.Repositories.SCM.StockReservationRepository>();
         services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IItemKitRepository, ERP.Infrastructure.Repositories.SCM.ItemKitRepository>();
         services.AddScoped<ERP.Infrastructure.Interfaces.SCM.ICycleCountRepository, ERP.Infrastructure.Repositories.SCM.CycleCountRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IPutawayTaskRepository, ERP.Infrastructure.Repositories.SCM.PutawayTaskRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IPickListRepository, ERP.Infrastructure.Repositories.SCM.PickListRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IReplenishmentTaskRepository, ERP.Infrastructure.Repositories.SCM.ReplenishmentTaskRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IPackOrderRepository, ERP.Infrastructure.Repositories.SCM.PackOrderRepository>();
+        services.AddScoped<ERP.Infrastructure.Interfaces.SCM.IShipmentRepository, ERP.Infrastructure.Repositories.SCM.ShipmentRepository>();
         services.AddScoped<ERP.Application.Interfaces.Inventory.IBrandService, ERP.Application.Inventory.BrandService>();
         services.AddScoped<ERP.Application.Interfaces.Inventory.IWarehouseLocationService, ERP.Application.Inventory.WarehouseLocationService>();
         services.AddScoped<ERP.Application.Interfaces.Inventory.IStockReservationService, ERP.Application.Inventory.StockReservationService>();
         services.AddScoped<ERP.Application.Interfaces.Inventory.IItemKitService, ERP.Application.Inventory.ItemKitService>();
         services.AddScoped<ERP.Application.Interfaces.Inventory.ICycleCountService, ERP.Application.Inventory.CycleCountService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IPutawayTaskService, ERP.Application.Inventory.PutawayTaskService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IPickListService, ERP.Application.Inventory.PickListService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IReplenishmentTaskService, ERP.Application.Inventory.ReplenishmentTaskService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IShipmentService, ERP.Application.Inventory.ShipmentService>();
+        services.AddScoped<ERP.Application.Interfaces.Inventory.IPackOrderService, ERP.Application.Inventory.PackOrderService>();
         return services;
     }
 
@@ -354,6 +366,8 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.HRM.IBenefitsService, BenefitsService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.ILeaveRequestService, LeaveRequestService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.IDepartmentService, DepartmentService>();
+        services.AddScoped<ERP.Application.Interfaces.HRM.ILeaveTypeService, LeaveTypeService>();
+        services.AddScoped<ERP.Application.Interfaces.HRM.ILeaveBalanceService, LeaveBalanceService>();
         services.AddScoped<ERP.Application.HRM.IEmployeeAdvanceService, ERP.Application.HRM.EmployeeAdvanceService>();
         services.AddScoped<ERP.Application.HRM.ITeamService, ERP.Application.HRM.TeamService>();
         return services;
@@ -410,6 +424,8 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.Manufacturing.IBillOfMaterialService, BillOfMaterialService>();
         services.AddScoped<ERP.Application.Manufacturing.IRoutingService, ERP.Application.Manufacturing.RoutingService>();
         services.AddScoped<ERP.Application.Manufacturing.IProductionScrapService, ERP.Application.Manufacturing.ProductionScrapService>();
+        services.AddScoped<ERP.Application.Manufacturing.IScrapReasonService, ERP.Application.Manufacturing.ScrapReasonService>();
+        services.AddScoped<ERP.Application.Manufacturing.IQualityCheckService, ERP.Application.Manufacturing.QualityCheckService>();
         services.AddScoped<ERP.Application.Manufacturing.IManufacturingReleaseService, ERP.Application.Manufacturing.ManufacturingReleaseService>();
         return services;
     }
@@ -421,6 +437,7 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<IProjectMilestoneRepository, ProjectMilestoneRepository>();
         services.AddScoped<IProjectResourceRepository, ProjectResourceRepository>();
         services.AddScoped<IProjectDocumentRepository, ProjectDocumentRepository>();
+        services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
         services.AddSingleton<ERP.Shared.Abstractions.IProjectDocumentStorage>(sp =>
         {
             var env = sp.GetService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
@@ -434,8 +451,10 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.Interfaces.Projects.IProjectMilestoneService, ProjectMilestoneService>();
         services.AddScoped<ERP.Application.Interfaces.Projects.IProjectResourceService, ProjectResourceService>();
         services.AddScoped<ERP.Application.Interfaces.Projects.IProjectDocumentService, ProjectDocumentService>();
+        services.AddScoped<ERP.Application.Interfaces.Projects.IProjectMemberService, ProjectMemberService>();
         services.AddScoped<ERP.Application.Projects.IProjectTimesheetService, ERP.Application.Projects.ProjectTimesheetService>();
         services.AddScoped<ERP.Application.Projects.IProjectMilestoneBillingService, ERP.Application.Projects.ProjectMilestoneBillingService>();
+        services.AddScoped<ERP.Application.Projects.IProjectCostService, ERP.Application.Projects.ProjectCostService>();
         return services;
     }
 
@@ -444,6 +463,7 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IReportScheduleRepository, ReportScheduleRepository>();
         services.AddScoped<IReportExecutionRepository, ReportExecutionRepository>();
+        services.AddScoped<ERP.Application.Reports.IModuleReportQueryService, ERP.Application.Reports.ModuleReportQueryService>();
         services.AddScoped<ERP.Application.Interfaces.Reports.IReportService, ReportService>();
         services.AddScoped<ERP.Application.Interfaces.Reports.IOperationalReportService, OperationalReportService>();
         services.AddHostedService<ERP.Api.Workers.ReportScheduleWorker>();

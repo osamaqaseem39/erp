@@ -79,6 +79,19 @@ public class AttendanceService : IAttendanceService
         return Map(open);
     }
 
+    public async Task<IEnumerable<AttendanceRecordDto>> GetAllAsync(
+        Guid tenantId, DateTime? fromDate = null, DateTime? toDate = null)
+    {
+        if (tenantId == Guid.Empty) return [];
+        var from = (fromDate ?? DateTime.UtcNow.Date.AddDays(-30)).Date;
+        var to = (toDate ?? DateTime.UtcNow.Date).Date.AddDays(1);
+        return (await _timeEntries.GetAllAsync(tenantId))
+            .Where(t => t.ClockIn >= from && t.ClockIn < to)
+            .OrderByDescending(t => t.ClockIn)
+            .Select(Map)
+            .ToList();
+    }
+
     public async Task<IEnumerable<AttendanceRecordDto>> GetEmployeeAttendanceAsync(
         Guid employeeId, Guid tenantId, DateTime fromDate, DateTime toDate)
     {

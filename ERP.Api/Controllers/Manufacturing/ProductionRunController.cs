@@ -26,6 +26,11 @@ public class ProductionRunController : ERP.Api.Abstractions.ControllerBase
         _service = service;
     }
 
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ProductionRunDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetAll() =>
+        Ok(await _service.GetAllAsync(GetTenantId()));
+
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ProductionRunDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> GetById(Guid id)

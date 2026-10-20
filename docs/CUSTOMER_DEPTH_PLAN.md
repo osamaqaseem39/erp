@@ -211,7 +211,7 @@ ItemCategory, ItemGroup, UnitOfMeasure, InventoryValuationMethod, Item (+ attrib
 | Item | Detail |
 |------|--------|
 | `Item.BrandId` | FK Brand |
-| Stock lines | Optional `WarehouseLocationId` on receive/issue/transfer/adjust/GRN/DA |
+| Stock lines | Optional `WarehouseLocationId` on receive/issue; when `inventory.requireBin`, GRN creates putaway and DA requires completed pick |
 | WAC | Average cost from ledger; honest report + optional admin recalc |
 
 ### Add — entities
@@ -225,7 +225,9 @@ ItemCategory, ItemGroup, UnitOfMeasure, InventoryValuationMethod, Item (+ attrib
 | `CycleCount` + `CycleCountLine` | Draft → Counted → Posted; variance creates StockAdjustment |
 
 ### Complete when
-Bin moves work when required; kits deduct components; reservations prevent oversell; cycle count posts adjustments; WAC matches ledger.
+Bin moves work when required (putaway + pick lists); kits deduct components; reservations prevent oversell; cycle count posts adjustments; WAC matches ledger.
+
+**Wired (2026-10):** SO approve → `StockReservation` + `ReservedQuantity`; reject/cancel clears hold; ship releases then issues (kits explode to components). Quote/SO UI item picker uses inventory catalog. Remaining: POS kit explode, WAC admin recalc, cycle-count UI.
 
 ---
 
@@ -283,23 +285,27 @@ Order completes with routing steps logged; scrap recorded; SO can release to pro
 ## 9. Projects
 
 ### Already have
-Project, ProjectTask, ProjectMilestone, ProjectResource, ProjectDocument
+Project, ProjectTask, ProjectMilestone, ProjectResource, ProjectDocument, ProjectTimesheet(+lines)
 
-### Add — entities
+### Add — entities (entity depth)
 
 | Entity | Role |
 |--------|------|
-| `ProjectTimesheet` + lines | Employee hours on project/task; submit/approve |
+| `ProjectMember` | Team membership (role); distinct from Resource allocation |
+| Milestone billing columns | `Amount`, `IsBillable`, `SalesInvoiceId` / `FinanceInvoiceId`, `BilledAt` — not Notes-only |
+| Invoice `ProjectId` | On SalesInvoice + Finance Invoice for reverse lookup |
+| Timesheet line billable | `IsBillable`, `HourlyRate` on lines |
 
 ### Add — behaviors
 
 | Behavior | Detail |
 |----------|--------|
-| Milestone billing | Milestone reached → draft SalesInvoice / Finance AR |
-| Project expense | ExpenseClaim.ProjectId; show on project cost |
+| Milestone billing | Milestone → draft SalesInvoice / Finance AR; durable FKs on milestone + invoice |
+| Project expense | ExpenseClaim.ProjectId; roll into ActualCost via cost service |
+| ActualCost rollup | Approved timesheet labor + approved expenses (+ optional GL ProjectId debits) |
 
 ### Complete when
-Time entry → approve; milestone can bill; expenses roll into project cost.
+Timesheet → approve; milestone can bill once with FKs; expenses roll into project cost.
 
 ---
 
@@ -325,22 +331,25 @@ Advance balance + payroll recovery work; optional teams; expense claims usable f
 
 ## 11. Reports
 
+> **Not complete.** Full gap-fill: [REPORTS_COMPLETION_PLAN.md](./REPORTS_COMPLETION_PLAN.md).
+
 ### Already have
-Report, ReportSchedule, ReportExecution + operational/finance catalog routes
+Report, ReportSchedule, ReportExecution + operational sales/purchase/stock APIs + finance `/api/finance/reports/*` + schedule worker (execute only, no email) + 11 built-in catalog codes (sales-heavy). No `/reports` hub UI; PDF export not delivered.
 
 ### Add — catalog / behavior (mostly queries, not entities)
 
 | Report / capability |
 |---------------------|
-| Sale order schedule by req. date |
-| Pending SO for production |
-| Broader sale delivery / invoice schedule |
-| PDF for SO, SI, CN, PO, DA, vouchers |
-| Per-report permission gating |
+| Unify catalog (finance + leftover ops codes into `BuiltInCatalog`) |
+| Purchase/Inventory/CRM/MFG/Projects/HR/POS catalog expansion |
+| `/reports` hub UI (catalog, runner, history, schedules) |
+| Sale order schedule / pending SO for production in catalog (APIs exist) |
+| PDF for SO, SI, CN, PO, DA, vouchers + CSV/Excel artifacts |
+| Per-report permission gating aligned to `ReportCode` |
 | Schedule worker delivers via real SMTP |
 
 ### Complete when
-All catalog reports return real data; prints work; unauthorized reports hidden; schedules email successfully.
+DoD in [REPORTS_COMPLETION_PLAN.md](./REPORTS_COMPLETION_PLAN.md): single catalog, hub UI, exports, SMTP schedules, permissions, tests.
 
 ---
 
@@ -354,7 +363,7 @@ O2C:  Lead/Enquiry → PreCost? → Quote → SO → Reserve stock → Dispatch 
 P2P:  PR → RFQ → PO (contract price) → GRN → Landed cost → PI (3-way match) → AP → Payment
       PurchaseReturn → DebitNote → AP/GL/stock
 
-Stock: GRN/DA/adjust/transfer/MFG/kit/cycle-count/reservation all via Inventory services only
+Stock: GRN/DA/putaway/pick/adjust/transfer/MFG/kit/cycle-count/reservation all via Inventory services only
 
 GL:   Opening → Journals (FY + period) → TB/P&L/BS; ChequeBook on BPV; Budget; ExpenseClaim
 
@@ -408,5 +417,5 @@ Plus field enrichments on Customer, Vendor, Quote, SalesOrder, SalesInvoice, Ite
 - [x] Manufacturing (routing, scrap, SO release)
 - [x] Projects (timesheet, milestone bill, expense)
 - [x] HRM (advance, team)
-- [x] Reports (schedules, production pending, PDF, permissions)
+- [x] Reports (unified catalog, hub UI, CSV/Excel/PDF export, schedule SMTP; favorites via localStorage)
 - [ ] Cross-flows E2E on staging (apply SQL scripts; run smoke on staging tenant)

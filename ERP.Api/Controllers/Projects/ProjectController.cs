@@ -25,6 +25,8 @@ public class ProjectController : ERP.Api.Abstractions.ControllerBase
     private readonly IProjectMilestoneService _milestones;
     private readonly IProjectResourceService _resources;
     private readonly IProjectDocumentService _documents;
+    private readonly IProjectMemberService _members;
+    private readonly ERP.Application.Projects.IProjectCostService _costs;
 
     public ProjectController(
         IProjectService projectService,
@@ -32,6 +34,8 @@ public class ProjectController : ERP.Api.Abstractions.ControllerBase
         IProjectMilestoneService milestones,
         IProjectResourceService resources,
         IProjectDocumentService documents,
+        IProjectMemberService members,
+        ERP.Application.Projects.IProjectCostService costs,
         ILogger<ProjectController> logger) : base(logger)
     {
         _projectService = projectService;
@@ -39,6 +43,8 @@ public class ProjectController : ERP.Api.Abstractions.ControllerBase
         _milestones = milestones;
         _resources = resources;
         _documents = documents;
+        _members = members;
+        _costs = costs;
     }
 
     [HttpPost]
@@ -207,6 +213,67 @@ public class ProjectController : ERP.Api.Abstractions.ControllerBase
         if (existing == null || existing.ProjectId != projectId) return NotFound();
         var ok = await _milestones.DeleteAsync(milestoneId, GetTenantId());
         return ok ? NoContent() : BadRequest(new { error = "Could not delete milestone." });
+    }
+
+    [HttpGet("{projectId:guid}/cost-summary")]
+    [ProducesResponseType(typeof(ERP.Shared.DTOs.Projects.ProjectCostSummaryDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> CostSummary(Guid projectId)
+    {
+        var summary = await _costs.GetCostSummaryAsync(projectId, GetTenantId());
+        return summary == null ? NotFound() : Ok(summary);
+    }
+
+    [HttpPost("{projectId:guid}/recalculate-cost")]
+    [ProducesResponseType(typeof(ERP.Shared.DTOs.Projects.ProjectCostSummaryDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> RecalculateCost(Guid projectId)
+    {
+        var summary = await _costs.RecalculateActualCostAsync(projectId, GetTenantId());
+        return summary == null ? NotFound() : Ok(summary);
+    }
+
+    [HttpGet("{projectId:guid}/members")]
+    [ProducesResponseType(typeof(IEnumerable<ProjectMemberDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> ListMembers(Guid projectId)
+        => Ok(await _members.GetByProjectAsync(projectId, GetTenantId()));
+
+    [HttpGet("{projectId:guid}/members/{memberId:guid}")]
+    [ProducesResponseType(typeof(ProjectMemberDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetMember(Guid projectId, Guid memberId)
+    {
+        var row = await _members.GetByIdAsync(memberId, GetTenantId());
+        if (row == null || row.ProjectId != projectId) return NotFound();
+        return Ok(row);
+    }
+
+    [HttpPost("{projectId:guid}/members")]
+    [ProducesResponseType(typeof(IdResponse), OpenApiResponseTypes.Created)]
+    public async Task<IActionResult> CreateMember(Guid projectId, [FromBody] CreateProjectMemberDto dto)
+    {
+        dto.ProjectId = projectId;
+        var id = await _members.CreateAsync(dto, GetTenantId(), GetUserId());
+        if (id == Guid.Empty) return BadRequest(new { error = "Could not create member." });
+        return CreatedAtAction(nameof(GetMember), new { projectId, memberId = id }, new IdResponse { Id = id });
+    }
+
+    [HttpPut("{projectId:guid}/members/{memberId:guid}")]
+    [ProducesResponseType(typeof(ProjectMemberDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> UpdateMember(Guid projectId, Guid memberId, [FromBody] UpdateProjectMemberDto dto)
+    {
+        dto.Id = memberId;
+        var existing = await _members.GetByIdAsync(memberId, GetTenantId());
+        if (existing == null || existing.ProjectId != projectId) return NotFound();
+        var ok = await _members.UpdateAsync(dto, GetTenantId(), GetUserId());
+        return ok ? Ok(await _members.GetByIdAsync(memberId, GetTenantId())) : BadRequest(new { error = "Could not update member." });
+    }
+
+    [HttpDelete("{projectId:guid}/members/{memberId:guid}")]
+    [ProducesResponseType(OpenApiResponseTypes.NoContent)]
+    public async Task<IActionResult> DeleteMember(Guid projectId, Guid memberId)
+    {
+        var existing = await _members.GetByIdAsync(memberId, GetTenantId());
+        if (existing == null || existing.ProjectId != projectId) return NotFound();
+        var ok = await _members.DeleteAsync(memberId, GetTenantId());
+        return ok ? NoContent() : BadRequest(new { error = "Could not delete member." });
     }
 
     [HttpGet("{projectId:guid}/resources")]

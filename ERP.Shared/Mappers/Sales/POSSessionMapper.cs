@@ -53,7 +53,7 @@ public static class POSSessionMapper
         entity.EndTime = dto.EndTime;
         if (dto.OpeningBalance.HasValue) entity.OpeningBalance = dto.OpeningBalance.Value;
         entity.ClosingBalance = dto.ClosingBalance;
-        entity.Status = dto.Status;
+        // Status only via Open/Close DocumentWorkflow
         entity.Notes = dto.Notes;
         
         entity.UpdatedAt = DateTime.UtcNow;

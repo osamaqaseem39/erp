@@ -122,7 +122,7 @@ public class TimeTrackingService : ITimeTrackingService
         if (dto.EndTime.HasValue) entity.ClockOut = dto.EndTime.Value;
         if (dto.HoursWorked.HasValue) entity.HoursWorked = dto.HoursWorked;
         if (dto.Description != null) entity.Notes = dto.Description;
-        if (dto.Status != null) entity.Status = dto.Status;
+        // Status not free-set on Update
         entity.UpdatedBy = dto.UpdatedBy;
         entity.UpdatedAt = DateTime.UtcNow;
     }

@@ -56,6 +56,7 @@ public class WorkCenterService : IWorkCenterService
             WorkCenterType = dto.WorkCenterType ?? string.Empty,
             Capacity = dto.Capacity ?? 0,
             CapacityUnit = dto.CapacityUnit ?? "Hours",
+            WeeklyAvailableHours = dto.WeeklyAvailableHours ?? dto.Capacity ?? 40m,
             Notes = dto.Notes,
             IsActive = dto.IsActive ?? true,
             TenantId = tenantId,
@@ -82,6 +83,7 @@ public class WorkCenterService : IWorkCenterService
         if (dto.WorkCenterType != null) workCenter.WorkCenterType = dto.WorkCenterType;
         if (dto.Capacity.HasValue) workCenter.Capacity = dto.Capacity.Value;
         if (dto.CapacityUnit != null) workCenter.CapacityUnit = dto.CapacityUnit;
+        if (dto.WeeklyAvailableHours.HasValue) workCenter.WeeklyAvailableHours = dto.WeeklyAvailableHours.Value;
         if (dto.Notes != null) workCenter.Notes = dto.Notes;
         if (dto.IsActive.HasValue) workCenter.IsActive = dto.IsActive.Value;
         workCenter.UpdatedBy = userId.ToString();
@@ -107,6 +109,7 @@ public class WorkCenterService : IWorkCenterService
             WorkCenterType = workCenter.WorkCenterType,
             Capacity = workCenter.Capacity,
             CapacityUnit = workCenter.CapacityUnit,
+            WeeklyAvailableHours = workCenter.WeeklyAvailableHours,
             Notes = workCenter.Notes,
             IsActive = workCenter.IsActive,
             TenantId = workCenter.TenantId,

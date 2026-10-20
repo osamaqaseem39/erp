@@ -33,6 +33,8 @@ public class SalesInvoiceDto : BaseDto
     public decimal DiscountAmount { get; set; }
     public DateTime? PostedAt { get; set; }
     public Guid? PostedBy { get; set; }
+    public Guid? ProjectId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
     public List<SalesInvoiceLineDto> Lines { get; set; } = new();
 }
 
@@ -59,6 +61,8 @@ public class CreateSalesInvoiceDto : CreateDto
     public decimal Overhead { get; set; }
     public string? DiscountType { get; set; }
     public decimal DiscountAmount { get; set; }
+    public Guid? ProjectId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
     public List<CreateSalesInvoiceLineDto> Lines { get; set; } = new();
 }
 

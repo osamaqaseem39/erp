@@ -9,6 +9,7 @@ public class RoutingDto
     public Guid? ItemId { get; set; }
     public string Version { get; set; } = "1";
     public string Status { get; set; } = "Draft";
+    public bool IsDefault { get; set; }
     public string? Notes { get; set; }
     public List<RoutingStepDto> Steps { get; set; } = new();
 }
@@ -29,6 +30,7 @@ public class CreateRoutingDto
     public string Name { get; set; } = string.Empty;
     public Guid? ItemId { get; set; }
     public string? Version { get; set; }
+    public bool IsDefault { get; set; }
     public string? Notes { get; set; }
     public List<CreateRoutingStepDto> Steps { get; set; } = new();
 }
@@ -50,6 +52,8 @@ public class ProductionScrapDto
     public Guid? ItemId { get; set; }
     public decimal Quantity { get; set; }
     public DateTime ScrapDate { get; set; }
+    public Guid? ScrapReasonId { get; set; }
+    public Guid? WarehouseId { get; set; }
     public string? Reason { get; set; }
 }
 
@@ -59,6 +63,8 @@ public class CreateProductionScrapDto
     public Guid? ItemId { get; set; }
     public decimal Quantity { get; set; }
     public DateTime? ScrapDate { get; set; }
+    public Guid? ScrapReasonId { get; set; }
+    public Guid? WarehouseId { get; set; }
     public string? Reason { get; set; }
 }
 
@@ -68,6 +74,7 @@ public class ReleaseSalesOrderLineDto
     public Guid? BomId { get; set; }
     public Guid? RoutingId { get; set; }
     public Guid? WorkCenterId { get; set; }
+    public Guid? WarehouseId { get; set; }
     public decimal? Quantity { get; set; }
     public DateTime? PlannedStartDate { get; set; }
     public DateTime? PlannedEndDate { get; set; }

@@ -102,6 +102,24 @@ public class ProductionOrderController : ERP.Api.Abstractions.ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id}/operations")]
+    [ProducesResponseType(typeof(IEnumerable<ProductionOrderOperationDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> ListOperations(Guid id)
+    {
+        var ops = await _productionOrderService.ListOperationsAsync(id, GetTenantId());
+        return Ok(ops);
+    }
+
+    [HttpPost("{id}/operations/{operationId:guid}/complete")]
+    [ProducesResponseType(typeof(ProductionOrderOperationDto), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> CompleteOperation(
+        Guid id, Guid operationId, [FromBody] CompleteProductionOrderOperationDto? dto)
+    {
+        var result = await _productionOrderService.CompleteOperationAsync(
+            id, operationId, dto ?? new CompleteProductionOrderOperationDto(), GetTenantId(), GetUserId());
+        return Ok(result);
+    }
+
     [HttpDelete("{id}")]
     [ProducesResponseType(OpenApiResponseTypes.NoContent)]
     public async Task<IActionResult> Delete(Guid id)

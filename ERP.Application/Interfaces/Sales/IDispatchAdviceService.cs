@@ -12,4 +12,5 @@ public interface IDispatchAdviceService
     Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId);
     Task<bool> DispatchAsync(Guid id, Guid tenantId, Guid userId);
     Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId);
+    Task<Guid> CreatePickAsync(Guid id, Guid tenantId, Guid userId);
 }

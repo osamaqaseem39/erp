@@ -14,6 +14,12 @@ public class ItemVariantService : IItemVariantService
         _repository = repository;
     }
 
+    public async Task<IEnumerable<ItemVariantDto>> GetAllAsync(Guid tenantId)
+    {
+        var entities = await _repository.GetAllAsync(tenantId);
+        return entities.Select(ItemVariantMapper.ToDto);
+    }
+
     public async Task<IEnumerable<ItemVariantDto>> GetByItemAsync(Guid itemId, Guid tenantId)
     {
         var entities = await _repository.GetByItemAsync(itemId, tenantId);

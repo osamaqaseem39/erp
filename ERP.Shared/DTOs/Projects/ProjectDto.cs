@@ -22,6 +22,9 @@ public class ProjectDto : BaseDto
     public decimal ActualCost { get; set; }
     public decimal Progress { get; set; }
     public string? Notes { get; set; }
+    public Guid? CostCenterId { get; set; }
+    public Guid? CurrencyId { get; set; }
+    public Guid? BranchId { get; set; }
 }
 
 public class CreateProjectDto : CreateDto
@@ -38,6 +41,9 @@ public class CreateProjectDto : CreateDto
     public string? Priority { get; set; } = "Medium";
     public decimal? Budget { get; set; }
     public string? Notes { get; set; }
+    public Guid? CostCenterId { get; set; }
+    public Guid? CurrencyId { get; set; }
+    public Guid? BranchId { get; set; }
 }
 
 public class UpdateProjectDto : UpdateDto
@@ -57,4 +63,7 @@ public class UpdateProjectDto : UpdateDto
     public decimal? ActualCost { get; set; }
     public decimal? Progress { get; set; }
     public string? Notes { get; set; }
+    public Guid? CostCenterId { get; set; }
+    public Guid? CurrencyId { get; set; }
+    public Guid? BranchId { get; set; }
 }

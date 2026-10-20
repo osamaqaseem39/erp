@@ -22,6 +22,7 @@ public class InvoiceDto : BaseDto
     public string Status { get; set; } = "Draft";
     public Guid? SalesOrderId { get; set; }
     public string? SalesOrderNumber { get; set; }
+    public Guid? SourceSalesInvoiceId { get; set; }
     public DateTime? PostedAt { get; set; }
     public Guid? PostedBy { get; set; }
     public bool IsLocked { get; set; }
@@ -29,6 +30,8 @@ public class InvoiceDto : BaseDto
     public string? Terms { get; set; }
     public string? ShippingAddress { get; set; }
     public string? BillingAddress { get; set; }
+    public Guid? ProjectId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
     public List<InvoiceLineDto>? InvoiceLines { get; set; }
 }
 
@@ -44,11 +47,14 @@ public class CreateInvoiceDto : CreateDto
     public decimal? TotalAmount { get; set; }
     public string? Status { get; set; } = "Draft";
     public Guid? SalesOrderId { get; set; }
+    public Guid? SourceSalesInvoiceId { get; set; }
     public bool? IsLocked { get; set; } = false;
     public string? Notes { get; set; }
     public string? Terms { get; set; }
     public string? ShippingAddress { get; set; }
     public string? BillingAddress { get; set; }
+    public Guid? ProjectId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
 }
 
 public class InvoiceLineDto

@@ -1,6 +1,4 @@
 using ERP.Application.Interfaces.Manufacturing;
-using ERP.Domain.CRM;
-using ERP.Domain.Manufacturing;
 using ERP.Infrastructure.Database;
 using ERP.Shared.DTOs.Manufacturing;
 using ERP.Shared.Exceptions;
@@ -42,15 +40,19 @@ public class ManufacturingReleaseService : IManufacturingReleaseService
 
         return await _productionOrders.CreateAsync(new CreateProductionOrderDto
         {
-            OrderNumber = $"{order.OrderNumber}-L{line.Id:N}"[..24],
+            OrderNumber = Truncate($"{order.OrderNumber}-L{line.Id:N}", 50),
             ItemId = line.ItemId,
             BomId = dto.BomId,
             RoutingId = dto.RoutingId,
             WorkCenterId = dto.WorkCenterId,
+            WarehouseId = dto.WarehouseId,
+            SalesOrderId = order.Id,
+            SalesOrderLineId = line.Id,
             Quantity = qty,
             PlannedStartDate = dto.PlannedStartDate,
             PlannedEndDate = dto.PlannedEndDate,
-            Notes = $"Released from SO {order.OrderNumber}, line {line.ItemName}"
+            Status = "Released",
+            Notes = $"Released from SO {order.OrderNumber}"
         }, tenantId, userId);
     }
 
@@ -69,20 +71,22 @@ public class ManufacturingReleaseService : IManufacturingReleaseService
             .Where(l => l.TenantId == tenantId && orderIds.Contains(l.SalesOrderId))
             .ToListAsync();
 
-        var released = await _db.ProductionOrders.AsNoTracking()
-            .Where(p => p.TenantId == tenantId && p.IsActive && p.Notes != null)
-            .Select(p => new { p.Notes, p.Quantity })
+        var lineIds = lines.Select(l => l.Id).ToList();
+        var releasedByLine = await _db.ProductionOrders.AsNoTracking()
+            .Where(p => p.TenantId == tenantId && p.IsActive
+                && p.SalesOrderLineId != null
+                && lineIds.Contains(p.SalesOrderLineId.Value)
+                && p.Status != "Cancelled")
+            .GroupBy(p => p.SalesOrderLineId!.Value)
+            .Select(g => new { LineId = g.Key, Qty = g.Sum(p => p.Quantity) })
             .ToListAsync();
+        var releasedMap = releasedByLine.ToDictionary(x => x.LineId, x => x.Qty);
 
         var result = new List<PendingSalesOrderForProductionDto>();
         foreach (var line in lines)
         {
             var order = openOrders.First(o => o.Id == line.SalesOrderId);
-            var tag = $"SO {order.OrderNumber}";
-            var releasedQty = released
-                .Where(r => r.Notes!.Contains(tag, StringComparison.OrdinalIgnoreCase)
-                    && r.Notes.Contains(line.ItemName, StringComparison.OrdinalIgnoreCase))
-                .Sum(r => r.Quantity);
+            releasedMap.TryGetValue(line.Id, out var releasedQty);
             var pending = Math.Max(0, line.Quantity - releasedQty);
             if (pending <= 0) continue;
             result.Add(new PendingSalesOrderForProductionDto
@@ -100,4 +104,7 @@ public class ManufacturingReleaseService : IManufacturingReleaseService
 
         return result.OrderBy(r => r.OrderNumber).ToList();
     }
+
+    private static string Truncate(string value, int max) =>
+        value.Length <= max ? value : value[..max];
 }

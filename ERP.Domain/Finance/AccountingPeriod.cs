@@ -9,4 +9,7 @@ public class AccountingPeriod : BaseEntity
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string Status { get; set; } = "Open";
+    public bool IsLocked { get; set; }
+    public DateTime? ClosedAt { get; set; }
+    public Guid? ClosedBy { get; set; }
 }

@@ -25,6 +25,7 @@ public class Payment : BaseEntity
     public Guid? ProcessedBy { get; set; }
     public Guid? CompanyId { get; set; }
     public ICollection<PaymentApplication> PaymentApplications { get; set; } = new List<PaymentApplication>();
+    public ICollection<WithholdingTaxLine> WithholdingTaxLines { get; set; } = new List<WithholdingTaxLine>();
     
     // Navigation properties
     public BankAccount? BankAccount { get; set; }

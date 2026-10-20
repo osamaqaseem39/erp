@@ -18,4 +18,5 @@ public class Budget : BaseEntity
     
     // Navigation properties
     public ChartOfAccount Account { get; set; } = null!;
+    public ICollection<BudgetLine> Lines { get; set; } = new List<BudgetLine>();
 }

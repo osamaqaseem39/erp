@@ -47,6 +47,8 @@ public class StockTransferDetailDto
     public Guid ItemId { get; set; }
     public string? ItemName { get; set; }
     public decimal Quantity { get; set; }
+    public Guid? FromLocationId { get; set; }
+    public Guid? ToLocationId { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -54,6 +56,8 @@ public class CreateStockTransferDetailDto
 {
     public Guid ItemId { get; set; }
     public decimal Quantity { get; set; }
+    public Guid? FromLocationId { get; set; }
+    public Guid? ToLocationId { get; set; }
     public string? Notes { get; set; }
 }
 
@@ -62,5 +66,7 @@ public class UpdateStockTransferDetailDto
     public new Guid Id { get; set; }
     public Guid ItemId { get; set; }
     public decimal Quantity { get; set; }
+    public Guid? FromLocationId { get; set; }
+    public Guid? ToLocationId { get; set; }
     public string? Notes { get; set; }
 }

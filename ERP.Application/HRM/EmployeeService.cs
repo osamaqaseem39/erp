@@ -213,6 +213,7 @@ public class EmployeeService : IEmployeeService
         entity.DateOfBirth = dto.DateOfBirth;
         entity.Nationality = dto.Nationality;
         entity.MaritalStatus = dto.MaritalStatus;
+        // entity.Status unchanged on Update — use dedicated lifecycle if added
         entity.JobTitle = dto.JobTitle;
         entity.DepartmentId = dto.DepartmentId;
         entity.ManagerId = dto.ManagerId;
@@ -224,7 +225,6 @@ public class EmployeeService : IEmployeeService
         entity.WorkLocationId = dto.WorkLocationId;
         entity.DateHired = dto.DateHired;
         entity.DateTerminated = dto.DateTerminated;
-        entity.Status = dto.Status;
         entity.IsRemote = dto.IsRemote ?? entity.IsRemote;
         entity.EmploymentContractId = dto.EmploymentContractId;
         entity.UpdatedBy = dto.UpdatedBy;

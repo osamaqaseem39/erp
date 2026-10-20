@@ -15,7 +15,7 @@ Authoritative runtime shape still lives in `ERP.Domain` + EF configurations + sc
 | HRM | EF + HRM schema SQL | Employees, leave, payroll, … |
 | Inventory / SCM | EF + Inventory schema SQL | Items, warehouses, stock ledger |
 | Procurement | EF + Procurement schema SQL | Vendors, PO, PR, GRN, PI (+ details) |
-| Manufacturing | EF | Work centers, production orders/runs (thin) |
+| Manufacturing | EF + schema SQL | Work centers, BOM, routing, production orders/runs, scrap, QC, operations |
 | Projects | EF | Projects, tasks, milestones, resources |
 | Reports | EF | Definitions, executions, schedules |
 
@@ -56,6 +56,45 @@ See also [DATABASE.md](../DATABASE.md).
 | 2026-10-20 | Recruitment workflows | HRM | JobOpening Open→Closed/Filled; Application Applied→Shortlisted→Interviewed→Hired/Rejected; Interview Scheduled→Completed/Cancelled | **Implemented** (no schema change; existing tables) |
 | 2026-10-20 | `Core.Users` TOTP 2FA columns | Platform | TwoFactorEnabled/Secret/PendingSecret + login challenge hash/expiry | **Implemented** (apply `20261020_Auth_TwoFactorTotp.sql`) |
 | 2026-10-20 | Customer depth tables | All modules | See [CUSTOMER_DEPTH_PLAN.md](../CUSTOMER_DEPTH_PLAN.md); SQL `20261020_CustomerDepth_*.sql` | **Implemented** (apply scripts) |
+| 2026-10-20 | Finance gap set (glue + depth) | Finance | SI/PI FKs, PaymentApplication XOR, TaxTransaction EF, BudgetLine, TaxGroup, assets, recon lines, memos, advances, WHT, recurring, FX, IC settlement | **Implemented** (apply `20261020_Finance_Gap_Full.sql`) |
+
+### Finance gap set — shapes
+
+#### Glue / columns on existing tables
+
+| Table / column | Type | Notes |
+|----------------|------|--------|
+| `Invoices.SourceSalesInvoiceId` | uniqueidentifier NULL | FK to Sales invoice; filtered unique where not null |
+| `Invoices.Notes` | nvarchar(2000) NULL | optional; SI post prefers SourceSalesInvoiceId |
+| `Bills.SourcePurchaseInvoiceId` | uniqueidentifier NULL | FK to Purchase invoice; filtered unique |
+| `PaymentApplications.InvoiceId` | uniqueidentifier NULL | XOR with BillId |
+| `PaymentApplications.BillId` | uniqueidentifier NULL | XOR with InvoiceId |
+| `Journals.ReversedFromJournalId` | uniqueidentifier NULL | self-FK to original journal |
+| `AccountingPeriods.IsLocked` | bit | soft lock |
+| `AccountingPeriods.ClosedAt` / `ClosedBy` | datetime2 / uniqueidentifier NULL | period close audit |
+| `TaxCodes.TaxGroupId` | uniqueidentifier NULL | optional default group |
+| `FixedAssets.AssetCategoryId` | uniqueidentifier NULL | FK AssetCategories |
+| `IntercompanyTransactions.SettlementId` | uniqueidentifier NULL | FK IntercompanySettlements |
+
+#### New tables (`Finance` schema, BaseEntity shape: Id, TenantId, audit, IsActive)
+
+| Table | Purpose |
+|-------|---------|
+| `BudgetLines` | Period amounts under Budget |
+| `TaxGroups` / `TaxGroupLines` | Multi-tax composition |
+| `TaxTransactions` | Persist orphan domain type |
+| `AssetCategories` | Dep method/life + GL accounts |
+| `AssetDisposals` / `AssetTransfers` | FA lifecycle |
+| `BankReconciliationLines` | Explicit recon ticks |
+| `FundTransfers` | Bank/cash transfer + PostedJournalId |
+| `CreditMemos` / `CreditMemoLines` | Pure AR financial memo |
+| `DebitMemos` / `DebitMemoLines` | Pure AP financial memo |
+| `CustomerAdvances` / `VendorAdvances` | Trade advances |
+| `AdvanceApplications` | Advance → Invoice/Bill |
+| `WithholdingTaxLines` | WHT on Payment |
+| `RecurringJournals` / `RecurringJournalLines` | JV templates |
+| `FxRevaluationRuns` / `FxRevaluationLines` | FX reval |
+| `IntercompanySettlements` | IC settlement hub |
 
 ### Customer depth — Core
 
@@ -85,10 +124,18 @@ See also [DATABASE.md](../DATABASE.md).
 | `Procurement.VendorContracts` | Vendor price contracts | **Implemented** |
 | Enrich Vendor columns | Party parity | **Implemented** |
 | `Inventory.Brands` | Item brand | **Implemented** |
-| `Inventory.WarehouseLocations` | Bins | **Implemented** |
+| `Inventory.WarehouseLocations` | Bins (+ LocationType, Zone) | **Implemented** |
 | `Inventory.StockReservations` (+ rows) | Soft allocate | **Implemented** |
 | `Inventory.ItemKits` + components | Retail kits | **Implemented** |
 | `Inventory.CycleCounts` + lines | Cycle count | **Implemented** |
+| `StockBalances` / `StockLedgers`.`WarehouseLocationId` | Bin-level qty | **Implemented** (`20261022_Wms_BinStock.sql`) |
+| `Inventory.PutawayTasks` + lines | GRN → bin putaway | **Implemented** (same) |
+| `Inventory.PickLists` + lines | Dispatch pick from bins | **Implemented** (same) |
+| `StockTransferDetails` From/ToLocationId | Two-step bin transfer | **Implemented** (`20261022_Wms_Phase2.sql`) |
+| `StockAdjustmentLines.WarehouseLocationId` | Bin adjustments | **Implemented** (same) |
+| `Inventory.ReplenishmentTasks` + lines | Bulk→Pick | **Implemented** (same) |
+| `Inventory.PackOrders` + lines | Pack after pick | **Implemented** (same) |
+| `Inventory.Shipments` + lines | Carrier / tracking | **Implemented** (same) |
 
 ### Customer depth — Finance / MFG / Projects / HRM
 
@@ -100,9 +147,50 @@ See also [DATABASE.md](../DATABASE.md).
 | `Finance.ExpenseClaims` + lines | Expense claims | **Implemented** |
 | `Manufacturing.Routings` + steps | Routing | **Implemented** |
 | `Manufacturing.ProductionScraps` | Scrap/QC | **Implemented** |
+| `ProductionOrders` SO FKs + WarehouseId | SO→MO link + default WH | **Implemented** (`20261021_Manufacturing_Gaps.sql`) |
+| `WorkCenters.WeeklyAvailableHours` | Capacity warn | **Implemented** (same) |
+| `BillOfMaterials` IsDefault + effective dates | Default BOM pick | **Implemented** (same) |
+| `BillOfMaterialLines.AlternateGroup` | Component substitutes | **Implemented** (same) |
+| `Routings.IsDefault` | Default routing pick | **Implemented** (same) |
+| `Manufacturing.ScrapReasons` | Scrap reason master | **Implemented** (same) |
+| `ProductionScraps.ScrapReasonId` + WarehouseId | Typed scrap + stock | **Implemented** (same) |
+| `Manufacturing.ProductionOrderOperations` | Routing step actuals | **Implemented** (same) |
+| `ProductionRuns` WorkCenterId + OperationId | Run ↔ op/WC | **Implemented** (same) |
+| `Manufacturing.QualityChecks` + lines | QC gate before FG receive | **Implemented** (same) |
 | `Projects.ProjectTimesheets` + lines | Timesheets | **Implemented** |
+| `Projects.ProjectMembers` | Project team membership | **Implemented** |
+| `Projects` entity depth (milestone billing, billable lines, finance dims, invoice ProjectId) | PSA depth | **Implemented** |
 | `HRM.EmployeeAdvances` | Employee advance | **Implemented** |
 | `HRM.Teams` | Team master | **Implemented** |
+
+### `Projects.ProjectMembers` (shape)
+
+| Column | Type | Notes |
+|--------|------|--------|
+| Id | uniqueidentifier | PK |
+| TenantId | uniqueidentifier | required |
+| ProjectId | uniqueidentifier | FK project |
+| EmployeeId | uniqueidentifier | FK employee |
+| Role | nvarchar(100) | e.g. Member, Lead, Contributor |
+| StartDate | date | nullable |
+| EndDate | date | nullable |
+| Status | nvarchar(30) | Active / Inactive |
+| Notes | nvarchar(1000) | nullable |
+| audit | | standard |
+
+### Projects entity depth — column alters (implemented)
+
+| Table | Columns | Notes |
+|-------|---------|--------|
+| `dbo.Projects` | CostCenterId?, CurrencyId?, BranchId? | Finance dimensions |
+| `dbo.ProjectMilestones` | Amount, IsBillable, SalesInvoiceId?, FinanceInvoiceId?, BilledAt? | Durable milestone billing |
+| `Projects.ProjectTimesheetLines` | IsBillable (default 1), HourlyRate | Labor cost / billing |
+| `dbo.ProjectDocuments` | ProjectTaskId?, ProjectMilestoneId? | Optional scoping |
+| `dbo.SalesInvoices` | ProjectId?, ProjectMilestoneId? | Reverse project P&L |
+| `dbo.Invoices` | ProjectId?, ProjectMilestoneId? | Finance AR link |
+| `dbo.TimeEntries` | ProjectTaskId? | Explicit (was shadow FK) |
+
+**ActualCost rollup rule:** approved timesheet lines (`IsBillable` × `Hours` × `HourlyRate`) + approved `ExpenseClaims` for the project + posted `JournalEntry` debits with `ProjectId`.
 
 ### `HRM.Benefits` (shape)
 

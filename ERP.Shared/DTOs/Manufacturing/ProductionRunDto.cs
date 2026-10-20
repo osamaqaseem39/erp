@@ -11,7 +11,9 @@ public class ProductionRunDto : BaseDto
     public DateTime? EndTime { get; set; }
     public decimal QuantityProduced { get; set; }
     public decimal QuantityRejected { get; set; }
-    public string Status { get; set; } = "Running";
+    public Guid? WorkCenterId { get; set; }
+    public Guid? ProductionOrderOperationId { get; set; }
+    public string Status { get; set; } = "InProgress";
     public string? Notes { get; set; }
     public Guid? OperatorId { get; set; }
     public string? OperatorName { get; set; }
@@ -25,7 +27,9 @@ public class CreateProductionRunDto : CreateDto
     public DateTime? EndTime { get; set; }
     public decimal? QuantityProduced { get; set; }
     public decimal? QuantityRejected { get; set; }
-    public string? Status { get; set; } = "Running";
+    public Guid? WorkCenterId { get; set; }
+    public Guid? ProductionOrderOperationId { get; set; }
+    public string? Status { get; set; } = "InProgress";
     public string? Notes { get; set; }
     public Guid? OperatorId { get; set; }
 }

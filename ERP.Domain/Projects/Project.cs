@@ -22,6 +22,9 @@ public class Project : BaseEntity
     public decimal ActualCost { get; set; }
     public decimal Progress { get; set; } // Percentage
     public string? Notes { get; set; }
+    public Guid? CostCenterId { get; set; }
+    public Guid? CurrencyId { get; set; }
+    public Guid? BranchId { get; set; }
     
     // Navigation properties
     public Customer? Client { get; set; }
@@ -30,4 +33,5 @@ public class Project : BaseEntity
     public ICollection<ProjectResource> Resources { get; set; } = new List<ProjectResource>();
     public ICollection<ProjectMilestone> Milestones { get; set; } = new List<ProjectMilestone>();
     public ICollection<ProjectDocument> Documents { get; set; } = new List<ProjectDocument>();
+    public ICollection<ProjectMember> Members { get; set; } = new List<ProjectMember>();
 }

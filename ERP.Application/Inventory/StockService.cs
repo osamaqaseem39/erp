@@ -1,3 +1,4 @@
+using ERP.Application.Core.Settings;
 using ERP.Application.Interfaces;
 using ERP.Domain.SCM;
 using ERP.Infrastructure.Database;
@@ -14,17 +15,20 @@ public class StockService : IStockService
     private readonly IStockLedgerRepository? _ledgers;
     private readonly ERPDbContext? _db;
     private readonly ITenantProvider? _tenant;
+    private readonly ICoreSettingsService? _settings;
 
     public StockService(
         IStockBalanceRepository repository,
         IStockLedgerRepository? ledgers = null,
         ERPDbContext? db = null,
-        ITenantProvider? tenant = null)
+        ITenantProvider? tenant = null,
+        ICoreSettingsService? settings = null)
     {
         _repository = repository;
         _ledgers = ledgers;
         _db = db;
         _tenant = tenant;
+        _settings = settings;
     }
 
     private Guid CurrentTenantId =>
@@ -83,8 +87,24 @@ public class StockService : IStockService
     public async Task<decimal> GetStockLevelAsync(Guid itemId, Guid warehouseId, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return 0m;
-        var entity = await _repository.GetByItemAndWarehouseAsync(itemId, warehouseId, tenantId);
-        return entity?.AvailableQuantity ?? entity?.CurrentQuantity ?? 0m;
+        var balances = await _repository.GetByItemAndWarehouseAllLocationsAsync(itemId, warehouseId, tenantId);
+        return balances.Sum(b => b.AvailableQuantity);
+    }
+
+    public async Task<StockBalanceDto?> GetByItemWarehouseLocationAsync(
+        Guid itemId, Guid warehouseId, Guid? warehouseLocationId, Guid tenantId)
+    {
+        if (tenantId == Guid.Empty) return null;
+        var entity = await _repository.GetByItemWarehouseLocationAsync(itemId, warehouseId, warehouseLocationId, tenantId);
+        return entity == null ? null : MapToDto(entity);
+    }
+
+    public async Task<bool> IsBinRequiredAsync()
+    {
+        if (_settings == null) return false;
+        var raw = await _settings.GetValueAsync(SettingsCatalog.RequireBinKey);
+        return string.Equals(raw, "true", StringComparison.OrdinalIgnoreCase)
+               || (bool.TryParse(raw, out var b) && b);
     }
 
     public Task<bool> AdjustStockAsync(StockAdjustmentDto dto)
@@ -94,36 +114,32 @@ public class StockService : IStockService
     {
         if (tenantId == Guid.Empty) return false;
         dto.TenantId = tenantId;
+        var requireBin = await IsBinRequiredAsync();
         foreach (var detail in dto.Details)
         {
+            if (requireBin && (!detail.WarehouseLocationId.HasValue || detail.WarehouseLocationId == Guid.Empty))
+                return false;
             var qty = detail.QuantityDifference != 0
                 ? detail.QuantityDifference
                 : detail.QuantityCounted - detail.QuantityOnHand;
             var unitCost = await ResolveUnitCostAsync(detail.ItemId, tenantId, null);
             await ApplyDeltaAsync(
                 tenantId, dto.WarehouseId, detail.ItemId, qty, unitCost,
-                "Adjustment", dto.CreatedBy, dto.UpdatedBy);
+                "Adjustment", dto.CreatedBy, dto.UpdatedBy, null, detail.WarehouseLocationId);
         }
         return true;
     }
 
-    public async Task<bool> ReceiveStockAsync(
+    public Task<bool> ReceiveStockAsync(
         Guid tenantId,
         Guid warehouseId,
         IEnumerable<(Guid ItemId, decimal Quantity)> lines,
         string? userId = null)
-    {
-        if (tenantId == Guid.Empty || warehouseId == Guid.Empty) return false;
-        foreach (var (itemId, quantity) in lines)
-        {
-            if (quantity <= 0) continue;
-            if (!await CanReceiveTrackedAsync(tenantId, itemId, quantity)) return false;
-            var unitCost = await ResolveUnitCostAsync(itemId, tenantId, null);
-            await ApplyDeltaAsync(tenantId, warehouseId, itemId, quantity, unitCost, "Receipt", userId, userId);
-            await RecordTrackingOnReceiveAsync(tenantId, warehouseId, itemId, quantity, userId);
-        }
-        return true;
-    }
+        => ReceiveStockAsync(
+            tenantId,
+            warehouseId,
+            lines.Select(l => (l.ItemId, l.Quantity, (Guid?)null)),
+            userId);
 
     public async Task<bool> ReceiveStockAsync(
         Guid tenantId,
@@ -132,36 +148,112 @@ public class StockService : IStockService
         string? userId = null)
     {
         if (tenantId == Guid.Empty || warehouseId == Guid.Empty) return false;
+        var requireBin = await IsBinRequiredAsync();
         foreach (var (itemId, quantity, unitCost) in lines)
         {
             if (quantity <= 0) continue;
+            if (requireBin) return false;
             if (!await CanReceiveTrackedAsync(tenantId, itemId, quantity)) return false;
             var cost = unitCost > 0 ? unitCost : await ResolveUnitCostAsync(itemId, tenantId, null);
-            await ApplyDeltaAsync(tenantId, warehouseId, itemId, quantity, cost, "Receipt", userId, userId);
+            await ApplyDeltaAsync(tenantId, warehouseId, itemId, quantity, cost, "Receipt", userId, userId, null, null);
             await RecordTrackingOnReceiveAsync(tenantId, warehouseId, itemId, quantity, userId);
         }
         return true;
     }
 
-    public async Task<bool> IssueStockAsync(
+    public async Task<bool> ReceiveStockAsync(
+        Guid tenantId,
+        Guid warehouseId,
+        IEnumerable<(Guid ItemId, decimal Quantity, Guid? WarehouseLocationId)> lines,
+        string? userId = null)
+    {
+        if (tenantId == Guid.Empty || warehouseId == Guid.Empty) return false;
+        var requireBin = await IsBinRequiredAsync();
+        var list = lines.Where(l => l.Quantity > 0).ToList();
+        foreach (var (itemId, quantity, locationId) in list)
+        {
+            if (requireBin && (!locationId.HasValue || locationId == Guid.Empty)) return false;
+            if (!await CanReceiveTrackedAsync(tenantId, itemId, quantity)) return false;
+        }
+
+        foreach (var (itemId, quantity, locationId) in list)
+        {
+            var unitCost = await ResolveUnitCostAsync(itemId, tenantId, null);
+            await ApplyDeltaAsync(
+                tenantId, warehouseId, itemId, quantity, unitCost, "Receipt",
+                userId, userId, null, NormalizeLocation(locationId));
+            await RecordTrackingOnReceiveAsync(tenantId, warehouseId, itemId, quantity, userId);
+        }
+        return true;
+    }
+
+    public Task<bool> IssueStockAsync(
         Guid tenantId,
         Guid warehouseId,
         IEnumerable<(Guid ItemId, decimal Quantity)> lines,
         string? userId = null)
+        => IssueStockAsync(
+            tenantId,
+            warehouseId,
+            lines.Select(l => (l.ItemId, l.Quantity, (Guid?)null)),
+            userId);
+
+    public async Task<bool> IssueStockAsync(
+        Guid tenantId,
+        Guid warehouseId,
+        IEnumerable<(Guid ItemId, decimal Quantity, Guid? WarehouseLocationId)> lines,
+        string? userId = null)
     {
         if (tenantId == Guid.Empty || warehouseId == Guid.Empty) return false;
+        var requireBin = await IsBinRequiredAsync();
         var list = lines.Where(l => l.Quantity > 0).ToList();
-        foreach (var (itemId, quantity) in list)
+
+        foreach (var (itemId, quantity, locationId) in list)
         {
-            var bal = await _repository.GetByItemAndWarehouseAsync(itemId, warehouseId, tenantId);
-            if (bal == null || bal.CurrentQuantity < quantity) return false;
+            if (requireBin && (!locationId.HasValue || locationId == Guid.Empty)) return false;
             if (!await CanIssueTrackedAsync(tenantId, warehouseId, itemId, quantity)) return false;
+
+            if (locationId.HasValue && locationId != Guid.Empty)
+            {
+                var bal = await _repository.GetByItemWarehouseLocationAsync(itemId, warehouseId, locationId, tenantId);
+                if (bal == null || bal.AvailableQuantity < quantity) return false;
+            }
+            else
+            {
+                var balances = await _repository.GetByItemAndWarehouseAllLocationsAsync(itemId, warehouseId, tenantId);
+                if (balances.Sum(b => b.AvailableQuantity) < quantity) return false;
+            }
         }
 
-        foreach (var (itemId, quantity) in list)
+        foreach (var (itemId, quantity, locationId) in list)
         {
             var avg = await PeekAverageRateAsync(itemId, tenantId, warehouseId);
-            await ApplyDeltaAsync(tenantId, warehouseId, itemId, -quantity, avg, "Issue", userId, userId);
+            if (locationId.HasValue && locationId != Guid.Empty)
+            {
+                await ApplyDeltaAsync(
+                    tenantId, warehouseId, itemId, -quantity, avg, "Issue",
+                    userId, userId, null, locationId);
+            }
+            else
+            {
+                var remaining = quantity;
+                var balances = (await _repository.GetByItemAndWarehouseAllLocationsAsync(itemId, warehouseId, tenantId))
+                    .Where(b => b.AvailableQuantity > 0)
+                    .OrderBy(b => b.WarehouseLocationId == null ? 0 : 1)
+                    .ThenByDescending(b => b.AvailableQuantity)
+                    .ToList();
+                foreach (var bal in balances)
+                {
+                    if (remaining <= 0) break;
+                    var take = Math.Min(remaining, Math.Min(bal.AvailableQuantity, bal.CurrentQuantity));
+                    await ApplyDeltaAsync(
+                        tenantId, warehouseId, itemId, -take, avg, "Issue",
+                        userId, userId, null, bal.WarehouseLocationId);
+                    remaining -= take;
+                }
+                if (remaining > 0) return false;
+            }
+
             await ConsumeTrackingOnIssueAsync(tenantId, warehouseId, itemId, quantity, userId);
         }
         return true;
@@ -173,25 +265,81 @@ public class StockService : IStockService
         string? userId = null)
     {
         if (tenantId == Guid.Empty) return false;
+        if (await IsBinRequiredAsync()) return false;
+
         foreach (var (itemId, quantity) in lines.Where(l => l.Quantity > 0))
         {
             var remaining = quantity;
             var balances = (await _repository.GetByItemAsync(itemId, tenantId))
-                .Where(b => b.CurrentQuantity > 0)
-                .OrderByDescending(b => b.CurrentQuantity)
+                .Where(b => b.AvailableQuantity > 0)
+                .OrderByDescending(b => b.AvailableQuantity)
                 .ToList();
 
-            if (balances.Sum(b => b.CurrentQuantity) < quantity) return false;
+            if (balances.Sum(b => b.AvailableQuantity) < quantity) return false;
 
             foreach (var bal in balances)
             {
                 if (remaining <= 0) break;
-                var take = Math.Min(remaining, bal.CurrentQuantity);
+                var take = Math.Min(remaining, Math.Min(bal.AvailableQuantity, bal.CurrentQuantity));
                 var avg = await PeekAverageRateAsync(itemId, tenantId, bal.WarehouseId);
-                await ApplyDeltaAsync(tenantId, bal.WarehouseId, itemId, -take, avg, "Issue", userId, userId);
+                await ApplyDeltaAsync(
+                    tenantId, bal.WarehouseId, itemId, -take, avg, "Issue",
+                    userId, userId, null, bal.WarehouseLocationId);
                 remaining -= take;
             }
         }
+        return true;
+    }
+
+    public async Task<bool> ReserveAsync(
+        Guid tenantId, Guid warehouseId, Guid itemId, decimal quantity, string? userId = null)
+    {
+        if (tenantId == Guid.Empty || warehouseId == Guid.Empty || itemId == Guid.Empty || quantity <= 0)
+            return false;
+
+        var balances = (await _repository.GetByItemAndWarehouseAllLocationsAsync(itemId, warehouseId, tenantId)).ToList();
+        if (balances.Sum(b => b.AvailableQuantity) < quantity) return false;
+
+        var bucket = await _repository.GetByItemWarehouseLocationAsync(itemId, warehouseId, null, tenantId);
+        if (bucket == null)
+        {
+            bucket = new StockBalance
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                ItemId = itemId,
+                WarehouseId = warehouseId,
+                WarehouseLocationId = null,
+                CurrentQuantity = 0,
+                ReservedQuantity = quantity,
+                LastUpdated = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = userId
+            };
+            await _repository.CreateAsync(bucket);
+            return true;
+        }
+
+        bucket.ReservedQuantity += quantity;
+        bucket.LastUpdated = DateTime.UtcNow;
+        bucket.UpdatedBy = userId;
+        await _repository.UpdateAsync(bucket);
+        return true;
+    }
+
+    public async Task<bool> UnreserveAsync(
+        Guid tenantId, Guid warehouseId, Guid itemId, decimal quantity, string? userId = null)
+    {
+        if (tenantId == Guid.Empty || warehouseId == Guid.Empty || itemId == Guid.Empty || quantity <= 0)
+            return false;
+
+        var bucket = await _repository.GetByItemWarehouseLocationAsync(itemId, warehouseId, null, tenantId);
+        if (bucket == null) return true;
+
+        bucket.ReservedQuantity = Math.Max(0, bucket.ReservedQuantity - quantity);
+        bucket.LastUpdated = DateTime.UtcNow;
+        bucket.UpdatedBy = userId;
+        await _repository.UpdateAsync(bucket);
         return true;
     }
 
@@ -201,7 +349,7 @@ public class StockService : IStockService
         foreach (var detail in dto.Details)
         {
             var from = await _repository.GetByItemAndWarehouseAsync(detail.ItemId, dto.FromWarehouseId, dto.TenantId);
-            if (from == null || from.CurrentQuantity < detail.Quantity)
+            if (from == null || from.AvailableQuantity < detail.Quantity)
                 return false;
 
             var avg = await PeekAverageRateAsync(detail.ItemId, dto.TenantId, dto.FromWarehouseId);
@@ -372,11 +520,13 @@ public class StockService : IStockService
         string transactionType,
         string? createdBy,
         string? updatedBy,
-        string? reference = null)
+        string? reference = null,
+        Guid? warehouseLocationId = null)
     {
         if (delta == 0) return;
 
-        var entity = await _repository.GetByItemAndWarehouseAsync(itemId, warehouseId, tenantId);
+        var locationId = NormalizeLocation(warehouseLocationId);
+        var entity = await _repository.GetByItemWarehouseLocationAsync(itemId, warehouseId, locationId, tenantId);
         if (entity == null)
         {
             if (delta < 0) return;
@@ -386,6 +536,7 @@ public class StockService : IStockService
                 TenantId = tenantId,
                 ItemId = itemId,
                 WarehouseId = warehouseId,
+                WarehouseLocationId = locationId,
                 CurrentQuantity = delta,
                 ReservedQuantity = 0,
                 LastUpdated = DateTime.UtcNow,
@@ -404,7 +555,7 @@ public class StockService : IStockService
 
         await WriteLedgerAsync(
             tenantId, warehouseId, itemId, delta, unitCost, transactionType,
-            entity.CurrentQuantity, createdBy, reference);
+            entity.CurrentQuantity, createdBy, reference, locationId);
     }
 
     private async Task WriteLedgerAsync(
@@ -416,7 +567,8 @@ public class StockService : IStockService
         string transactionType,
         decimal balanceQty,
         string? createdBy,
-        string? reference)
+        string? reference,
+        Guid? warehouseLocationId = null)
     {
         var qtyIn = delta > 0 ? delta : 0m;
         var qtyOut = delta < 0 ? Math.Abs(delta) : 0m;
@@ -427,6 +579,7 @@ public class StockService : IStockService
             TenantId = tenantId,
             ItemId = itemId,
             WarehouseId = warehouseId,
+            WarehouseLocationId = warehouseLocationId,
             TransactionType = transactionType,
             TransactionDate = DateTime.UtcNow,
             QuantityIn = qtyIn,
@@ -449,6 +602,9 @@ public class StockService : IStockService
         _db.StockLedgers.Add(row);
         await _db.SaveChangesAsync();
     }
+
+    private static Guid? NormalizeLocation(Guid? warehouseLocationId)
+        => warehouseLocationId is null || warehouseLocationId == Guid.Empty ? null : warehouseLocationId;
 
     private async Task<decimal> ResolveUnitCostAsync(Guid itemId, Guid tenantId, decimal? overrideCost)
     {
@@ -700,6 +856,7 @@ public class StockService : IStockService
         ItemId = entity.ItemId,
         ItemName = entity.Item?.ItemName ?? string.Empty,
         WarehouseId = entity.WarehouseId,
+        WarehouseLocationId = entity.WarehouseLocationId,
         WarehouseName = entity.Warehouse?.WarehouseName ?? string.Empty,
         QuantityOnHand = entity.CurrentQuantity,
         QuantityReserved = entity.ReservedQuantity,
@@ -719,6 +876,7 @@ public class StockService : IStockService
         ItemId = entity.ItemId,
         ItemName = entity.Item?.ItemName ?? string.Empty,
         WarehouseId = entity.WarehouseId,
+        WarehouseLocationId = entity.WarehouseLocationId,
         WarehouseName = entity.Warehouse?.WarehouseName ?? string.Empty,
         TransactionType = entity.TransactionType,
         Quantity = entity.QuantityIn - entity.QuantityOut,
@@ -738,6 +896,7 @@ public class StockService : IStockService
         TenantId = dto.TenantId,
         ItemId = dto.ItemId,
         WarehouseId = dto.WarehouseId,
+        WarehouseLocationId = dto.WarehouseLocationId,
         CurrentQuantity = dto.QuantityOnHand,
         ReservedQuantity = dto.QuantityReserved,
         LastUpdated = dto.LastUpdated,
@@ -748,6 +907,7 @@ public class StockService : IStockService
     {
         entity.ItemId = dto.ItemId;
         entity.WarehouseId = dto.WarehouseId;
+        entity.WarehouseLocationId = dto.WarehouseLocationId;
         entity.CurrentQuantity = dto.QuantityOnHand;
         entity.ReservedQuantity = dto.QuantityReserved;
         entity.LastUpdated = dto.LastUpdated;

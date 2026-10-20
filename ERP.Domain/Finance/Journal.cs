@@ -39,9 +39,12 @@ public class Journal : BaseEntity
     public bool IsLocked { get; set; } = false;
     /// <summary>Set on post when an Active fiscal year covers JournalDate.</summary>
     public Guid? FinancialYearId { get; set; }
+    /// <summary>When this journal is a reversal, points at the original posted journal.</summary>
+    public Guid? ReversedFromJournalId { get; set; }
 
     // Navigation properties
     public ChartOfAccount? CashOrBankAccount { get; set; }
+    public Journal? ReversedFromJournal { get; set; }
     public ICollection<JournalEntry> JournalEntries { get; set; } = new List<JournalEntry>();
     public ICollection<DepreciationEntry> DepreciationEntries { get; set; } = new List<DepreciationEntry>();
 }

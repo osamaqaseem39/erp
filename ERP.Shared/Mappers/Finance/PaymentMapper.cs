@@ -100,8 +100,7 @@ public static class PaymentMapper
         if (dto.RelatedBillId.HasValue)
             entity.RelatedBillId = dto.RelatedBillId;
         
-        if (!string.IsNullOrEmpty(dto.Status))
-            entity.Status = dto.Status;
+        // Status only via payment workflow actions
         
         entity.Reference = dto.Reference;
         entity.ReferenceNumber = dto.ReferenceNumber;

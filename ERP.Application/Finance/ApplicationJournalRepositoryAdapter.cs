@@ -154,7 +154,8 @@ public class ApplicationJournalRepositoryAdapter : IJournalRepository
 
         if (_budgetEnforcement != null
             && await _budgetEnforcement.WouldExceedBudgetAsync(tenantId, journal.JournalId))
-            return false;
+            throw new ERP.Shared.Exceptions.ValidationException(
+                "Journal exceeds active budget for one or more accounts (finance.enforceBudget).");
 
         // When the tenant has Active fiscal years, journal date must fall in one.
         var hasActiveFy = await _db.FiscalYears.AnyAsync(f =>
@@ -228,6 +229,7 @@ public class ApplicationJournalRepositoryAdapter : IJournalRepository
             TotalCredit = original.TotalDebit,
             Status = "Posted",
             JournalNumber = $"JV-REV-{DateTime.UtcNow:yyyyMMdd}-{revId:N}"[..24].ToUpperInvariant(),
+            ReversedFromJournalId = original.JournalId != Guid.Empty ? original.JournalId : original.Id,
             PostedAt = DateTime.UtcNow,
             PostedBy = reversedBy,
             IsLocked = true,
@@ -268,7 +270,10 @@ public class ApplicationJournalRepositoryAdapter : IJournalRepository
 
     public async Task<IEnumerable<JournalEntry>> GetEntriesByJournalIdAsync(Guid journalId, Guid tenantId)
     {
-        var q = _db.JournalEntries.Where(e => e.JournalId == journalId);
+        var q = _db.JournalEntries
+            .Include(e => e.Account)
+            .Include(e => e.CostCenter)
+            .Where(e => e.JournalId == journalId);
         if (tenantId != Guid.Empty) q = q.Where(e => e.TenantId == tenantId);
         return await q.ToListAsync();
     }

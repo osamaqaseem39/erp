@@ -14,6 +14,15 @@ public class ItemPricingRepository : IItemPricingRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<ItemPricing>> GetAllAsync(Guid tenantId)
+    {
+        return await _context.Set<ItemPricing>()
+            .Include(ip => ip.Item)
+            .Where(ip => ip.TenantId == tenantId)
+            .OrderByDescending(ip => ip.ValidFrom)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<ItemPricing>> GetByItemAsync(Guid itemId, Guid tenantId, string? priceListName = null)
     {
         var query = _context.Set<ItemPricing>()

@@ -1,5 +1,7 @@
 using ERP.Application.CRM;
+using ERP.Application.Interfaces.Inventory;
 using ERP.Application.Inventory;
+using ERP.Application.SCM.Interfaces;
 using ERP.Domain.SCM;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Numbering;
@@ -9,6 +11,7 @@ using ERP.Shared.Abstractions;
 using ERP.Shared.DTOs.Core;
 using ERP.Shared.DTOs.CRM;
 using ERP.Shared.DTOs.Finance;
+using ERP.Shared.DTOs.Inventory;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERP.Tests.CRM;
@@ -100,7 +103,28 @@ public class Wave2O2CShipStockTests
             new SalesOrderLineRepository(db, new FixedTenant()),
             new StubInvoices(),
             new StubNumbers(),
-            stock);
+            stock,
+            new StockReservationService(new StockReservationRepository(db), stock),
+            new ItemKitService(new ItemKitRepository(db)),
+            new StubItems());
+
+    private sealed class StubItems : IItemService
+    {
+        public Task<ItemDto?> GetByIdAsync(Guid id, Guid tenantId) =>
+            Task.FromResult<ItemDto?>(new ItemDto { Id = id, TenantId = tenantId, DefaultWarehouseId = Warehouse });
+        public Task<IEnumerable<ItemDto>> GetAllAsync(Guid tenantId, Guid companyId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+        public Task<IEnumerable<ItemDto>> GetByCategoryAsync(Guid categoryId, Guid tenantId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+        public Task<ItemDto> CreateAsync(CreateItemDto dto, Guid tenantId, string createdBy) =>
+            throw new NotImplementedException();
+        public Task<ItemDto> UpdateAsync(UpdateItemDto dto, Guid tenantId, string updatedBy) =>
+            throw new NotImplementedException();
+        public Task<bool> DeleteAsync(Guid id, Guid tenantId) => Task.FromResult(false);
+        public Task<bool> ExistsAsync(Guid id, Guid tenantId) => Task.FromResult(true);
+        public Task<IEnumerable<ItemDto>> GetLowStockItemsAsync(Guid tenantId, Guid companyId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+    }
 
     [Fact]
     public async Task Ship_IssuesStock_FromAnyWarehouse()
@@ -145,7 +169,7 @@ public class Wave2O2CShipStockTests
     }
 
     [Fact]
-    public async Task Ship_Fails_WhenInsufficientStock()
+    public async Task Approve_Fails_WhenInsufficientStock()
     {
         await using var db = Db();
         var stock = new StockService(new StockBalanceRepository(db), tenant: new FixedTenant());
@@ -165,7 +189,50 @@ public class Wave2O2CShipStockTests
                 new CreateSalesOrderLineDto { ItemId = Item, Quantity = 2, UnitPrice = 10 }
             ]
         }, Tenant, creator);
+        Assert.False(await svc.ApproveAsync(orderId, Tenant, approver));
+        Assert.Equal("Draft", (await svc.GetByIdAsync(orderId, Tenant))!.Status);
+    }
+
+    [Fact]
+    public async Task Ship_Fails_WhenInsufficientStock_AfterApproveReleased()
+    {
+        await using var db = Db();
+        var stockRepo = new StockBalanceRepository(db);
+        var stock = new StockService(stockRepo, tenant: new FixedTenant());
+        await stockRepo.CreateAsync(new StockBalance
+        {
+            Id = Guid.NewGuid(),
+            TenantId = Tenant,
+            ItemId = Item,
+            WarehouseId = Warehouse,
+            CurrentQuantity = 2,
+            ReservedQuantity = 0,
+            LastUpdated = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        var svc = CreateService(db, stock);
+        var creator = Guid.NewGuid();
+        var approver = Guid.NewGuid();
+        var orderId = await svc.CreateAsync(new CreateSalesOrderDto
+        {
+            TenantId = Tenant,
+            CreatedBy = creator.ToString(),
+            CustomerId = Guid.NewGuid(),
+            OrderDate = DateTime.UtcNow,
+            Status = "Draft",
+            SalesOrderLines =
+            [
+                new CreateSalesOrderLineDto { ItemId = Item, Quantity = 2, UnitPrice = 10 }
+            ]
+        }, Tenant, creator);
         Assert.True(await svc.ApproveAsync(orderId, Tenant, approver));
+
+        // Drain stock outside the reservation path so ship fails after release.
+        var bal = (await stockRepo.GetByItemAsync(Item, Tenant)).First();
+        bal.CurrentQuantity = 0;
+        bal.ReservedQuantity = 0;
+        await stockRepo.UpdateAsync(bal);
 
         Assert.False(await svc.ShipAsync(orderId, Tenant, approver));
         Assert.Equal("Approved", (await svc.GetByIdAsync(orderId, Tenant))!.Status);

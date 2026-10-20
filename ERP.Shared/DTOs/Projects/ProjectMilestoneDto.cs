@@ -14,6 +14,11 @@ public class ProjectMilestoneDto : BaseDto
     public string Priority { get; set; } = "Medium";
     public decimal Progress { get; set; }
     public string? Notes { get; set; }
+    public decimal Amount { get; set; }
+    public bool IsBillable { get; set; }
+    public Guid? SalesInvoiceId { get; set; }
+    public Guid? FinanceInvoiceId { get; set; }
+    public DateTime? BilledAt { get; set; }
 }
 
 public class CreateProjectMilestoneDto : CreateDto
@@ -25,6 +30,8 @@ public class CreateProjectMilestoneDto : CreateDto
     public string? Status { get; set; } = "NotStarted";
     public string? Priority { get; set; } = "Medium";
     public string? Notes { get; set; }
+    public decimal? Amount { get; set; }
+    public bool? IsBillable { get; set; }
 }
 
 public class UpdateProjectMilestoneDto : UpdateDto
@@ -37,4 +44,6 @@ public class UpdateProjectMilestoneDto : UpdateDto
     public string? Priority { get; set; }
     public decimal? Progress { get; set; }
     public string? Notes { get; set; }
+    public decimal? Amount { get; set; }
+    public bool? IsBillable { get; set; }
 }

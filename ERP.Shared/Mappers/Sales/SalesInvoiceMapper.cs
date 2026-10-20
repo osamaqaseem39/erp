@@ -14,7 +14,7 @@ public static class SalesInvoiceMapper
             TenantId = entity.TenantId,
             InvoiceNumber = entity.InvoiceNumber,
             CustomerId = entity.CustomerId,
-            CustomerName = string.Empty, // TODO: Get customer name from repository
+            CustomerName = null, // populated by SalesInvoiceService from Customers
             InvoiceDate = entity.InvoiceDate,
             DueDate = entity.DueDate,
             SubTotal = entity.SubTotal,

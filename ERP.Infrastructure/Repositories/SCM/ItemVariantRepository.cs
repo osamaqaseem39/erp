@@ -14,6 +14,15 @@ public class ItemVariantRepository : IItemVariantRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<ItemVariant>> GetAllAsync(Guid tenantId)
+    {
+        return await _context.Set<ItemVariant>()
+            .Include(iv => iv.Item)
+            .Where(iv => iv.TenantId == tenantId)
+            .OrderBy(iv => iv.VariantCode)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<ItemVariant>> GetByItemAsync(Guid itemId, Guid tenantId)
     {
         return await _context.Set<ItemVariant>()

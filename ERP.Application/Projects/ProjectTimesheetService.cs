@@ -20,11 +20,13 @@ public class ProjectTimesheetService : IProjectTimesheetService
 {
     private readonly ERPDbContext _db;
     private readonly IProjectRepository _projects;
+    private readonly IProjectCostService _costs;
 
-    public ProjectTimesheetService(ERPDbContext db, IProjectRepository projects)
+    public ProjectTimesheetService(ERPDbContext db, IProjectRepository projects, IProjectCostService costs)
     {
         _db = db;
         _projects = projects;
+        _costs = costs;
     }
 
     public async Task<IReadOnlyList<ProjectTimesheetDto>> ListAsync(Guid tenantId, Guid? projectId = null)
@@ -54,6 +56,13 @@ public class ProjectTimesheetService : IProjectTimesheetService
         if (dto.EmployeeId == Guid.Empty) throw new ValidationException("Employee is required.");
         _ = await _projects.GetByIdAsync(dto.ProjectId, tenantId) ?? throw new NotFoundException("Project not found.");
 
+        var defaultRate = await _db.ProjectResources.AsNoTracking()
+            .Where(r => r.TenantId == tenantId && r.ProjectId == dto.ProjectId
+                && r.EmployeeId == dto.EmployeeId && r.IsActive)
+            .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
+            .Select(r => (decimal?)r.HourlyRate)
+            .FirstOrDefaultAsync() ?? 0m;
+
         var entity = new ProjectTimesheet
         {
             TenantId = tenantId,
@@ -76,6 +85,8 @@ public class ProjectTimesheetService : IProjectTimesheetService
                 ProjectTaskId = line.ProjectTaskId,
                 Hours = line.Hours,
                 Description = line.Description,
+                IsBillable = line.IsBillable ?? true,
+                HourlyRate = line.HourlyRate ?? defaultRate,
                 CreatedBy = userId.ToString()
             });
         }
@@ -90,11 +101,15 @@ public class ProjectTimesheetService : IProjectTimesheetService
         => await TransitionAsync(id, tenantId, userId, "Draft", "Submitted", t => t.SubmittedAt = DateTime.UtcNow);
 
     public async Task<ProjectTimesheetDto> ApproveAsync(Guid id, Guid tenantId, Guid userId)
-        => await TransitionAsync(id, tenantId, userId, "Submitted", "Approved", t =>
+    {
+        var result = await TransitionAsync(id, tenantId, userId, "Submitted", "Approved", t =>
         {
             t.ApprovedAt = DateTime.UtcNow;
             t.ApprovedBy = userId;
         });
+        await _costs.RecalculateActualCostAsync(result.ProjectId, tenantId);
+        return result;
+    }
 
     private async Task<ProjectTimesheetDto> TransitionAsync(
         Guid id, Guid tenantId, Guid userId, string from, string to, Action<ProjectTimesheet> apply)
@@ -130,7 +145,9 @@ public class ProjectTimesheetService : IProjectTimesheetService
             WorkDate = l.WorkDate,
             ProjectTaskId = l.ProjectTaskId,
             Hours = l.Hours,
-            Description = l.Description
+            Description = l.Description,
+            IsBillable = l.IsBillable,
+            HourlyRate = l.HourlyRate
         }).ToList()
     };
 }

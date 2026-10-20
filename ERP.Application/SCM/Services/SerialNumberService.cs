@@ -45,7 +45,7 @@ public class SerialNumberService : ISerialNumberService
 
         existing.ItemId = dto.ItemId;
         existing.SerialNumberValue = dto.SerialNumber;
-        existing.Status = dto.Status;
+        // Status not free-set on Update
         existing.Location = dto.Location;
         existing.IsActive = dto.IsActive;
         existing.UpdatedBy = updatedBy;

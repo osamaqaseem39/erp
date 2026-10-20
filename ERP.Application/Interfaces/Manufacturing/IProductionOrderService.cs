@@ -14,4 +14,8 @@ public interface IProductionOrderService
     Task<ProductionOrderDto> StartAsync(Guid id, Guid tenantId, Guid userId);
     Task<ProductionOrderDto> CompleteAsync(Guid id, CompleteProductionOrderDto dto, Guid tenantId, Guid userId);
     Task<ProductionOrderDto> CancelAsync(Guid id, string reason, Guid tenantId, Guid userId);
+    Task<IReadOnlyList<ProductionOrderOperationDto>> ListOperationsAsync(Guid productionOrderId, Guid tenantId);
+    Task<ProductionOrderOperationDto> CompleteOperationAsync(
+        Guid productionOrderId, Guid operationId, CompleteProductionOrderOperationDto dto, Guid tenantId, Guid userId);
+    Task<WorkCenterCapacityWarnDto> GetCapacityWarnAsync(Guid workCenterId, Guid tenantId, DateTime? weekStartUtc = null);
 }

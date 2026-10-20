@@ -63,7 +63,7 @@ public class PaymentTenantIsolationTests
     {
         await using var db = Db();
         var adapter = new PaymentRepositoryAdapter(new PaymentRepository(db));
-        var svc = new PaymentService(adapter, new ApplicationInvoiceRepositoryAdapter(db));
+        var svc = new PaymentService(adapter, new ApplicationInvoiceRepositoryAdapter(db), db);
 
         Assert.Null(await svc.GetByIdAsync(Guid.NewGuid(), Guid.Empty));
         Assert.Empty(await svc.GetAllAsync(Guid.Empty));

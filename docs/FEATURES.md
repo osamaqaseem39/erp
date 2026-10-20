@@ -95,7 +95,7 @@ DI-registered via `AddErpProcurementModule`. `/api/procurement/vendors` (VendorS
 
 ## Manufacturing — Wired
 
-DI-registered via `AddErpManufacturingModule`. `/api/manufacturing/production-orders`, work centers.
+DI-registered via `AddErpManufacturingModule`. Production orders (SO FKs, warehouse, BOM explode, routing operations, QC gate), work centers (capacity warn), BOM, routing activate, scrap reasons + scrap→stock, release from SO, quality checks. UI: dashboard, BOM/routing/work-center lists, order detail, release-from-sales.
 
 ## Projects — Wired
 

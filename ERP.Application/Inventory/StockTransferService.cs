@@ -66,6 +66,8 @@ public class StockTransferService : IStockTransferService
                 TransferId = id,
                 ItemId = d.ItemId,
                 Quantity = d.Quantity,
+                FromLocationId = d.FromLocationId,
+                ToLocationId = d.ToLocationId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             }).ToList()
@@ -93,7 +95,6 @@ public class StockTransferService : IStockTransferService
         entity.TransferDate = dto.TransferDate == default ? entity.TransferDate : dto.TransferDate;
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
-        // ERP-FIX-5: status only via approve/complete/cancel
         entity.Status = "Draft";
         await _repository.UpdateAsync(entity);
 
@@ -108,6 +109,8 @@ public class StockTransferService : IStockTransferService
                 TransferId = entity.Id,
                 ItemId = d.ItemId,
                 Quantity = d.Quantity,
+                FromLocationId = d.FromLocationId,
+                ToLocationId = d.ToLocationId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             });
@@ -148,11 +151,21 @@ public class StockTransferService : IStockTransferService
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "InTransit", Transitions))
             return false;
-        // ERP-FIX-6: creator cannot approve
         if (DocumentWorkflow.IsSameActor(entity.CreatedBy, userId))
             return false;
-        if (entity.StockTransferDetails == null || entity.StockTransferDetails.Count == 0)
+        var details = entity.StockTransferDetails?.ToList() ?? [];
+        if (details.Count == 0) return false;
+
+        if (await _stock.IsBinRequiredAsync()
+            && details.Any(d => !d.FromLocationId.HasValue || d.FromLocationId == Guid.Empty))
             return false;
+
+        var issueLines = details
+            .Select(d => (d.ItemId, d.Quantity, d.FromLocationId))
+            .ToList();
+        var issued = await _stock.IssueStockAsync(
+            tenantId, entity.FromWarehouseId, issueLines, userId.ToString());
+        if (!issued) return false;
 
         entity.Status = "InTransit";
         entity.ApprovedBy = userId.ToString();
@@ -172,24 +185,16 @@ public class StockTransferService : IStockTransferService
         var details = entity.StockTransferDetails?.ToList() ?? [];
         if (details.Count == 0) return false;
 
-        var moved = await _stock.TransferStockAsync(new StockTransferDto
-        {
-            TenantId = tenantId,
-            FromWarehouseId = entity.FromWarehouseId,
-            ToWarehouseId = entity.ToWarehouseId,
-            TransferDate = entity.TransferDate,
-            Status = entity.Status,
-            CreatedBy = userId.ToString(),
-            UpdatedBy = userId.ToString(),
-            Details = details.Select(d => new StockTransferDetailDto
-            {
-                Id = d.Id,
-                StockTransferId = entity.Id,
-                ItemId = d.ItemId,
-                Quantity = d.Quantity
-            }).ToList()
-        });
-        if (!moved) return false;
+        if (await _stock.IsBinRequiredAsync()
+            && details.Any(d => !d.ToLocationId.HasValue || d.ToLocationId == Guid.Empty))
+            return false;
+
+        var receiveLines = details
+            .Select(d => (d.ItemId, d.Quantity, d.ToLocationId))
+            .ToList();
+        var received = await _stock.ReceiveStockAsync(
+            tenantId, entity.ToWarehouseId, receiveLines, userId.ToString());
+        if (!received) return false;
 
         entity.Status = "Completed";
         entity.UpdatedBy = userId.ToString();
@@ -204,6 +209,19 @@ public class StockTransferService : IStockTransferService
         if (entity == null) return false;
         if (!DocumentWorkflow.CanTransition(entity.Status, "Cancelled", Transitions))
             return false;
+
+        // Reverse in-transit: put qty back at source.
+        if (string.Equals(DocumentWorkflow.Normalize(entity.Status), "InTransit", StringComparison.OrdinalIgnoreCase))
+        {
+            var details = entity.StockTransferDetails?.ToList() ?? [];
+            if (details.Count == 0) return false;
+            var reverse = details
+                .Select(d => (d.ItemId, d.Quantity, d.FromLocationId))
+                .ToList();
+            var restored = await _stock.ReceiveStockAsync(
+                tenantId, entity.FromWarehouseId, reverse, userId.ToString());
+            if (!restored) return false;
+        }
 
         entity.Status = "Cancelled";
         entity.UpdatedBy = userId.ToString();
@@ -234,7 +252,9 @@ public class StockTransferService : IStockTransferService
             StockTransferId = e.Id,
             ItemId = d.ItemId,
             ItemName = d.Item?.ItemName,
-            Quantity = d.Quantity
+            Quantity = d.Quantity,
+            FromLocationId = d.FromLocationId,
+            ToLocationId = d.ToLocationId
         }).ToList()
     };
 }

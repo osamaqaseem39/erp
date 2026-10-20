@@ -69,6 +69,8 @@ public class ProjectMilestoneService : IProjectMilestoneService
             // ERP-FIX-5: always start Pending; status only via CompleteAsync
             Status = "Pending",
             Notes = dto.Notes,
+            Amount = dto.Amount ?? 0,
+            IsBillable = dto.IsBillable ?? false,
             CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy,
             CreatedAt = DateTime.UtcNow
         };
@@ -87,6 +89,8 @@ public class ProjectMilestoneService : IProjectMilestoneService
         if (dto.Description != null) e.Description = dto.Description;
         if (dto.TargetDate.HasValue) e.TargetDate = dto.TargetDate;
         if (dto.Notes != null) e.Notes = dto.Notes;
+        if (dto.Amount.HasValue) e.Amount = dto.Amount.Value;
+        if (dto.IsBillable.HasValue) e.IsBillable = dto.IsBillable.Value;
         // ERP-FIX-5: status only via CompleteAsync
         e.UpdatedBy = userId != Guid.Empty ? userId.ToString() : dto.UpdatedBy;
         e.UpdatedAt = DateTime.UtcNow;
@@ -137,6 +141,11 @@ public class ProjectMilestoneService : IProjectMilestoneService
             CompletedDate = e.ActualDate,
             Status = status,
             Notes = e.Notes,
+            Amount = e.Amount,
+            IsBillable = e.IsBillable,
+            SalesInvoiceId = e.SalesInvoiceId,
+            FinanceInvoiceId = e.FinanceInvoiceId,
+            BilledAt = e.BilledAt,
             CreatedAt = e.CreatedAt,
             UpdatedAt = e.UpdatedAt
         };

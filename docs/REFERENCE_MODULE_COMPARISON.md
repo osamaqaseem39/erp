@@ -3,7 +3,8 @@
 > **Lens:** capabilities / workflows / data rules only — **not** UI.  
 > **References:** `reference/POS` (complete trade/GL code) · `reference/BlocksERP` (**copy in progress** — see status) · **packaging Sale walkthrough** (Setup / Customer / Sale Query / CSO screens — aligns with BlocksERP `clsInvoice` / `clsAccountDetail` fields).  
 > **Ours:** `ERP.Domain` + API modules.  
-> Finance depth: [ACCOUNTS_MODULE_PLAN.md](./ACCOUNTS_MODULE_PLAN.md).
+> Finance depth: [ACCOUNTS_MODULE_PLAN.md](./ACCOUNTS_MODULE_PLAN.md).  
+> **Post-v1 note (2026-10-20):** Domain/API coverage matches [ENTITY_TREE.md](./ENTITY_TREE.md) (~180 entities) including packaging Enquiry/PreCost, Dispatch Advice, SI Unpost (setting-gated), cheque books, pending-for-production report, and customer-depth masters. Remaining gaps are mostly UI/`frontend-new` registry wiring, PDF layout polish, schedule email delivery, and staging E2E — not missing Domain entities. Lending remains ❌ / out of scope.
 
 ---
 
@@ -186,7 +187,7 @@ Walkthrough: login → main module menu → **User** (User Type, User, User Role
 | Tax codes / rates | ✅ | — | ✅ |
 | Currency / FX | ⚠️ | — | ✅ |
 | Fixed assets / depreciation | — | — | ✅ thin CRUD + period dep |
-| Budgets | — | — | ⚠️ domain |
+| Budgets | — | — | ✅ API + FE list; enforceBudget on journal post |
 | TB / ledger / running TB | ✅ | — | ✅ |
 | P&L / balance sheet (classified) | ✅ | — | ✅ |
 | AR/AP aging | ✅ | — | ✅ buckets + partner balances |

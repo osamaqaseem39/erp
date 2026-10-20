@@ -49,6 +49,11 @@ public class ReportController : ERP.Api.Abstractions.ControllerBase
 
         var filtered = reports.Where(r =>
         {
+            if (!string.IsNullOrWhiteSpace(r.ReportCode))
+            {
+                var byCode = ERP.Application.Reports.ReportCatalog.ViewPermission(r.ReportCode);
+                if (held.Contains(byCode)) return true;
+            }
             var code = ReportViewPermissionCode(r.ReportCode) ?? ReportViewPermissionCode(r.Name) ?? ReportViewPermissionCode(r.ReportName);
             return code != null && held.Contains(code);
         });
@@ -59,6 +64,8 @@ public class ReportController : ERP.Api.Abstractions.ControllerBase
     internal static string? ReportViewPermissionCode(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
+        if (name.Contains('_'))
+            return ERP.Application.Reports.ReportCatalog.ViewPermission(name);
         var camel = Regex.Replace(name.Trim(), @"[^A-Za-z0-9]+", " ");
         var parts = camel.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 0) return null;

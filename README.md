@@ -48,9 +48,8 @@ This repository contains:
 
 ### Frontend (`React`)
 
-- `frontend`: SPA admin UI built with React 18, TypeScript, Vite, Redux, Redux-Saga, Tailwind, and FrostUI components.
-- Route-driven module structure under `frontend/src` (routes in `frontend/src/routes`).
-- Theming and UI styling under `frontend/src/assets/scss`.
+- **`frontend-new`** (supported): Vite + registry-driven SPA. Point `VITE_API_URL` at `https://erp-api.tekvers.com` or local API.
+- `frontend/` (deprecated): legacy Konrix template — do not add product screens there.
 
 ## Tech Stack
 
@@ -89,23 +88,19 @@ Useful endpoints:
 - Swagger: `https://localhost:7062/swagger`
 - GraphQL: `https://localhost:7062/graphql`
 
-### 2) Frontend setup
+### 2) Frontend setup (supported: `frontend-new`)
 
 In a new terminal:
 
 ```bash
-cd frontend
+cd frontend-new
 npm install
 npm run dev
 ```
 
 Vite default URL: `http://localhost:5173`
 
-Frontend API base URL:
-
-- `frontend/src/config.ts`
-- Fallback default: `https://localhost:7062/api`
-- Override via env: `VITE_API_BASE_URL`
+Set `VITE_API_URL` to `https://erp-api.tekvers.com` or `https://localhost:7062`. The legacy `frontend/` tree is deprecated.
 
 ### 3) Initial data/bootstrap (automated)
 

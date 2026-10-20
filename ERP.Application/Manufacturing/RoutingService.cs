@@ -11,6 +11,8 @@ public interface IRoutingService
     Task<IReadOnlyList<RoutingDto>> ListAsync(Guid tenantId);
     Task<RoutingDto?> GetAsync(Guid id, Guid tenantId);
     Task<RoutingDto> CreateAsync(CreateRoutingDto dto, Guid tenantId, Guid userId);
+    Task<RoutingDto> ActivateAsync(Guid id, Guid tenantId, Guid userId);
+    Task<RoutingDto> ObsoleteAsync(Guid id, Guid tenantId, Guid userId);
 }
 
 public class RoutingService : IRoutingService
@@ -53,6 +55,7 @@ public class RoutingService : IRoutingService
             ItemId = dto.ItemId,
             Version = string.IsNullOrWhiteSpace(dto.Version) ? "1" : dto.Version.Trim(),
             Status = "Draft",
+            IsDefault = dto.IsDefault,
             Notes = dto.Notes,
             CreatedBy = userId.ToString()
         };
@@ -76,6 +79,39 @@ public class RoutingService : IRoutingService
         return Map(entity);
     }
 
+    public async Task<RoutingDto> ActivateAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        var entity = await _db.Routings.Include(r => r.Steps)
+            .FirstOrDefaultAsync(r => r.Id == id && r.TenantId == tenantId)
+            ?? throw new NotFoundException("Routing not found.");
+        if (!string.Equals(entity.Status, "Draft", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(entity.Status, "Obsolete", StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException($"Cannot activate routing in status '{entity.Status}'.");
+        if (!entity.Steps.Any(s => s.IsActive))
+            throw new ValidationException("Routing must have at least one step to activate.");
+
+        entity.Status = "Active";
+        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        await _db.SaveChangesAsync();
+        return Map(entity);
+    }
+
+    public async Task<RoutingDto> ObsoleteAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        var entity = await _db.Routings.Include(r => r.Steps)
+            .FirstOrDefaultAsync(r => r.Id == id && r.TenantId == tenantId)
+            ?? throw new NotFoundException("Routing not found.");
+        if (!string.Equals(entity.Status, "Active", StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("Only Active routings can be obsoleted.");
+
+        entity.Status = "Obsolete";
+        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedBy = userId.ToString();
+        await _db.SaveChangesAsync();
+        return Map(entity);
+    }
+
     private static RoutingDto Map(Routing e) => new()
     {
         Id = e.Id,
@@ -85,6 +121,7 @@ public class RoutingService : IRoutingService
         ItemId = e.ItemId,
         Version = e.Version,
         Status = e.Status,
+        IsDefault = e.IsDefault,
         Notes = e.Notes,
         Steps = e.Steps.OrderBy(s => s.StepNumber).Select(s => new RoutingStepDto
         {

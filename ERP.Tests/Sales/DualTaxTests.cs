@@ -2,6 +2,7 @@ using ERP.Application.CRM;
 using ERP.Application.Finance;
 using ERP.Application.Inventory;
 using ERP.Application.Sales;
+using ERP.Application.SCM.Interfaces;
 using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Numbering;
 using ERP.Infrastructure.Repositories.CRM;
@@ -11,6 +12,7 @@ using ERP.Shared.Abstractions;
 using ERP.Shared.DTOs.Core;
 using ERP.Shared.DTOs.CRM;
 using ERP.Shared.DTOs.Finance;
+using ERP.Shared.DTOs.Inventory;
 using ERP.Shared.DTOs.Sales;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +28,24 @@ public class DualTaxTests
     private sealed class FixedTenant : ITenantProvider
     {
         public Guid? GetTenantId() => Tenant;
+    }
+
+    private sealed class StubItems : IItemService
+    {
+        public Task<ItemDto?> GetByIdAsync(Guid id, Guid tenantId) =>
+            Task.FromResult<ItemDto?>(new ItemDto { Id = id, TenantId = tenantId });
+        public Task<IEnumerable<ItemDto>> GetAllAsync(Guid tenantId, Guid companyId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+        public Task<IEnumerable<ItemDto>> GetByCategoryAsync(Guid categoryId, Guid tenantId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
+        public Task<ItemDto> CreateAsync(CreateItemDto dto, Guid tenantId, string createdBy) =>
+            throw new NotImplementedException();
+        public Task<ItemDto> UpdateAsync(UpdateItemDto dto, Guid tenantId, string updatedBy) =>
+            throw new NotImplementedException();
+        public Task<bool> DeleteAsync(Guid id, Guid tenantId) => Task.FromResult(false);
+        public Task<bool> ExistsAsync(Guid id, Guid tenantId) => Task.FromResult(true);
+        public Task<IEnumerable<ItemDto>> GetLowStockItemsAsync(Guid tenantId, Guid companyId) =>
+            Task.FromResult(Enumerable.Empty<ItemDto>());
     }
 
     private sealed class StubNumbers : IDocumentNumberService
@@ -171,7 +191,10 @@ public class DualTaxTests
             new SalesOrderLineRepository(db, tenant),
             new StubInvoices(),
             new StubNumbers(),
-            stock);
+            stock,
+            new StockReservationService(new StockReservationRepository(db), stock),
+            new ItemKitService(new ItemKitRepository(db)),
+            new StubItems());
 
         var id = await svc.CreateAsync(new CreateSalesOrderDto
         {

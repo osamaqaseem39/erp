@@ -30,6 +30,9 @@ public class ProductionScrapController : ERP.Api.Abstractions.ControllerBase
 
     [HttpPost]
     [ProducesResponseType(typeof(ProductionScrapDto), OpenApiResponseTypes.Created)]
-    public async Task<IActionResult> Create([FromBody] CreateProductionScrapDto dto) =>
-        Ok(await _service.CreateAsync(dto, HttpContext.RequireTenantId(), User.RequireUserId()));
+    public async Task<IActionResult> Create([FromBody] CreateProductionScrapDto dto)
+    {
+        var result = await _service.CreateAsync(dto, HttpContext.RequireTenantId(), User.RequireUserId());
+        return CreatedAtAction(nameof(List), new { productionOrderId = result.ProductionOrderId }, result);
+    }
 }

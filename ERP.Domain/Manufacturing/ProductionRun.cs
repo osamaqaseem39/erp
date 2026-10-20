@@ -10,9 +10,11 @@ public class ProductionRun : BaseEntity
     public DateTime? EndTime { get; set; }
     public decimal QuantityProduced { get; set; }
     public decimal QuantityRejected { get; set; }
-    public string Status { get; set; } = "InProgress"; // InProgress, Completed, Cancelled
+    public Guid? WorkCenterId { get; set; }
+    public Guid? ProductionOrderOperationId { get; set; }
+    /// <summary>InProgress | Completed | Cancelled</summary>
+    public string Status { get; set; } = "InProgress";
     public string? Notes { get; set; }
-    
-    // Navigation properties
+
     public ProductionOrder ProductionOrder { get; set; } = null!;
 }

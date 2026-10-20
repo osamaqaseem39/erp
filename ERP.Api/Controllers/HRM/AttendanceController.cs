@@ -24,6 +24,11 @@ public class AttendanceController : ERP.Api.Abstractions.ControllerBase
         _attendanceService = attendanceService;
     }
 
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<AttendanceRecordDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> GetAll([FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null) =>
+        Ok(await _attendanceService.GetAllAsync(GetTenantId(), fromDate, toDate));
+
     [HttpPost("check-in")]
     [ProducesResponseType(typeof(AttendanceRecordDto), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> CheckIn([FromBody] CheckInDto dto)

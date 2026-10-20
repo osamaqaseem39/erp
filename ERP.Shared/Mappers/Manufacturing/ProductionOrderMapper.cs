@@ -90,8 +90,7 @@ public static class ProductionOrderMapper
         if (dto.PlannedEndDate.HasValue)
             entity.PlannedEndDate = dto.PlannedEndDate;
         
-        if (!string.IsNullOrEmpty(dto.Status))
-            entity.Status = dto.Status;
+        // Status only via start/complete/cancel workflow
         
         if (!string.IsNullOrEmpty(dto.Priority))
             entity.Priority = dto.Priority;

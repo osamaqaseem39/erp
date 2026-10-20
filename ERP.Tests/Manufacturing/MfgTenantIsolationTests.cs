@@ -42,7 +42,8 @@ public class MfgTenantIsolationTests
             new ProductionOrderLineRepository(db),
             new ProductionRunRepository(db),
             new WorkCenterRepository(db),
-            new BillOfMaterialRepository(db));
+            new BillOfMaterialRepository(db),
+            db);
 
         var order = await orderSvc.CreateAsync(new CreateProductionOrderDto
         {
@@ -67,7 +68,7 @@ public class MfgTenantIsolationTests
         var runs = new ProductionRunRepository(db);
         var orderSvc = new ProductionOrderService(
             orders, new ProductionOrderLineRepository(db), runs,
-            new WorkCenterRepository(db), new BillOfMaterialRepository(db));
+            new WorkCenterRepository(db), new BillOfMaterialRepository(db), db);
         var runSvc = new ProductionRunService(runs, orders);
 
         var order = await orderSvc.CreateAsync(new CreateProductionOrderDto

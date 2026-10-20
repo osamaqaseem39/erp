@@ -135,12 +135,12 @@ Wave 0   Hygiene + Platform contracts          [backend] then auth UI
 Wave 1   Sales lines + POS lines               [backend] then Sales/POS UI
 Wave 2   Procurement PO→GRN→PI                 [backend] then Procurement UI
 Wave 3   O2C + P2P glue (stock + AR/AP)        [backend ✅ stock + PI→bill + SI→AR + payments] then CRM ship/invoice UX
-Wave 4   Finance journals/AP/banks + reports   [backend partial: journals + banks + COA; recon/reports still open] then Finance + Reports UI
-Wave 5   Projects children + MFG + BOM         [backend] then Projects/MFG UI
-Wave 6   HRM employee/leave/attendance/payroll [backend] then HRM UI
+Wave 4   Finance journals/AP/banks + reports   [backend ✅ journals/banks/COA/recon/reports] then Finance + Reports UI
+Wave 5   Projects children + MFG + BOM         [backend ✅] then Projects/MFG UI
+Wave 6   HRM employee/leave/attendance/payroll [backend ✅] then HRM UI
 Wave 7   Platform forgot-password + sessions   [backend ✅] then account UI
-Wave 8   Dashboard, permissions polish, E2E    [backend ✅ Core+Admin dashboards; FE/E2E open]
-Wave 9   Hardening, remove dead routes, docs   [both]
+Wave 8   Dashboard, permissions polish, E2E    [backend ✅; frontend-new primary; staging E2E in post-v1]
+Wave 9   Hardening, remove dead routes, docs   [both — post-v1 polish]
 ```
 
 Backend phase mapping (detail in [BACKEND_COMPLETION_PLAN.md](./BACKEND_COMPLETION_PLAN.md)):

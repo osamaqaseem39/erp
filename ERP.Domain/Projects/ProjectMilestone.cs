@@ -11,6 +11,11 @@ public class ProjectMilestone : BaseEntity
     public DateTime? ActualDate { get; set; }
     public string Status { get; set; } = "Pending"; // Pending, Completed, Overdue
     public string? Notes { get; set; }
+    public decimal Amount { get; set; }
+    public bool IsBillable { get; set; }
+    public Guid? SalesInvoiceId { get; set; }
+    public Guid? FinanceInvoiceId { get; set; }
+    public DateTime? BilledAt { get; set; }
     
     // Navigation properties
     public Project Project { get; set; } = null!;

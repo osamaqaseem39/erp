@@ -7,20 +7,22 @@
 | Attribute | Value |
 |-----------|-------|
 | Backend | `ERP.Api`, `ERP.Application`, `ERP.Domain`, `ERP.Infrastructure`, `ERP.Shared`, `ERP.Tests` |
-| Frontend | `frontend/` (Konrix/FrostUI-based SPA) |
+| Frontend | **`frontend-new/`** (supported SPA) · `frontend/` (legacy Konrix template — deprecated) |
 | Database | SQL Server via EF Core + Dapper stored-procedure executor |
 | Auth | JWT Bearer; refresh tokens on `User` |
 | Multi-tenancy | Shared DB; `TenantId` on entities; `TenantMiddleware` + `ITenantProvider` |
 | GraphQL | HotChocolate at `/graphql` |
 | Bootstrap | `GET/POST /api/setup/super-admin*` + frontend `/setup` |
 
-## What is actually wired in DI (`Program.cs`)
+## Supported UI
 
-Dependency injection registers **Core**, **Admin**, **Sales (POS + sales invoices)**, and **CRM** repositories/services. Those modules can run end-to-end when the API starts.
+Use **`frontend-new`** (Vite + registry engine). Point `VITE_API_URL` at `https://erp-api.tekvers.com` or local API. Coverage inventory: [frontend-new/docs/FRONTEND_NEW_COVERAGE.md](../frontend-new/docs/FRONTEND_NEW_COVERAGE.md). The older `frontend/` tree remains for reference only — do not add product screens there.
 
-Controllers, domain entities, application services, and EF `DbSet`s also exist for **Finance, HRM, Inventory/SCM, Procurement, Manufacturing, Projects, and Reports** — but their services/repositories are **not registered** in `Program.cs`. Hitting those REST controllers will fail at runtime with DI resolution errors until registration is completed. See [FEATURES.md](FEATURES.md) and [BACKEND.md](BACKEND.md).
+## Backend modules
 
-CRM maturity is tracked separately in [CRM_MODULE_STATUS.md](CRM_MODULE_STATUS.md) (do not treat that file as obsolete).
+Backend v1 DoD (tenant fail-closed, O2C/P2P, FIX-5 workflows) is closed. Entity map: [ENTITY_TREE.md](ENTITY_TREE.md). Staging E2E: [operating/STAGING_E2E_CHECKLIST.md](operating/STAGING_E2E_CHECKLIST.md).
+
+CRM maturity is tracked separately in [CRM_MODULE_STATUS.md](CRM_MODULE_STATUS.md).
 
 ## Repository layout
 
@@ -35,8 +37,9 @@ erp/
 ├── ERP.Domain/                    # Entities by module folder
 ├── ERP.Infrastructure/            # EF DbContext, migrations, repositories, SQL schemas
 ├── ERP.Shared/                    # DTOs, AppConstants, helpers
-├── ERP.Tests/                     # Limited unit tests
-└── frontend/                      # React SPA
+├── ERP.Tests/                     # Unit / in-memory workflow tests
+├── frontend-new/                  # Supported React SPA (registry-driven)
+└── frontend/                      # Legacy SPA (deprecated)
 ```
 
 ## Quick start
@@ -45,10 +48,10 @@ erp/
 dotnet restore ERP.SaaS.sln
 dotnet run --project ERP.Api
 # separate terminal
-cd frontend && npm install && npm run dev
+cd frontend-new && npm install && npm run dev
 ```
 
-Dev API: `https://localhost:7062` (Swagger), GraphQL `/graphql`. Frontend: `http://localhost:5173`. API base: `VITE_API_BASE_URL` or default `https://localhost:7062/api` (`frontend/src/config.ts`).
+Dev API: `https://localhost:7062` (Swagger), GraphQL `/graphql`. Frontend-new: Vite default port. Set `VITE_API_URL` to the API origin.
 
 Connection strings and JWT secrets currently live as **constants** in `ERP.Shared/Constants/AppConstants.cs` (machine-specific SQL Server name) — see [DEPLOYMENT.md](DEPLOYMENT.md).
 

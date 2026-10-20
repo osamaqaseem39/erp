@@ -31,4 +31,6 @@ public class SalesInvoice : BaseEntity
     public decimal DiscountAmount { get; set; }
     public DateTime? PostedAt { get; set; }
     public Guid? PostedBy { get; set; }
+    public Guid? ProjectId { get; set; }
+    public Guid? ProjectMilestoneId { get; set; }
 }

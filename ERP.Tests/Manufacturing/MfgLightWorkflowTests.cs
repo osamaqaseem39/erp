@@ -39,14 +39,14 @@ public class MfgLightWorkflowTests
     }
 
     [Fact]
-    public async Task ProductionOrder_Start_Creates_Run_And_Complete_Run_Closes_Order()
+    public async Task ProductionOrder_Start_Creates_Run_And_Order_Complete_Closes_Order()
     {
         await using var db = Db();
         var orders = new ProductionOrderRepository(db);
         var runs = new ProductionRunRepository(db);
         var lines = new ProductionOrderLineRepository(db);
         var centers = new WorkCenterRepository(db);
-        var orderSvc = new ProductionOrderService(orders, lines, runs, centers, new BillOfMaterialRepository(db));
+        var orderSvc = new ProductionOrderService(orders, lines, runs, centers, new BillOfMaterialRepository(db), db);
         var runSvc = new ProductionRunService(runs, orders);
 
         var order = await orderSvc.CreateAsync(new CreateProductionOrderDto
@@ -59,18 +59,24 @@ public class MfgLightWorkflowTests
         Assert.Equal("Draft", order.Status);
 
         await orderSvc.StartAsync(order.Id!.Value, Tenant, User);
-        Assert.Equal("In Progress", (await orderSvc.GetByIdAsync(order.Id!.Value, Tenant))!.Status);
+        Assert.Equal("InProgress", (await orderSvc.GetByIdAsync(order.Id!.Value, Tenant))!.Status);
 
         var activeRuns = (await runSvc.GetByOrderAsync(order.Id!.Value, Tenant)).ToList();
         Assert.Single(activeRuns);
         Assert.Equal("InProgress", activeRuns[0].Status);
 
-        var completed = await runSvc.CompleteAsync(
+        var completedRun = await runSvc.CompleteAsync(
             activeRuns[0].Id!.Value, quantityProduced: 10, quantityRejected: 0, Tenant, User);
-        Assert.Equal("Completed", completed.Status);
+        Assert.Equal("Completed", completedRun.Status);
 
-        var closed = await orderSvc.GetByIdAsync(order.Id!.Value, Tenant);
-        Assert.Equal("Completed", closed!.Status);
+        // Run complete must not close the order (stock path lives on order Complete).
+        Assert.Equal("InProgress", (await orderSvc.GetByIdAsync(order.Id!.Value, Tenant))!.Status);
+
+        var closed = await orderSvc.CompleteAsync(order.Id!.Value, new CompleteProductionOrderDto
+        {
+            ActualQuantity = 10
+        }, Tenant, User);
+        Assert.Equal("Completed", closed.Status);
     }
 
     [Fact]
@@ -82,7 +88,8 @@ public class MfgLightWorkflowTests
             new ProductionOrderLineRepository(db),
             new ProductionRunRepository(db),
             new WorkCenterRepository(db),
-            new BillOfMaterialRepository(db));
+            new BillOfMaterialRepository(db),
+            db);
 
         var order = await svc.CreateAsync(new CreateProductionOrderDto
         {
