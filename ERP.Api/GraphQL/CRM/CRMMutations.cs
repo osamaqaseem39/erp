@@ -235,9 +235,11 @@ public class CRMMutations
         [Service] ILeadService leadService,
         Guid leadId,
         Guid tenantId,
-        Guid userId)
+        Guid userId,
+        string lostReason,
+        string? lostNote = null)
     {
-        return await leadService.MarkLostAsync(leadId, tenantId, userId);
+        return await leadService.MarkLostAsync(leadId, new LoseLeadDto { LostReason = lostReason, LostNote = lostNote }, tenantId, userId);
     }
 
     public async Task<Guid> ConvertOpportunityToQuote(

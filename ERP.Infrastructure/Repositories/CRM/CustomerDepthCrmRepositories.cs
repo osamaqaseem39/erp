@@ -235,6 +235,8 @@ public class SaleEnquiryRepository : ISaleEnquiryRepository
     {
         if (tenantId == Guid.Empty) return Array.Empty<SaleEnquiry>();
         return await _db.SaleEnquiries.AsNoTracking()
+            .Include(x => x.Customer)
+            .Include(x => x.Lines)
             .Where(x => x.TenantId == tenantId)
             .OrderByDescending(x => x.EnquiryDate)
             .ToListAsync();
@@ -267,6 +269,7 @@ public class SaleEnquiryRepository : ISaleEnquiryRepository
         existing.ReferenceNo = entity.ReferenceNo;
         existing.Notes = entity.Notes;
         existing.Status = entity.Status;
+        existing.RejectionReason = entity.RejectionReason;
         existing.UpdatedAt = DateTime.UtcNow;
         existing.UpdatedBy = entity.UpdatedBy;
         return await _db.SaveChangesAsync() > 0;

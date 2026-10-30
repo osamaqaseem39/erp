@@ -4,6 +4,7 @@ using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
 using ERP.Infrastructure.Numbering;
 using ERP.Shared.DTOs.CRM;
+using ERP.Shared.Exceptions;
 
 namespace ERP.Application.CRM;
 
@@ -52,17 +53,21 @@ public class LeadService : ILeadService
     public async Task<Guid> CreateAsync(CreateLeadDto dto, Guid tenantId, Guid userId)
     {
         if (tenantId == Guid.Empty) return Guid.Empty;
+        if (!dto.AllowDuplicate)
+        {
+            var matches = await _repository.FindDuplicatesAsync(dto.Email, dto.Phone, null, tenantId);
+            if (matches.Count > 0)
+                throw new ConflictException(
+                    "Possible duplicate: " + string.Join("; ", matches.Take(3).Select(m => $"{m.Kind} {m.Code} {m.Name}".Replace("  ", " ").Trim()))
+                    + ". Tick \"Allow duplicate\" to save anyway.");
+        }
         var entity = MapToEntity(dto);
         entity.TenantId = tenantId;
         // ERP-FIX-5: always start New
         entity.Status = "New";
         entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
-        if (string.IsNullOrWhiteSpace(entity.LeadCode))
-            entity.LeadCode = await _numbers.NextAsync("crm.lead");
-        if (string.IsNullOrWhiteSpace(entity.LeadSource) && !string.IsNullOrWhiteSpace(entity.Source))
-            entity.LeadSource = entity.Source;
-        if (string.IsNullOrWhiteSpace(entity.Source) && !string.IsNullOrWhiteSpace(entity.LeadSource))
-            entity.Source = entity.LeadSource;
+        // Lead codes are always issued by the tenant sequence (LD-2026-00001); a client value is ignored.
+        entity.LeadCode = await _numbers.NextAsync("crm.lead");
 
         return await _repository.CreateAsync(entity);
     }
@@ -133,27 +138,33 @@ public class LeadService : ILeadService
         return await _repository.UpdateAsync(lead);
     }
 
-    public async Task<bool> MarkLostAsync(Guid id, Guid tenantId, Guid userId)
+    public async Task<bool> MarkLostAsync(Guid id, LoseLeadDto dto, Guid tenantId, Guid userId)
     {
+        if (string.IsNullOrWhiteSpace(dto.LostReason)) return false;
         var lead = await GetScopedAsync(id, tenantId);
         if (lead == null) return false;
         if (!DocumentWorkflow.CanTransition(StatusOf(lead), "Lost", Transitions))
             return false;
 
         lead.Status = "Lost";
+        lead.LostReason = dto.LostReason.Trim();
+        lead.LostNote = string.IsNullOrWhiteSpace(dto.LostNote) ? null : dto.LostNote.Trim();
         lead.UpdatedBy = userId.ToString();
         lead.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(lead);
     }
 
-    public async Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid tenantId, Guid userId)
+    public Task<IReadOnlyList<LeadDuplicateDto>> FindDuplicatesAsync(string? email, string? phone, Guid? excludeLeadId, Guid tenantId) =>
+        _repository.FindDuplicatesAsync(email, phone, excludeLeadId, tenantId);
+
+    public async Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid tenantId, Guid userId, ConvertLeadToOpportunityDto? dto = null)
     {
         var lead = await GetScopedAsync(leadId, tenantId);
         if (lead == null) return Guid.Empty;
         if (!DocumentWorkflow.CanTransition(StatusOf(lead), "Converted", Transitions))
             return Guid.Empty;
 
-        var displayName = DisplayName(lead);
+        var displayName = string.IsNullOrWhiteSpace(dto?.OpportunityName) ? DisplayName(lead) : dto!.OpportunityName!.Trim();
 
         var opportunity = new Opportunity
         {
@@ -165,8 +176,10 @@ public class LeadService : ILeadService
             Description = lead.Notes,
             Stage = "Qualification",
             Status = "Open",
-            Amount = lead.EstimatedValue ?? 0,
-            Probability = 10,
+            Amount = dto?.Amount ?? lead.EstimatedValue ?? 0,
+            Probability = Math.Clamp(dto?.Probability ?? 10, 0, 100),
+            ExpectedCloseDate = dto?.ExpectedCloseDate,
+            CustomerId = dto?.CustomerId,
             Currency = "USD",
             Source = string.IsNullOrWhiteSpace(lead.Source) ? lead.LeadSource : lead.Source,
             AssignedTo = lead.AssignedTo,
@@ -270,15 +283,25 @@ public class LeadService : ILeadService
         Country = entity.Country,
         PostalCode = entity.PostalCode,
         Industry = entity.Industry,
-        Source = entity.Source,
+        LeadSource = SourceOf(entity),
+        Source = SourceOf(entity),
         Status = entity.Status,
-        AssignedTo = entity.AssignedTo,
+        Priority = entity.Priority,
+        LastContactDate = entity.LastContactDate,
+        AssignedToUserId = OwnerOf(entity),
+        AssignedToId = OwnerOf(entity),
+        AssignedTo = OwnerOf(entity),
         AssignedToName = entity.AssignedToUser != null
             ? $"{entity.AssignedToUser.FirstName} {entity.AssignedToUser.LastName}".Trim()
             : string.Empty,
+        AssignedToUserName = entity.AssignedToUser != null
+            ? $"{entity.AssignedToUser.FirstName} {entity.AssignedToUser.LastName}".Trim()
+            : null,
         LeadScore = entity.LeadScore,
         Notes = entity.Notes,
         ConvertedDate = entity.ConvertedDate,
+        LostReason = entity.LostReason,
+        LostNote = entity.LostNote,
         CreatedAt = entity.CreatedAt,
         UpdatedAt = entity.UpdatedAt,
         CreatedBy = entity.CreatedBy,
@@ -286,46 +309,66 @@ public class LeadService : ILeadService
         IsActive = entity.IsActive
     };
 
-    private static Lead MapToEntity(CreateLeadDto dto) => new()
+    private static Lead MapToEntity(CreateLeadDto dto)
     {
-        TenantId = dto.TenantId,
-        CompanyId = dto.CompanyId,
-        LeadCode = dto.LeadCode ?? string.Empty,
-        CompanyName = dto.CompanyName,
-        ContactPerson = dto.ContactPerson,
-        Email = dto.Email,
-        Phone = dto.Phone,
-        Address = dto.Address,
-        City = dto.City,
-        State = dto.State,
-        Country = dto.Country,
-        PostalCode = dto.PostalCode,
-        Industry = dto.Industry,
-        Source = dto.Source ?? string.Empty,
-        Status = "New",
-        AssignedTo = dto.AssignedTo,
-        LeadScore = dto.LeadScore,
-        Notes = dto.Notes,
-        CreatedBy = dto.CreatedBy
-    };
+        var entity = new Lead
+        {
+            TenantId = dto.TenantId,
+            CompanyId = dto.CompanyId,
+            Status = "New",
+            CreatedBy = dto.CreatedBy
+        };
+        ApplyFields(entity, dto.FirstName, dto.LastName, dto.CompanyName, dto.ContactPerson, dto.Email, dto.Phone,
+            dto.Address, dto.City, dto.State, dto.Country, dto.PostalCode, dto.Industry,
+            Coalesce(dto.LeadSource, dto.Source), dto.Priority, dto.EstimatedValue, dto.LastContactDate,
+            dto.AssignedToUserId ?? dto.AssignedToId ?? dto.AssignedTo, dto.Notes);
+        return entity;
+    }
 
     private static void MapToEntity(UpdateLeadDto dto, Lead entity)
     {
-        entity.CompanyName = dto.CompanyName;
-        entity.ContactPerson = dto.ContactPerson;
-        entity.Email = dto.Email;
-        entity.Phone = dto.Phone;
-        entity.Address = dto.Address;
-        entity.City = dto.City;
-        entity.State = dto.State;
-        entity.Country = dto.Country;
-        entity.PostalCode = dto.PostalCode;
-        entity.Industry = dto.Industry;
-        entity.Source = dto.Source ?? entity.Source;
-        entity.AssignedTo = dto.AssignedTo;
-        entity.LeadScore = dto.LeadScore;
-        entity.Notes = dto.Notes;
+        // LeadCode is immutable once issued.
+        ApplyFields(entity, dto.FirstName, dto.LastName, dto.CompanyName, dto.ContactPerson, dto.Email, dto.Phone,
+            dto.Address, dto.City, dto.State, dto.Country, dto.PostalCode, dto.Industry,
+            Coalesce(dto.LeadSource, dto.Source) ?? SourceOf(entity), dto.Priority, dto.EstimatedValue,
+            // Last contact is maintained from logged activities, not typed on the edit form.
+            entity.LastContactDate ?? dto.LastContactDate,
+            dto.AssignedToUserId ?? dto.AssignedToId ?? dto.AssignedTo, dto.Notes);
         entity.UpdatedBy = dto.UpdatedBy;
         entity.UpdatedAt = DateTime.UtcNow;
     }
+
+    private static void ApplyFields(Lead entity, string firstName, string lastName, string? companyName, string? contactPerson,
+        string? email, string? phone, string? address, string? city, string? state, string? country, string? postalCode,
+        string? industry, string? source, string? priority, decimal? estimatedValue, DateTime? lastContactDate,
+        Guid? ownerId, string? notes)
+    {
+        entity.FirstName = firstName.Trim();
+        entity.LastName = (lastName ?? string.Empty).Trim();
+        entity.CompanyName = companyName;
+        entity.ContactPerson = contactPerson;
+        entity.Email = email?.Trim().ToLowerInvariant();
+        entity.Phone = phone?.Trim();
+        entity.Address = address;
+        entity.City = city;
+        entity.State = state;
+        entity.Country = country;
+        entity.PostalCode = postalCode;
+        entity.Industry = industry;
+        // Source and owner are each stored in legacy duplicate columns; keep them in sync.
+        entity.LeadSource = entity.Source = source ?? string.Empty;
+        entity.Priority = string.IsNullOrWhiteSpace(priority) ? "Medium" : priority;
+        entity.EstimatedValue = estimatedValue;
+        entity.LastContactDate = lastContactDate;
+        entity.AssignedToUserId = entity.AssignedToId = entity.AssignedTo = ownerId;
+        entity.Notes = notes;
+        // Score is always calculated; a client-supplied value is ignored.
+        entity.LeadScore = LeadScoring.Score(entity, DateTime.UtcNow);
+    }
+
+    private static string? Coalesce(params string?[] values) => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+
+    private static string SourceOf(Lead entity) => Coalesce(entity.LeadSource, entity.Source) ?? string.Empty;
+
+    private static Guid? OwnerOf(Lead entity) => entity.AssignedToUserId ?? entity.AssignedToId ?? entity.AssignedTo;
 }

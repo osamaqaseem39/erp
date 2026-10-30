@@ -1,3 +1,4 @@
+using ERP.Application.CRM;
 using ERP.Shared.DTOs.CRM;
 using FluentValidation;
 
@@ -15,23 +16,24 @@ public class UpdateOpportunityValidator : BaseValidator<UpdateOpportunityDto>
             .MaximumLength(200).WithMessage("Opportunity name cannot exceed 200 characters")
             .When(x => !string.IsNullOrEmpty(x.OpportunityName));
 
-
         RuleFor(x => x.Stage)
-            .NotEmpty().WithMessage("Stage is required")
-            .MaximumLength(50).WithMessage("Stage cannot exceed 50 characters")
+            .Must(OpportunityStages.IsOpen!).WithMessage($"Stage must be one of: {string.Join(", ", OpportunityStages.Open.Keys)}")
             .When(x => !string.IsNullOrEmpty(x.Stage));
 
         RuleFor(x => x.Probability)
             .InclusiveBetween(0, 100).WithMessage("Probability must be between 0 and 100")
             .When(x => x.Probability.HasValue);
 
+        RuleFor(x => x.Amount)
+            .GreaterThanOrEqualTo(0).WithMessage("Deal value cannot be negative")
+            .When(x => x.Amount.HasValue);
+
         RuleFor(x => x.EstimatedValue)
-            .GreaterThan(0).WithMessage("Estimated value must be greater than 0")
+            .GreaterThanOrEqualTo(0).WithMessage("Deal value cannot be negative")
             .When(x => x.EstimatedValue.HasValue);
 
         RuleFor(x => x.ExpectedCloseDate)
-            .GreaterThan(DateTime.Today).WithMessage("Expected close date must be in the future")
-            .When(x => x.ExpectedCloseDate.HasValue);
+            .NotEmpty().WithMessage("Expected close date is required");
 
         RuleFor(x => x.ActualCloseDate)
             .LessThanOrEqualTo(DateTime.Today).WithMessage("Actual close date cannot be in the future")
@@ -45,9 +47,5 @@ public class UpdateOpportunityValidator : BaseValidator<UpdateOpportunityDto>
             .MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters")
             .When(x => !string.IsNullOrEmpty(x.Description));
 
-        RuleFor(x => x.Status)
-            .NotEmpty().WithMessage("Status is required")
-            .MaximumLength(50).WithMessage("Status cannot exceed 50 characters")
-            .When(x => !string.IsNullOrEmpty(x.Status));
     }
 }

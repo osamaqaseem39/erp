@@ -3,6 +3,7 @@ using ERP.Domain.CRM;
 using ERP.Infrastructure.Numbering;
 using ERP.Infrastructure.Repositories.CRM;
 using ERP.Shared.DTOs.CRM;
+using ERP.Shared.Exceptions;
 
 namespace ERP.Application.CRM;
 
@@ -41,11 +42,14 @@ public interface ISaleEnquiryService
     Task<bool> UpdateAsync(UpdateSaleEnquiryDto dto, Guid tenantId, Guid userId);
     Task<bool> DeleteAsync(Guid id, Guid tenantId);
     Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId);
-    Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId);
+    Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId, string? reason = null);
+    Task<bool> ReopenAsync(Guid id, Guid tenantId, Guid userId);
 }
 
 public interface ISalePreCostService
 {
+    /// <summary>Starts a Draft pre-cost from an Approved enquiry, copying its lines and specs.</summary>
+    Task<Guid> CreateFromEnquiryAsync(Guid enquiryId, Guid tenantId, Guid userId);
     Task<SalePreCostDto?> GetByIdAsync(Guid id, Guid tenantId);
     Task<IEnumerable<SalePreCostDto>> GetAllAsync(Guid tenantId);
     Task<Guid> CreateAsync(CreateSalePreCostDto dto, Guid tenantId, Guid userId);
@@ -248,35 +252,39 @@ public class SaleEnquiryService : ISaleEnquiryService
         {
             ["Draft"] = new[] { "Approved", "Rejected" },
             ["Approved"] = Array.Empty<string>(),
-            ["Rejected"] = Array.Empty<string>()
+            ["Rejected"] = new[] { "Draft" }
         };
 
     private readonly ISaleEnquiryRepository _repo;
     private readonly IDocumentNumberService _numbers;
+    private readonly ISalePreCostRepository? _preCosts;
 
-    public SaleEnquiryService(ISaleEnquiryRepository repo, IDocumentNumberService numbers)
+    public SaleEnquiryService(ISaleEnquiryRepository repo, IDocumentNumberService numbers, ISalePreCostRepository? preCosts = null)
     {
         _repo = repo;
         _numbers = numbers;
+        _preCosts = preCosts;
     }
 
     public async Task<SaleEnquiryDto?> GetByIdAsync(Guid id, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return null;
         var e = await _repo.GetByIdAsync(id, tenantId, includeLines: true);
-        return e == null ? null : Map(e);
+        return e == null ? null : WithPreCost(Map(e), await PreCostsByEnquiryAsync(tenantId));
     }
 
     public async Task<IEnumerable<SaleEnquiryDto>> GetAllAsync(Guid tenantId)
     {
         if (tenantId == Guid.Empty) return [];
         var list = await _repo.GetAllAsync(tenantId);
-        return list.Select(MapHeader);
+        var preCosts = await PreCostsByEnquiryAsync(tenantId);
+        return list.Select(e => WithPreCost(MapHeader(e), preCosts));
     }
 
     public async Task<Guid> CreateAsync(CreateSaleEnquiryDto dto, Guid tenantId, Guid userId)
     {
         if (tenantId == Guid.Empty) return Guid.Empty;
+        ValidateLines(dto.Lines);
         var entity = new SaleEnquiry
         {
             TenantId = tenantId,
@@ -299,6 +307,7 @@ public class SaleEnquiryService : ISaleEnquiryService
         if (entity == null) return false;
         if (!string.Equals(DocumentWorkflow.Normalize(entity.Status), "Draft", StringComparison.OrdinalIgnoreCase))
             return false;
+        ValidateLines(dto.Lines);
 
         entity.CustomerId = dto.CustomerId;
         entity.EnquiryDate = dto.EnquiryDate?.Date ?? entity.EnquiryDate;
@@ -322,23 +331,86 @@ public class SaleEnquiryService : ISaleEnquiryService
 
     public async Task<bool> ApproveAsync(Guid id, Guid tenantId, Guid userId)
     {
-        var entity = await _repo.GetByIdAsync(id, tenantId);
-        if (entity == null || tenantId == Guid.Empty) return false;
-        if (!DocumentWorkflow.CanTransition(entity.Status, "Approved", Transitions)) return false;
-        if (DocumentWorkflow.IsSameActor(entity.CreatedBy, userId)) return false;
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repo.GetByIdAsync(id, tenantId, includeLines: true);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Approved", Transitions))
+            throw new ConflictException($"Only Draft enquiries can be approved (this one is {entity.Status}).");
+        // Maker-checker: the creator cannot approve their own enquiry.
+        if (DocumentWorkflow.IsSameActor(entity.CreatedBy, userId))
+            throw new ForbiddenException("You created this enquiry, so another user must approve it.");
+        var problems = new List<string>();
+        if (entity.CustomerId is null) problems.Add("Customer is required before approval.");
+        if (entity.Lines.Count == 0) problems.Add("Add at least one line before approval.");
+        if (problems.Count > 0) throw new ValidationException("Enquiry is not ready for approval", problems);
+
         entity.Status = "Approved";
+        entity.RejectionReason = null;
         entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
         return await _repo.UpdateAsync(entity);
     }
 
-    public async Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId)
+    public async Task<bool> RejectAsync(Guid id, Guid tenantId, Guid userId, string? reason = null)
     {
+        if (tenantId == Guid.Empty) return false;
         var entity = await _repo.GetByIdAsync(id, tenantId);
-        if (entity == null || tenantId == Guid.Empty) return false;
-        if (!DocumentWorkflow.CanTransition(entity.Status, "Rejected", Transitions)) return false;
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Rejected", Transitions))
+            throw new ConflictException($"Only Draft enquiries can be rejected (this one is {entity.Status}).");
         entity.Status = "Rejected";
+        entity.RejectionReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
         entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
         return await _repo.UpdateAsync(entity);
+    }
+
+    /// <summary>Sends a rejected enquiry back to Draft so it can be corrected and resubmitted.</summary>
+    public async Task<bool> ReopenAsync(Guid id, Guid tenantId, Guid userId)
+    {
+        if (tenantId == Guid.Empty) return false;
+        var entity = await _repo.GetByIdAsync(id, tenantId);
+        if (entity == null) return false;
+        if (!DocumentWorkflow.CanTransition(entity.Status, "Draft", Transitions))
+            throw new ConflictException($"Only Rejected enquiries can be reopened (this one is {entity.Status}).");
+        entity.Status = "Draft";
+        entity.UpdatedBy = userId.ToString();
+        entity.UpdatedAt = DateTime.UtcNow;
+        return await _repo.UpdateAsync(entity);
+    }
+
+    private static void ValidateLines(IEnumerable<CreateSaleEnquiryLineDto>? lines)
+    {
+        var problems = new List<string>();
+        var n = 0;
+        foreach (var l in lines ?? [])
+        {
+            n++;
+            if (l.ItemId is null && string.IsNullOrWhiteSpace(l.ItemDescription))
+                problems.Add($"Line {n}: pick an item or enter a description.");
+            if (l.Quantity <= 0)
+                problems.Add($"Line {n}: quantity must be greater than 0.");
+        }
+        if (problems.Count > 0) throw new ValidationException("Some enquiry lines are invalid", problems);
+    }
+
+    private async Task<Dictionary<Guid, SalePreCost>> PreCostsByEnquiryAsync(Guid tenantId)
+    {
+        if (_preCosts == null) return [];
+        return (await _preCosts.GetAllAsync(tenantId))
+            .Where(p => p.SaleEnquiryId != null && !string.Equals(p.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            .GroupBy(p => p.SaleEnquiryId!.Value)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(p => p.CreatedAt).First());
+    }
+
+    private static SaleEnquiryDto WithPreCost(SaleEnquiryDto dto, Dictionary<Guid, SalePreCost> preCosts)
+    {
+        if (preCosts.TryGetValue(dto.Id, out var pc))
+        {
+            dto.SalePreCostId = pc.Id;
+            dto.SalePreCostNumber = pc.PreCostNumber;
+        }
+        return dto;
     }
 
     private static SaleEnquiryLine ToLine(CreateSaleEnquiryLineDto dto, Guid tenantId) => new()
@@ -396,6 +468,12 @@ public class SaleEnquiryService : ISaleEnquiryService
         Status = e.Status,
         ReferenceNo = e.ReferenceNo,
         Notes = e.Notes,
+        CustomerName = e.Customer == null ? null
+            : string.IsNullOrWhiteSpace(e.Customer.CustomerName) ? e.Customer.CompanyName : e.Customer.CustomerName,
+        LineCount = e.Lines.Count,
+        TotalQuantity = e.Lines.Sum(l => l.Quantity),
+        CreatedBy = e.CreatedBy,
+        RejectionReason = e.RejectionReason,
         IsActive = e.IsActive,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt
@@ -414,11 +492,58 @@ public class SalePreCostService : ISalePreCostService
 
     private readonly ISalePreCostRepository _repo;
     private readonly IDocumentNumberService _numbers;
+    private readonly ISaleEnquiryRepository? _enquiries;
 
-    public SalePreCostService(ISalePreCostRepository repo, IDocumentNumberService numbers)
+    public SalePreCostService(ISalePreCostRepository repo, IDocumentNumberService numbers, ISaleEnquiryRepository? enquiries = null)
     {
         _repo = repo;
         _numbers = numbers;
+        _enquiries = enquiries;
+    }
+
+    public async Task<Guid> CreateFromEnquiryAsync(Guid enquiryId, Guid tenantId, Guid userId)
+    {
+        if (tenantId == Guid.Empty || _enquiries == null) return Guid.Empty;
+        var enquiry = await _enquiries.GetByIdAsync(enquiryId, tenantId, includeLines: true);
+        if (enquiry == null) return Guid.Empty;
+        if (!string.Equals(enquiry.Status, "Approved", StringComparison.OrdinalIgnoreCase))
+            throw new ConflictException("Only approved enquiries can be costed.");
+        var existing = (await _repo.GetAllAsync(tenantId))
+            .FirstOrDefault(p => p.SaleEnquiryId == enquiryId && !string.Equals(p.Status, "Rejected", StringComparison.OrdinalIgnoreCase));
+        if (existing != null)
+            throw new ConflictException($"Pre-cost {existing.PreCostNumber} already exists for this enquiry.");
+
+        var entity = new SalePreCost
+        {
+            TenantId = tenantId,
+            PreCostNumber = await _numbers.NextAsync("crm.salePreCost"),
+            SaleEnquiryId = enquiry.Id,
+            CustomerId = enquiry.CustomerId,
+            PreCostDate = DateTime.UtcNow.Date,
+            Status = "Draft",
+            Notes = enquiry.Notes,
+            CreatedBy = userId.ToString(),
+            Lines = enquiry.Lines.Select(l => new SalePreCostLine
+            {
+                TenantId = tenantId,
+                ItemId = l.ItemId,
+                ItemDescription = l.ItemDescription,
+                Quantity = l.Quantity,
+                Size = l.Size,
+                MaterialType = l.MaterialType,
+                PET = l.PET,
+                MPET = l.MPET,
+                LaminationMicron = l.LaminationMicron,
+                CutOffLength = l.CutOffLength,
+                FolderSize = l.FolderSize,
+                Ups = l.Ups,
+                PouchTypeId = l.PouchTypeId,
+                ProcessId = l.ProcessId,
+                FOHTypeId = l.FOHTypeId,
+                Notes = l.Notes
+            }).ToList()
+        };
+        return await _repo.CreateAsync(entity);
     }
 
     public async Task<SalePreCostDto?> GetByIdAsync(Guid id, Guid tenantId)

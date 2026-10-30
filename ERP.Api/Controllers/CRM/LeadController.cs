@@ -88,6 +88,12 @@ public class LeadController : ERP.Api.Abstractions.ControllerBase
     public async Task<IActionResult> Delete(Guid id) =>
         await HandleAsync(() => _service.DeleteAsync(id, GetTenantId()));
 
+    /// <summary>Leads, customers and contacts sharing this email or phone.</summary>
+    [HttpGet("duplicates")]
+    [ProducesResponseType(typeof(IReadOnlyList<LeadDuplicateDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> Duplicates([FromQuery] string? email, [FromQuery] string? phone, [FromQuery] Guid? excludeId) =>
+        Ok(await _service.FindDuplicatesAsync(email, phone, excludeId, GetTenantId()));
+
     [HttpPost("{id}/qualify")]
     [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> Qualify(Guid id)
@@ -100,9 +106,11 @@ public class LeadController : ERP.Api.Abstractions.ControllerBase
 
     [HttpPost("{id}/lose")]
     [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
-    public async Task<IActionResult> MarkLost(Guid id)
+    public async Task<IActionResult> MarkLost(Guid id, [FromBody] LoseLeadDto dto)
     {
-        var ok = await _service.MarkLostAsync(id, GetTenantId(), GetUserId());
+        if (string.IsNullOrWhiteSpace(dto.LostReason))
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "A lost reason is required" });
+        var ok = await _service.MarkLostAsync(id, dto, GetTenantId(), GetUserId());
         if (!ok)
             return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to mark lead lost (must be New or Qualified)" });
         return Ok(new MessageResponse { Message = "Lead marked as lost" });
@@ -120,9 +128,9 @@ public class LeadController : ERP.Api.Abstractions.ControllerBase
 
     [HttpPost("{id}/convert-to-opportunity")]
     [ProducesResponseType(OpenApiResponseTypes.Ok)]
-    public async Task<IActionResult> ConvertToOpportunity(Guid id)
+    public async Task<IActionResult> ConvertToOpportunity(Guid id, [FromBody] ConvertLeadToOpportunityDto? dto)
     {
-        var opportunityId = await _service.ConvertToOpportunityAsync(id, GetTenantId(), GetUserId());
+        var opportunityId = await _service.ConvertToOpportunityAsync(id, GetTenantId(), GetUserId(), dto);
         if (opportunityId == Guid.Empty)
             return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to convert lead (must be Qualified)" });
         return Ok(new { OpportunityId = opportunityId });

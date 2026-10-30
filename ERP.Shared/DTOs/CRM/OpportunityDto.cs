@@ -19,6 +19,9 @@ public class OpportunityDto : BaseDto
     public DateTime? ExpectedCloseDate { get; set; }
     public DateTime? ActualCloseDate { get; set; }
     public DateTime? ConvertedDate { get; set; }
+    public string? CloseReason { get; set; }
+    /// <summary>Amount x probability: the pipeline value this deal is expected to bring in.</summary>
+    public decimal? WeightedValue { get; set; }
     public string? Description { get; set; }
     public string? Notes { get; set; }
     public string? Source { get; set; }
@@ -75,4 +78,11 @@ public class UpdateOpportunityDto : UpdateDto
     public string? Source { get; set; }
     public Guid? AssignedTo { get; set; }
     public Guid? AssignedToUserId { get; set; }
+}
+
+public class ChangeOpportunityStageDto
+{
+    public string Stage { get; set; } = string.Empty;
+    /// <summary>Leave empty to use the stage default (10/25/50/75).</summary>
+    public decimal? Probability { get; set; }
 }

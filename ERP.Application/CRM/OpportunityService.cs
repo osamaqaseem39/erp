@@ -7,6 +7,25 @@ using ERP.Shared.DTOs.CRM;
 
 namespace ERP.Application.CRM;
 
+/// <summary>Open pipeline stages and the win probability each implies by default.</summary>
+public static class OpportunityStages
+{
+    public static readonly IReadOnlyDictionary<string, decimal> Open =
+        new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Prospecting"] = 10,
+            ["Qualification"] = 25,
+            ["Proposal"] = 50,
+            ["Negotiation"] = 75
+        };
+
+    public static bool IsOpen(string? stage) => stage != null && Open.ContainsKey(stage.Trim());
+
+    /// <summary>Canonical casing for a known open stage, or Prospecting.</summary>
+    public static string Normalize(string? stage) =>
+        Open.Keys.FirstOrDefault(k => string.Equals(k, stage?.Trim(), StringComparison.OrdinalIgnoreCase)) ?? "Prospecting";
+}
+
 public class OpportunityService : IOpportunityService
 {
     private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> Transitions =
@@ -52,10 +71,8 @@ public class OpportunityService : IOpportunityService
         // ERP-FIX-5: always start Open
         entity.Status = "Open";
         entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
-        if (string.IsNullOrWhiteSpace(entity.OpportunityCode))
-            entity.OpportunityCode = await _numbers.NextAsync("crm.opportunity");
-        if (string.IsNullOrWhiteSpace(entity.OpportunityName))
-            entity.OpportunityName = entity.Title;
+        // Codes are always issued by the tenant sequence (OP-2026-00001); a client value is ignored.
+        entity.OpportunityCode = await _numbers.NextAsync("crm.opportunity");
         return await _repository.CreateAsync(entity);
     }
 
@@ -120,6 +137,8 @@ public class OpportunityService : IOpportunityService
 
         entity.Status = "Won";
         entity.Stage = "Closed Won";
+        entity.Probability = 100;
+        entity.ActualValue ??= entity.Amount;
         entity.ActualCloseDate = DateTime.UtcNow;
         entity.ClosedDate = DateTime.UtcNow;
         entity.UpdatedBy = userId.ToString();
@@ -135,7 +154,8 @@ public class OpportunityService : IOpportunityService
 
         entity.Status = "Lost";
         entity.Stage = "Closed Lost";
-        entity.CloseReason = reason;
+        entity.Probability = 0;
+        entity.CloseReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
         entity.ActualCloseDate = DateTime.UtcNow;
         entity.ClosedDate = DateTime.UtcNow;
         entity.UpdatedBy = userId.ToString();
@@ -198,12 +218,15 @@ public class OpportunityService : IOpportunityService
     public async Task<bool> UpdateStageAsync(Guid id, string stage, decimal probability, Guid tenantId)
     {
         if (tenantId == Guid.Empty) return false;
+        // Closed stages are reached only through win/lose.
+        if (!OpportunityStages.IsOpen(stage) || probability is < 0 or > 100) return false;
         var entity = await _repository.GetByIdAsync(id, tenantId);
         if (entity == null) return false;
         if (!IsOpen(entity.Status)) return false;
 
-        entity.Stage = stage;
+        entity.Stage = OpportunityStages.Normalize(stage);
         entity.Probability = probability;
+        entity.UpdatedAt = DateTime.UtcNow;
         return await _repository.UpdateAsync(entity);
     }
 
@@ -231,17 +254,27 @@ public class OpportunityService : IOpportunityService
             OpportunityName = entity.OpportunityName,
             Title = entity.Title,
             CustomerId = entity.CustomerId,
-            CustomerName = entity.Customer?.CompanyName ?? string.Empty,
+            CustomerName = entity.Customer == null ? null
+                : string.IsNullOrWhiteSpace(entity.Customer.CustomerName) ? entity.Customer.CompanyName : entity.Customer.CustomerName,
+            LeadId = entity.LeadId,
+            LeadName = entity.Lead == null ? null
+                : string.IsNullOrWhiteSpace(entity.Lead.CompanyName) ? $"{entity.Lead.FirstName} {entity.Lead.LastName}".Trim() : entity.Lead.CompanyName,
             Description = entity.Description,
             Stage = entity.Stage,
             Status = entity.Status,
             Probability = entity.Probability,
             Amount = entity.Amount,
+            EstimatedValue = entity.Amount,
+            WeightedValue = Math.Round(entity.Amount * entity.Probability / 100m, 2),
+            ActualValue = entity.ActualValue,
             Currency = entity.Currency,
             ExpectedCloseDate = entity.ExpectedCloseDate,
-            AssignedTo = entity.AssignedTo,
-            AssignedToUserId = entity.AssignedToUserId,
-            AssignedToName = entity.AssignedToUser?.FirstName + " " + entity.AssignedToUser?.LastName ?? string.Empty,
+            ActualCloseDate = entity.ActualCloseDate,
+            CloseReason = entity.CloseReason,
+            AssignedTo = OwnerOf(entity),
+            AssignedToUserId = OwnerOf(entity),
+            AssignedToName = OwnerName(entity),
+            AssignedToUserName = OwnerName(entity),
             Source = entity.Source,
             Notes = entity.Notes,
             ConvertedDate = entity.ConvertedDate,
@@ -255,44 +288,56 @@ public class OpportunityService : IOpportunityService
 
     private static Opportunity MapToEntity(CreateOpportunityDto dto)
     {
-        return new Opportunity
+        var entity = new Opportunity
         {
             TenantId = dto.TenantId,
-            OpportunityCode = dto.OpportunityCode ?? string.Empty,
-            OpportunityName = dto.OpportunityName ?? string.Empty,
-            Title = dto.Title ?? string.Empty,
-            CustomerId = dto.CustomerId,
-            Description = dto.Description,
-            Stage = dto.Stage ?? "Prospecting",
+            LeadId = dto.LeadId,
             Status = "Open",
-            Probability = dto.Probability ?? 0m,
-            Amount = dto.Amount ?? 0m,
-            Currency = dto.Currency ?? "USD",
-            ExpectedCloseDate = dto.ExpectedCloseDate,
-            AssignedTo = dto.AssignedTo,
-            AssignedToUserId = dto.AssignedToUserId,
-            Source = dto.Source,
-            Notes = dto.Notes,
             CreatedBy = dto.CreatedBy
         };
+        ApplyFields(entity, dto.OpportunityName, dto.Title, dto.CustomerId, dto.Description, dto.Stage, dto.Probability,
+            dto.Amount ?? dto.EstimatedValue, dto.Currency, dto.ExpectedCloseDate, dto.AssignedToUserId ?? dto.AssignedTo,
+            dto.Source, dto.Notes);
+        return entity;
     }
 
     private static void MapToEntity(UpdateOpportunityDto dto, Opportunity entity)
     {
-        entity.CustomerId = dto.CustomerId;
-        entity.Title = dto.Title ?? string.Empty;
-        if (!string.IsNullOrWhiteSpace(dto.OpportunityName))
-            entity.OpportunityName = dto.OpportunityName;
-        entity.Description = dto.Description;
-        entity.Stage = dto.Stage ?? entity.Stage;
-        entity.Probability = dto.Probability ?? entity.Probability;
-        entity.Amount = dto.Amount ?? entity.Amount;
-        entity.Currency = dto.Currency ?? entity.Currency;
-        entity.ExpectedCloseDate = dto.ExpectedCloseDate;
-        entity.AssignedTo = dto.AssignedTo;
-        entity.AssignedToUserId = dto.AssignedToUserId;
-        entity.Source = dto.Source;
-        entity.Notes = dto.Notes;
+        // OpportunityCode, LeadId and status are fixed by the workflow and never edited here.
+        ApplyFields(entity, dto.OpportunityName ?? entity.OpportunityName, dto.Title, dto.CustomerId ?? entity.CustomerId,
+            dto.Description, dto.Stage ?? entity.Stage, dto.Probability,
+            dto.Amount ?? dto.EstimatedValue ?? entity.Amount, dto.Currency ?? entity.Currency, dto.ExpectedCloseDate,
+            dto.AssignedToUserId ?? dto.AssignedTo, dto.Source, dto.Notes);
         entity.UpdatedBy = dto.UpdatedBy;
+        entity.UpdatedAt = DateTime.UtcNow;
     }
+
+    private static void ApplyFields(Opportunity entity, string? name, string? title, Guid? customerId, string? description,
+        string? stage, decimal? probability, decimal? amount, string? currency, DateTime? expectedCloseDate, Guid? ownerId,
+        string? source, string? notes)
+    {
+        var newStage = OpportunityStages.Normalize(stage);
+        var stageChanged = !string.Equals(entity.Stage, newStage, StringComparison.OrdinalIgnoreCase);
+        entity.OpportunityName = (string.IsNullOrWhiteSpace(name) ? title : name)?.Trim() ?? string.Empty;
+        entity.Title = string.IsNullOrWhiteSpace(title) ? entity.OpportunityName : title.Trim();
+        entity.CustomerId = customerId;
+        entity.Description = description;
+        entity.Stage = newStage;
+        // No probability given → the stage default when the stage moved (or none was ever set).
+        entity.Probability = probability
+            ?? (stageChanged || entity.Probability == 0 ? OpportunityStages.Open[newStage] : entity.Probability);
+        entity.Amount = amount ?? 0m;
+        entity.EstimatedValue = entity.Amount;
+        entity.Currency = string.IsNullOrWhiteSpace(currency) ? "USD" : currency.Trim().ToUpperInvariant();
+        entity.ExpectedCloseDate = expectedCloseDate;
+        // Owner is stored in two legacy columns; keep them in sync.
+        entity.AssignedToUserId = entity.AssignedTo = ownerId;
+        entity.Source = source;
+        entity.Notes = notes;
+    }
+
+    private static Guid? OwnerOf(Opportunity entity) => entity.AssignedToUserId ?? entity.AssignedTo;
+
+    private static string? OwnerName(Opportunity entity) =>
+        entity.AssignedToUser == null ? null : $"{entity.AssignedToUser.FirstName} {entity.AssignedToUser.LastName}".Trim();
 }

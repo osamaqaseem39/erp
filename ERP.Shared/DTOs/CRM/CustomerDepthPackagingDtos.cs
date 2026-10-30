@@ -103,7 +103,20 @@ public class SaleEnquiryDto : BaseDto
     public string Status { get; set; } = "Draft";
     public string? ReferenceNo { get; set; }
     public string? Notes { get; set; }
+    public string? CustomerName { get; set; }
+    public int LineCount { get; set; }
+    public decimal TotalQuantity { get; set; }
+    public string? CreatedBy { get; set; }
+    public string? RejectionReason { get; set; }
+    /// <summary>The pre-cost built from this enquiry, if any.</summary>
+    public Guid? SalePreCostId { get; set; }
+    public string? SalePreCostNumber { get; set; }
     public List<SaleEnquiryLineDto> Lines { get; set; } = new();
+}
+
+public class RejectSaleEnquiryDto
+{
+    public string Reason { get; set; } = string.Empty;
 }
 
 public class CreateSaleEnquiryDto

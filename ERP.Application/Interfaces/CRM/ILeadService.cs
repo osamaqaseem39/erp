@@ -14,7 +14,8 @@ public interface ILeadService
     Task<IEnumerable<LeadDto>> GetByAssignedToAsync(Guid assignedTo, Guid tenantId);
     Task<IEnumerable<LeadDto>> SearchAsync(string searchTerm, Guid tenantId);
     Task<bool> QualifyAsync(Guid id, Guid tenantId, Guid userId);
-    Task<bool> MarkLostAsync(Guid id, Guid tenantId, Guid userId);
-    Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid tenantId, Guid userId);
+    Task<bool> MarkLostAsync(Guid id, LoseLeadDto dto, Guid tenantId, Guid userId);
+    Task<Guid> ConvertToOpportunityAsync(Guid leadId, Guid tenantId, Guid userId, ConvertLeadToOpportunityDto? dto = null);
+    Task<IReadOnlyList<LeadDuplicateDto>> FindDuplicatesAsync(string? email, string? phone, Guid? excludeLeadId, Guid tenantId);
     Task<Guid> ConvertToCustomerAsync(Guid leadId, Guid tenantId, Guid userId);
 }

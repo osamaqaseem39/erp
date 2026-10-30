@@ -50,8 +50,7 @@ public class UpdateLeadValidator : BaseValidator<UpdateLeadDto>
             .When(x => !string.IsNullOrEmpty(x.Country));
 
         RuleFor(x => x.LeadSource)
-            .NotEmpty().WithMessage("Lead source is required")
-            .MaximumLength(100).WithMessage("Lead source cannot exceed 100 characters")
+            .Must(LeadRules.IsSource).WithMessage($"Lead source must be one of: {string.Join(", ", LeadRules.Sources)}")
             .When(x => !string.IsNullOrEmpty(x.LeadSource));
 
         RuleFor(x => x.Status)
@@ -60,8 +59,7 @@ public class UpdateLeadValidator : BaseValidator<UpdateLeadDto>
             .When(x => !string.IsNullOrEmpty(x.Status));
 
         RuleFor(x => x.Priority)
-            .NotEmpty().WithMessage("Priority is required")
-            .MaximumLength(50).WithMessage("Priority cannot exceed 50 characters")
+            .Must(LeadRules.IsPriority).WithMessage($"Priority must be one of: {string.Join(", ", LeadRules.Priorities)}")
             .When(x => !string.IsNullOrEmpty(x.Priority));
 
         RuleFor(x => x.EstimatedValue)

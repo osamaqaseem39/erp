@@ -1,3 +1,4 @@
+using ERP.Application.CRM;
 using ERP.Api.Errors;
 using ERP.Api.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -107,10 +108,25 @@ public class OpportunityController : ERP.Api.Abstractions.ControllerBase
     [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
     public async Task<IActionResult> MarkLost(Guid id, [FromBody] CloseOpportunityRequest? body = null)
     {
-        var ok = await _service.MarkLostAsync(id, GetTenantId(), GetUserId(), body?.Reason);
+        if (string.IsNullOrWhiteSpace(body?.Reason))
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "A lost reason is required" });
+        var ok = await _service.MarkLostAsync(id, GetTenantId(), GetUserId(), body.Reason);
         if (!ok)
             return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to mark opportunity lost (must be Open)" });
         return Ok(new MessageResponse { Message = "Opportunity marked as lost" });
+    }
+
+    [HttpPost("{id}/stage")]
+    [ProducesResponseType(typeof(MessageResponse), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> ChangeStage(Guid id, [FromBody] ChangeOpportunityStageDto dto)
+    {
+        if (!OpportunityStages.IsOpen(dto.Stage))
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = $"Stage must be one of: {string.Join(", ", OpportunityStages.Open.Keys)}. Use win/lose to close." });
+        var probability = dto.Probability ?? OpportunityStages.Open[OpportunityStages.Normalize(dto.Stage)];
+        var ok = await _service.UpdateStageAsync(id, dto.Stage, probability, GetTenantId());
+        if (!ok)
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "Unable to change stage (must be Open, probability 0-100)" });
+        return Ok(new MessageResponse { Message = "Stage updated" });
     }
 
     [HttpPost("{id}/cancel")]

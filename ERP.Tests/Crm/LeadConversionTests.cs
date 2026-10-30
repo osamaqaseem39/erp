@@ -1,6 +1,7 @@
 using ERP.Application.CRM;
 using ERP.Domain.CRM;
 using ERP.Infrastructure.Interfaces.CRM;
+using ERP.Shared.DTOs.CRM;
 
 namespace ERP.Tests.Crm;
 
@@ -87,6 +88,8 @@ public class LeadConversionTests
         public Task<Guid> CreateAsync(Lead lead) => throw new NotImplementedException();
         public Task<bool> UpdateAsync(Lead lead) => Task.FromResult(true);
         public Task<bool> DeleteAsync(Guid id, Guid tenantId) => Task.FromResult(true);
+        public Task<IReadOnlyList<LeadDuplicateDto>> FindDuplicatesAsync(string? email, string? phone, Guid? excludeLeadId, Guid tenantId) =>
+            Task.FromResult<IReadOnlyList<LeadDuplicateDto>>([]);
     }
 
     private sealed class FakeCustomerRepository : ICustomerRepository

@@ -11,6 +11,7 @@ public class SaleEnquiry : BaseEntity
     public string Status { get; set; } = "Draft";
     public string? Notes { get; set; }
     public string? ReferenceNo { get; set; }
+    public string? RejectionReason { get; set; }
 
     public Customer? Customer { get; set; }
     public ICollection<SaleEnquiryLine> Lines { get; set; } = new List<SaleEnquiryLine>();

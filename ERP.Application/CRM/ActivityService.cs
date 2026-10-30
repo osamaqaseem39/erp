@@ -17,10 +17,12 @@ public class ActivityService : IActivityService
         };
 
     private readonly IActivityRepository _repository;
+    private readonly ILeadRepository? _leads;
 
-    public ActivityService(IActivityRepository repository)
+    public ActivityService(IActivityRepository repository, ILeadRepository? leads = null)
     {
         _repository = repository;
+        _leads = leads;
     }
 
     public async Task<ActivityDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -45,7 +47,9 @@ public class ActivityService : IActivityService
         // ERP-FIX-5: always start Open
         entity.Status = "Open";
         entity.CreatedBy = userId != Guid.Empty ? userId.ToString() : dto.CreatedBy;
-        return await _repository.CreateAsync(entity);
+        var id = await _repository.CreateAsync(entity);
+        await TouchLeadAsync(entity.LeadId, entity.StartDate, tenantId);
+        return id;
     }
 
     public async Task<bool> UpdateAsync(UpdateActivityDto dto, Guid tenantId, Guid userId)
@@ -132,7 +136,9 @@ public class ActivityService : IActivityService
         entity.EndDate ??= DateTime.UtcNow;
         entity.UpdatedBy = userId.ToString();
         entity.UpdatedAt = DateTime.UtcNow;
-        return await _repository.UpdateAsync(entity);
+        var ok = await _repository.UpdateAsync(entity);
+        if (ok) await TouchLeadAsync(entity.LeadId, entity.EndDate.Value, tenantId);
+        return ok;
     }
 
     public async Task<bool> CancelAsync(Guid id, Guid tenantId, Guid userId)
@@ -254,5 +260,19 @@ public class ActivityService : IActivityService
         entity.OpportunityId = dto.OpportunityId;
         entity.UpdatedBy = dto.UpdatedBy;
         entity.UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>Logging or completing an activity counts as contact: move the lead's last contact date forward and rescore.</summary>
+    private async Task TouchLeadAsync(Guid? leadId, DateTime when, Guid tenantId)
+    {
+        if (_leads == null || leadId is not { } id || when == default) return;
+        var now = DateTime.UtcNow;
+        if (when > now) return; // a future meeting is not contact yet; completing it will count
+        var lead = await _leads.GetByIdAsync(id, tenantId);
+        if (lead == null || (lead.LastContactDate is { } last && last >= when)) return;
+        lead.LastContactDate = when;
+        lead.LeadScore = LeadScoring.Score(lead, now);
+        lead.UpdatedAt = now;
+        await _leads.UpdateAsync(lead);
     }
 }

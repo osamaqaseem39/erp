@@ -30,6 +30,8 @@ public class LeadDto : BaseDto
     public int? LeadScore { get; set; }
     public string? Notes { get; set; }
     public DateTime? ConvertedDate { get; set; }
+    public string? LostReason { get; set; }
+    public string? LostNote { get; set; }
     public new bool IsActive { get; set; } = true;
     
     // Navigation properties
@@ -64,6 +66,8 @@ public class CreateLeadDto : CreateDto
     public Guid? AssignedTo { get; set; }
     public int? LeadScore { get; set; }
     public string? Notes { get; set; }
+    /// <summary>Save even when the email or phone matches an existing lead, contact or customer.</summary>
+    public bool AllowDuplicate { get; set; }
 }
 
 public class UpdateLeadDto : UpdateDto
@@ -92,4 +96,29 @@ public class UpdateLeadDto : UpdateDto
     public Guid? AssignedTo { get; set; }
     public int? LeadScore { get; set; }
     public string? Notes { get; set; }
+}
+
+public class LoseLeadDto
+{
+    public string LostReason { get; set; } = string.Empty;
+    public string? LostNote { get; set; }
+}
+
+public class ConvertLeadToOpportunityDto
+{
+    public string? OpportunityName { get; set; }
+    public decimal? Amount { get; set; }
+    public decimal? Probability { get; set; }
+    public DateTime? ExpectedCloseDate { get; set; }
+    public Guid? CustomerId { get; set; }
+}
+
+public class LeadDuplicateDto
+{
+    public string Kind { get; set; } = string.Empty; // Lead, Customer, Contact
+    public Guid Id { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
 }

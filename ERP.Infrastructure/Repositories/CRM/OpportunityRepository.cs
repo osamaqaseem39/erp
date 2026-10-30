@@ -19,6 +19,8 @@ public class OpportunityRepository : CrmRepositoryBase, IOpportunityRepository
             return Context.Opportunities.Where(_ => false);
         return Context.Opportunities
             .Include(o => o.Customer)
+            .Include(o => o.Lead)
+            .Include(o => o.AssignedToUser)
             .Include(o => o.Activities)
             .Where(o => o.TenantId == tenantId);
     }

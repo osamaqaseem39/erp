@@ -31,6 +31,8 @@ public class Lead : BaseEntity
     public int? LeadScore { get; set; }
     public string? Notes { get; set; }
     public DateTime? ConvertedDate { get; set; }
+    public string? LostReason { get; set; }
+    public string? LostNote { get; set; }
     
     // Navigation properties
     public User? AssignedToUser { get; set; }

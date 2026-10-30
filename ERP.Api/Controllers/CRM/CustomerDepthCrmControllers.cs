@@ -131,7 +131,13 @@ public class FOHTypeController : Microsoft.AspNetCore.Mvc.ControllerBase
 public class SaleEnquiryController : Microsoft.AspNetCore.Mvc.ControllerBase
 {
     private readonly ISaleEnquiryService _service;
-    public SaleEnquiryController(ISaleEnquiryService service) => _service = service;
+    private readonly ISalePreCostService _preCosts;
+
+    public SaleEnquiryController(ISaleEnquiryService service, ISalePreCostService preCosts)
+    {
+        _service = service;
+        _preCosts = preCosts;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync(HttpContext.RequireTenantId()));
@@ -169,9 +175,26 @@ public class SaleEnquiryController : Microsoft.AspNetCore.Mvc.ControllerBase
             ? Ok(new MessageResponse { Message = "Approved" }) : NotFound();
 
     [HttpPost("{id:guid}/reject")]
-    public async Task<IActionResult> Reject(Guid id) =>
-        await _service.RejectAsync(id, HttpContext.RequireTenantId(), User.RequireUserId())
+    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectSaleEnquiryDto? dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto?.Reason))
+            return BadRequest(new ApiError { Status = 400, ErrorCode = ApiErrorCodes.BusinessRule, Message = "A rejection reason is required" });
+        return await _service.RejectAsync(id, HttpContext.RequireTenantId(), User.RequireUserId(), dto.Reason)
             ? Ok(new MessageResponse { Message = "Rejected" }) : NotFound();
+    }
+
+    [HttpPost("{id:guid}/reopen")]
+    public async Task<IActionResult> Reopen(Guid id) =>
+        await _service.ReopenAsync(id, HttpContext.RequireTenantId(), User.RequireUserId())
+            ? Ok(new MessageResponse { Message = "Reopened as draft" }) : NotFound();
+
+    /// <summary>Creates a Draft pre-cost from this approved enquiry, copying its lines.</summary>
+    [HttpPost("{id:guid}/create-pre-cost")]
+    public async Task<IActionResult> CreatePreCost(Guid id)
+    {
+        var preCostId = await _preCosts.CreateFromEnquiryAsync(id, HttpContext.RequireTenantId(), User.RequireUserId());
+        return preCostId == Guid.Empty ? NotFound() : Ok(new { SalePreCostId = preCostId });
+    }
 }
 
 [Authorize]
