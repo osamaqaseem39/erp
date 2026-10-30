@@ -20,7 +20,8 @@ public class PayrollWorkflowTests
     private static PayrollCrudService Svc(ERPDbContext db) => new(
         new PayrollRepository(db),
         new PayrollLineRepository(db),
-        new EmployeeRepository(db));
+        new EmployeeRepository(db),
+        db);
 
     private static async Task SeedAsync(ERPDbContext db)
     {
@@ -163,5 +164,51 @@ public class PayrollWorkflowTests
         Assert.Equal(3000m, run.TotalGross);
         Assert.Equal(300m, run.TotalDeductions); // 10% tax
         Assert.Equal(2700m, run.TotalNet);
+    }
+
+    [Fact]
+    public async Task Salary_Structure_Drives_Lines_And_Payslips()
+    {
+        await using var db = Db();
+        await SeedAsync(db);
+        var setup = new PayrollSetupService(db);
+        var svc = Svc(db);
+
+        var basic = await setup.SaveComponentAsync(new PayrollComponentDto { Name = "Basic", Type = "Basic", CalculationType = "Fixed", Value = 0 }, Tenant, User);
+        var hra = await setup.SaveComponentAsync(new PayrollComponentDto { Name = "House rent", Type = "Earning", CalculationType = "PercentOfBasic", Value = 40, IsTaxable = true }, Tenant, User);
+        var eobi = await setup.SaveComponentAsync(new PayrollComponentDto { Name = "EOBI", Type = "Deduction", CalculationType = "Fixed", Value = 100 }, Tenant, User);
+        var tax = await setup.SaveComponentAsync(new PayrollComponentDto { Name = "Income tax", Type = "Tax", CalculationType = "PercentOfGross", Value = 5 }, Tenant, User);
+        foreach (var (c, v) in new[] { (basic.Id, (decimal?)6000m), (hra.Id, null), (eobi.Id, null), (tax.Id, null) })
+            await setup.SaveStructureAsync(new EmployeeSalaryComponentDto { EmployeeId = EmpA, PayrollComponentId = c, Value = v }, Tenant, User);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            setup.SaveStructureAsync(new EmployeeSalaryComponentDto { EmployeeId = EmpA, PayrollComponentId = hra.Id }, Tenant, User));
+
+        var id = await svc.CreateAsync(new PayrollDto
+        {
+            EmployeeId = EmpA,
+            PayPeriodStart = new DateTime(2026, 4, 1),
+            PayPeriodEnd = new DateTime(2026, 4, 30),
+            PayDate = new DateTime(2026, 5, 1),
+        }, Tenant, User);
+        Assert.True(await svc.ProcessPayrollAsync(id, Tenant, User));
+
+        // Basic 6000 + HRA 2400 = 8400 gross; EOBI 100 + tax 5% of 8400 = 420, net 7880
+        var run = await svc.GetByIdAsync(id, Tenant);
+        Assert.Equal(8400m, run!.TotalGross);
+        Assert.Equal(7880m, run.TotalNet);
+
+        var slip = Assert.Single(await setup.GetPayslipsAsync(id, Tenant));
+        Assert.Equal(new[] { "Basic", "House rent" }, slip.Earnings.Select(e => e.Name));
+        Assert.Equal(new[] { 100m, 420m }, slip.DeductionItems.Select(d => d.Amount));
+        Assert.Equal(7880m, slip.NetPay);
+    }
+
+    [Fact]
+    public void Calculator_Prorates_Partial_Period()
+    {
+        var basic = new PayrollComponent { Name = "Basic", Type = "Basic", CalculationType = "Fixed" };
+        var r = SalaryCalculator.Calculate([new SalaryCalculator.Item(basic, 3000m)], 0, 0.5m);
+        Assert.Equal(1500m, r.Gross);
     }
 }

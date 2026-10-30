@@ -1,6 +1,8 @@
 using ERP.Application.Interfaces.HRM;
 using ERP.Domain.HRM;
+using ERP.Infrastructure.Database;
 using ERP.Infrastructure.Repositories.HRM;
+using Microsoft.EntityFrameworkCore;
 using ERP.Shared.DTOs.HRM;
 
 namespace ERP.Application.HRM;
@@ -14,15 +16,18 @@ public class PayrollCrudService : ERP.Application.Interfaces.HRM.IPayrollService
     private readonly IPayrollRepository _payrolls;
     private readonly IPayrollLineRepository _lines;
     private readonly IEmployeeRepository _employees;
+    private readonly ERPDbContext _db;
 
     public PayrollCrudService(
         IPayrollRepository payrolls,
         IPayrollLineRepository lines,
-        IEmployeeRepository employees)
+        IEmployeeRepository employees,
+        ERPDbContext db)
     {
         _payrolls = payrolls;
         _lines = lines;
         _employees = employees;
+        _db = db;
     }
 
     public async Task<PayrollDto?> GetByIdAsync(Guid id, Guid tenantId)
@@ -168,20 +173,58 @@ public class PayrollCrudService : ERP.Application.Interfaces.HRM.IPayrollService
         if (employees.Count == 0)
             throw new InvalidOperationException("No active employees found for this payroll run.");
 
+        var employeeIds = employees.Select(e => e.Id).ToList();
+        var start = payroll.PayPeriodStart.Date;
+        var end = payroll.PayPeriodEnd.Date;
+        var structures = (await _db.EmployeeSalaryComponents.AsNoTracking()
+                .Include(s => s.PayrollComponent)
+                .Where(s => s.TenantId == tenantId && s.IsActive && s.PayrollComponent.IsActive
+                    && employeeIds.Contains(s.EmployeeId)
+                    && (s.EffectiveFrom == null || s.EffectiveFrom <= end)
+                    && (s.EffectiveTo == null || s.EffectiveTo >= start))
+                .ToListAsync())
+            .ToLookup(s => s.EmployeeId);
+
         decimal totalGross = 0, totalDed = 0, totalNet = 0;
         foreach (var emp in employees)
         {
-            var baseSalary = emp.EmploymentContract?.BaseSalary > 0
-                ? emp.EmploymentContract.BaseSalary
-                : payroll.BasicSalary;
-            if (baseSalary <= 0) continue;
+            var contractSalary = emp.EmploymentContract?.BaseSalary > 0 ? emp.EmploymentContract.BaseSalary : 0;
+            var structure = structures[emp.Id].ToList();
+            decimal baseSalary, allowances, otherDed, tax, gross, net;
+            List<PayslipItemDto> breakdown;
 
-            var allowances = payroll.Allowances;
-            var otherDed = payroll.Deductions;
-            var gross = Math.Round(baseSalary + allowances, 2);
-            var tax = Math.Round(gross * DefaultTaxRate, 2);
+            if (structure.Count > 0)
+            {
+                var r = SalaryCalculator.Calculate(
+                    structure.Select(x => new SalaryCalculator.Item(x.PayrollComponent, x.Value ?? x.PayrollComponent.Value)),
+                    contractSalary > 0 ? contractSalary : payroll.BasicSalary,
+                    PeriodFactor(emp, start, end));
+                if (r.Gross <= 0) continue;
+                baseSalary = r.Basic;
+                allowances = r.Allowances + payroll.Allowances;
+                otherDed = r.Deductions + payroll.Deductions;
+                tax = r.Tax;
+                breakdown = [.. r.Earnings, .. r.DeductionItems];
+                if (payroll.Allowances != 0) breakdown.Add(new PayslipItemDto { Name = "Other allowances", Type = "Earning", Amount = payroll.Allowances });
+                if (payroll.Deductions != 0) breakdown.Add(new PayslipItemDto { Name = "Other deductions", Type = "Deduction", Amount = payroll.Deductions });
+            }
+            else
+            {
+                // No salary structure: simplified contract/default salary with flat tax.
+                baseSalary = contractSalary > 0 ? contractSalary : payroll.BasicSalary;
+                if (baseSalary <= 0) continue;
+                allowances = payroll.Allowances;
+                otherDed = payroll.Deductions;
+                tax = Math.Round((baseSalary + allowances) * DefaultTaxRate, 2);
+                breakdown = [new PayslipItemDto { Name = "Basic salary", Type = "Basic", Amount = baseSalary }];
+                if (allowances != 0) breakdown.Add(new PayslipItemDto { Name = "Allowances", Type = "Earning", Amount = allowances });
+                if (otherDed != 0) breakdown.Add(new PayslipItemDto { Name = "Deductions", Type = "Deduction", Amount = otherDed });
+                if (tax != 0) breakdown.Add(new PayslipItemDto { Name = "Income tax", Type = "Tax", Amount = tax });
+            }
+
+            gross = Math.Round(baseSalary + allowances, 2);
             var deductions = Math.Round(otherDed + tax, 2);
-            var net = Math.Round(gross - deductions, 2);
+            net = Math.Round(gross - deductions, 2);
             if (net < 0) net = 0;
 
             var line = new PayrollLine
@@ -195,6 +238,7 @@ public class PayrollCrudService : ERP.Application.Interfaces.HRM.IPayrollService
                 Deductions = otherDed,
                 TaxAmount = tax,
                 NetPay = net,
+                BreakdownJson = PayrollSetupService.Serialize(breakdown),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = userId == Guid.Empty ? null : userId.ToString(),
                 IsActive = true
@@ -222,6 +266,17 @@ public class PayrollCrudService : ERP.Application.Interfaces.HRM.IPayrollService
         payroll.UpdatedAt = DateTime.UtcNow;
         payroll.UpdatedBy = userId == Guid.Empty ? null : userId.ToString();
         await _payrolls.UpdateAsync(payroll);
+    }
+
+    /// <summary>Prorates for employees hired or leaving inside the pay period (calendar days).</summary>
+    private static decimal PeriodFactor(Employee emp, DateTime start, DateTime end)
+    {
+        var from = emp.DateHired?.Date > start ? emp.DateHired.Value.Date : start;
+        var to = emp.DateTerminated?.Date < end ? emp.DateTerminated.Value.Date : end;
+        var total = (end - start).Days + 1;
+        if (total <= 0) return 1m;
+        var worked = Math.Max(0, (to - from).Days + 1);
+        return Math.Min(1m, (decimal)worked / total);
     }
 
     private async Task<List<Employee>> LoadEmployeesAsync(Payroll payroll, Guid tenantId)
@@ -284,6 +339,8 @@ public class PayrollCrudService : ERP.Application.Interfaces.HRM.IPayrollService
         CreatedBy = p.CreatedBy,
         UpdatedBy = p.UpdatedBy,
         IsActive = p.IsActive,
-        PayrollNumber = $"PR-{p.PayPeriodStart:yyyyMM}-{p.Id.ToString("N")[..8]}"
+        PayrollNumber = NumberOf(p)
     };
+
+    public static string NumberOf(Payroll p) => $"PR-{p.PayPeriodStart:yyyyMM}-{p.Id.ToString("N")[..8]}";
 }

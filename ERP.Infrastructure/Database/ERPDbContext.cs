@@ -48,6 +48,7 @@ public class ERPDbContext : DbContext
     public DbSet<Payroll> Payrolls { get; set; }
     public DbSet<PayrollLine> PayrollLines { get; set; }
     public DbSet<PayrollComponent> PayrollComponents { get; set; }
+    public DbSet<EmployeeSalaryComponent> EmployeeSalaryComponents { get; set; }
     public DbSet<TimeEntry> TimeEntries { get; set; }
     public DbSet<Department> Departments { get; set; }
     public DbSet<Benefit> Benefits { get; set; }
@@ -705,6 +706,17 @@ public class ERPDbContext : DbContext
             entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
             entity.Property(e => e.CalculationType).IsRequired().HasMaxLength(50);
             entity.Property(e => e.Value).HasColumnType("decimal(18,6)");
+            entity.Property(e => e.Code).HasMaxLength(30);
+            entity.Property(e => e.Description).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<EmployeeSalaryComponent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Value).HasColumnType("decimal(18,6)");
+            entity.HasIndex(e => new { e.TenantId, e.EmployeeId });
+            entity.HasOne(e => e.Employee).WithMany().HasForeignKey(e => e.EmployeeId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.PayrollComponent).WithMany().HasForeignKey(e => e.PayrollComponentId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // Configure TimeEntry

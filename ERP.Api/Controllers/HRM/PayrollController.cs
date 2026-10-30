@@ -5,6 +5,7 @@ using ERP.Api.Abstractions;
 using ERP.Api.Security;
 using ERP.Shared.DTOs;
 using ERP.Shared.DTOs.HRM;
+using PayrollSetupService = ERP.Application.HRM.PayrollSetupService;
 using ERP.Application.Interfaces.HRM;
 
 namespace ERP.Api.Controllers.HRM;
@@ -19,12 +20,15 @@ namespace ERP.Api.Controllers.HRM;
 public class PayrollController : ERP.Api.Abstractions.ControllerBase
 {
     private readonly IPayrollService _service;
+    private readonly PayrollSetupService _setup;
 
     public PayrollController(
         IPayrollService service,
+        PayrollSetupService setup,
         ILogger<PayrollController> logger) : base(logger)
     {
         _service = service;
+        _setup = setup;
     }
 
     [HttpGet("{id}")]
@@ -94,6 +98,11 @@ public class PayrollController : ERP.Api.Abstractions.ControllerBase
         var userId = GetUserId();
         return await HandleAsync(() => _service.ProcessPayrollAsync(id, tenantId, userId));
     }
+
+    [HttpGet("{id}/payslips")]
+    [ProducesResponseType(typeof(IEnumerable<PayslipDto>), OpenApiResponseTypes.Ok)]
+    public async Task<IActionResult> Payslips(Guid id) =>
+        await HandleAsync(() => _setup.GetPayslipsAsync(id, GetTenantId()));
 
     private Guid GetTenantId() => HttpContext.RequireTenantId();
     private Guid GetUserId() => User.RequireUserId();

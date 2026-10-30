@@ -13,6 +13,8 @@ public class PayrollLine : BaseEntity
     public decimal NetPay { get; set; }
     public Guid? BankAccountId { get; set; }
     public Guid? PayrollComponentId { get; set; }
+    /// <summary>Payslip breakdown: JSON array of {name, type, amount}.</summary>
+    public string? BreakdownJson { get; set; }
     
     // Navigation properties
     public Payroll Payroll { get; set; } = null!;

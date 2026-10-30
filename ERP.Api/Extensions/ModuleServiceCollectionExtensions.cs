@@ -357,6 +357,7 @@ public static class ModuleServiceCollectionExtensions
         services.AddScoped<ERP.Application.HRM.IEmployeeService, EmployeeService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.ILeaveService, LeaveService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.IPayrollService, PayrollCrudService>();
+        services.AddScoped<PayrollSetupService>();
         services.AddScoped<ERP.Application.HRM.IPayrollService, PayrollService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.IPerformanceService, PerformanceService>();
         services.AddScoped<ERP.Application.Interfaces.HRM.IRecruitmentService, RecruitmentService>();
